@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using MFiles.VAF.Common;
-using MFiles.VAF.Configuration;
 using MFilesAPI;
 
-namespace MFiles.VAF.Extensions.ExtensionMethods
+namespace MFiles.VAF.Extensions
 {
 	/// <summary>
 	/// Extension methods for the <see cref="MFSearchBuilder"/> class.

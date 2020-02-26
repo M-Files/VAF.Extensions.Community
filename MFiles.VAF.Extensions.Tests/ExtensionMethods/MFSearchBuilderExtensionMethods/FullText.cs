@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MFiles.VAF.Extensions.ExtensionMethods;
 using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -15,7 +14,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 	{
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods.FullText"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.FullText"/>
 		/// adds a search condition.
 		/// </summary>
 		[TestMethod]
@@ -47,7 +46,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods.FullText"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.FullText"/>
 		/// adds a valid search condition.
 		/// </summary>
 		[TestMethod]
@@ -84,7 +83,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods.FullText"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.FullText"/>
 		/// adds a valid search condition (explicitly searching only file data).
 		/// </summary>
 		[TestMethod]
@@ -119,7 +118,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods.FullText"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.FullText"/>
 		/// adds a valid search condition (explicitly searching only metadata).
 		/// </summary>
 		[TestMethod]

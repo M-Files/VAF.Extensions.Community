@@ -9,12 +9,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionMethods
 {
 	[TestClass]
-	public class ExternalId
+	public class FileSize
 		: MFSearchBuilderExtensionMethodTestBase
 	{
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFSearchBuilderExtensionMethods.ExternalId"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.FileSize(Common.MFSearchBuilder, long, MFConditionType)"/>
 		/// adds a search condition.
 		/// </summary>
 		[TestMethod]
@@ -26,27 +26,27 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			// Ensure it has no items in the collection.
 			Assert.AreEqual(0, mfSearchBuilder.Conditions.Count);
 
-			// Add the search condition for the external ID.
-			mfSearchBuilder.ExternalId("hello-world");
+			// Add the search condition for the file size.
+			mfSearchBuilder.FileSize(1014 * 1024, MFConditionType.MFConditionTypeGreaterThan);
 
 			// Ensure that there is one item in the collection.
 			Assert.AreEqual(1, mfSearchBuilder.Conditions.Count);
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void NullExternalIdThrows()
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void NegativeSizeThrows()
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
 
-			// Attempt to search by null.
-			mfSearchBuilder.ExternalId(null);
+			// Attempt to search by negative size.
+			mfSearchBuilder.FileSize(-1000, MFConditionType.MFConditionTypeEqual);
 		}
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFSearchBuilderExtensionMethods.ExternalId"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.FileSize(Common.MFSearchBuilder, long, MFConditionType)"/>
 		/// adds a valid search condition.
 		/// </summary>
 		[TestMethod]
@@ -55,8 +55,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
 
-			// Add the search condition for the external ID.
-			mfSearchBuilder.ExternalId("hello-world");
+			// Add the search condition for the file size.
+			mfSearchBuilder.FileSize(1024 * 1024, MFConditionType.MFConditionTypeGreaterThan);
 
 			// If there's anything other than one condition then fail.
 			if (mfSearchBuilder.Conditions.Count != 1)
@@ -66,17 +66,18 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			var condition = mfSearchBuilder.Conditions[mfSearchBuilder.Conditions.Count];
 
 			// Ensure the condition type is correct.
-			Assert.AreEqual(MFConditionType.MFConditionTypeEqual, condition.ConditionType);
+			Assert.AreEqual(MFConditionType.MFConditionTypeGreaterThan, condition.ConditionType);
 
 			// Ensure the expression type is correct.
-			Assert.AreEqual(MFExpressionType.MFExpressionTypeStatusValue, condition.Expression.Type);
+			Assert.AreEqual(MFExpressionType.MFExpressionTypeFileValue, condition.Expression.Type);
 
 			// Ensure the status value is correct.
-			Assert.AreEqual(MFStatusType.MFStatusTypeExtID, condition.Expression.DataStatusValueType);
+			Assert.AreEqual(MFFileValueType.MFFileValueTypeFileSize, condition.Expression.DataFileValueType);
 
 			// Ensure that the typed value is correct.
-			Assert.AreEqual(MFDataType.MFDatatypeText, condition.TypedValue.DataType);
-			Assert.AreEqual("hello-world", condition.TypedValue.Value as string);
+			Assert.AreEqual(MFDataType.MFDatatypeInteger64, condition.TypedValue.DataType);
+			Assert.AreEqual(1024 * 1024, condition.TypedValue.Value as long?);
 		}
+
 	}
 }

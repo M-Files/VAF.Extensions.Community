@@ -59,6 +59,8 @@
   <ItemGroup>
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.ExternalID.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.HasFiles.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.FileSize.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.FileExtension.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.FullText.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.String.cs" />

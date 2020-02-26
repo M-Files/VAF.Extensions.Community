@@ -9,12 +9,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionMethods
 {
 	[TestClass]
-	public class FileExtension
+	public class HasFiles
 		: MFSearchBuilderExtensionMethodTestBase
 	{
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFSearchBuilderExtensionMethods.FileExtension(Common.MFSearchBuilder, string)"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.HasFiles(Common.MFSearchBuilder, bool)"/>
 		/// adds a search condition.
 		/// </summary>
 		[TestMethod]
@@ -26,37 +26,61 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			// Ensure it has no items in the collection.
 			Assert.AreEqual(0, mfSearchBuilder.Conditions.Count);
 
-			// Add the search condition for the extension.
-			mfSearchBuilder.FileExtension(".pdf");
+			// Add the search condition for whether the object must have files.
+			mfSearchBuilder.HasFiles(true);
 
 			// Ensure that there is one item in the collection.
 			Assert.AreEqual(1, mfSearchBuilder.Conditions.Count);
 		}
-
+		
+		/// <summary>
+		/// Tests that calling
+		/// <see cref="MFSearchBuilderExtensionMethods.HasFiles(Common.MFSearchBuilder, bool)"/>
+		/// adds a valid search condition with a true argument.
+		/// </summary>
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void NullExtensionThrows()
+		public void SearchConditionIsCorrect_True()
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
 
-			// Attempt to search by null.
-			mfSearchBuilder.FileExtension(null);
+			// Add the search condition for whether the object should have files.
+			mfSearchBuilder.HasFiles(true);
+
+			// If there's anything other than one condition then fail.
+			if (mfSearchBuilder.Conditions.Count != 1)
+				Assert.Inconclusive("Only one search condition should exist");
+
+			// Retrieve the just-added condition.
+			var condition = mfSearchBuilder.Conditions[mfSearchBuilder.Conditions.Count];
+
+			// Ensure the condition type is correct.
+			Assert.AreEqual(MFConditionType.MFConditionTypeEqual, condition.ConditionType);
+
+			// Ensure the expression type is correct.
+			Assert.AreEqual(MFExpressionType.MFExpressionTypeFileValue, condition.Expression.Type);
+
+			// Ensure the status value is correct.
+			Assert.AreEqual(MFFileValueType.MFFileValueTypeHasFiles, condition.Expression.DataFileValueType);
+
+			// Ensure that the typed value is correct.
+			Assert.AreEqual(MFDataType.MFDatatypeBoolean, condition.TypedValue.DataType);
+			Assert.AreEqual(true, condition.TypedValue.Value as bool?);
 		}
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFSearchBuilderExtensionMethods.FileExtension(Common.MFSearchBuilder, string)"/>
-		/// adds a valid search condition.
+		/// <see cref="MFSearchBuilderExtensionMethods.HasFiles(Common.MFSearchBuilder, bool)"/>
+		/// adds a valid search condition with a false argument.
 		/// </summary>
 		[TestMethod]
-		public void SearchConditionIsCorrect()
+		public void SearchConditionIsCorrect_False()
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
 
-			// Add the search condition for the extension.
-			mfSearchBuilder.FileExtension(".pdf");
+			// Add the search condition for whether the object should have files.
+			mfSearchBuilder.HasFiles(false);
 
 			// If there's anything other than one condition then fail.
 			if (mfSearchBuilder.Conditions.Count != 1)
@@ -66,52 +90,18 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			var condition = mfSearchBuilder.Conditions[mfSearchBuilder.Conditions.Count];
 
 			// Ensure the condition type is correct.
-			Assert.AreEqual(MFConditionType.MFConditionTypeContains, condition.ConditionType);
+			Assert.AreEqual(MFConditionType.MFConditionTypeEqual, condition.ConditionType);
 
 			// Ensure the expression type is correct.
 			Assert.AreEqual(MFExpressionType.MFExpressionTypeFileValue, condition.Expression.Type);
 
 			// Ensure the status value is correct.
-			Assert.AreEqual(MFFileValueType.MFFileValueTypeFileName, condition.Expression.DataFileValueType);
+			Assert.AreEqual(MFFileValueType.MFFileValueTypeHasFiles, condition.Expression.DataFileValueType);
 
 			// Ensure that the typed value is correct.
-			Assert.AreEqual(MFDataType.MFDatatypeText, condition.TypedValue.DataType);
-			Assert.AreEqual(".pdf", condition.TypedValue.Value as string);
+			Assert.AreEqual(MFDataType.MFDatatypeBoolean, condition.TypedValue.DataType);
+			Assert.AreEqual(false, condition.TypedValue.Value as bool?);
 		}
 
-		/// <summary>
-		/// Tests that calling
-		/// <see cref="MFSearchBuilderExtensionMethods.FileExtension(Common.MFSearchBuilder, string)"/>
-		/// adds a valid search condition.
-		/// </summary>
-		[TestMethod]
-		public void SearchConditionIsCorrect_WithoutDot()
-		{
-			// Create the search builder.
-			var mfSearchBuilder = this.GetSearchBuilder();
-
-			// Add the search condition for the extension.
-			mfSearchBuilder.FileExtension("pdf");
-
-			// If there's anything other than one condition then fail.
-			if (mfSearchBuilder.Conditions.Count != 1)
-				Assert.Inconclusive("Only one search condition should exist");
-
-			// Retrieve the just-added condition.
-			var condition = mfSearchBuilder.Conditions[mfSearchBuilder.Conditions.Count];
-
-			// Ensure the condition type is correct.
-			Assert.AreEqual(MFConditionType.MFConditionTypeContains, condition.ConditionType);
-
-			// Ensure the expression type is correct.
-			Assert.AreEqual(MFExpressionType.MFExpressionTypeFileValue, condition.Expression.Type);
-
-			// Ensure the status value is correct.
-			Assert.AreEqual(MFFileValueType.MFFileValueTypeFileName, condition.Expression.DataFileValueType);
-
-			// Ensure that the typed value is correct.
-			Assert.AreEqual(MFDataType.MFDatatypeText, condition.TypedValue.DataType);
-			Assert.AreEqual(".pdf", condition.TypedValue.Value as string);
-		}
 	}
 }

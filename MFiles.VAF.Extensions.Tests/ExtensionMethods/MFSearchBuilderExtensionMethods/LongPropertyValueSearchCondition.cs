@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MFiles.VAF.Common;
-using MFiles.VAF.Extensions.ExtensionMethods;
 using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -54,7 +53,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods.Property(Common.MFSearchBuilder, int, long?, MFConditionType, MFParentChildBehavior, DataFunctionCall)"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.Property(MFiles.VAF.Common.MFSearchBuilder,int,System.Nullable{long},MFilesAPI.MFConditionType,MFilesAPI.MFParentChildBehavior,MFilesAPI.DataFunctionCall)"/>
 		/// adds a valid search condition.
 		/// </summary>
 		[TestMethod]

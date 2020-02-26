@@ -15,41 +15,39 @@ namespace MFiles.VAF.Extensions
 	public static partial class MFSearchBuilderExtensionMethods
 	{
 		/// <summary>
-		/// Adds a <see cref="SearchCondition"/> to the collection to restrict items just to files of the provided type.
+		/// Adds a <see cref="SearchCondition"/> to the collection to restrict files by their size.
 		/// </summary>
 		/// <param name="searchBuilder">The <see cref="MFSearchBuilder"/> to add the condition to.</param>
-		/// <param name="extension">The file extension to restrict by.  If this does not start with a "." then the method will add it.</param>
+		/// <param name="size">The file size to restrict by (in bytes).</param>
+		/// <param name="conditionType">What type of search to execute.</param>
 		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
-		public static MFSearchBuilder FileExtension
+		public static MFSearchBuilder FileSize
 		(
 			this MFSearchBuilder searchBuilder,
-			string extension
+			long size,
+			MFConditionType conditionType
 		)
 		{
 			// Sanity.
 			if (null == searchBuilder)
 				throw new ArgumentNullException(nameof(searchBuilder));
-			if (null == extension)
-				throw new ArgumentNullException(nameof(extension));
-
-			// Ensure it starts with a dot.
-			if(false == extension.StartsWith("."))
-				extension = "." + extension;
+			if (size < 0)
+				throw new ArgumentOutOfRangeException($"The size parameter must be zero or larger.", nameof(size));
 
 			// Create the search condition.
 			var searchCondition = new SearchCondition
 			{
-				ConditionType = MFConditionType.MFConditionTypeContains
+				ConditionType = conditionType
 			};
 
 			// Set up the file value expression.
 			searchCondition.Expression.SetFileValueExpression
 			(
-				MFFileValueType.MFFileValueTypeFileName
+				MFFileValueType.MFFileValueTypeFileSize
 			);
 
-			// Search for the extension.
-			searchCondition.TypedValue.SetValue(MFDataType.MFDatatypeText, extension);
+			// Search by the size
+			searchCondition.TypedValue.SetValue(MFDataType.MFDatatypeInteger64, size);
 
 			// Add the search condition to the collection.
 			searchBuilder.Conditions.Add(-1, searchCondition);

@@ -5,7 +5,7 @@ using Moq;
 namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionMethods
 {
 	/// <summary>
-	/// A base class that tests of the <see cref="MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods"/>
+	/// A base class that tests of the <see cref="MFSearchBuilderExtensionMethods"/>
 	/// can use.
 	/// </summary>
 	// ReSharper disable once InconsistentNaming

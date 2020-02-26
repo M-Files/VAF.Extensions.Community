@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MFiles.VAF.Common;
-using MFiles.VAF.Extensions.ExtensionMethods;
 using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -47,7 +46,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods.Date(Common.MFSearchBuilder, int, DateTime?, MFConditionType, MFParentChildBehavior)"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.Date(Common.MFSearchBuilder, int, DateTime?, MFConditionType, MFParentChildBehavior)"/>
 		/// removes any time component from the date added.
 		/// </summary>
 		[TestMethod]
@@ -78,7 +77,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods.Date(Common.MFSearchBuilder, int, DateTime?, MFConditionType, MFParentChildBehavior)"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.Date(Common.MFSearchBuilder, int, DateTime?, MFConditionType, MFParentChildBehavior)"/>
 		/// correctly populates the data function call.
 		/// </summary>
 		[TestMethod]

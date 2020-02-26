@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using MFiles.VAF.Common;
-using MFiles.VAF.Extensions.ExtensionMethods;
 using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -159,7 +158,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 	}
 
 	/// <summary>
-	/// A base class used for testing <see cref="MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods"/>
+	/// A base class used for testing <see cref="MFSearchBuilderExtensionMethods"/>
 	/// extension methods that refer to property value search conditions.
 	/// </summary>
 	// ReSharper disable once InconsistentNaming

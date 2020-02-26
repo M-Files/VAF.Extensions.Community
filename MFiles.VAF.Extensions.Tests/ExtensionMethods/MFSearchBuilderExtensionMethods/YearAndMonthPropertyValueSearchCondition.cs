@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MFiles.VAF.Common;
-using MFiles.VAF.Extensions.ExtensionMethods;
 using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -47,7 +46,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods.YearAndMonth(Common.MFSearchBuilder, int, int, int, MFConditionType, MFParentChildBehavior)"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.YearAndMonth"/>
 		/// correctly sets the value.
 		/// </summary>
 		[TestMethod]
@@ -79,7 +78,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods.YearAndMonth(Common.MFSearchBuilder, int, int, int, MFConditionType, MFParentChildBehavior)"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.YearAndMonth"/>
 		/// correctly populates the data function call.
 		/// </summary>
 		[TestMethod]
@@ -110,7 +109,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods.YearAndMonth(Common.MFSearchBuilder, int, int, int, MFConditionType, MFParentChildBehavior)"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.YearAndMonth"/>
 		/// throws if zero month.
 		/// </summary>
 		[TestMethod]
@@ -132,7 +131,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods.YearAndMonth(Common.MFSearchBuilder, int, int, int, MFConditionType, MFParentChildBehavior)"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.YearAndMonth"/>
 		/// throws if 13 month.
 		/// </summary>
 		[TestMethod]

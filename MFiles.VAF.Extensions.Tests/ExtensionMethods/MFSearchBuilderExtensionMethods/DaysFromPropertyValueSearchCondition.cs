@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MFiles.VAF.Common;
-using MFiles.VAF.Extensions.ExtensionMethods;
 using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -46,7 +45,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods.DaysFrom(Common.MFSearchBuilder, int, int, MFConditionType, MFParentChildBehavior)"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.DaysFrom"/>
 		/// correctly sets the value
 		/// </summary>
 		[TestMethod]
@@ -77,7 +76,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods.DaysFrom(Common.MFSearchBuilder, int, int, MFConditionType, MFParentChildBehavior)"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.DaysFrom"/>
 		/// correctly populates the data function call.
 		/// </summary>
 		[TestMethod]
