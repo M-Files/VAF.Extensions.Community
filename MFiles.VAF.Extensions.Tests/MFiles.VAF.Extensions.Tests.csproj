@@ -78,6 +78,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\DaysFromPropertyValueSearchCondition.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\DaysToPropertyValueSearchCondition.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\YearPropertyValueSearchCondition.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\YearAndMonthPropertyValueSearchCondition.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\MonthPropertyValueSearchCondition.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\DatePropertyValueSearchCondition.cs" />

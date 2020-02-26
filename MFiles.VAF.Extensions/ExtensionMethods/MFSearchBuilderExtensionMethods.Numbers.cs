@@ -202,5 +202,193 @@ namespace MFiles.VAF.Extensions.ExtensionMethods
 		}
 
 		#endregion
+
+		#region Year
+
+		/// <summary>
+		/// Adds a <see cref="SearchCondition"/> to the collection for a <see cref="MFDataType.MFDatatypeDate"/>
+		/// or <see cref="MFDataType.MFDatatypeTimestamp"/> property definition.
+		/// This method searches solely by the year component in the property value , equivalent to using
+		/// a <see cref="DataFunctionCall" /> set to <see cref="DataFunctionCall.SetDataYear"/>.
+		/// </summary>
+		/// <param name="searchBuilder">The <see cref="MFSearchBuilder"/> to add the condition to.</param>
+		/// <param name="propertyDef">The ID of the property to search by.</param>
+		/// <param name="year">The four-digit year to search by.</param>
+		/// <param name="conditionType">What type of search to execute (defaults to <see cref="MFConditionType.MFConditionTypeEqual"/>).</param>
+		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well (defaults to <see cref="MFParentChildBehavior.MFParentChildBehaviorNone"/>).</param>
+		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
+		public static MFSearchBuilder Year
+		(
+			this MFSearchBuilder searchBuilder,
+			int propertyDef,
+			int year,
+			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
+			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone
+		)
+		{
+			// Sanity.
+			if (null == searchBuilder)
+				throw new ArgumentNullException(nameof(searchBuilder));
+			if (0 > propertyDef)
+				throw new ArgumentOutOfRangeException(nameof(propertyDef), "Property Ids must be greater than -1; ensure that your property alias was resolved.");
+			if(year < 1000 || year > 9999)
+				throw new ArgumentOutOfRangeException(nameof(year), "The year must be four digits.");
+
+			// What is the type of this property?
+			var dataType = searchBuilder.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
+
+			// What is the data type of the property?
+			DataFunctionCall dataFunctionCall = null;
+			switch (dataType)
+			{
+				case MFDataType.MFDatatypeTimestamp:
+				case MFDataType.MFDatatypeDate:
+
+					// Timestamps and dates should be converted to integer using a data function call.
+					dataFunctionCall = new DataFunctionCall();
+					dataFunctionCall.SetDataYear();
+
+					break;
+				default:
+					throw new ArgumentException($"Property {propertyDef} is not a date or timestamp property.", nameof(propertyDef));
+			}
+
+			// Use the property method.
+			return searchBuilder.Property
+			(
+				propertyDef,
+				year,
+				conditionType,
+				parentChildBehavior,
+				dataFunctionCall
+			);
+
+		}
+
+		#endregion
+
+		#region Days to
+
+		/// <summary>
+		/// Adds a <see cref="SearchCondition"/> to the collection for a <see cref="MFDataType.MFDatatypeDate"/>
+		/// or <see cref="MFDataType.MFDatatypeTimestamp"/> property definition.
+		/// This method searches by how many days there are to the property, equivalent to using
+		/// a <see cref="DataFunctionCall" /> set to <see cref="DataFunctionCall.SetDataDaysTo"/>.
+		/// </summary>
+		/// <param name="searchBuilder">The <see cref="MFSearchBuilder"/> to add the condition to.</param>
+		/// <param name="propertyDef">The ID of the property to search by.</param>
+		/// <param name="value">The number of days to search by.</param>
+		/// <param name="conditionType">What type of search to execute (defaults to <see cref="MFConditionType.MFConditionTypeEqual"/>).</param>
+		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well (defaults to <see cref="MFParentChildBehavior.MFParentChildBehaviorNone"/>).</param>
+		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
+		public static MFSearchBuilder DaysTo
+		(
+			this MFSearchBuilder searchBuilder,
+			int propertyDef,
+			int value,
+			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
+			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone
+		)
+		{
+			// Sanity.
+			if (null == searchBuilder)
+				throw new ArgumentNullException(nameof(searchBuilder));
+			if (0 > propertyDef)
+				throw new ArgumentOutOfRangeException(nameof(propertyDef), "Property Ids must be greater than -1; ensure that your property alias was resolved.");
+
+			// What is the type of this property?
+			var dataType = searchBuilder.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
+
+			// What is the data type of the property?
+			DataFunctionCall dataFunctionCall = null;
+			switch (dataType)
+			{
+				case MFDataType.MFDatatypeTimestamp:
+				case MFDataType.MFDatatypeDate:
+
+					// Timestamps and dates should be converted to integer using a data function call.
+					dataFunctionCall = new DataFunctionCall();
+					dataFunctionCall.SetDataDaysTo();
+
+					break;
+				default:
+					throw new ArgumentException($"Property {propertyDef} is not a date or timestamp property.", nameof(propertyDef));
+			}
+
+			// Use the property method.
+			return searchBuilder.Property
+			(
+				propertyDef,
+				value,
+				conditionType,
+				parentChildBehavior,
+				dataFunctionCall
+			);
+
+		}
+
+		#endregion
+
+		#region Days from
+
+		/// <summary>
+		/// Adds a <see cref="SearchCondition"/> to the collection for a <see cref="MFDataType.MFDatatypeDate"/>
+		/// or <see cref="MFDataType.MFDatatypeTimestamp"/> property definition.
+		/// This method searches by how many days there are from the property, equivalent to using
+		/// a <see cref="DataFunctionCall" /> set to <see cref="DataFunctionCall.SetDataDaysFrom"/>.
+		/// </summary>
+		/// <param name="searchBuilder">The <see cref="MFSearchBuilder"/> to add the condition to.</param>
+		/// <param name="propertyDef">The ID of the property to search by.</param>
+		/// <param name="value">The number of days to search by.</param>
+		/// <param name="conditionType">What type of search to execute (defaults to <see cref="MFConditionType.MFConditionTypeEqual"/>).</param>
+		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well (defaults to <see cref="MFParentChildBehavior.MFParentChildBehaviorNone"/>).</param>
+		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
+		public static MFSearchBuilder DaysFrom
+		(
+			this MFSearchBuilder searchBuilder,
+			int propertyDef,
+			int value,
+			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
+			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone
+		)
+		{
+			// Sanity.
+			if (null == searchBuilder)
+				throw new ArgumentNullException(nameof(searchBuilder));
+			if (0 > propertyDef)
+				throw new ArgumentOutOfRangeException(nameof(propertyDef), "Property Ids must be greater than -1; ensure that your property alias was resolved.");
+
+			// What is the type of this property?
+			var dataType = searchBuilder.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
+
+			// What is the data type of the property?
+			DataFunctionCall dataFunctionCall = null;
+			switch (dataType)
+			{
+				case MFDataType.MFDatatypeTimestamp:
+				case MFDataType.MFDatatypeDate:
+
+					// Timestamps and dates should be converted to integer using a data function call.
+					dataFunctionCall = new DataFunctionCall();
+					dataFunctionCall.SetDataDaysFrom();
+
+					break;
+				default:
+					throw new ArgumentException($"Property {propertyDef} is not a date or timestamp property.", nameof(propertyDef));
+			}
+
+			// Use the property method.
+			return searchBuilder.Property
+			(
+				propertyDef,
+				value,
+				conditionType,
+				parentChildBehavior,
+				dataFunctionCall
+			);
+
+		}
+
+		#endregion
 	}
 }

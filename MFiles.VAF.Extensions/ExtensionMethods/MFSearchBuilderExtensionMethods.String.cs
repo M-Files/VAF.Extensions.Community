@@ -164,7 +164,7 @@ namespace MFiles.VAF.Extensions.ExtensionMethods
 		/// Adds a <see cref="SearchCondition"/> to the collection for a <see cref="MFDataType.MFDatatypeDate"/>
 		/// or <see cref="MFDataType.MFDatatypeTimestamp"/> property definition.
 		/// This method searches solely by the month component in the property value , equivalent to using
-		/// a <see cref="DataFunctionCall" /> set to "SetMonth".
+		/// a <see cref="DataFunctionCall" /> set to <see cref="DataFunctionCall.SetDataMonth" />.
 		/// </summary>
 		/// <param name="searchBuilder">The <see cref="MFSearchBuilder"/> to add the condition to.</param>
 		/// <param name="propertyDef">The ID of the property to search by.</param>
@@ -187,7 +187,7 @@ namespace MFiles.VAF.Extensions.ExtensionMethods
 			if (0 > propertyDef)
 				throw new ArgumentOutOfRangeException(nameof(propertyDef), "Property Ids must be greater than -1; ensure that your property alias was resolved.");
 			if(month < 1 || month > 12)
-				throw new ArgumentOutOfRangeException(nameof(month), "The month number must be between 1 and 12 inclusive");
+				throw new ArgumentOutOfRangeException(nameof(month), "The month number must be between 1 and 12 inclusive.");
 
 			// What is the type of this property?
 			var dataType = searchBuilder.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
@@ -228,11 +228,11 @@ namespace MFiles.VAF.Extensions.ExtensionMethods
 		/// Adds a <see cref="SearchCondition"/> to the collection for a <see cref="MFDataType.MFDatatypeDate"/>
 		/// or <see cref="MFDataType.MFDatatypeTimestamp"/> property definition.
 		/// This method searches solely by the year and month components in the property value , equivalent to using
-		/// a <see cref="DataFunctionCall" /> set to "SetYearAndMonth".
+		/// a <see cref="DataFunctionCall" /> set to <see cref="DataFunctionCall.SetDataYearAndMonth" />.
 		/// </summary>
 		/// <param name="searchBuilder">The <see cref="MFSearchBuilder"/> to add the condition to.</param>
 		/// <param name="propertyDef">The ID of the property to search by.</param>
-		/// <param name="year">The year to search by.</param>
+		/// <param name="year">The four-digit year to search by.</param>
 		/// <param name="month">The 1-based number of the month to search by (1 = January, 12 = December).</param>
 		/// <param name="conditionType">What type of search to execute (defaults to <see cref="MFConditionType.MFConditionTypeEqual"/>).</param>
 		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well (defaults to <see cref="MFParentChildBehavior.MFParentChildBehaviorNone"/>).</param>
@@ -253,7 +253,9 @@ namespace MFiles.VAF.Extensions.ExtensionMethods
 			if (0 > propertyDef)
 				throw new ArgumentOutOfRangeException(nameof(propertyDef), "Property Ids must be greater than -1; ensure that your property alias was resolved.");
 			if(month < 1 || month > 12)
-				throw new ArgumentOutOfRangeException(nameof(month), "The month number must be between 1 and 12 inclusive");
+				throw new ArgumentOutOfRangeException(nameof(month), "The month number must be between 1 and 12 inclusive.");
+			if(year < 1000 || year > 9999)
+				throw new ArgumentOutOfRangeException(nameof(year), "The year must be four digits.");
 
 			// What is the type of this property?
 			var dataType = searchBuilder.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
