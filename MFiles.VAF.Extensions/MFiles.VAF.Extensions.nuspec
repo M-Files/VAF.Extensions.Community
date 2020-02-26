@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>0.1.0-alpha</version>
+    <title>$title$</title>
+    <authors>M-Files Corporation</authors>
+    <owners>$author$</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/M-Files/MFilesSamplesAndLibraries/</projectUrl>
+    <description>A set of community-maintained extensions to the M-Files Vault Application Framework runtime.</description>
+    <copyright>Copyright 2020 M-Files Corporation</copyright>
+    <tags>M-Files VAF Vault Application Framework</tags>
+  </metadata>
+</package>
