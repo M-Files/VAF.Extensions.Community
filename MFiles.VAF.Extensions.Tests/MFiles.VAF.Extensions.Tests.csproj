@@ -99,6 +99,7 @@
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\ExternalId.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\MFSearchBuilderExtensionMethodTestBase.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\PropertyValueSearchConditionTestBase.cs" />
+    <Compile Include="ExtensionMethods\ObjVerEx\IsTemplate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestBaseWithVaultMock.cs" />
   </ItemGroup>

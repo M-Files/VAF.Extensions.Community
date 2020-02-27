@@ -69,6 +69,7 @@
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\Booleans.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\Numbers.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\DateTimes.cs" />
+    <Compile Include="ExtensionMethods\ObjVerEx\IsTemplate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
