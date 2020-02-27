@@ -53,14 +53,14 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			{
 				PropertyDef = (int) MFBuiltInPropertyDef.MFBuiltInPropertyDefIsTemplate
 			};
-			propertyValue.TypedValue.SetValue(MFDataType.MFDatatypeBoolean, false);
+			propertyValue.TypedValue.SetValue(MFDataType.MFDatatypeBoolean, input);
 
 			// Create the ObjVerEx and set the properties.
 			var objVerEx = new Common.ObjVerEx();
 			objVerEx.Properties.Add(-1, propertyValue);
 
 			// Assert.
-			Assert.AreEqual(false, objVerEx.IsTemplate());
+			Assert.AreEqual(expectedOutput, objVerEx.IsTemplate());
 		}
 	}
 }
