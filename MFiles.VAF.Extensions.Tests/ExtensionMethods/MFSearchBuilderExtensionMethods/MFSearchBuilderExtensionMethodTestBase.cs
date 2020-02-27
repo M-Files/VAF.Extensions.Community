@@ -1,6 +1,4 @@
 ﻿using MFiles.VAF.Common;
-using MFilesAPI;
-using Moq;
 
 namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionMethods
 {
@@ -10,15 +8,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 	/// </summary>
 	// ReSharper disable once InconsistentNaming
 	public abstract class MFSearchBuilderExtensionMethodTestBase
+		: TestBaseWithVaultMock
 	{
-		/// <summary>
-		/// Returns a mock <see cref="Vault"/> that can be used to retrieve data as appropriate.
-		/// </summary>
-		/// <returns></returns>
-		protected virtual Mock<Vault> GetVaultMock()
-		{
-			return new Mock<Vault>();
-		}
 
 		/// <summary>
 		/// Returns a <see cref="MFSearchBuilder"/> that will be used for the tests.

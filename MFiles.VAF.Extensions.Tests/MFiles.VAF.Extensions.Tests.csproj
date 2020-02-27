@@ -99,6 +99,7 @@
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\MFSearchBuilderExtensionMethodTestBase.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\PropertyValueSearchConditionTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestBaseWithVaultMock.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
