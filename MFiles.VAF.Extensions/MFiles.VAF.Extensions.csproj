@@ -64,6 +64,7 @@
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\FileSize.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\FileExtension.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\FullText.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\Permissions.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\Strings.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\Booleans.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\Numbers.cs" />
