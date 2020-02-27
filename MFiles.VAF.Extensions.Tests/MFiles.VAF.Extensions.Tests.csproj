@@ -80,6 +80,7 @@
   <ItemGroup>
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\DaysFromPropertyValueSearchCondition.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\DaysToPropertyValueSearchCondition.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\IsCheckedOut.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\HasFiles.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\FileSize.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\YearPropertyValueSearchCondition.cs" />

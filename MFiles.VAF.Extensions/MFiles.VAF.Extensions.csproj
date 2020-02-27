@@ -57,16 +57,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.cs" />
-    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.ExternalID.cs" />
-    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.HasFiles.cs" />
-    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.FileSize.cs" />
-    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.FileExtension.cs" />
-    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.FullText.cs" />
-    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.String.cs" />
-    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.Boolean.cs" />
-    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.Numbers.cs" />
-    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods.DateTime.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\MFSearchBuilderExtensionMethods.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\ExternalID.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\CheckedOut.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\HasFiles.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\FileSize.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\FileExtension.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\FullText.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\Strings.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\Booleans.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\Numbers.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\DateTimes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
