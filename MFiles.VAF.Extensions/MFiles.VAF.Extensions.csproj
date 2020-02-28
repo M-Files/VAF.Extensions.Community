@@ -44,8 +44,8 @@
     <Reference Include="MFiles.VAF.Configuration, Version=2.1.0.7, Culture=neutral, PublicKeyToken=fa007b370d17fe5e, processorArchitecture=MSIL">
       <HintPath>..\packages\MFiles.VAF.2.1.0.7\lib\net45\MFiles.VAF.Configuration.dll</HintPath>
     </Reference>
-    <Reference Include="MFilesAPI.Extensions, Version=0.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MFilesAPI.Extensions.0.1.0-alpha\lib\net45\MFilesAPI.Extensions.dll</HintPath>
+    <Reference Include="MFilesAPI.Extensions, Version=0.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MFilesAPI.Extensions.0.1.1-alpha\lib\net45\MFilesAPI.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\MFiles.VAF.2.1.0.7\lib\net45\Newtonsoft.Json.dll</HintPath>

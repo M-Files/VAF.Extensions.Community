@@ -206,7 +206,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 
 		/// <summary>
 		/// Tests that calling 
-		/// <see cref="AddSearchCondition(MFSearchBuilder, int, T, MFConditionType, MFParentChildBehavior, DataFunctionCall)"/>
+		/// <see cref="AddSearchCondition(MFSearchBuilder, int, TInputType, MFConditionType, MFParentChildBehavior, DataFunctionCall)"/>
 		/// adds a search condition.
 		/// </summary>
 		[TestMethod]
@@ -334,8 +334,10 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				this.AddSearchCondition(mfSearchBuilder, propertyDef, default);
 
 				// If we got this far then the above did not throw.
-				Assert.Fail(
-					$"Adding a search condition for an incorrect type {dataType} should have excepted but it did not.");
+				Assert.Fail
+				(
+					$"Adding a search condition for an incorrect type {dataType} should have excepted but it did not."
+				);
 			}
 			catch (ArgumentException)
 			{
