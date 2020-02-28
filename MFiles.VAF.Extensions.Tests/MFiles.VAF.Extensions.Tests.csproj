@@ -80,6 +80,8 @@
   <ItemGroup>
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\DaysFromPropertyValueSearchCondition.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\DaysToPropertyValueSearchCondition.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\ObjectId.cs" />
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\ObjectIdSegment.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\Permissions.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\IsCheckedOut.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\HasFiles.cs" />

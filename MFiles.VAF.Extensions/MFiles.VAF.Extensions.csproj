@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\ObjectIds.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\MFSearchBuilderExtensionMethods.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\ExternalID.cs" />
     <Compile Include="ExtensionMethods\MFSearchBuilderExtensionMethods\CheckedOut.cs" />
