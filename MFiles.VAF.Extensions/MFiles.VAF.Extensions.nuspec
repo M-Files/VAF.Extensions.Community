@@ -12,5 +12,8 @@
     <description>A set of community-maintained extensions to the M-Files Vault Application Framework runtime.</description>
     <copyright>Copyright 2020 M-Files Corporation</copyright>
     <tags>M-Files VAF Vault Application Framework</tags>
+	<dependencies>
+      <group targetFramework=".NETFramework4.5" />
+    </dependencies>
   </metadata>
 </package>
