@@ -1,10 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net45</TargetFrameworks>
-    <Copyright>M-Files Corporation</Copyright>
+    <Copyright>M-Files Corporation 2020 onwards</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>0.1.1-alpha</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Company>M-Files Corporation</Company>
+    <Authors>M-Files Corporation</Authors>
+    <Product>M-Files Vault Application Framework extension library</Product>
+    <Description>Community-driven extensions for the M-Files Vault Application Framework.</Description>
+    <RepositoryUrl>https://github.com/M-Files/VAF.Extensions.Community</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
