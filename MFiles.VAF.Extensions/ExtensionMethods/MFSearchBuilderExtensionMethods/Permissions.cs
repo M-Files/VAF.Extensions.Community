@@ -37,6 +37,17 @@ namespace MFiles.VAF.Extensions
 			if (null == searchBuilder)
 				throw new ArgumentNullException(nameof(searchBuilder));
 
+			// We can only handle certain condition types; throw for others.
+			if (conditionType != MFConditionType.MFConditionTypeEqual
+				&& conditionType != MFConditionType.MFConditionTypeNotEqual)
+			{
+				throw new ArgumentException
+				(
+					$"The condition type {conditionType} is not supported for permission-based search conditions.",
+					nameof(conditionType)
+				);
+			}
+
 			// Create the search condition.
 			var searchCondition = new SearchCondition
 			{

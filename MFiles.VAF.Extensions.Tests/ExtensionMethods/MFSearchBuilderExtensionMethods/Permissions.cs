@@ -77,7 +77,36 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			Assert.AreEqual(MFDataType.MFDatatypeLookup, condition.TypedValue.DataType);
 			Assert.AreEqual(userId, condition.TypedValue.GetLookupID());
 		}
-		
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		[DataRow(MFConditionType.MFConditionTypeContains)]
+		[DataRow(MFConditionType.MFConditionTypeContainsAnyBitwise)]
+		[DataRow(MFConditionType.MFConditionTypeDoesNotContain)]
+		[DataRow(MFConditionType.MFConditionTypeDoesNotContainAnyBitwise)]
+		[DataRow(MFConditionType.MFConditionTypeDoesNotMatchWildcardPattern)]
+		[DataRow(MFConditionType.MFConditionTypeDoesNotStartWith)]
+		[DataRow(MFConditionType.MFConditionTypeGreaterThan)]
+		[DataRow(MFConditionType.MFConditionTypeGreaterThanOrEqual)]
+		[DataRow(MFConditionType.MFConditionTypeLessThan)]
+		[DataRow(MFConditionType.MFConditionTypeLessThanOrEqual)]
+		[DataRow(MFConditionType.MFConditionTypeMatchesWildcardPattern)]
+		[DataRow(MFConditionType.MFConditionTypeStartsWith)]
+		[DataRow(MFConditionType.MFConditionTypeStartsWithAtWordBoundary)]
+		public void UserHasPermissionToInvalidConditionTypeThrows(MFConditionType conditionType)
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Add the search condition.
+			mfSearchBuilder.UserHasPermissionTo
+				(
+				123, 
+				MFPermissionsExpressionType.MFVisibleTo, 
+				conditionType
+				);
+		}
+
 		/// <summary>
 		/// Tests that calling
 		/// <see cref="MFSearchBuilderExtensionMethods.VisibleTo"/>
