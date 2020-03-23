@@ -53,8 +53,79 @@ namespace MFiles.VAF.Extensions
 			);
 
 			// If we have any indirection levels then use them.
-			searchCondition.Expression.IndirectionLevels 
-				= indirectionLevels ?? new PropertyDefOrObjectTypes();
+			if (null != indirectionLevels)
+			{
+				// If any indirection level points at a value list then it will except.
+				// Show a nicer error message here.
+				foreach (PropertyDefOrObjectType indirectionLevel in indirectionLevels)
+				{
+					var objectTypeId = indirectionLevel.ID;
+					if (indirectionLevel.PropertyDef)
+					{
+						// If it's a property def then find the object type.
+						PropertyDef indirectionLevelPropertyDef;
+						try
+						{
+							indirectionLevelPropertyDef = searchBuilder
+								.Vault
+								.PropertyDefOperations
+								.GetPropertyDef(indirectionLevel.ID);
+						}
+						catch
+						{
+							indirectionLevelPropertyDef = null;
+						}
+
+						// Does it exist?
+						if (null == indirectionLevelPropertyDef)
+						{
+							throw new ArgumentException($"An indirection level references a property definition with ID {indirectionLevel.ID}, but this property definition could not be found.", nameof(indirectionLevel));
+						}
+
+						// Is it a list-based one?
+						if (false == indirectionLevelPropertyDef.BasedOnValueList)
+						{
+							throw new ArgumentException($"The indirection level for property {indirectionLevel.ID} does not reference a lookup-style property definition.", nameof(indirectionLevel));
+						}
+
+						// Record the object type id.
+						objectTypeId = indirectionLevelPropertyDef.ValueList;
+					}
+
+					// Is it an object type (fine) or a value list (not fine)?
+					{
+						ObjType indirectionLevelObjectType;
+						try
+						{
+							indirectionLevelObjectType = searchBuilder
+								.Vault
+								.ValueListOperations
+								.GetValueList(objectTypeId);
+						}
+						catch
+						{
+							indirectionLevelObjectType = null;
+						}
+
+						// Does it exist?
+						if (null == indirectionLevelObjectType)
+						{
+							throw new ArgumentException($"An indirection level references a value list with ID {objectTypeId}, but this value list could not be found.", nameof(indirectionLevel));
+						}
+
+						// If it's not a real object type then throw.
+						if (false == indirectionLevelObjectType.RealObjectType)
+						{
+							throw new ArgumentException($"An indirection level references an object type with ID {objectTypeId}, but this list does not refer to an object type (cannot be used with value lists).", nameof(indirectionLevel));
+						}
+					}
+
+				}
+
+				// Set the indirection levels.
+				searchCondition.Expression.IndirectionLevels
+					= indirectionLevels;
+			}
 
 			// Was the value null?
 			if (null == value)

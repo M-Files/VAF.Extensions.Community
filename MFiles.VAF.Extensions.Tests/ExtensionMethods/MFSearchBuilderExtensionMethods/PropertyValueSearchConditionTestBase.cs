@@ -64,14 +64,18 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			{
 				ID = PropertyValueSearchConditionTestBase.TestLookupPropertyId,
 				Name = "test lookup property",
-				DataType = MFDataType.MFDatatypeLookup
+				DataType = MFDataType.MFDatatypeLookup,
+				BasedOnValueList = true,
+				ValueList = PropertyValueSearchConditionTestBase.TestProjectObjectTypeId
 			});
 
 			properties.Add(new PropertyDef()
 			{
 				ID = PropertyValueSearchConditionTestBase.TestMultiSelectLookupPropertyId,
 				Name = "test lookup (multi-select) property",
-				DataType = MFDataType.MFDatatypeMultiSelectLookup
+				DataType = MFDataType.MFDatatypeMultiSelectLookup,
+				BasedOnValueList = true,
+				ValueList = PropertyValueSearchConditionTestBase.TestProjectObjectTypeId
 			});
 
 			properties.Add(new PropertyDef()
@@ -125,6 +129,45 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 
 			return properties;
 		}
+		
+		// ReSharper disable InconsistentNaming
+		public const int TestProjectObjectTypeId = 101;
+		public const int TestCustomerObjectTypeId = 102;
+		// ReSharper restore InconsistentNaming
+
+		protected virtual IEnumerable<ObjType> GetTestObjectTypes()
+		{
+#pragma warning disable IDE0028 // Simplify collection initialization
+			var  objectTypes = new List<ObjType>();
+#pragma warning restore IDE0028 // Simplify collection initialization
+
+			objectTypes.Add(new ObjType()
+			{
+				ID = (int)MFBuiltInObjectType.MFBuiltInObjectTypeDocument,
+				NamePlural = "Documents",
+				NameSingular = "Document",
+				RealObjectType = true,
+				CanHaveFiles = true
+			});
+
+			objectTypes.Add(new ObjType()
+			{
+				ID = PropertyValueSearchConditionTestBase.TestProjectObjectTypeId,
+				NamePlural = "Projects",
+				NameSingular = "Project",
+				RealObjectType = true
+			});
+
+			objectTypes.Add(new ObjType()
+			{
+				ID = PropertyValueSearchConditionTestBase.TestCustomerObjectTypeId,
+				NamePlural = "Customers",
+				NameSingular = "Customer",
+				RealObjectType = true
+			});
+
+			return objectTypes;
+		}
 
 		protected override Mock<Vault> GetVaultMock()
 		{
@@ -155,6 +198,51 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			vaultMock
 				.SetupGet(m => m.PropertyDefOperations)
 				.Returns(propertyDefOperationsMock.Object);
+
+			// Set up the object type operations mock.
+			var objectTypeOperationsMock = new Mock<VaultObjectTypeOperations>();
+
+			// Set up the GetObjectType method.
+			objectTypeOperationsMock
+				.Setup(m => m.GetObjectType(It.IsAny<int>()))
+				.Returns((int objectTypeId) =>
+				{
+					// Make sure we have something.
+					var objType = this
+						.GetTestObjectTypes()
+						.FirstOrDefault(p => p.ID == objectTypeId);
+					if (null == objType)
+					{
+						throw new InvalidOperationException($"Unknown object type {objectTypeId}.");
+					}
+
+					return objType;
+				});
+
+			// Set up the value list operations mock.
+			var valueListOperationsMock = new Mock<VaultValueListOperations>();
+
+			// Set up the GetObjectType method.
+			valueListOperationsMock
+				.Setup(m => m.GetValueList(It.IsAny<int>()))
+				.Returns((int valueListId) =>
+				{
+					// Make sure we have something.
+					var objType = this
+						.GetTestObjectTypes()
+						.FirstOrDefault(p => p.ID == valueListId);
+					if (null == objType)
+					{
+						throw new InvalidOperationException($"Unknown value list {valueListId}.");
+					}
+
+					return objType;
+				});
+
+			// Make the vault return the object type operations mock as needed.
+			vaultMock
+				.SetupGet(m => m.ValueListOperations)
+				.Returns(valueListOperationsMock.Object);
 
 			// Return the vault mock.
 			return vaultMock;

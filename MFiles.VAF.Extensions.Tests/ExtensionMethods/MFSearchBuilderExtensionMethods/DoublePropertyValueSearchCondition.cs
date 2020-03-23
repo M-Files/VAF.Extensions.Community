@@ -52,7 +52,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="Extensions.MFSearchBuilderExtensionMethods.Property(MFSearchBuilder, int, double?, MFConditionType, MFParentChildBehavior, DataFunctionCall, PropertyDefOrObjectTypes)"/>
+		/// <see cref="Extensions.MFSearchBuilderExtensionMethods.Property(MFSearchBuilder, int, double?, MFConditionType, MFParentChildBehavior, PropertyDefOrObjectTypes, DataFunctionCall)"/>
 		/// adds a valid search condition.
 		/// </summary>
 		[TestMethod]
@@ -107,7 +107,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="VAF.Extensions.MFSearchBuilderExtensionMethods.Property(MFSearchBuilder, int, double?, MFConditionType, MFParentChildBehavior, DataFunctionCall, PropertyDefOrObjectTypes)"/>
+		/// <see cref="VAF.Extensions.MFSearchBuilderExtensionMethods.Property(MFSearchBuilder, int, double?, MFConditionType, MFParentChildBehavior, PropertyDefOrObjectTypes, DataFunctionCall)"/>
 		/// adds a valid search condition when using indirection levels.
 		/// </summary>
 		[TestMethod]
@@ -137,7 +137,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			// Single indirection level by property.
 			{
 				var indirectionLevels = new PropertyDefOrObjectTypes();
-				indirectionLevels.AddPropertyDefIndirectionLevel(1234);
+				indirectionLevels.AddPropertyDefIndirectionLevel(PropertyValueSearchConditionTestBase.TestLookupPropertyId);
 				yield return new object[]
 				{
 					PropertyValueSearchConditionTestBase.TestFloatPropertyId,
@@ -151,7 +151,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			// Single indirection level by object type.
 			{
 				var indirectionLevels = new PropertyDefOrObjectTypes();
-				indirectionLevels.AddObjectTypeIndirectionLevel(101);
+				indirectionLevels.AddObjectTypeIndirectionLevel(PropertyValueSearchConditionTestBase.TestProjectObjectTypeId);
 				yield return new object[]
 				{
 					PropertyValueSearchConditionTestBase.TestFloatPropertyId,
@@ -165,8 +165,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			// Multiple indirection levels by property.
 			{
 				var indirectionLevels = new PropertyDefOrObjectTypes();
-				indirectionLevels.AddPropertyDefIndirectionLevel(1234);
-				indirectionLevels.AddPropertyDefIndirectionLevel(4321);
+				indirectionLevels.AddPropertyDefIndirectionLevel(PropertyValueSearchConditionTestBase.TestLookupPropertyId);
+				indirectionLevels.AddPropertyDefIndirectionLevel(PropertyValueSearchConditionTestBase.TestMultiSelectLookupPropertyId);
 				yield return new object[]
 				{
 					PropertyValueSearchConditionTestBase.TestFloatPropertyId,
@@ -180,8 +180,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			// Multiple indirection levels by object type.
 			{
 				var indirectionLevels = new PropertyDefOrObjectTypes();
-				indirectionLevels.AddObjectTypeIndirectionLevel(101);
-				indirectionLevels.AddObjectTypeIndirectionLevel(102);
+				indirectionLevels.AddObjectTypeIndirectionLevel(PropertyValueSearchConditionTestBase.TestProjectObjectTypeId);
+				indirectionLevels.AddObjectTypeIndirectionLevel(PropertyValueSearchConditionTestBase.TestCustomerObjectTypeId);
 				yield return new object[]
 				{
 					PropertyValueSearchConditionTestBase.TestFloatPropertyId,
