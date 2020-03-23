@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MFiles.VAF.Common;
 using MFilesAPI;
+using MFilesAPI.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionMethods
@@ -26,7 +27,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			DateTime? value,
 			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
 			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
-			DataFunctionCall dataFunctionCall = null
+			DataFunctionCall dataFunctionCall = null,
+			PropertyDefOrObjectTypes indirectionLevels = null
 			)
 		{
 			// Sanity.
@@ -40,24 +42,26 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				value,
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall
+				dataFunctionCall,
+				indirectionLevels
 				);
 		}
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFSearchBuilderExtensionMethods.Property(MFiles.VAF.Common.MFSearchBuilder,int,System.Nullable{System.DateTime},MFilesAPI.MFConditionType,MFilesAPI.MFParentChildBehavior,MFilesAPI.DataFunctionCall)"/>
+		/// <see cref="Extensions.MFSearchBuilderExtensionMethods.Property(MFSearchBuilder, int, DateTime?, MFConditionType, MFParentChildBehavior, DataFunctionCall, PropertyDefOrObjectTypes)"/>
 		/// adds a valid search condition.
 		/// </summary>
 		[TestMethod]
 		[DynamicData(nameof(DateTimePropertyValueSearchCondition.GetValidValues), DynamicDataSourceType.Method)]
 		public void SearchConditionIsCorrect
-			(
+		(
 			int propertyDef, 
 			DateTime? input,
 			MFConditionType conditionType,
-			MFParentChildBehavior parentChildBehavior
-			)
+			MFParentChildBehavior parentChildBehavior,
+			PropertyDefOrObjectTypes indirectionLevels
+		)
 		{
 			base.AssertSearchConditionIsCorrect
 			(
@@ -65,7 +69,53 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				MFDataType.MFDatatypeDate,
 				input,
 				conditionType,
-				parentChildBehavior
+				parentChildBehavior,
+				indirectionLevels
+			);
+		}
+		
+		/// <summary>
+		/// Tests that calling
+		/// <see cref="Extensions.MFSearchBuilderExtensionMethods.Property(MFSearchBuilder, int, DateTime?, MFConditionType, MFParentChildBehavior, DataFunctionCall, PropertyDefOrObjectTypes)"/>
+		/// adds a valid search condition.
+		/// </summary>
+		[TestMethod]
+		public void SearchConditionIsCorrect_TimeStrippedFromDateProperties
+			(
+			)
+		{
+			// Create the search builder.
+			var searchBuilder = new MFSearchBuilder(this.GetVaultMock().Object);
+
+			// Set up the expected data.
+			var propertyDef = PropertyValueSearchConditionTestBase.TestDatePropertyId;
+			var parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone;
+			var conditionType = MFConditionType.MFConditionTypeEqual;
+			var indirectionLevels = new PropertyDefOrObjectTypes();
+			var val = DateTime.Now;
+
+			// If we happen to run right at midnight then make sure we have a time component.
+			if (val.Hour == 0 && val.Minute == 0)
+				val = val.AddMinutes(30);
+
+			// Add the condition.
+			searchBuilder.Property
+			(
+				propertyDef,
+				val,
+				conditionType,
+				parentChildBehavior,
+				indirectionLevels: indirectionLevels
+			);
+
+			base.AssertSearchConditionIsCorrect
+			(
+				propertyDef,
+				MFDataType.MFDatatypeDate,
+				val.Date, // Ensure that the time was stripped!
+				conditionType,
+				parentChildBehavior,
+				indirectionLevels
 			);
 		}
 
@@ -78,7 +128,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 					PropertyValueSearchConditionTestBase.TestDatePropertyId, 
 					DateTime.Today, 
 					conditionType, 
-					MFParentChildBehavior.MFParentChildBehaviorNone
+					MFParentChildBehavior.MFParentChildBehaviorNone,
+					(PropertyDefOrObjectTypes)null
 				};
 			}
 		}
@@ -123,6 +174,94 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				condition.Expression.DataPropertyValueDataFunction
 			);
 
+		}
+		
+		/// <summary>
+		/// Tests that calling
+		/// <see cref="VAF.Extensions.MFSearchBuilderExtensionMethods.Property(MFSearchBuilder, int, DateTime?, MFConditionType, MFParentChildBehavior, DataFunctionCall, PropertyDefOrObjectTypes)"/>
+		/// adds a valid search condition when using indirection levels.
+		/// </summary>
+		[TestMethod]
+		[DynamicData(nameof(DateTimePropertyValueSearchCondition.GetValidValuesWithIndirectionLevels), DynamicDataSourceType.Method)]
+		public void SearchConditionIsCorrect_WithIndirectionLevels
+			(
+			int propertyDef, 
+			DateTime? input,
+			MFConditionType conditionType,
+			MFParentChildBehavior parentChildBehavior,
+			PropertyDefOrObjectTypes indirectionLevels
+			)
+		{
+			base.AssertSearchConditionIsCorrect
+			(
+				propertyDef,
+				MFDataType.MFDatatypeDate,
+				input,
+				conditionType,
+				parentChildBehavior,
+				indirectionLevels
+			);
+		}
+
+		public static IEnumerable<object[]> GetValidValuesWithIndirectionLevels()
+		{
+			// Single indirection level by property.
+			{
+				var indirectionLevels = new PropertyDefOrObjectTypes();
+				indirectionLevels.AddPropertyDefIndirectionLevel(1234);
+				yield return new object[]
+				{
+					PropertyValueSearchConditionTestBase.TestDatePropertyId,
+					DateTime.Now.Date,
+					MFConditionType.MFConditionTypeEqual,
+					MFParentChildBehavior.MFParentChildBehaviorNone,
+					indirectionLevels
+				};
+			}
+
+			// Single indirection level by object type.
+			{
+				var indirectionLevels = new PropertyDefOrObjectTypes();
+				indirectionLevels.AddObjectTypeIndirectionLevel(101);
+				yield return new object[]
+				{
+					PropertyValueSearchConditionTestBase.TestDatePropertyId,
+					DateTime.Now.Date,
+					MFConditionType.MFConditionTypeEqual,
+					MFParentChildBehavior.MFParentChildBehaviorNone,
+					indirectionLevels
+				};
+			}
+
+			// Multiple indirection levels by property.
+			{
+				var indirectionLevels = new PropertyDefOrObjectTypes();
+				indirectionLevels.AddPropertyDefIndirectionLevel(1234);
+				indirectionLevels.AddPropertyDefIndirectionLevel(4321);
+				yield return new object[]
+				{
+					PropertyValueSearchConditionTestBase.TestDatePropertyId,
+					DateTime.Now.Date,
+					MFConditionType.MFConditionTypeEqual,
+					MFParentChildBehavior.MFParentChildBehaviorNone,
+					indirectionLevels
+				};
+			}
+
+			// Multiple indirection levels by object type.
+			{
+				var indirectionLevels = new PropertyDefOrObjectTypes();
+				indirectionLevels.AddObjectTypeIndirectionLevel(101);
+				indirectionLevels.AddObjectTypeIndirectionLevel(102);
+				yield return new object[]
+				{
+					PropertyValueSearchConditionTestBase.TestDatePropertyId,
+					DateTime.Now.Date,
+					MFConditionType.MFConditionTypeEqual,
+					MFParentChildBehavior.MFParentChildBehaviorNone,
+					indirectionLevels
+				};
+			}
 		}
 
 	}

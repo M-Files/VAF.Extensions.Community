@@ -26,7 +26,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			string value,
 			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
 			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
-			DataFunctionCall dataFunctionCall = null
+			DataFunctionCall dataFunctionCall = null,
+			PropertyDefOrObjectTypes indirectionLevels = null
 			)
 		{
 			// Sanity.
@@ -40,7 +41,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				2020,
 				1,
 				conditionType,
-				parentChildBehavior
+				parentChildBehavior,
+				indirectionLevels
 				);
 		}
 		

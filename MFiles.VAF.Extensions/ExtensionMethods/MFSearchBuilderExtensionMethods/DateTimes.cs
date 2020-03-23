@@ -26,6 +26,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="conditionType">What type of search to execute (defaults to <see cref="MFConditionType.MFConditionTypeEqual"/>).</param>
 		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well (defaults to <see cref="MFParentChildBehavior.MFParentChildBehaviorNone"/>).</param>
 		/// <param name="dataFunctionCall">An expression for modifying how the results of matches are evaluated (defaults to null).</param>
+		/// <param name="indirectionLevels">The indirection levels (from the search object) to access the property to match.</param>
 		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
 		public static MFSearchBuilder Property
 		(
@@ -34,7 +35,8 @@ namespace MFiles.VAF.Extensions
 			DateTime? value,
 			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
 			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
-			DataFunctionCall dataFunctionCall = null
+			DataFunctionCall dataFunctionCall = null,
+			PropertyDefOrObjectTypes indirectionLevels = null
 		)
 		{
 			// Sanity.
@@ -63,7 +65,11 @@ namespace MFiles.VAF.Extensions
 			if (dataType != MFDataType.MFDatatypeDate
 				&& dataType != MFDataType.MFDatatypeTimestamp)
 				throw new ArgumentException($"Property {propertyDef} is not a date or timestamp property.", nameof(propertyDef));
-			
+
+			//// If it's a date and the value has a time component then strip it.
+			if (dataType == MFDataType.MFDatatypeDate)
+				value = value?.Date;
+
 			// Add the search condition.
 			return searchBuilder.AddPropertyValueSearchCondition
 			(
@@ -72,7 +78,8 @@ namespace MFiles.VAF.Extensions
 				value,
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall
+				dataFunctionCall,
+				indirectionLevels
 			);
 		}
 
@@ -87,6 +94,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="value">The value to search for.</param>
 		/// <param name="conditionType">What type of search to execute (defaults to <see cref="MFConditionType.MFConditionTypeEqual"/>).</param>
 		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well (defaults to <see cref="MFParentChildBehavior.MFParentChildBehaviorNone"/>).</param>
+		/// <param name="indirectionLevels">The indirection levels (from the search object) to access the property to match.</param>
 		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
 		public static MFSearchBuilder Date
 		(
@@ -94,7 +102,8 @@ namespace MFiles.VAF.Extensions
 			int propertyDef,
 			DateTime value,
 			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
-			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone
+			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
+			PropertyDefOrObjectTypes indirectionLevels = null
 		)
 		{
 			// Sanity.
@@ -107,7 +116,7 @@ namespace MFiles.VAF.Extensions
 			var dataType = searchBuilder.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
 
 			// What is the data type of the property?
-			DataFunctionCall dataFunctionCall = null;
+			DataFunctionCall dataFunctionCall;
 			switch (dataType)
 			{
 				case MFDataType.MFDatatypeTimestamp:
@@ -130,7 +139,8 @@ namespace MFiles.VAF.Extensions
 				value.Date,
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall
+				dataFunctionCall,
+				indirectionLevels
 			);
 
 		}

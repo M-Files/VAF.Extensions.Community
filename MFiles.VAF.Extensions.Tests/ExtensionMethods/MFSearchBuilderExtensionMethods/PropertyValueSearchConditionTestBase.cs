@@ -13,7 +13,9 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 	public abstract class PropertyValueSearchConditionTestBase
 		: MFSearchBuilderExtensionMethodTestBase
 	{
+#pragma warning disable CA1819 // Properties should not return arrays
 		protected MFDataType[] HandledDataTypes { get; set; }
+#pragma warning restore CA1819 // Properties should not return arrays
 
 		protected PropertyValueSearchConditionTestBase(MFDataType[] handledDataTypes)
 		{
@@ -24,6 +26,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				throw new ArgumentException("Handled data types cannot be empty", nameof(handledDataTypes));
 		}
 		
+		// ReSharper disable InconsistentNaming
 		public const int TestTextPropertyId = 1200;
 		public const int TestMultiLineTextPropertyId = 1201;
 		public const int TestLookupPropertyId = 1202;
@@ -35,6 +38,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		public const int TestInteger64PropertyId = 1208;
 		public const int TestFloatPropertyId = 1209;
 		public const int TestBooleanPropertyId = 1210;
+		// ReSharper restore InconsistentNaming
 
 		protected virtual IEnumerable<PropertyDef> GetTestProperties()
 		{
@@ -181,6 +185,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		/// <param name="conditionType">The condition type for the property search condition.</param>
 		/// <param name="parentChildBehavior">How to handle parent/child matches.</param>
 		/// <param name="dataFunctionCall">The data function call, if any.</param>
+		/// <param name="indirectionLevels">The indirection levels (from the search object) to access the property to match.</param>
 		protected abstract void AddSearchCondition
 			(
 			MFSearchBuilder mfSearchBuilder,
@@ -188,7 +193,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			TInputType value,
 			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
 			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
-			DataFunctionCall dataFunctionCall = null
+			DataFunctionCall dataFunctionCall = null,
+			PropertyDefOrObjectTypes indirectionLevels = null
 			);
 
 		[TestMethod]
@@ -206,14 +212,16 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 
 		/// <summary>
 		/// Tests that calling 
-		/// <see cref="AddSearchCondition(MFSearchBuilder, int, TInputType, MFConditionType, MFParentChildBehavior, DataFunctionCall)"/>
+		/// <see cref="AddSearchCondition(MFSearchBuilder, int, TInputType, MFConditionType, MFParentChildBehavior, DataFunctionCall, PropertyDefOrObjectTypes)"/>
 		/// adds a search condition.
 		/// </summary>
 		[TestMethod]
 		public void AddsSearchCondition()
 		{
 			// Get the test properties.
-			var properties = this.GetTestProperties();
+			var properties = this
+				.GetTestProperties()
+				.ToList();
 
 			// Check each handled data type works as expected.
 			foreach (var dataType in this.HandledDataTypes)
@@ -243,34 +251,29 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			}
 		}
 
+		/// <summary>
+		/// Ensures that the search condition added matches the expected data.
+		/// </summary>
+		/// <param name="condition">The already-populated search condition.</param>
+		/// <param name="propertyDef">The property definition Id expected.</param>
+		/// <param name="expectedDataType">The expected data type.</param>
+		/// <param name="input">The expected value.</param>
+		/// <param name="conditionType">The condition (equal, etc.) expected.</param>
+		/// <param name="parentChildBehavior">The expected parent/child behaviour.</param>
+		/// <param name="indirectionLevels">The expected indirection levels.</param>
 		public void AssertSearchConditionIsCorrect
 			(
+			SearchCondition condition,
 			int propertyDef, 
 			MFDataType expectedDataType,
 			TInputType input,
 			MFConditionType conditionType,
-			MFParentChildBehavior parentChildBehavior
+			MFParentChildBehavior parentChildBehavior,
+			PropertyDefOrObjectTypes indirectionLevels
 			)
 		{
-			// Create the search builder.
-			var mfSearchBuilder = this.GetSearchBuilder();
-
-			// Add the search condition for the property.
-			this.AddSearchCondition
-			(
-				mfSearchBuilder,
-				propertyDef,
-				input,
-				conditionType,
-				parentChildBehavior
-			);
-
-			// If there's anything other than one condition then fail.
-			if (mfSearchBuilder.Conditions.Count != 1)
-				Assert.Inconclusive("Only one search condition should exist");
-
-			// Retrieve the just-added condition.
-			var condition = mfSearchBuilder.Conditions[mfSearchBuilder.Conditions.Count];
+			// Ensure the condition is not null.
+			Assert.IsNotNull(condition);
 
 			// Ensure the condition type is correct.
 			Assert.AreEqual(conditionType, condition.ConditionType);
@@ -300,6 +303,98 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			else
 			{
 				Assert.AreEqual(input, (TInputType)condition.TypedValue.Value);
+			}
+
+			// Ensure that the indirection levels are the same.
+			this.AssertIndirectionLevelsAreSame(indirectionLevels, condition.Expression.IndirectionLevels);
+		}
+
+		/// <summary>
+		/// Ensures that the search condition added matches the expected data.
+		/// </summary>
+		/// <param name="propertyDef">The property definition Id expected.</param>
+		/// <param name="expectedDataType">The expected data type.</param>
+		/// <param name="input">The expected value.</param>
+		/// <param name="conditionType">The condition (equal, etc.) expected.</param>
+		/// <param name="parentChildBehavior">The expected parent/child behaviour.</param>
+		/// <param name="indirectionLevels">The expected indirection levels.</param>
+		public void AssertSearchConditionIsCorrect
+			(
+			int propertyDef, 
+			MFDataType expectedDataType,
+			TInputType input,
+			MFConditionType conditionType,
+			MFParentChildBehavior parentChildBehavior,
+			PropertyDefOrObjectTypes indirectionLevels
+			)
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Add the search condition for the property.
+			this.AddSearchCondition
+			(
+				mfSearchBuilder,
+				propertyDef,
+				input,
+				conditionType,
+				parentChildBehavior,
+				indirectionLevels: indirectionLevels
+			);
+
+			// If there's anything other than one condition then fail.
+			if (mfSearchBuilder.Conditions.Count != 1)
+				Assert.Inconclusive("Only one search condition should exist");
+
+			// Retrieve the just-added condition.
+			var condition = mfSearchBuilder.Conditions[mfSearchBuilder.Conditions.Count];
+
+			// Validate it.
+			this.AssertSearchConditionIsCorrect
+			(
+				condition,
+				propertyDef,
+				expectedDataType,
+				input,
+				conditionType,
+				parentChildBehavior,
+				indirectionLevels
+			);
+		}
+
+		/// <summary>
+		/// Asserts that the supplied indirection levels match.
+		/// </summary>
+		/// <param name="expected">The expected indirection levels.  If null will be converted to an empty collection.</param>
+		/// <param name="actual">The actual indirection levels on the search condition.</param>
+		public void AssertIndirectionLevelsAreSame
+		(
+			PropertyDefOrObjectTypes expected,
+			PropertyDefOrObjectTypes actual
+		)
+		{
+			// If the expected is null then it should be empty.
+			expected = expected ?? new PropertyDefOrObjectTypes();
+			Assert.IsNotNull(actual);
+
+			// Ensure that the indirection levels are the same.
+			Assert.AreEqual(expected.Count, actual.Count);
+			for (var i = 1; i <= expected.Count; i++)
+			{
+				var expectedLevel = expected[i];
+				var actualLevel = actual[i];
+
+				// Should never be null, but check they're the same.
+				if (expectedLevel == null)
+				{
+					Assert.IsNull(actualLevel);
+					continue;
+				}
+
+				// Make sure they are the same.
+				Assert.IsNotNull(actualLevel);
+				Assert.AreEqual(expectedLevel.ID, actualLevel.ID);
+				Assert.AreEqual(expectedLevel.PropertyDef, actualLevel.PropertyDef);
 			}
 		}
 

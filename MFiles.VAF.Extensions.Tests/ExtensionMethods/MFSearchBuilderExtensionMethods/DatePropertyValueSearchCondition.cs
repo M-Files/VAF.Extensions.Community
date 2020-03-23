@@ -26,7 +26,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			DateTime? value,
 			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
 			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
-			DataFunctionCall dataFunctionCall = null
+			DataFunctionCall dataFunctionCall = null,
+			PropertyDefOrObjectTypes indirectionLevels = null
 			)
 		{
 			// Sanity.
@@ -40,13 +41,14 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				// Value is not nullable in the real world, but needed here for the test to work.
 				value ?? new DateTime(2020, 01, 01),
 				conditionType,
-				parentChildBehavior
+				parentChildBehavior,
+				indirectionLevels
 				);
 		}
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFSearchBuilderExtensionMethods.Date(Common.MFSearchBuilder, int, DateTime?, MFConditionType, MFParentChildBehavior)"/>
+		/// <see cref="Extensions.MFSearchBuilderExtensionMethods.Date"/>
 		/// removes any time component from the date added.
 		/// </summary>
 		[TestMethod]
@@ -77,7 +79,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFSearchBuilderExtensionMethods.Date(Common.MFSearchBuilder, int, DateTime?, MFConditionType, MFParentChildBehavior)"/>
+		/// <see cref="Extensions.MFSearchBuilderExtensionMethods.Date"/>
 		/// correctly populates the data function call.
 		/// </summary>
 		[TestMethod]

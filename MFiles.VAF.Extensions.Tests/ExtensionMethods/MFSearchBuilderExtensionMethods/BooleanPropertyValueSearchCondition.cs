@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MFiles.VAF.Common;
 using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MFilesAPI.Extensions;
 
 namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionMethods
 {
@@ -26,7 +27,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			bool? value,
 			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
 			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
-			DataFunctionCall dataFunctionCall = null
+			DataFunctionCall dataFunctionCall = null,
+			PropertyDefOrObjectTypes indirectionLevels = null
 			)
 		{
 			// Sanity.
@@ -40,31 +42,33 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				value,
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall
+				dataFunctionCall,
+				indirectionLevels
 				);
 		}
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFSearchBuilderExtensionMethods.Property(MFiles.VAF.Common.MFSearchBuilder,int,System.Nullable{bool},MFilesAPI.MFConditionType,MFilesAPI.MFParentChildBehavior,MFilesAPI.DataFunctionCall)"/>
+		/// <see cref="VAF.Extensions.MFSearchBuilderExtensionMethods.Property(MFSearchBuilder, int, bool?, MFConditionType, MFParentChildBehavior, DataFunctionCall, PropertyDefOrObjectTypes)"/>
 		/// adds a valid search condition.
 		/// </summary>
 		[TestMethod]
-		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, true, MFConditionType.MFConditionTypeEqual, MFParentChildBehavior.MFParentChildBehaviorNone)]
-		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, false, MFConditionType.MFConditionTypeEqual, MFParentChildBehavior.MFParentChildBehaviorNone)]
-		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, null, MFConditionType.MFConditionTypeEqual, MFParentChildBehavior.MFParentChildBehaviorNone)]
-		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, true, MFConditionType.MFConditionTypeNotEqual, MFParentChildBehavior.MFParentChildBehaviorNone)]
-		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, false, MFConditionType.MFConditionTypeNotEqual, MFParentChildBehavior.MFParentChildBehaviorNone)]
-		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, null, MFConditionType.MFConditionTypeNotEqual, MFParentChildBehavior.MFParentChildBehaviorNone)]
-		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, true, MFConditionType.MFConditionTypeEqual, MFParentChildBehavior.MFParentChildBehaviorIncludeParentValues)]
-		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, true, MFConditionType.MFConditionTypeEqual, MFParentChildBehavior.MFParentChildBehaviorIncludeChildValues)]
-		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, true, MFConditionType.MFConditionTypeEqual, MFParentChildBehavior.MFParentChildBehaviorIncludeParentValues | MFParentChildBehavior.MFParentChildBehaviorIncludeChildValues)]
+		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, true, MFConditionType.MFConditionTypeEqual, MFParentChildBehavior.MFParentChildBehaviorNone, (PropertyDefOrObjectTypes)null)]
+		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, false, MFConditionType.MFConditionTypeEqual, MFParentChildBehavior.MFParentChildBehaviorNone, (PropertyDefOrObjectTypes)null)]
+		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, null, MFConditionType.MFConditionTypeEqual, MFParentChildBehavior.MFParentChildBehaviorNone, (PropertyDefOrObjectTypes)null)]
+		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, true, MFConditionType.MFConditionTypeNotEqual, MFParentChildBehavior.MFParentChildBehaviorNone, (PropertyDefOrObjectTypes)null)]
+		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, false, MFConditionType.MFConditionTypeNotEqual, MFParentChildBehavior.MFParentChildBehaviorNone, (PropertyDefOrObjectTypes)null)]
+		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, null, MFConditionType.MFConditionTypeNotEqual, MFParentChildBehavior.MFParentChildBehaviorNone, (PropertyDefOrObjectTypes)null)]
+		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, true, MFConditionType.MFConditionTypeEqual, MFParentChildBehavior.MFParentChildBehaviorIncludeParentValues, (PropertyDefOrObjectTypes)null)]
+		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, true, MFConditionType.MFConditionTypeEqual, MFParentChildBehavior.MFParentChildBehaviorIncludeChildValues, (PropertyDefOrObjectTypes)null)]
+		[DataRow(PropertyValueSearchConditionTestBase.TestBooleanPropertyId, true, MFConditionType.MFConditionTypeEqual, MFParentChildBehavior.MFParentChildBehaviorIncludeParentValues | MFParentChildBehavior.MFParentChildBehaviorIncludeChildValues, (PropertyDefOrObjectTypes)null)]
 		public void SearchConditionIsCorrect
 			(
 			int propertyDef, 
 			bool? input,
 			MFConditionType conditionType,
-			MFParentChildBehavior parentChildBehavior
+			MFParentChildBehavior parentChildBehavior,
+			PropertyDefOrObjectTypes indirectionLevels
 			)
 		{
 			base.AssertSearchConditionIsCorrect
@@ -73,8 +77,97 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				MFDataType.MFDatatypeBoolean,
 				input,
 				conditionType,
-				parentChildBehavior
+				parentChildBehavior,
+				indirectionLevels
 			);
+		}
+		
+		/// <summary>
+		/// Tests that calling
+		/// <see cref="VAF.Extensions.MFSearchBuilderExtensionMethods.Property(MFSearchBuilder, int, bool?, MFConditionType, MFParentChildBehavior, DataFunctionCall, PropertyDefOrObjectTypes)"/>
+		/// adds a valid search condition when using indirection levels.
+		/// </summary>
+		[TestMethod]
+		[DynamicData(nameof(BooleanPropertyValueSearchCondition.GetValidValuesWithIndirectionLevels), DynamicDataSourceType.Method)]
+		public void SearchConditionIsCorrect_WithIndirectionLevels
+			(
+			int propertyDef, 
+			bool? input,
+			MFConditionType conditionType,
+			MFParentChildBehavior parentChildBehavior,
+			PropertyDefOrObjectTypes indirectionLevels
+			)
+		{
+			base.AssertSearchConditionIsCorrect
+			(
+				propertyDef,
+				MFDataType.MFDatatypeBoolean,
+				input,
+				conditionType,
+				parentChildBehavior,
+				indirectionLevels
+			);
+		}
+
+		public static IEnumerable<object[]> GetValidValuesWithIndirectionLevels()
+		{
+			// Single indirection level by property.
+			{
+				var indirectionLevels = new PropertyDefOrObjectTypes();
+				indirectionLevels.AddPropertyDefIndirectionLevel(1234);
+				yield return new object[]
+				{
+					PropertyValueSearchConditionTestBase.TestBooleanPropertyId,
+					true,
+					MFConditionType.MFConditionTypeEqual,
+					MFParentChildBehavior.MFParentChildBehaviorNone,
+					indirectionLevels
+				};
+			}
+
+			// Single indirection level by object type.
+			{
+				var indirectionLevels = new PropertyDefOrObjectTypes();
+				indirectionLevels.AddObjectTypeIndirectionLevel(101);
+				yield return new object[]
+				{
+					PropertyValueSearchConditionTestBase.TestBooleanPropertyId,
+					true,
+					MFConditionType.MFConditionTypeEqual,
+					MFParentChildBehavior.MFParentChildBehaviorNone,
+					indirectionLevels
+				};
+			}
+
+			// Multiple indirection levels by property.
+			{
+				var indirectionLevels = new PropertyDefOrObjectTypes();
+				indirectionLevels.AddPropertyDefIndirectionLevel(1234);
+				indirectionLevels.AddPropertyDefIndirectionLevel(4321);
+				yield return new object[]
+				{
+					PropertyValueSearchConditionTestBase.TestBooleanPropertyId,
+					true,
+					MFConditionType.MFConditionTypeEqual,
+					MFParentChildBehavior.MFParentChildBehaviorNone,
+					indirectionLevels
+				};
+			}
+
+			// Multiple indirection levels by object type.
+			{
+				var indirectionLevels = new PropertyDefOrObjectTypes();
+				indirectionLevels.AddObjectTypeIndirectionLevel(101);
+				indirectionLevels.AddObjectTypeIndirectionLevel(102);
+				yield return new object[]
+				{
+					PropertyValueSearchConditionTestBase.TestBooleanPropertyId,
+					true,
+					MFConditionType.MFConditionTypeEqual,
+					MFParentChildBehavior.MFParentChildBehaviorNone,
+					indirectionLevels
+				};
+			}
 		}
 
 	}

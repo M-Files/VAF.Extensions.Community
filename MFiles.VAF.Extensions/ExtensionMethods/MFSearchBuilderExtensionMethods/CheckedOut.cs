@@ -30,13 +30,23 @@ namespace MFiles.VAF.Extensions
 			if (null == searchBuilder)
 				throw new ArgumentNullException(nameof(searchBuilder));
 
-			// Use the Status method.
-			return searchBuilder.Status
-			(
-				MFStatusType.MFStatusTypeCheckedOut,
-				MFDataType.MFDatatypeBoolean,
-				isCheckedOut
-			);
+			
+			// Create the search condition.
+			var searchCondition = new SearchCondition
+			{
+				ConditionType = MFConditionType.MFConditionTypeEqual
+			};
+
+			// Set up the status value expression.
+			searchCondition.Expression.SetStatusValueExpression(MFStatusType.MFStatusTypeCheckedOut);
+
+			searchCondition.TypedValue.SetValue(MFDataType.MFDatatypeBoolean, isCheckedOut);
+
+			// Add the search condition to the collection.
+			searchBuilder.Conditions.Add(-1, searchCondition);
+
+			// Return the search builder for chaining.
+			return searchBuilder;
 		}
 
 	}

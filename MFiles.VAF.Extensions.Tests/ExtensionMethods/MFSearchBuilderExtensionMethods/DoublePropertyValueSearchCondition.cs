@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MFiles.VAF.Common;
 using MFilesAPI;
+using MFilesAPI.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionMethods
@@ -29,7 +30,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			double? value,
 			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
 			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
-			DataFunctionCall dataFunctionCall = null
+			DataFunctionCall dataFunctionCall = null,
+			PropertyDefOrObjectTypes indirectionLevels = null
 			)
 		{
 			// Sanity.
@@ -43,13 +45,14 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				value,
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall
+				dataFunctionCall,
+				indirectionLevels
 				);
 		}
 		
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFSearchBuilderExtensionMethods.Property(MFiles.VAF.Common.MFSearchBuilder,int,System.Nullable{double},MFilesAPI.MFConditionType,MFilesAPI.MFParentChildBehavior,MFilesAPI.DataFunctionCall)"/>
+		/// <see cref="Extensions.MFSearchBuilderExtensionMethods.Property(MFSearchBuilder, int, double?, MFConditionType, MFParentChildBehavior, DataFunctionCall, PropertyDefOrObjectTypes)"/>
 		/// adds a valid search condition.
 		/// </summary>
 		[TestMethod]
@@ -60,7 +63,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			double? input,
 			MFDataType dataType,
 			MFConditionType conditionType,
-			MFParentChildBehavior parentChildBehavior
+			MFParentChildBehavior parentChildBehavior,
+			PropertyDefOrObjectTypes indirectionLevels
 			)
 		{
 			base.AssertSearchConditionIsCorrect
@@ -69,7 +73,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				dataType,
 				input,
 				conditionType,
-				parentChildBehavior
+				parentChildBehavior,
+				indirectionLevels
 			);
 		}
 
@@ -82,7 +87,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				null, 
 				MFDataType.MFDatatypeFloating,
 				MFConditionType.MFConditionTypeEqual, 
-				MFParentChildBehavior.MFParentChildBehaviorNone
+				MFParentChildBehavior.MFParentChildBehaviorNone,
+				(PropertyDefOrObjectTypes)null
 			};
 
 			foreach (MFConditionType conditionType in Enum.GetValues(typeof(MFConditionType)).Cast<MFConditionType>())
@@ -93,7 +99,96 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 					12.0D, 
 					MFDataType.MFDatatypeFloating,
 					conditionType, 
-					MFParentChildBehavior.MFParentChildBehaviorNone
+					MFParentChildBehavior.MFParentChildBehaviorNone,
+					(PropertyDefOrObjectTypes)null
+				};
+			}
+		}
+		
+		/// <summary>
+		/// Tests that calling
+		/// <see cref="VAF.Extensions.MFSearchBuilderExtensionMethods.Property(MFSearchBuilder, int, double?, MFConditionType, MFParentChildBehavior, DataFunctionCall, PropertyDefOrObjectTypes)"/>
+		/// adds a valid search condition when using indirection levels.
+		/// </summary>
+		[TestMethod]
+		[DynamicData(nameof(DoublePropertyValueSearchCondition.GetValidValuesWithIndirectionLevels), DynamicDataSourceType.Method)]
+		public void SearchConditionIsCorrect_WithIndirectionLevels
+			(
+			int propertyDef, 
+			double? input,
+			MFConditionType conditionType,
+			MFParentChildBehavior parentChildBehavior,
+			PropertyDefOrObjectTypes indirectionLevels
+			)
+		{
+			base.AssertSearchConditionIsCorrect
+			(
+				propertyDef,
+				MFDataType.MFDatatypeFloating,
+				input,
+				conditionType,
+				parentChildBehavior,
+				indirectionLevels
+			);
+		}
+
+		public static IEnumerable<object[]> GetValidValuesWithIndirectionLevels()
+		{
+			// Single indirection level by property.
+			{
+				var indirectionLevels = new PropertyDefOrObjectTypes();
+				indirectionLevels.AddPropertyDefIndirectionLevel(1234);
+				yield return new object[]
+				{
+					PropertyValueSearchConditionTestBase.TestFloatPropertyId,
+					12.0D,
+					MFConditionType.MFConditionTypeEqual,
+					MFParentChildBehavior.MFParentChildBehaviorNone,
+					indirectionLevels
+				};
+			}
+
+			// Single indirection level by object type.
+			{
+				var indirectionLevels = new PropertyDefOrObjectTypes();
+				indirectionLevels.AddObjectTypeIndirectionLevel(101);
+				yield return new object[]
+				{
+					PropertyValueSearchConditionTestBase.TestFloatPropertyId,
+					12.0D,
+					MFConditionType.MFConditionTypeEqual,
+					MFParentChildBehavior.MFParentChildBehaviorNone,
+					indirectionLevels
+				};
+			}
+
+			// Multiple indirection levels by property.
+			{
+				var indirectionLevels = new PropertyDefOrObjectTypes();
+				indirectionLevels.AddPropertyDefIndirectionLevel(1234);
+				indirectionLevels.AddPropertyDefIndirectionLevel(4321);
+				yield return new object[]
+				{
+					PropertyValueSearchConditionTestBase.TestFloatPropertyId,
+					12.0D,
+					MFConditionType.MFConditionTypeEqual,
+					MFParentChildBehavior.MFParentChildBehaviorNone,
+					indirectionLevels
+				};
+			}
+
+			// Multiple indirection levels by object type.
+			{
+				var indirectionLevels = new PropertyDefOrObjectTypes();
+				indirectionLevels.AddObjectTypeIndirectionLevel(101);
+				indirectionLevels.AddObjectTypeIndirectionLevel(102);
+				yield return new object[]
+				{
+					PropertyValueSearchConditionTestBase.TestFloatPropertyId,
+					12.0D,
+					MFConditionType.MFConditionTypeEqual,
+					MFParentChildBehavior.MFParentChildBehaviorNone,
+					indirectionLevels
 				};
 			}
 		}

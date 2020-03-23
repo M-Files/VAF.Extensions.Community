@@ -26,6 +26,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="conditionType">What type of search to execute (defaults to <see cref="MFConditionType.MFConditionTypeEqual"/>).</param>
 		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well (defaults to <see cref="MFParentChildBehavior.MFParentChildBehaviorNone"/>).</param>
 		/// <param name="dataFunctionCall">An expression for modifying how the results of matches are evaluated (defaults to null).</param>
+		/// <param name="indirectionLevels">The indirection levels (from the search object) to access the property to match.</param>
 		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
 		public static MFSearchBuilder Property
 		(
@@ -34,7 +35,8 @@ namespace MFiles.VAF.Extensions
 			string value,
 			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
 			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
-			DataFunctionCall dataFunctionCall = null
+			DataFunctionCall dataFunctionCall = null,
+			PropertyDefOrObjectTypes indirectionLevels = null
 		)
 		{
 			// Sanity.
@@ -151,7 +153,8 @@ namespace MFiles.VAF.Extensions
 				value,
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall
+				dataFunctionCall,
+				indirectionLevels
 			);
 		}
 
@@ -169,6 +172,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="propertyDef">The ID of the property to search by.</param>
 		/// <param name="month">The 1-based number of the month to search by (1 = January, 12 = December).</param>
 		/// <param name="conditionType">What type of search to execute (defaults to <see cref="MFConditionType.MFConditionTypeEqual"/>).</param>
+		/// <param name="indirectionLevels">The indirection levels (from the search object) to access the property to match.</param>
 		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well (defaults to <see cref="MFParentChildBehavior.MFParentChildBehaviorNone"/>).</param>
 		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
 		public static MFSearchBuilder Month
@@ -177,7 +181,8 @@ namespace MFiles.VAF.Extensions
 			int propertyDef,
 			int month,
 			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
-			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone
+			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
+			PropertyDefOrObjectTypes indirectionLevels = null
 		)
 		{
 			// Sanity.
@@ -192,7 +197,7 @@ namespace MFiles.VAF.Extensions
 			var dataType = searchBuilder.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
 
 			// What is the data type of the property?
-			DataFunctionCall dataFunctionCall = null;
+			DataFunctionCall dataFunctionCall;
 			switch (dataType)
 			{
 				case MFDataType.MFDatatypeTimestamp:
@@ -214,7 +219,8 @@ namespace MFiles.VAF.Extensions
 				month.ToString("00"),
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall
+				dataFunctionCall,
+				indirectionLevels
 			);
 
 		}
@@ -235,6 +241,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="month">The 1-based number of the month to search by (1 = January, 12 = December).</param>
 		/// <param name="conditionType">What type of search to execute (defaults to <see cref="MFConditionType.MFConditionTypeEqual"/>).</param>
 		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well (defaults to <see cref="MFParentChildBehavior.MFParentChildBehaviorNone"/>).</param>
+		/// <param name="indirectionLevels">The indirection levels (from the search object) to access the property to match.</param>
 		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
 		public static MFSearchBuilder YearAndMonth
 		(
@@ -243,7 +250,8 @@ namespace MFiles.VAF.Extensions
 			int year,
 			int month,
 			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
-			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone
+			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
+			PropertyDefOrObjectTypes indirectionLevels = null
 		)
 		{
 			// Sanity.
@@ -260,7 +268,7 @@ namespace MFiles.VAF.Extensions
 			var dataType = searchBuilder.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
 
 			// What is the data type of the property?
-			DataFunctionCall dataFunctionCall = null;
+			DataFunctionCall dataFunctionCall;
 			switch (dataType)
 			{
 				case MFDataType.MFDatatypeTimestamp:
@@ -282,7 +290,8 @@ namespace MFiles.VAF.Extensions
 				$"{year}-{month:00}",
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall
+				dataFunctionCall,
+				indirectionLevels
 			);
 
 		}

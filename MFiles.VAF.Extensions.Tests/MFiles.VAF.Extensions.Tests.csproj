@@ -55,6 +55,9 @@
     <Reference Include="MFiles.VAF.Configuration, Version=2.1.0.7, Culture=neutral, PublicKeyToken=fa007b370d17fe5e, processorArchitecture=MSIL">
       <HintPath>..\packages\MFiles.VAF.2.1.0.7\lib\net45\MFiles.VAF.Configuration.dll</HintPath>
     </Reference>
+    <Reference Include="MFilesAPI.Extensions, Version=0.1.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MFilesAPI.Extensions.0.1.5-alpha\lib\net45\MFilesAPI.Extensions.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\MSTest.TestFramework.1.3.2\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.dll</HintPath>
     </Reference>

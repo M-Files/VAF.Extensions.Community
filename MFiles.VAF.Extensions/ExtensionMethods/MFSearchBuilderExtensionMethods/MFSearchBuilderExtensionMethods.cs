@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using MFiles.VAF.Common;
 using MFilesAPI;
 
@@ -24,6 +20,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="conditionType">What type of search to execute.</param>
 		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well.</param>
 		/// <param name="dataFunctionCall">An expression for modifying how the results of matches are evaluated.</param>
+		/// <param name="indirectionLevels">The indirection levels (from the search object) to access the property to match.</param>
 		/// <returns></returns>
 		private static MFSearchBuilder AddPropertyValueSearchCondition
 		(
@@ -33,7 +30,8 @@ namespace MFiles.VAF.Extensions
 			object value,
 			MFConditionType conditionType,
 			MFParentChildBehavior parentChildBehavior,
-			DataFunctionCall dataFunctionCall
+			DataFunctionCall dataFunctionCall,
+			PropertyDefOrObjectTypes indirectionLevels
 		)
 		{
 			// Sanity.
@@ -53,6 +51,10 @@ namespace MFiles.VAF.Extensions
 				parentChildBehavior,
 				dataFunctionCall
 			);
+
+			// If we have any indirection levels then use them.
+			searchCondition.Expression.IndirectionLevels 
+				= indirectionLevels ?? new PropertyDefOrObjectTypes();
 
 			// Was the value null?
 			if (null == value)
