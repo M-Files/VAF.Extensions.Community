@@ -116,7 +116,7 @@ namespace MFiles.VAF.Extensions
 						// If it's not a real object type then throw.
 						if (false == indirectionLevelObjectType.RealObjectType)
 						{
-							throw new ArgumentException($"An indirection level references an object type with ID {objectTypeId}, but this list does not refer to an object type (cannot be used with value lists).", nameof(indirectionLevel));
+							throw new ArgumentException($"An indirection level references an value list with ID {objectTypeId}, but this list does not refer to an object type (cannot be used with value lists).", nameof(indirectionLevel));
 						}
 					}
 
