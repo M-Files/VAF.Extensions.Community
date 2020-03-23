@@ -42,8 +42,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				value,
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall,
-				indirectionLevels
+				indirectionLevels,
+				dataFunctionCall
 				);
 		}
 		

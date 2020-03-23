@@ -35,8 +35,8 @@ namespace MFiles.VAF.Extensions
 			bool? value,
 			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
 			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
-			DataFunctionCall dataFunctionCall = null,
-			PropertyDefOrObjectTypes indirectionLevels = null
+			PropertyDefOrObjectTypes indirectionLevels = null,
+			DataFunctionCall dataFunctionCall = null
 		)
 		{
 			// Sanity.
@@ -60,8 +60,8 @@ namespace MFiles.VAF.Extensions
 				value,
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall,
-				indirectionLevels
+				indirectionLevels,
+				dataFunctionCall
 			);
 		}
 

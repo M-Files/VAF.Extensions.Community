@@ -35,8 +35,8 @@ namespace MFiles.VAF.Extensions
 			string value,
 			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
 			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
-			DataFunctionCall dataFunctionCall = null,
-			PropertyDefOrObjectTypes indirectionLevels = null
+			PropertyDefOrObjectTypes indirectionLevels = null,
+			DataFunctionCall dataFunctionCall = null
 		)
 		{
 			// Sanity.
@@ -153,8 +153,8 @@ namespace MFiles.VAF.Extensions
 				value,
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall,
-				indirectionLevels
+				indirectionLevels,
+				dataFunctionCall
 			);
 		}
 
@@ -219,8 +219,8 @@ namespace MFiles.VAF.Extensions
 				month.ToString("00"),
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall,
-				indirectionLevels
+				indirectionLevels,
+				dataFunctionCall
 			);
 
 		}
@@ -290,8 +290,8 @@ namespace MFiles.VAF.Extensions
 				$"{year}-{month:00}",
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall,
-				indirectionLevels
+				indirectionLevels,
+				dataFunctionCall
 			);
 
 		}

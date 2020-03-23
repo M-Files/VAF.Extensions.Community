@@ -35,8 +35,8 @@ namespace MFiles.VAF.Extensions
 			int? value,
 			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
 			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
-			DataFunctionCall dataFunctionCall = null,
-			PropertyDefOrObjectTypes indirectionLevels = null
+			PropertyDefOrObjectTypes indirectionLevels = null,
+			DataFunctionCall dataFunctionCall = null
 		)
 		{
 			// Sanity.
@@ -94,8 +94,8 @@ namespace MFiles.VAF.Extensions
 				value,
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall,
-				indirectionLevels
+				indirectionLevels,
+				dataFunctionCall
 			);
 		}
 
@@ -122,8 +122,8 @@ namespace MFiles.VAF.Extensions
 			long? value,
 			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
 			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
-			DataFunctionCall dataFunctionCall = null,
-			PropertyDefOrObjectTypes indirectionLevels = null
+			PropertyDefOrObjectTypes indirectionLevels = null,
+			DataFunctionCall dataFunctionCall = null
 		)
 		{
 			// Sanity.
@@ -151,8 +151,8 @@ namespace MFiles.VAF.Extensions
 				value,
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall,
-				indirectionLevels
+				indirectionLevels,
+				dataFunctionCall
 			);
 		}
 
@@ -179,8 +179,8 @@ namespace MFiles.VAF.Extensions
 			double? value,
 			MFConditionType conditionType = MFConditionType.MFConditionTypeEqual,
 			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
-			DataFunctionCall dataFunctionCall = null,
-			PropertyDefOrObjectTypes indirectionLevels = null
+			PropertyDefOrObjectTypes indirectionLevels = null,
+			DataFunctionCall dataFunctionCall = null
 		)
 		{
 			// Sanity.
@@ -204,8 +204,8 @@ namespace MFiles.VAF.Extensions
 				value,
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall,
-				indirectionLevels
+				indirectionLevels,
+				dataFunctionCall
 			);
 		}
 
@@ -270,8 +270,8 @@ namespace MFiles.VAF.Extensions
 				year,
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall,
-				indirectionLevels
+				indirectionLevels,
+				dataFunctionCall
 			);
 
 		}
@@ -335,8 +335,8 @@ namespace MFiles.VAF.Extensions
 				value,
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall,
-				indirectionLevels
+				indirectionLevels,
+				dataFunctionCall
 			);
 
 		}
@@ -400,8 +400,8 @@ namespace MFiles.VAF.Extensions
 				value,
 				conditionType,
 				parentChildBehavior,
-				dataFunctionCall,
-				indirectionLevels
+				indirectionLevels,
+				dataFunctionCall
 			);
 
 		}

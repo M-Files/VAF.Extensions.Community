@@ -30,8 +30,8 @@ namespace MFiles.VAF.Extensions
 			object value,
 			MFConditionType conditionType,
 			MFParentChildBehavior parentChildBehavior,
-			DataFunctionCall dataFunctionCall,
-			PropertyDefOrObjectTypes indirectionLevels
+			PropertyDefOrObjectTypes indirectionLevels,
+			DataFunctionCall dataFunctionCall
 		)
 		{
 			// Sanity.
