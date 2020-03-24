@@ -148,7 +148,7 @@ mfSearchBuilder.Property
 );
 ```
 
-Note: values can be provided as integers, longs or doubles.
+Note: Values can be provided as integers, longs or doubles.
 
 Note: When searching for properties of type `MFDatatypeLookup` or `MFDatatypeMultiSelectLookup`, the integer argument is expected to be the internal ID of the object that this property value points to.
 
