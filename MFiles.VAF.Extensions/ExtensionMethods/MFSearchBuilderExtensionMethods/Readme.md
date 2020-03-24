@@ -295,7 +295,6 @@ All property-value search condition extension methods additionally allow the pro
 ### By object type
 
 The example below is based upon the example in the [developer portal](https://developer.m-files.com/APIs/COM-API/Searching/SearchConditions/#referencing-by-object-type).
-{:.note }
 
 ```csharp
 // Create the indirection levels.
@@ -317,7 +316,6 @@ searchBuilder.Property
 ### By property definition
 
 The example below is based upon the example in the [developer portal](https://developer.m-files.com/APIs/COM-API/Searching/SearchConditions/#referencing-by-property-definition).
-{:.note }
 
 ```csharp
 // Create the indirection levels.
