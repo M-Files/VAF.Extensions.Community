@@ -298,6 +298,11 @@ The example below is based upon the example in the [developer portal](https://de
 {:.note }
 
 ```csharp
+// Create the indirection levels.
+var indirectionLevels = new PropertyDefsOrObjectTypes()
+    .AddObjectTypeIndirectionLevel(136); // The `Customer` object type Id
+
+// Execute the search.
 var searchBuilder = new MFSearchBuilder(env.Vault);
 searchBuilder.Deleted(false);
 searchBuilder.ObjType(149); // The 'Contact' object type Id.
@@ -305,8 +310,7 @@ searchBuilder.Property
 (
     1090, // The Id of the 'Country' property definition.
     3, // The Id of the 'United Kingdom' value list item.
-    indirectionLevels: new PropertyDefsOrObjectTypes()
-        .AddObjectTypeIndirectionLevel(136) // The `Customer` object type Id
+    indirectionLevels: indirectionLevels
 );
 ```
 
@@ -316,6 +320,11 @@ The example below is based upon the example in the [developer portal](https://de
 {:.note }
 
 ```csharp
+// Create the indirection levels.
+var indirectionLevels = new PropertyDefsOrObjectTypes()
+    .AddPropertyDefIndirectionLevel(1174); // The `Signer` property definition
+
+// Execute the search.
 var searchBuilder = new MFSearchBuilder(env.Vault);
 searchBuilder.Deleted(false);
 searchBuilder.ObjType(0); // Only retrieve documents
@@ -323,7 +332,6 @@ searchBuilder.Property
 (
     1136, // The Id of the 'Department' property definition.
     1, // The Id of the 'Sales' value list item.
-    indirectionLevels: new PropertyDefsOrObjectTypes()
-        .AddPropertyDefIndirectionLevel(1174) // The `Signer` property definition
+    indirectionLevels: indirectionLevels
 );
 ```
