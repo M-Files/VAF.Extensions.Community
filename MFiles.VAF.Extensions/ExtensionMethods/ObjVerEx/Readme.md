@@ -1,19 +1,23 @@
 ﻿# ObjVerEx extension methods
 
-## IsTemplate
+## AddFile
 
-Returns true if the `ObjVerEx` instance contains the built-in `MFBuiltInPropertyDefIsTemplate` property with a value of true:
+Adds a file to an existing M-Files object.
 
 ```csharp
-if(objVerEx.IsTemplate())
+// Assume that "sourceStream" contains the new file contents:
+using (var sourceStream = ...)
 {
-    Console.WriteLine($"The object is a template.");
-}
-else
-{
-    Console.WriteLine($"The object is not a template.");
+    env.ObjVerEx.AddFile
+    (
+        "My new file",
+        ".pdf,
+        sourceStream
+    );
 }
 ```
+
+*Note: the object must be already checked out and have the "Single File Document" property appropriately set prior to calling this method.*
 
 ## ToLookup
 
