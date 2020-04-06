@@ -13,7 +13,7 @@ namespace MFiles.VAF.Extensions.Tests
 		{
 			var mock = new Mock<Vault>
 			{
-				DefaultValue = DefaultValue.Mock
+				DefaultValue = DefaultValue.Empty
 			};
 			mock.SetupAllProperties();
 			return mock;
