@@ -21,7 +21,7 @@ namespace MFiles.VAF.Extensions
             // Get the standard implementation with version data.
             var lookup = objVerEx.ToLookup();
 
-            // If we want the version data then we're all good.
+            // If we do not want the version data then we're all good.
             if (!latestVersion)
                 return lookup;
 
