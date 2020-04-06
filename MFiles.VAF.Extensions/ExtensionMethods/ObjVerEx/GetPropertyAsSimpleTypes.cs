@@ -53,7 +53,7 @@ namespace MFiles.VAF.Extensions
 				}
 			}
 
-			// Attempt to return the data as a DateTime.
+			// Attempt to return the data as correctly typed value.
 			return (T)propertyValue.TypedValue.Value;
 		}
 
