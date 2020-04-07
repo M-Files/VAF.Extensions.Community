@@ -11,11 +11,17 @@
     <Description>Community-driven extensions for the M-Files Vault Application Framework.</Description>
     <RepositoryUrl>https://github.com/M-Files/VAF.Extensions.Community</RepositoryUrl>
     <PackageProjectUrl>https://github.com/M-Files/VAF.Extensions.Community</PackageProjectUrl>
+    <PackageIcon>logo.png</PackageIcon>
+    <PackageIconUrl />
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\lib\Resources\logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
     <None Include="MFiles.VAF.Extensions.nuspec" />
   </ItemGroup>
   <ItemGroup>
