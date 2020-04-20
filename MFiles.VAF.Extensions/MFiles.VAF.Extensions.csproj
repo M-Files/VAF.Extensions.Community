@@ -29,7 +29,7 @@
       <Version>2.1.0.7</Version>
     </PackageReference>
     <PackageReference Include="MFilesAPI.Extensions">
-      <Version>0.2.0-alpha</Version>
+      <Version>0.2.1-alpha</Version>
     </PackageReference>
   </ItemGroup>
 </Project>
