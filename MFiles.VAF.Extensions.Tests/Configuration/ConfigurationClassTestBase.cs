@@ -8,26 +8,18 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 	/// <summary>
 	/// Provides a base class for testing configuration-style objects.
 	/// </summary>
-	public abstract class ConfigurationClassTestBase
+	public abstract class ConfigurationClassTestBase<TConfigurationClass>
 	{
-		public abstract System.Type GetClassBeingTested();
-
-		[TestMethod]
-		public void ClassBeingTestedIsNotNull()
-		{
-			Assert.IsNotNull(this.GetClassBeingTested());
-		}
-
 		[TestMethod]
 		public void ClassHasDataContractAttribute()
 		{
 			Assert.IsNotNull
 			(
-				this.GetClassBeingTested()
+				typeof(TConfigurationClass)
 				.GetCustomAttributes(false)
 				.Cast<DataContractAttribute>()
 				.FirstOrDefault(),
-				"The class "
+				$"{typeof(TConfigurationClass).FullName} does not have a [DataContract] attribute."
 			);;
 		}
 
@@ -35,7 +27,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		public void EnsurePropertiesHaveDataMemberAttribute()
 		{
 			// What class should have the properties?
-			var classBeingTested = this.GetClassBeingTested();
+			var classBeingTested = typeof(TConfigurationClass);
 
 			// What properties should have [DataMember] attributes?
 			foreach (var attribute in this
@@ -49,10 +41,11 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 					Assert.IsTrue
 						(
 							classBeingTested
-							.GetProperties()
+							.GetProperties()?
 							.Where(p => p.DeclaringType == classBeingTested && p.Name == propertyName)
-							.FirstOrDefault()
-							.HasCustomAttribute<DataMemberAttribute>()
+							.FirstOrDefault()?
+							.HasCustomAttribute<DataMemberAttribute>() ?? false,
+							$"{classBeingTested.FullName}.{propertyName} was not found or does not have a [DataMember] attribute."
 						);
 				}
 			}
@@ -62,7 +55,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		public void EnsurePropertiesHaveSecurityAttribute()
 		{
 			// What class should have the properties?
-			var classBeingTested = this.GetClassBeingTested();
+			var classBeingTested = typeof(TConfigurationClass);
 
 			// What properties should have [Security] attribute?
 			foreach (var attribute in this
@@ -73,16 +66,35 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				// Ensure the property has the attribute.
 				var securityAttribute =
 							classBeingTested
-							.GetProperties()
+							.GetProperties()?
 							.Where(p => p.DeclaringType == classBeingTested && p.Name == attribute.PropertyName)
 							.FirstOrDefault()?
 							.GetCustomAttribute<SecurityAttribute>();
-				Assert.IsNotNull(securityAttribute);
+				Assert.IsNotNull
+				(
+					securityAttribute,
+					$"{classBeingTested.FullName}.{attribute.PropertyName} was not found or does not have a [Security] attribute."
+				);
 
-				// Ensure values are correct.
-				Assert.AreEqual(attribute.IsPassword, securityAttribute.IsPassword);
-				Assert.AreEqual(attribute.ChangeBy, securityAttribute.ChangeBy);
-				Assert.AreEqual(attribute.ViewBy, securityAttribute.ViewBy);
+				// Ensure values are as expected.
+				Assert.AreEqual
+				(
+					attribute.IsPassword, 
+					securityAttribute.IsPassword,
+					$"[Security(IsPassword=)] was not set properly for {classBeingTested.FullName}.{attribute.PropertyName}"
+				);
+				Assert.AreEqual
+				(
+					attribute.ChangeBy,
+					securityAttribute.ChangeBy,
+					$"[Security(ChangeBy=)] was not set properly for {classBeingTested.FullName}.{attribute.PropertyName}"
+				);
+				Assert.AreEqual
+				(
+					attribute.ViewBy, 
+					securityAttribute.ViewBy,
+					$"[Security(ViewBy=)] was not set properly for {classBeingTested.FullName}.{attribute.PropertyName}"
+				);
 			}
 		}
 
@@ -90,7 +102,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		public void EnsurePropertiesHaveJsonConfEditorAttribute()
 		{
 			// What class should have the properties?
-			var classBeingTested = this.GetClassBeingTested();
+			var classBeingTested = typeof(TConfigurationClass);
 
 			// What properties should have [JsonConfEditor] attribute?
 			foreach (var attribute in this
@@ -100,22 +112,41 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 			{
 				// Ensure the property has the attribute.
 				var jsonConfEditorAttribute = classBeingTested
-							.GetProperties()
+							.GetProperties()?
 							.Where(p => p.DeclaringType == classBeingTested && p.Name == attribute.PropertyName)
 							.FirstOrDefault()?
 							.GetCustomAttribute<JsonConfEditorAttribute>();
-				Assert.IsNotNull(jsonConfEditorAttribute);
+				Assert.IsNotNull
+				(
+					jsonConfEditorAttribute,
+					$"{classBeingTested.FullName}.{attribute.PropertyName} was not found or does not have a [JsonConfEditor] attribute."
+				);
 
 				// If we have a default then check.
 				if (null != attribute.DefaultValue)
 					Assert.AreEqual(attribute.DefaultValue, jsonConfEditorAttribute.DefaultValue);
 
 				// Hidden / ShowWhen / HideWhen?
-				Assert.AreEqual(attribute.Hidden, jsonConfEditorAttribute.Hidden);
+				Assert.AreEqual
+				(
+					attribute.Hidden,
+					jsonConfEditorAttribute.Hidden,
+					$"[JsonConfEditor(Hidden=)] was not set properly for {classBeingTested.FullName}.{attribute.PropertyName}"
+				);
 				if (false == string.IsNullOrWhiteSpace(attribute.ShowWhen))
-					Assert.AreEqual(attribute.ShowWhen, jsonConfEditorAttribute.ShowWhen);
+					Assert.AreEqual
+					(
+						attribute.ShowWhen,
+						jsonConfEditorAttribute.ShowWhen,
+						$"[JsonConfEditor(Hidden=)] was not set properly for {classBeingTested.FullName}.{attribute.PropertyName}"
+					);
 				if (false == string.IsNullOrWhiteSpace(attribute.HideWhen))
-					Assert.AreEqual(attribute.HideWhen, jsonConfEditorAttribute.HideWhen);
+					Assert.AreEqual
+					(
+						attribute.HideWhen, 
+						jsonConfEditorAttribute.HideWhen,
+						$"[JsonConfEditor(Hidden=)] was not set properly for {classBeingTested.FullName}.{attribute.PropertyName}"
+					);
 			}
 		}
 	}

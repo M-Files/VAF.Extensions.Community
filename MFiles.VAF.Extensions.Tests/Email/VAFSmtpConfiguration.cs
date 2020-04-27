@@ -61,9 +61,7 @@ namespace MFiles.VAF.Extensions.Tests.Email
 		showWhen: ".parent._children{.key == 'RequiresAuthentication' && .value == true }"
 	)]
 	public class VAFSmtpConfiguration
-		: ConfigurationClassTestBase
+		: ConfigurationClassTestBase<Extensions.Email.VAFSmtpConfiguration>
 	{
-		public override System.Type GetClassBeingTested()
-			=> typeof(Extensions.Email.VAFSmtpConfiguration);
 	}
 }

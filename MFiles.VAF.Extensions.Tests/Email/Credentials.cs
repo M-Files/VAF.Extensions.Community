@@ -1,9 +1,5 @@
-﻿using MFiles.VAF.Configuration;
-using MFiles.VAF.Extensions.Tests.Configuration;
+﻿using MFiles.VAF.Extensions.Tests.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Linq;
-using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions.Tests.Email
 {
@@ -19,9 +15,7 @@ namespace MFiles.VAF.Extensions.Tests.Email
 		true
 	)]
 	public class Credentials
-		: ConfigurationClassTestBase
+		: ConfigurationClassTestBase<Extensions.Email.Credentials>
 	{
-		public override Type GetClassBeingTested()
-			=> typeof(Extensions.Email.Credentials);
 	}
 }
