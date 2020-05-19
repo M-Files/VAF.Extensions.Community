@@ -3,7 +3,7 @@
     <TargetFrameworks>net45</TargetFrameworks>
     <Copyright>M-Files Corporation 2020 onwards</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.2.3.2-alpha</Version>
+    <Version>0.2.3.3-alpha</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Company>M-Files Corporation</Company>
     <Authors>M-Files Corporation</Authors>
@@ -26,10 +26,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MFiles.VAF">
-      <Version>2.1.0.7</Version>
+      <Version>2.1.0.8</Version>
     </PackageReference>
     <PackageReference Include="MFilesAPI.Extensions">
-      <Version>0.2.3.2-alpha</Version>
+      <Version>0.2.3.3-alpha</Version>
     </PackageReference>
   </ItemGroup>
 </Project>
