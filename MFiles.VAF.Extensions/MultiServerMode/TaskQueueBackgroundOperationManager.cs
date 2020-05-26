@@ -6,6 +6,10 @@ using System.Threading;
 
 namespace MFiles.VAF.Extensions.MultiServerMode
 {
+	/// <summary>
+	/// Provides an implementation of <see cref="TaskQueueBackgroundOperation{TDirective}"/> that does not
+	/// require a generic type argument (defaults to <see cref="TaskQueueDirective"/>).
+	/// </summary>
 	public class TaskQueueBackgroundOperationManager
 		: TaskQueueBackgroundOperationManager<TaskQueueDirective>
 	{	
@@ -19,6 +23,10 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// </summary>
 		internal static VaultServerAttachment CurrentServer { get; private set; }
 
+		/// <summary>
+		/// Ensures that <see cref="CurrentServer"/> is set correctly.
+		/// </summary>
+		/// <param name="vaultApplication">The vault application where this code is running.</param>
 		internal static void SetCurrentServer(VaultApplicationBase vaultApplication)
 		{
 			// Sanity.
@@ -50,13 +58,35 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		{
 		}
 	}
+
+	/// <summary>
+	/// Manages one or more background operations within a single queue.
+	/// </summary>
+	/// <typeparam name="TDirective">The directive type supported by the tasks in this queue.</typeparam>
 	public class TaskQueueBackgroundOperationManager<TDirective>
 		where TDirective : TaskQueueDirective
 	{
+		/// <summary>
+		/// The queue Id.
+		/// </summary>
 		public string QueueId { get;set; }
+
+		/// <summary>
+		/// The vault application that contains this background operation manager.
+		/// </summary>
 		public VaultApplicationBase VaultApplication { get; private set; }
+
+		/// <summary>
+		/// The cancellation token source, if cancellation should be supported.
+		/// </summary>
 		public CancellationTokenSource CancellationTokenSource { get; private set; }
 
+		/// <summary>
+		/// Creates a background operation manager for a given queue.
+		/// </summary>
+		/// <param name="vaultApplication">The vault application that contains this background operation manager.</param>
+		/// <param name="queueId">The queue Id.</param>
+		/// <param name="cancellationTokenSource">The cancellation token source, if cancellation should be supported.</param>
 		public TaskQueueBackgroundOperationManager
 		(
 			VaultApplicationBase vaultApplication,

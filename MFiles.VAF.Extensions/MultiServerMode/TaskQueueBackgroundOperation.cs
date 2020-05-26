@@ -69,15 +69,14 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <summary>
 		/// The method to run.
 		/// </summary>
-		public Action<Vault, TDirective> UserMethod { get; private set; }
+		public Action<TaskProcessorJob, TDirective> UserMethod { get; private set; }
 
 		/// <summary>
 		/// Creates a new background operation that runs the method in separate task.
 		/// </summary>
 		/// <param name="name">The name of the background operation.</param>
 		/// <param name="method">The method to invoke. The background operation will be passed to the method.</param>
-		/// <param name="vaultApplication">The vault application that this background operation is run in.</param>
-		/// <param name="queueId">The queue Id that this background operation is logged within.</param>
+		/// <param name="backgroundOperationManager">The background operation manager that manages this operation.</param>
 		/// <param name="taskTypeId">The type of this background operation.</param>
 		/// <param name="cancellationTokenSource">The cancellation token source.</param>
 		public TaskQueueBackgroundOperation
@@ -85,13 +84,13 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			TaskQueueBackgroundOperationManager<TDirective> backgroundOperationManager,
 			string taskTypeId,
 			string name,
-			Action<Vault, TDirective> method,
+			Action<TaskProcessorJob, TDirective> method,
 			CancellationTokenSource cancellationTokenSource = default
 		)
 		{
 			// Sanity.
 			if (string.IsNullOrWhiteSpace(taskTypeId))
-				throw new ArgumentException("The task type cannot be null or whitespace", nameof(taskTypeId));
+				throw new ArgumentException("The task type cannot be null or whitespace.", nameof(taskTypeId));
 
 			// Save parameters.
 			this.CancellationTokenSource = cancellationTokenSource;
@@ -116,6 +115,9 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			// Initialize default values.
 			this.Recurring = false;
 			this.Interval = null;
+
+			// Register the task queues.
+			this.TaskProcessor.RegisterTaskQueues();
 		}
 
 		/// <summary>
@@ -218,14 +220,10 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		}
 
 		/// <summary>
-		/// Stops running the operation at intervals.
-		/// Cancels any scheduled executions.
+		/// Marks any future executions of this job in this queue as cancelled.
 		/// </summary>
-		public void StopRunningAtIntervals()
+		public void CancelFutureExecutions(string remarks = null)
 		{
-			// Stop any new ones.
-			this.Recurring = false;
-
 			try
 			{
 				// Cancel any tasks that are already scheduled.
@@ -243,7 +241,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 					(
 						task.ToApplicationTask(),
 						string.Empty,
-						"Superseded."
+						remarks
 					);
 				}
 			}
@@ -255,6 +253,19 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 					e
 				);
 			}
+		}
+
+		/// <summary>
+		/// Stops running the operation at intervals.
+		/// Cancels any scheduled executions.
+		/// </summary>
+		public void StopRunningAtIntervals()
+		{
+			// Stop any new ones.
+			this.Recurring = false;
+
+			// Cancel any future executions.
+			this.CancelFutureExecutions("Superseded.");
 		}
 
 		/// <summary>
@@ -289,7 +300,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			this.TaskProcessor.UpdateTaskAsAssignedToProcessor( job );
 
 			// Execute the callback.
-			this.UserMethod(job.Vault, directive);
+			this.UserMethod(job, directive);
 		}
 	}
 }
