@@ -1,19 +1,52 @@
-﻿using MFiles.VAF.MultiserverMode;
+﻿using MFiles.VAF.Common;
+using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
 using System;
+using System.Threading;
 
 namespace MFiles.VAF.Extensions.MultiServerMode
 {
 	public class TaskQueueBackgroundOperationManager
 		: TaskQueueBackgroundOperationManager<TaskQueueDirective>
-	{
+	{	
+		/// <summary>
+		/// Lock for <see cref="CurrentServer"/>.
+		/// </summary>
+		private static readonly object _lock = new object();
+
+		/// <summary>
+		/// The server that this application is running on.
+		/// </summary>
+		internal static VaultServerAttachment CurrentServer { get; private set; }
+
+		internal static void SetCurrentServer(VaultApplicationBase vaultApplication)
+		{
+			// Sanity.
+			if (null == vaultApplication)
+				throw new ArgumentNullException(nameof(vaultApplication));
+
+			// Ensure that we have a current server.
+			lock (TaskQueueBackgroundOperationManager._lock)
+			{
+				if (null == TaskQueueBackgroundOperationManager.CurrentServer)
+				{
+					TaskQueueBackgroundOperationManager.CurrentServer
+						= vaultApplication
+							.PermanentVault
+							.GetVaultServerAttachments()
+							.GetCurrent();
+				}
+			}
+		}
+
 		/// <inheritdoc />
 		public TaskQueueBackgroundOperationManager
 		(
 			VaultApplicationBase vaultApplication,
-			string queueId
+			string queueId,
+			CancellationTokenSource cancellationTokenSource = default
 		)
-			: base(vaultApplication, queueId)
+			: base(vaultApplication, queueId, cancellationTokenSource)
 		{
 		}
 	}
@@ -22,11 +55,13 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 	{
 		public string QueueId { get;set; }
 		public VaultApplicationBase VaultApplication { get; private set; }
+		public CancellationTokenSource CancellationTokenSource { get; private set; }
 
 		public TaskQueueBackgroundOperationManager
 		(
 			VaultApplicationBase vaultApplication,
-			string queueId
+			string queueId,
+			CancellationTokenSource cancellationTokenSource = default
 		)
 		{
 			// Sanity.
@@ -34,8 +69,12 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				throw new ArgumentException("The queue id cannot be null or whitespace.", nameof(queueId));
 
 			// Assign.
+			this.CancellationTokenSource = cancellationTokenSource;
 			this.VaultApplication = vaultApplication ?? throw new ArgumentNullException(nameof(vaultApplication));
 			this.QueueId = queueId;
+
+			// Ensure we have a current server.
+			TaskQueueBackgroundOperationManager.SetCurrentServer(vaultApplication);
 		}
 
 		/// <summary>
@@ -105,7 +144,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		(
 			string name, 
 			string taskTypeId,
-			Action method 
+			Action method
 		)
 		{
 			return this.CreateBackgroundOperation
@@ -132,11 +171,11 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		{
 			return new TaskQueueBackgroundOperation<TDirective>
 			(
-				this.VaultApplication,
-				this.QueueId,
+				this,
 				taskTypeId,
 				name,
-				method
+				method,
+				this.CancellationTokenSource
 			);
 		}
 
