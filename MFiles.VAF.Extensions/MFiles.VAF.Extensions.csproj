@@ -15,6 +15,7 @@
     <PackageIconUrl />
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="MultiServerMode\ExtensionMethods\" />
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
@@ -25,11 +26,28 @@
     <None Include="MFiles.VAF.Extensions.nuspec" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MFiles.VAF">
-      <Version>2.1.0.8</Version>
-    </PackageReference>
     <PackageReference Include="MFilesAPI.Extensions">
       <Version>0.2.3.3-alpha</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Interop.MFilesAPI">
+      <HintPath>..\..\..\..\..\..\gl\vaf\src\MFiles.VAF\bin\Debug\Interop.MFilesAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="MFiles.Crypto">
+      <HintPath>..\..\..\..\..\..\gl\vaf\src\MFiles.VAF\bin\Debug\MFiles.Crypto.dll</HintPath>
+    </Reference>
+    <Reference Include="MFiles.VAF">
+      <HintPath>..\..\..\..\..\..\gl\vaf\src\MFiles.VAF\bin\Debug\MFiles.VAF.dll</HintPath>
+    </Reference>
+    <Reference Include="MFiles.VAF.Configuration">
+      <HintPath>..\..\..\..\..\..\gl\vaf\src\MFiles.VAF\bin\Debug\MFiles.VAF.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="MFiles.VAF.Configuration.Interfaces">
+      <HintPath>..\..\..\..\..\..\gl\vaf\src\MFiles.VAF\bin\Debug\MFiles.VAF.Configuration.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\lib\VAF\Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>
