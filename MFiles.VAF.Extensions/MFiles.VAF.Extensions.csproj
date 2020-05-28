@@ -15,7 +15,6 @@
     <PackageIconUrl />
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="MultiServerMode\ExtensionMethods\" />
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>

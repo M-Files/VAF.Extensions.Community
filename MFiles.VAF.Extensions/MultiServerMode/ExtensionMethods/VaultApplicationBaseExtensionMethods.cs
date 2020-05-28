@@ -22,7 +22,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="cancellationTokenSource">The cancellation token source.</param>
 		/// <param name="maxPollingInterval">The maximum interval (in seconds) between polling.</param>
 		/// <param name="automaticallyRegisterQueues">If true, automatically calls <see cref="AppTaskBatchProcessor.RegisterTaskQueues"/>.</param>
-		/// <returns>The concurrent batch processor.</returns>
+		/// <param name="automaticallyStartPolling">If true, automatically calls <see cref="TaskQueueManager.EnableTaskPolling"/>.</param>
+		/// <returns>The sequential batch processor.</returns>
 		public static SequentialTaskProcessor CreateSequentialTaskProcessor
 		(
 			this VaultApplicationBase vaultApplication,
@@ -30,7 +31,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			Dictionary<string, TaskProcessorJobHandler> taskHandlers,
 			CancellationTokenSource cancellationTokenSource = default,
 			int maxPollingInterval = 10,
-			bool automaticallyRegisterQueues = true
+			bool automaticallyRegisterQueues = true,
+			bool automaticallyStartPolling = true
 		)
 		{
 			// Sanity.
@@ -84,6 +86,10 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			if (automaticallyRegisterQueues)
 				processor.RegisterTaskQueues();
 
+			// Enable polling/processing of the queue.
+			if(automaticallyStartPolling)
+				vaultApplication.TaskQueueManager.EnableTaskPolling(true);
+
 			// Return the processor.
 			return processor;
 		}
@@ -100,6 +106,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="maxConcurrentJobs">The maximum number of concurrent jobs per batch (defaults to 5).</param>
 		/// <param name="maxPollingInterval">The maximum interval (in seconds) between polling.</param>
 		/// <param name="automaticallyRegisterQueues">If true, automatically calls <see cref="AppTaskBatchProcessor.RegisterTaskQueues"/>.</param>
+		/// <param name="automaticallyStartPolling">If true, automatically calls <see cref="TaskQueueManager.EnableTaskPolling"/>.</param>
 		/// <returns>The concurrent batch processor.</returns>
 		public static AppTaskBatchProcessor CreateConcurrentTaskProcessor
 		(
@@ -110,7 +117,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			int maxConcurrentBatches = 5,
 			int maxConcurrentJobs = 5,
 			int maxPollingInterval = 10,
-			bool automaticallyRegisterQueues = true
+			bool automaticallyRegisterQueues = true,
+			bool automaticallyStartPolling = true
 		)
 		{
 			// Sanity.
@@ -185,6 +193,10 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			if (automaticallyRegisterQueues)
 				processor.RegisterTaskQueues();
 
+			// Enable polling/processing of the queue.
+			if(automaticallyStartPolling)
+				vaultApplication.TaskQueueManager.EnableTaskPolling(true);
+
 			// Return the processor.
 			return processor;
 		}
@@ -201,7 +213,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="maxConcurrentJobs">The maximum number of concurrent jobs per batch (defaults to 5).</param>
 		/// <param name="maxPollingInterval">The maximum interval (in seconds) between polling.</param>
 		/// <param name="automaticallyRegisterQueues">If true, automatically calls <see cref="AppTaskBatchProcessor.RegisterTaskQueues"/>.</param>
-		/// <returns>The concurrent batch processor.</returns>
+		/// <param name="automaticallyStartPolling">If true, automatically calls <see cref="TaskQueueManager.EnableTaskPolling"/>.</param>
+		/// <returns>The broadcast batch processor.</returns>
 		public static AppTaskBatchProcessor CreateBroadcastTaskProcessor
 		(
 			this VaultApplicationBase vaultApplication,
@@ -211,7 +224,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			int maxConcurrentBatches = 5,
 			int maxConcurrentJobs = 5,
 			int maxPollingInterval = 10,
-			bool automaticallyRegisterQueues = true
+			bool automaticallyRegisterQueues = true,
+			bool automaticallyStartPolling = true
 		)
 		{
 			// Sanity.
@@ -284,6 +298,10 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			// Should we automatically register the task queues?
 			if (automaticallyRegisterQueues)
 				processor.RegisterTaskQueues();
+
+			// Enable polling/processing of the queue.
+			if(automaticallyStartPolling)
+				vaultApplication.TaskQueueManager.EnableTaskPolling(true);
 
 			// Return the processor.
 			return processor;

@@ -8,19 +8,42 @@ using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
 
 namespace MFiles.VAF.Extensions.MultiServerMode
+
 {
-	public class TaskQueueBackgroundOperation<TDirective>
-	where TDirective : TaskQueueDirective
+	//public class TaskQueueBackgroundOperation<TDirective>
+	//	: TaskQueueBackgroundOperation
+	//	where TDirective : TaskQueueDirective
+	//{
+
+	//	/// <summary>
+	//	/// Creates a new background operation that runs the method in separate task.
+	//	/// </summary>
+	//	/// <param name="name">The name of the background operation.</param>
+	//	/// <param name="method">The method to invoke. The background operation will be passed to the method.</param>
+	//	/// <param name="backgroundOperationManager">The background operation manager that manages this operation.</param>
+	//	/// <param name="cancellationTokenSource">The cancellation token source.</param>
+	//	public TaskQueueBackgroundOperation
+	//	(
+	//		TaskQueueBackgroundOperationManager backgroundOperationManager,
+	//		string name,
+	//		Action<TaskProcessorJob, TDirective> method,
+	//		CancellationTokenSource cancellationTokenSource = default
+	//	) : base(backgroundOperationManager, name, method, cancellationTokenSource)
+	//	{
+	//	}
+	//}
+
+	public class TaskQueueBackgroundOperation
 	{
 		/// <summary>
-		/// The task queue manager for this task.
+		/// The task type for this background operation.
 		/// </summary>
-		public AppTaskBatchProcessor TaskProcessor { get; private set; }
+		public const string TaskTypeId = "VaultApplication-BackgroundOperation";
 
 		/// <summary>
 		/// The manager that manages this operation.
 		/// </summary>
-		public TaskQueueBackgroundOperationManager<TDirective> BackgroundOperationManager { get; private set; }
+		public TaskQueueBackgroundOperationManager BackgroundOperationManager { get; private set; }
 
 		/// <summary>
 		/// The name of the vault running the background operation.
@@ -35,11 +58,6 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// The name of the background operation.
 		/// </summary>
 		public string Name { get; private set; }
-
-		/// <summary>
-		/// The task type for this background operation.
-		/// </summary>
-		public string TaskTypeId { get; private set; }
 
 		/// <summary>
 		/// The cancellation token for the operation.
@@ -69,7 +87,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <summary>
 		/// The method to run.
 		/// </summary>
-		public Action<TaskProcessorJob, TDirective> UserMethod { get; private set; }
+		public Action<TaskProcessorJob> UserMethod { get; private set; }
 
 		/// <summary>
 		/// Creates a new background operation that runs the method in separate task.
@@ -77,121 +95,55 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="name">The name of the background operation.</param>
 		/// <param name="method">The method to invoke. The background operation will be passed to the method.</param>
 		/// <param name="backgroundOperationManager">The background operation manager that manages this operation.</param>
-		/// <param name="taskTypeId">The type of this background operation.</param>
 		/// <param name="cancellationTokenSource">The cancellation token source.</param>
 		public TaskQueueBackgroundOperation
 		(
-			TaskQueueBackgroundOperationManager<TDirective> backgroundOperationManager,
-			string taskTypeId,
+			TaskQueueBackgroundOperationManager backgroundOperationManager,
 			string name,
-			Action<TaskProcessorJob, TDirective> method,
+			Action<TaskProcessorJob> method,
 			CancellationTokenSource cancellationTokenSource = default
 		)
 		{
 			// Sanity.
-			if (string.IsNullOrWhiteSpace(taskTypeId))
-				throw new ArgumentException("The task type cannot be null or whitespace.", nameof(taskTypeId));
+			if (string.IsNullOrWhiteSpace(name))
+				throw new ArgumentException("The background operation name cannot be null or whitespace.", nameof(name));
 
 			// Save parameters.
 			this.CancellationTokenSource = cancellationTokenSource;
-			this.TaskTypeId = taskTypeId;
 			this.BackgroundOperationManager = backgroundOperationManager ?? throw new ArgumentNullException(nameof(backgroundOperationManager));
-			this.TaskProcessor = backgroundOperationManager
-				.VaultApplication
-				.CreateConcurrentTaskProcessor
-				(
-					this.BackgroundOperationManager.QueueId,
-					new Dictionary<string, TaskProcessorJobHandler>
-					{
-						{ taskTypeId, this.ProcessJobHandler }
-					},
-					cancellationTokenSource == null
-						? new CancellationTokenSource()
-						: CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token)
-				);
 			this.UserMethod = method ?? throw new ArgumentNullException( nameof(method) );
 			this.Name = name ?? throw new ArgumentNullException( nameof(name) );
 
 			// Initialize default values.
 			this.Recurring = false;
 			this.Interval = null;
+		}
 
-			// Register the task queues.
-			this.TaskProcessor.RegisterTaskQueues();
+		/// <summary>
+		/// Runs the operation at once.
+		/// </summary>
+		/// <param name="runAt">If specified, schedules an execution at the provided time.  Otherwise schedules a call immediately.</param>
+		/// <remarks>Does not remove any scheduled executions.  Use <see cref="StopRunningAtIntervals"/>.</remarks>
+		public void RunOnce(DateTime? runAt = null)
+		{
+			// Schedule the next task to execute ASAP.
+			this.BackgroundOperationManager.RunOnce(this.Name, runAt);
 		}
 
 		/// <summary>
 		/// Runs the operation at once or immediately after the current run is finished.
 		/// </summary>
+		/// <param name="runAt">If specified, schedules an execution at the provided time.  Otherwise schedules a call immediately.</param>
 		/// <remarks>Does not remove any scheduled executions.  Use <see cref="StopRunningAtIntervals"/>.</remarks>
-		public void RunOnce(TDirective directive = null)
+		public void RunOnce<TDirective>
+		(
+			DateTime? runAt = null,
+			TDirective directive = null
+		)
+			where TDirective : TaskQueueDirective
 		{
 			// Schedule the next task to execute ASAP.
-			this.TaskProcessor.CreateApplicationTaskSafe
-			(
-				true,
-				this.BackgroundOperationManager.QueueId,
-				this.TaskTypeId,
-				directive?.ToBytes(),
-				DateTime.UtcNow
-			);
-		}
-
-		/// <summary>
-		/// Processes a job in the queue.
-		/// Performs validation then delegates to <see cref="TaskManagerBase{TTaskProcessor, TSettings, TDirective}.JobHandler"/>.
-		/// </summary>
-		/// <param name="job">The job to process.</param>
-		protected virtual void ProcessJobHandler(TaskProcessorJob job)
-		{
-			// Sanity.
-			if(null == job)
-				return;
-
-			// Ensure cancellation has not been requested.
-			job.ThrowIfCancellationRequested();
-
-			// Update the progress of the task in the task queue.
-			this.TaskProcessor.UpdateTaskAsAssignedToProcessor( job );
-
-			// Sanity.
-			if (null == job.Data?.Value)
-			{
-				return;
-			}
-
-			// Deserialize the directive.
-			var dir = TaskQueueDirective.Parse<TDirective>( job.Data?.Value );
-
-			// If it is a broadcast directive, then was it generated on the same server?
-			// If so then ignore.
-			if (dir is BroadcastDirective broadcastDirective)
-			{
-				{
-					if (broadcastDirective.GeneratedFromGuid
-						== TaskQueueBackgroundOperationManager.CurrentServer.ServerID)
-						return;
-				}
-			}
-
-			// Perform the action.
-			try
-			{
-				// Delegate to the hander.
-				this.RunJob(job, dir);
-			}
-			catch(Exception e)
-			{
-				// Exception.
-				this.TaskProcessor.UpdateTaskInfo
-				(
-					job.Data?.Value,
-					MFTaskState.MFTaskStateFailed,
-					e.Message,
-					false
-				);
-				// TODO: throw?
-			}
+			this.BackgroundOperationManager.RunOnce(this.Name, runAt, directive);
 		}
 
 		/// <summary>
@@ -231,13 +183,20 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				(
 					this.BackgroundOperationManager.VaultApplication.PermanentVault,
 					this.BackgroundOperationManager.QueueId,
-					t => t.Type == this.TaskTypeId,
+					t => t.Type == TaskQueueBackgroundOperation.TaskTypeId,
 					new[] { MFTaskState.MFTaskStateWaiting, MFTaskState.MFTaskStateInProgress }
 				);
 				foreach (var task in tasksToCancel.Cast<ApplicationTaskInfo>())
 				{
+					// If this task is not for this background operation then ignore it.
+					var directive = TaskQueueDirective.Parse<WrappedDirective>(task.ToApplicationTask());
+					if(null == directive)
+						continue;
+					if(directive.BackgroundOperationName != this.Name)
+						continue;
+
 					// Mark each task as superseded.
-					this.TaskProcessor.UpdateCancelledJobInTaskQueue
+					this.BackgroundOperationManager.TaskProcessor.UpdateCancelledJobInTaskQueue
 					(
 						task.ToApplicationTask(),
 						string.Empty,
@@ -249,7 +208,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			{
 				SysUtils.ReportErrorToEventLog
 				(
-					$"Exception cancelling tasks of type {this.TaskTypeId} on queue {this.BackgroundOperationManager.QueueId}.",
+					$"Exception cancelling tasks for background operation {this.Name} of type {TaskQueueBackgroundOperation.TaskTypeId} on queue {this.BackgroundOperationManager.QueueId}.",
 					e
 				);
 			}
@@ -276,31 +235,16 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			this.CancellationTokenSource?.Cancel();
 		}
 
-		private void RunJob(TaskProcessorJob job, TDirective directive)
+		/// <summary>
+		/// Called by the <see cref="TaskQueueBackgroundOperationManager"/> when a task for this background operation
+		/// is scheduled.
+		/// </summary>
+		/// <param name="job">The job to run.</param>
+		/// <param name="directive">The directive, if any, passed in.</param>
+		public virtual void RunJob(TaskProcessorJob job, TaskQueueDirective directive)
 		{
-			if (this.Recurring && this.Interval.HasValue)
-			{
-				// Bind to the completed event ( called always ) of the job.
-				// That way even if the job is canceled, fails, or finishes successfully
-				// ...we always schedule the next run.
-				job.ProcessingCompleted += (s, op)
-					=> this.TaskProcessor.CreateApplicationTaskSafe(
-						true,
-						this.BackgroundOperationManager.QueueId,
-						this.TaskTypeId,
-						directive?.ToBytes(),
-						DateTime.UtcNow.Add(this.Interval.Value)
-					);
-			}
-
-			// The hourly task has come due and is being processed.
-			job.ThrowIfCancellationRequested();
-
-			// Update has having been assigned.
-			this.TaskProcessor.UpdateTaskAsAssignedToProcessor( job );
-
 			// Execute the callback.
-			this.UserMethod(job, directive);
+			this.UserMethod(job);
 		}
 	}
 }
