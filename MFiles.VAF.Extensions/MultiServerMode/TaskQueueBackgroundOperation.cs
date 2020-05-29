@@ -87,7 +87,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <summary>
 		/// The method to run.
 		/// </summary>
-		public Action<TaskProcessorJob> UserMethod { get; private set; }
+		public Action<TaskProcessorJob, TaskQueueDirective> UserMethod { get; private set; }
 
 		/// <summary>
 		/// Creates a new background operation that runs the method in separate task.
@@ -100,7 +100,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		(
 			TaskQueueBackgroundOperationManager backgroundOperationManager,
 			string name,
-			Action<TaskProcessorJob> method,
+			Action<TaskProcessorJob, TaskQueueDirective> method,
 			CancellationTokenSource cancellationTokenSource = default
 		)
 		{
@@ -247,7 +247,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		public virtual void RunJob(TaskProcessorJob job, TaskQueueDirective directive)
 		{
 			// Execute the callback.
-			this.UserMethod(job);
+			this.UserMethod(job, directive);
 		}
 	}
 }

@@ -323,7 +323,29 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			(
 				name,
 				interval,
-				(j) => method()
+				(j, d) => method()
+			);
+		}
+
+		/// <summary>
+		/// Creates a new background operation and starts it. The background operation runs the given method at given intervals.
+		/// </summary>
+		/// <param name="name">The name of the operation.</param>
+		/// <param name="interval">The target interval between method calls. If the method call takes longer than the interval, the method will be invoked immediately after the previous method call returns.</param>
+		/// <param name="method">The method to invoke at given intervals.</param>
+		/// <returns>A scheduled background operation.</returns>
+		public TaskQueueBackgroundOperation StartRecurringBackgroundOperation
+		(
+			string name,
+			TimeSpan interval,
+			Action<TaskProcessorJob> method
+		)
+		{
+			return this.StartRecurringBackgroundOperation
+			(
+				name,
+				interval,
+				(j, d) => method(j)
 			);
 		}
 
@@ -338,7 +360,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		(
 			string name,
 			TimeSpan interval,
-			Action<TaskProcessorJob> method
+			Action<TaskProcessorJob, TaskQueueDirective> method
 		)
 		{
 			// Create the background operation.
@@ -370,7 +392,26 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			return this.CreateBackgroundOperation
 			(
 				name,
-				(j) => method()
+				(j, d) => method()
+			);
+		}
+
+		/// <summary>
+		/// Creates a new background operation. The background operations runs the given method at given intervals. Must be separately started.
+		/// </summary>
+		/// <param name="name">The name of the operation.</param>
+		/// <param name="method">The method to invoke at given intervals.</param>
+		/// <returns>A new background operation, that is not yet started.</returns>
+		public TaskQueueBackgroundOperation CreateBackgroundOperation
+		(
+			string name, 
+			Action<TaskProcessorJob> method
+		)
+		{
+			return this.CreateBackgroundOperation
+			(
+				name,
+				(j, d) => method(j)
 			);
 		}
 
@@ -383,7 +424,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		public TaskQueueBackgroundOperation CreateBackgroundOperation
 		(
 			string name,
-			Action<TaskProcessorJob> method
+			Action<TaskProcessorJob, TaskQueueDirective> method
 		)
 		{
 			TaskQueueBackgroundOperation backgroundOperation;
