@@ -1,4 +1,8 @@
 ﻿using MFiles.VAF.MultiserverMode;
+using Newtonsoft.Json;
+using System;
+using System.Text;
+using MFiles.VAF.Common;
 
 namespace MFiles.VAF.Extensions.MultiServerMode
 {
@@ -12,29 +16,14 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		{
 		}
 
-		public BackgroundOperationTaskQueueDirective(string backgroundOperationName)
-			: this()
-		{
-			// Sanity.
-			this.BackgroundOperationName = backgroundOperationName;
-		}
-
-		public BackgroundOperationTaskQueueDirective
-		(
-			string backgroundOperationName,
-			byte[] internalDirective
-		)
-			: this(backgroundOperationName)
-		{
-			this.InternalDirective = internalDirective;
-		}
 		public BackgroundOperationTaskQueueDirective
 		(
 			string backgroundOperationName,
 			TaskQueueDirective internalDirective
 		)
-			: this(backgroundOperationName, internalDirective?.ToBytes())
 		{
+			this.BackgroundOperationName = backgroundOperationName;
+			this.InternalDirective = internalDirective;
 		}
 
 		/// <summary>
@@ -46,7 +35,32 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <summary>
 		/// The internal directive information that is passed to this job execution (for serialisation).
 		/// </summary>
-		public byte[] InternalDirective { get; set; }
+		public byte[] InternalDirectiveForSerialization { get; set; }
+
+		/// <summary>
+		/// The type of the internal directive.
+		/// </summary>
+		public string InternalDirectiveTypeForSerialization { get; set; }
+
+		/// <summary>
+		/// The internal directive information that is passed to this job execution.
+		/// </summary>
+		private TaskQueueDirective internalDirective = null;
+
+		/// <summary>
+		/// The internal directive information that is passed to this job execution.
+		/// </summary>
+		[JsonIgnore]
+		public TaskQueueDirective InternalDirective
+		{
+			get => this.internalDirective;
+			set
+			{
+				this.internalDirective = value;
+				this.InternalDirectiveForSerialization = value?.ToBytes();
+				this.InternalDirectiveTypeForSerialization = value?.GetType()?.AssemblyQualifiedName;
+			}
+		}
 
 		/// <summary>
 		/// Returns <see cref="InternalDirective"/> as a parsed/populated instance.
@@ -65,9 +79,13 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		public TDirective GetParsedInternalDirective<TDirective>()
 			where TDirective : TaskQueueDirective
 		{
-			return this.InternalDirective == null
+			return this.InternalDirectiveForSerialization == null
 				? null
-				: TaskQueueDirective.Parse<TDirective>(this.InternalDirective);
+				: JsonConvert.DeserializeObject
+				(
+					this.InternalDirectiveForSerialization.AsString(Encoding.UTF8),
+					Type.GetType(this.InternalDirectiveTypeForSerialization)
+				) as TDirective;
 		}
 
 	}

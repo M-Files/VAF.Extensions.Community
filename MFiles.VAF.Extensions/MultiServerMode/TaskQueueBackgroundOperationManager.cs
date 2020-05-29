@@ -151,7 +151,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			where TDirective : TaskQueueDirective
 		{
 			// Create our actual directive.
-			var wrappedDirective = new BackgroundOperationTaskQueueDirective(backgroundOperationName, directive);
+			var backgroundOperationDirective = new BackgroundOperationTaskQueueDirective(backgroundOperationName, directive);
 
 			// Schedule the next task to execute ASAP.
 			this.TaskProcessor.CreateApplicationTaskSafe
@@ -159,7 +159,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				true,
 				this.QueueId,
 				TaskQueueBackgroundOperation.TaskTypeId,
-				wrappedDirective?.ToBytes(),
+				backgroundOperationDirective?.ToBytes(),
 				runAt.HasValue ? runAt.Value.ToUniversalTime() : DateTime.UtcNow
 			);
 		}
@@ -355,13 +355,41 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="name">The name of the operation.</param>
 		/// <param name="interval">The target interval between method calls. If the method call takes longer than the interval, the method will be invoked immediately after the previous method call returns.</param>
 		/// <param name="method">The method to invoke at given intervals.</param>
+		/// <param name="directive">The directive to pass to the job.</param>
 		/// <returns>A started background operation.</returns>
 		public TaskQueueBackgroundOperation StartRecurringBackgroundOperation
 		(
 			string name,
 			TimeSpan interval,
-			Action<TaskProcessorJob, TaskQueueDirective> method
+			Action<TaskProcessorJob, TaskQueueDirective> method,
+			TaskQueueDirective directive = null
 		)
+		{
+			return this.StartRecurringBackgroundOperation<TaskQueueDirective>
+			(
+				name,
+				interval,
+				method,
+				directive
+			);
+		}
+
+		/// <summary>
+		/// Creates a new background operation and starts it. The background operation runs the given method at given intervals.
+		/// </summary>
+		/// <param name="name">The name of the operation.</param>
+		/// <param name="interval">The target interval between method calls. If the method call takes longer than the interval, the method will be invoked immediately after the previous method call returns.</param>
+		/// <param name="method">The method to invoke at given intervals.</param>
+		/// <param name="directive">The directive to pass to the job.</param>
+		/// <returns>A started background operation.</returns>
+		public TaskQueueBackgroundOperation<TDirective> StartRecurringBackgroundOperation<TDirective>
+		(
+			string name,
+			TimeSpan interval,
+			Action<TaskProcessorJob, TDirective> method,
+			TDirective directive = null
+		)
+		where TDirective : TaskQueueDirective
 		{
 			// Create the background operation.
 			var backgroundOperation = this.CreateBackgroundOperation
@@ -371,7 +399,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			);
 			
 			// Start it running.
-			backgroundOperation.RunAtIntervals(interval);
+			backgroundOperation.RunAtIntervals(interval, directive);
 
 			// Return the background operation.
 			return backgroundOperation;
@@ -427,7 +455,27 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			Action<TaskProcessorJob, TaskQueueDirective> method
 		)
 		{
-			TaskQueueBackgroundOperation backgroundOperation;
+			return this.CreateBackgroundOperation<TaskQueueDirective>
+			(
+				name,
+				method
+			);
+		}
+
+		/// <summary>
+		/// Creates a new background operation. The background operations runs the given method at given intervals. Must be separately started.
+		/// </summary>
+		/// <param name="name">The name of the operation.</param>
+		/// <param name="method">The method to invoke at given intervals.</param>
+		/// <returns>A new background operation, that is not yet started.</returns>
+		public TaskQueueBackgroundOperation<TDirective> CreateBackgroundOperation<TDirective>
+		(
+			string name,
+			Action<TaskProcessorJob, TDirective> method
+		)
+		where TDirective : TaskQueueDirective
+		{
+			TaskQueueBackgroundOperation<TDirective> backgroundOperation;
 
 			lock (_lock)
 			{
@@ -435,7 +483,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 					throw new ArgumentException($"A background operation with the name {name} in queue {this.QueueId} could not be found.", nameof(name));
 
 				// Create the background operation.
-				backgroundOperation = new TaskQueueBackgroundOperation
+				backgroundOperation = new TaskQueueBackgroundOperation<TDirective>
 				(
 					this,
 					name,

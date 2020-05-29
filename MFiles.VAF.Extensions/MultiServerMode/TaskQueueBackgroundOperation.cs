@@ -10,28 +10,75 @@ using MFilesAPI;
 namespace MFiles.VAF.Extensions.MultiServerMode
 
 {
-	//public class TaskQueueBackgroundOperation<TDirective>
-	//	: TaskQueueBackgroundOperation
-	//	where TDirective : TaskQueueDirective
-	//{
+	public class TaskQueueBackgroundOperation<TDirective>
+		: TaskQueueBackgroundOperation
+		where TDirective : TaskQueueDirective
+	{
+		/// <summary>
+		/// The method to run.
+		/// </summary>
+		public new Action<TaskProcessorJob, TDirective> UserMethod { get; private set; }
 
-	//	/// <summary>
-	//	/// Creates a new background operation that runs the method in separate task.
-	//	/// </summary>
-	//	/// <param name="name">The name of the background operation.</param>
-	//	/// <param name="method">The method to invoke. The background operation will be passed to the method.</param>
-	//	/// <param name="backgroundOperationManager">The background operation manager that manages this operation.</param>
-	//	/// <param name="cancellationTokenSource">The cancellation token source.</param>
-	//	public TaskQueueBackgroundOperation
-	//	(
-	//		TaskQueueBackgroundOperationManager backgroundOperationManager,
-	//		string name,
-	//		Action<TaskProcessorJob, TDirective> method,
-	//		CancellationTokenSource cancellationTokenSource = default
-	//	) : base(backgroundOperationManager, name, method, cancellationTokenSource)
-	//	{
-	//	}
-	//}
+		/// <summary>
+		/// Creates a new background operation that runs the method in separate task.
+		/// </summary>
+		/// <param name="name">The name of the background operation.</param>
+		/// <param name="method">The method to invoke. The background operation will be passed to the method.</param>
+		/// <param name="backgroundOperationManager">The background operation manager that manages this operation.</param>
+		/// <param name="cancellationTokenSource">The cancellation token source.</param>
+		public TaskQueueBackgroundOperation
+		(
+			TaskQueueBackgroundOperationManager backgroundOperationManager,
+			string name,
+			Action<TaskProcessorJob, TDirective> method,
+			CancellationTokenSource cancellationTokenSource = default
+		) : 
+			base
+				(
+				backgroundOperationManager, 
+				name,
+				(j, d) => { }, // Ignore the method (we will set it below anyway).
+				cancellationTokenSource
+				)
+		{
+			// Save parameters.
+			this.UserMethod = method ?? throw new ArgumentNullException( nameof(method) );
+		}
+
+		/// <inheritdoc />
+		public override void RunJob(TaskProcessorJob job, TaskQueueDirective directive)
+		{
+			// Execute the callback.
+			this.UserMethod(job, directive as TDirective);
+		}
+
+		/// <summary>
+		/// Runs the operation at once or immediately after the current run is finished.
+		/// </summary>
+		/// <param name="runAt">If specified, schedules an execution at the provided time.  Otherwise schedules a call immediately.</param>
+		/// <param name="directive">The directive ("data") to pass to the execution.</param>
+		/// <remarks>Does not remove any scheduled executions.  Use <see cref="StopRunningAtIntervals"/>.</remarks>
+		public void RunOnce
+		(
+			DateTime? runAt = null,
+			TDirective directive = null
+		)
+		{
+			// Use the base implementation.
+			base.RunOnce(runAt, directive);
+		}
+
+		/// <summary>
+		/// Begins running the operation at given intervals. If a run takes longer than the interval, the next run starts immediately after the previous run.
+		/// </summary>
+		/// <param name="interval">The interval between consecutive runs.</param>
+		/// <param name="directive">The directive ("data") to pass to the execution.</param>
+		public void RunAtIntervals( TimeSpan interval, TDirective directive = null )
+		{
+			// Use the base implementation.
+			base.RunAtIntervals(interval, directive);
+		}
+	}
 
 	public class TaskQueueBackgroundOperation
 	{
@@ -126,23 +173,6 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="directive">The directive ("data") to pass to the execution.</param>
 		/// <remarks>Does not remove any scheduled executions.  Use <see cref="StopRunningAtIntervals"/>.</remarks>
 		public void RunOnce(DateTime? runAt = null, TaskQueueDirective directive = null)
-		{
-			// Schedule the next task to execute ASAP.
-			this.BackgroundOperationManager.RunOnce(this.Name, runAt, directive);
-		}
-
-		/// <summary>
-		/// Runs the operation at once or immediately after the current run is finished.
-		/// </summary>
-		/// <param name="runAt">If specified, schedules an execution at the provided time.  Otherwise schedules a call immediately.</param>
-		/// <param name="directive">The directive ("data") to pass to the execution.</param>
-		/// <remarks>Does not remove any scheduled executions.  Use <see cref="StopRunningAtIntervals"/>.</remarks>
-		public void RunOnce<TDirective>
-		(
-			DateTime? runAt = null,
-			TDirective directive = null
-		)
-			where TDirective : TaskQueueDirective
 		{
 			// Schedule the next task to execute ASAP.
 			this.BackgroundOperationManager.RunOnce(this.Name, runAt, directive);
