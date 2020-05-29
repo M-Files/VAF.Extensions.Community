@@ -12,10 +12,23 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 	internal class BackgroundOperationTaskQueueDirective
 		: TaskQueueDirective
 	{
+		/// <summary>
+		/// Creates an empty background operation task queue directive.
+		/// This constructor is mainly used for JSON deserialisation.
+		/// Instead use <see cref="BackgroundOperationTaskQueueDirective.BackgroundOperationTaskQueueDirective(string, TaskQueueDirective)"/>.
+		/// If this constructor is used in codethen you must explicitly manually set
+		/// <see cref="BackgroundOperationName"/> and, optionally, <see cref="InternalDirective"/>.
+		/// </summary>
 		public BackgroundOperationTaskQueueDirective()
 		{
 		}
 
+		/// <summary>
+		/// Instantiates a background operation task queue directive that
+		/// may include a wrapped internal directive.
+		/// </summary>
+		/// <param name="backgroundOperationName">The name of the background operation on which this task is run.</param>
+		/// <param name="internalDirective">The directive - if any - to pass to the job.</param>
 		public BackgroundOperationTaskQueueDirective
 		(
 			string backgroundOperationName,

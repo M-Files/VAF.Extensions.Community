@@ -37,7 +37,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				(
 				backgroundOperationManager, 
 				name,
-				(j, d) => { }, // Ignore the method (we will set it below anyway).
+				(j, d) => { }, // Ignore the method (we will set it below).
 				cancellationTokenSource
 				)
 		{
