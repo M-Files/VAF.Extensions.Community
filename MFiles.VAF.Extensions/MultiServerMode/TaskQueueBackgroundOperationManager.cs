@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using MFiles.VAF.Common.ApplicationTaskQueue;
+using MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods;
 
 namespace MFiles.VAF.Extensions.MultiServerMode
 {
@@ -150,7 +151,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			where TDirective : TaskQueueDirective
 		{
 			// Create our actual directive.
-			var wrappedDirective = new WrappedDirective(backgroundOperationName, directive);
+			var wrappedDirective = new BackgroundOperationTaskQueueDirective(backgroundOperationName, directive);
 
 			// Schedule the next task to execute ASAP.
 			this.TaskProcessor.CreateApplicationTaskSafe
@@ -232,9 +233,9 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				return;
 			}
 
-			// Deserialize the (wrapped) directive.
-			var wrappedDirective = TaskQueueDirective.Parse<WrappedDirective>( job.Data?.Value );
-			if (null == wrappedDirective)
+			// Deserialize the background directive.
+			var backgroundOperationDirective = job.GetTaskQueueDirective<BackgroundOperationTaskQueueDirective>();
+			if (null == backgroundOperationDirective)
 			{
 				// This is an issue.  We have no way to decide what background operation should run it.  Die.
 				SysUtils.ReportErrorToEventLog
@@ -245,9 +246,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			}
 
 			// If we have a directive then extract it.
-			TaskQueueDirective dir = null == wrappedDirective.InternalDirective
-				? null
-				: TaskQueueDirective.Parse<TaskQueueDirective>(wrappedDirective.InternalDirective);
+			var dir = backgroundOperationDirective.GetParsedInternalDirective();
 
 			// If it is a broadcast directive, then was it generated on the same server?
 			// If so then ignore.
@@ -261,12 +260,12 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			TaskQueueBackgroundOperation bo = null;
 			lock (_lock)
 			{
-				if (false == this.BackgroundOperations.TryGetValue(wrappedDirective.BackgroundOperationName, out bo))
+				if (false == this.BackgroundOperations.TryGetValue(backgroundOperationDirective.BackgroundOperationName, out bo))
 				{
 					// We have no registered background operation to handle the callback.
 					SysUtils.ReportErrorToEventLog
 					(
-						$"No background operation found with name {wrappedDirective.BackgroundOperationName}(queue: {job.AppTaskQueueId}, task type: {job.AppTaskId})."
+						$"No background operation found with name {backgroundOperationDirective.BackgroundOperationName}(queue: {job.AppTaskQueueId}, task type: {job.AppTaskId})."
 					);
 					return;
 				} 
@@ -392,7 +391,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			lock (_lock)
 			{
 				if (this.BackgroundOperations.ContainsKey(name))
-					throw new ArgumentException("", nameof(name));
+					throw new ArgumentException($"A background operation with the name {name} in queue {this.QueueId} could not be found.", nameof(name));
 
 				// Create the background operation.
 				backgroundOperation = new TaskQueueBackgroundOperation

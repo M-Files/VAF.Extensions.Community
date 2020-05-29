@@ -123,17 +123,19 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// Runs the operation at once.
 		/// </summary>
 		/// <param name="runAt">If specified, schedules an execution at the provided time.  Otherwise schedules a call immediately.</param>
+		/// <param name="directive">The directive ("data") to pass to the execution.</param>
 		/// <remarks>Does not remove any scheduled executions.  Use <see cref="StopRunningAtIntervals"/>.</remarks>
-		public void RunOnce(DateTime? runAt = null)
+		public void RunOnce(DateTime? runAt = null, TaskQueueDirective directive = null)
 		{
 			// Schedule the next task to execute ASAP.
-			this.BackgroundOperationManager.RunOnce(this.Name, runAt);
+			this.BackgroundOperationManager.RunOnce(this.Name, runAt, directive);
 		}
 
 		/// <summary>
 		/// Runs the operation at once or immediately after the current run is finished.
 		/// </summary>
 		/// <param name="runAt">If specified, schedules an execution at the provided time.  Otherwise schedules a call immediately.</param>
+		/// <param name="directive">The directive ("data") to pass to the execution.</param>
 		/// <remarks>Does not remove any scheduled executions.  Use <see cref="StopRunningAtIntervals"/>.</remarks>
 		public void RunOnce<TDirective>
 		(
@@ -150,7 +152,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// Begins running the operation at given intervals. If a run takes longer than the interval, the next run starts immediately after the previous run.
 		/// </summary>
 		/// <param name="interval">The interval between consecutive runs.</param>
-		public void RunAtIntervals( TimeSpan interval )
+		/// <param name="directive">The directive ("data") to pass to the execution.</param>
+		public void RunAtIntervals( TimeSpan interval, TaskQueueDirective directive = null )
 		{
 			// Check for validity.
 			if( interval < TimeSpan.Zero )
@@ -168,7 +171,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			this.Recurring = true;
 			
 			// Run (which will set up the next iteration).
-			this.RunOnce();
+			this.RunOnce(directive: directive);
 		}
 
 		/// <summary>
@@ -189,7 +192,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				foreach (var task in tasksToCancel.Cast<ApplicationTaskInfo>())
 				{
 					// If this task is not for this background operation then ignore it.
-					var directive = TaskQueueDirective.Parse<WrappedDirective>(task.ToApplicationTask());
+					var directive = TaskQueueDirective.Parse<BackgroundOperationTaskQueueDirective>(task.ToApplicationTask());
 					if(null == directive)
 						continue;
 					if(directive.BackgroundOperationName != this.Name)
