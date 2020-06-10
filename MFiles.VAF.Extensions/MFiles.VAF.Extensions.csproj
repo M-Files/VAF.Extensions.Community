@@ -32,4 +32,8 @@
       <Version>0.2.3.3-alpha</Version>
     </PackageReference>
   </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="Pack" Condition=" '$(Configuration)' == 'Release'" >
+    <RemoveDir Directories="..\current-release" />
+    <Copy SourceFiles="$(OutputPath)$(PackageId).$(PackageVersion).nupkg" DestinationFolder="..\current-release" />
+</Target>
 </Project>
