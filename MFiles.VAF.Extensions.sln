@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MFiles.VAF.Extensions", "MFiles.VAF.Extensions\MFiles.VAF.Extensions.csproj", "{AFF051C7-E8BB-49C4-AAF3-A927487FA459}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MFiles.VAF.Extensions.Tests", "MFiles.VAF.Extensions.Tests\MFiles.VAF.Extensions.Tests.csproj", "{4D9460B8-5377-4549-A615-0A3FCAE81C2F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MFiles.VAF.Extensions.Tests", "MFiles.VAF.Extensions.Tests\MFiles.VAF.Extensions.Tests.csproj", "{4D9460B8-5377-4549-A615-0A3FCAE81C2F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{4ED89495-B548-4A5A-9CEB-FE9AF010976C}"
 	ProjectSection(SolutionItems) = preProject
@@ -13,6 +13,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		CONTRIBUTING.md = CONTRIBUTING.md
 		LICENSE.md = LICENSE.md
 		Readme.md = Readme.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{442416AF-8A79-4D4D-B126-077BA84F5068}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\dotnet-core.yml = .github\workflows\dotnet-core.yml
 	EndProjectSection
 EndProject
 Global
