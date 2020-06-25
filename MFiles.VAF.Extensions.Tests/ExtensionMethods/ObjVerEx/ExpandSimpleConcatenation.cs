@@ -180,8 +180,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 					var data = new PropertyValues();
 					foreach(var tuple in propertyValues ?? new Tuple<int, MFDataType, object>[0])
 					{
-						var pv = new PropertyValue();
-						pv.PropertyDef = tuple.Item1;
+						var pv = new PropertyValue { PropertyDef = tuple.Item1 };
 						pv.Value.SetValue(tuple.Item2, tuple.Item3);
 						data.Add(-1, pv);
 					}

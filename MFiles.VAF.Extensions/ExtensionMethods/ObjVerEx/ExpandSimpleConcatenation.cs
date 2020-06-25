@@ -9,7 +9,7 @@ namespace MFiles.VAF.Extensions.ExtensionMethods
 		/// <summary>
 		/// The regular expression used to extract property matches ("%PROPERTY_0%").
 		/// </summary>
-		private static Regex extractPlaceholders = new Regex(
+		private static readonly Regex extractPlaceholders = new Regex(
 			"(?<replacementText>(?<prefix>\\%)(?<reference>(?<type>PROPERTY_)(\\{?(?<aliasorid>[^%]+?)\\}?)?\\.?)+(?<suffix>\\%))",
 			RegexOptions.Multiline
 			| RegexOptions.ExplicitCapture

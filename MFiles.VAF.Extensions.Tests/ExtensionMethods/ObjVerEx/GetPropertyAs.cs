@@ -174,7 +174,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			var output = this.CallGetPropertyMethod(objVerEx, 12345);
 
 			// Ensure we got a default output.
-			Assert.AreEqual(default(T), output);
+			Assert.AreEqual( default, output );
 		}
 
 		[TestMethod]
@@ -185,8 +185,10 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 
 			// Add the property value as null.
 			{
-				var propertyValue = new PropertyValue();
-				propertyValue.PropertyDef = 12345;
+				var propertyValue = new PropertyValue
+				{
+					PropertyDef = 12345
+				};
 				propertyValue.TypedValue.SetValueToNULL(this.GetValidDataTypes()[0]);
 				propertyValues.Add(-1, propertyValue);
 			}
@@ -203,7 +205,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			var output = this.CallGetPropertyMethod(objVerEx, 12345);
 
 			// Ensure we got a default output.
-			Assert.AreEqual(default(T), output);
+			Assert.AreEqual(default, output);
 		}
 
 		[TestMethod]
@@ -214,8 +216,10 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 
 			// Add the property value as uninitialised.
 			{
-				var propertyValue = new PropertyValue();
-				propertyValue.PropertyDef = 12345;
+				var propertyValue = new PropertyValue
+				{
+					PropertyDef = 12345
+				};
 				propertyValue.TypedValue.SetValueToNULL(MFDataType.MFDatatypeUninitialized);
 				propertyValues.Add(-1, propertyValue);
 			}
@@ -232,7 +236,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			var output = this.CallGetPropertyMethod(objVerEx, 12345);
 
 			// Ensure we got a default output.
-			Assert.AreEqual(default(T), output);
+			Assert.AreEqual(default, output);
 		}
 
 		[TestMethod]
@@ -261,8 +265,10 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 				// Add the property value.
 				try
 				{
-					var propertyValue = new PropertyValue();
-					propertyValue.PropertyDef = 12345;
+					var propertyValue = new PropertyValue
+					{
+						PropertyDef = 12345
+					};
 					propertyValue.TypedValue.SetValue(dataType, this.GetSampleValueForDataType(dataType));
 					propertyValues.Add(-1, propertyValue);
 				}
@@ -321,8 +327,10 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 				// Add the property value.
 				try
 				{
-					var propertyValue = new PropertyValue();
-					propertyValue.PropertyDef = 12345;
+					var propertyValue = new PropertyValue
+					{
+						PropertyDef = 12345
+					};
 					propertyValue.TypedValue.SetValue(dataType, this.GetSampleValueForDataType(dataType));
 					propertyValues.Add(-1, propertyValue);
 				}
@@ -392,17 +400,25 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 					return "hello\r\nworld";
 				case MFDataType.MFDatatypeMultiSelectLookup:
 				{
-					var lookups = new Lookups();
-					lookups.Add(-1, new Lookup()
-						{
-							ObjectType = (int) MFBuiltInObjectType.MFBuiltInObjectTypeDocument,
-							Item = 123
-						});
-					lookups.Add(-1, new Lookup()
+					var lookups = new Lookups
 					{
-						ObjectType = (int) MFBuiltInObjectType.MFBuiltInObjectTypeDocument,
-						Item = 456
-					});
+						{
+							-1,
+							new Lookup()
+							{
+								ObjectType = ( int )MFBuiltInObjectType.MFBuiltInObjectTypeDocument,
+								Item = 123
+							}
+						},
+						{
+							-1,
+							new Lookup()
+							{
+								ObjectType = ( int )MFBuiltInObjectType.MFBuiltInObjectTypeDocument,
+								Item = 456
+							}
+						}
+					};
 					return lookups;
 				}
 				case MFDataType.MFDatatypeText:
