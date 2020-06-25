@@ -26,7 +26,7 @@ namespace MFiles.VAF.Extensions.ExtensionMethods
 		/// <param name="objVerEx">The object containing information to use for the expansion.</param>
 		/// <param name="concatenationString">The string containing the placeholders.</param>
 		/// <returns>The expanded string.</returns>
-		public static string ExpandPropertyConcatenation
+		public static string ExpandSimpleConcatenation
 		(
 			this ObjVerEx objVerEx,
 			string concatenationString
