@@ -100,6 +100,28 @@ double? value = env.ObjVerEx.GetPropertyAsDouble(1234);
 
 ## ExpandSimpleConcatenation
 
+Performs replacement of content in a similar manner to the built-in [simple concatenation of properties](https://www.m-files.com/user-guide/latest/eng/Automatic_values.html#automatic_values__simple_concatenation_of_properties).
+
+### Internal ID
+
+```csharp
+var output = objVerEx.ExpandSimpleConcatenation("The internal ID of object %PROPERTY_0% is %INTERNALID%")
+```
+
+### External ID
+
+```csharp
+var output = objVerEx.ExpandSimpleConcatenation("The external ID of object %PROPERTY_0% is %EXTERNALID%.")
+```
+
+### Combined internal and external ID
+
 ```csharp
 var output = objVerEx.ExpandSimpleConcatenation("The internal ID of object %PROPERTY_0% is %INTERNALID%, and the external ID is %EXTERNALID%.")
+```
+
+### Indirect properties
+
+```csharp
+var output = objVerEx.ExpandSimpleConcatenation("The customer's country of object %PROPERTY_0% is %PROPERTY_{MF.PD.Customer}.PROPERTY_{MF.PD.Country}%.")
 ```
