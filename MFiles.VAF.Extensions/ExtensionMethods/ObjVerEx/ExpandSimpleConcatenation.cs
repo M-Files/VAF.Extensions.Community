@@ -1,16 +1,20 @@
 ﻿using MFiles.VAF.Common;
+using MFilesAPI;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace MFiles.VAF.Extensions.ExtensionMethods
+namespace MFiles.VAF.Extensions
 {
 	public static partial class ObjVerExExtensionMethods
 	{
 		/// <summary>
 		/// The regular expression used to extract property matches ("%PROPERTY_0%").
 		/// </summary>
-		private static readonly Regex extractPlaceholders = new Regex(
-			"(?<replacementText>(?<prefix>\\%)(?<reference>(?<type>PROPERTY_)(\\{?(?<aliasorid>[^%]+?)\\}?)?\\.?)+(?<suffix>\\%))",
+		public static readonly Regex ExtractPlaceholders = new Regex(
+			"(?<replacementText>(?<prefix>\\%)(?<type>INTERNALID)?(?<type>EXTERNALID)?(?<reference>(?<type>PROPERTY)_(\\{?(?<aliasorid>[^%]+?)\\}?)?\\.?)*(?<suffix>\\%))",
 			RegexOptions.Multiline
 			| RegexOptions.ExplicitCapture
 			| RegexOptions.CultureInvariant
@@ -38,57 +42,101 @@ namespace MFiles.VAF.Extensions.ExtensionMethods
 			if (string.IsNullOrWhiteSpace(concatenationString))
 				return string.Empty;
 
-			// Replace simple strings.
-			concatenationString = concatenationString.Replace("%INTERNALID%", objVerEx.ID.ToString());
-			concatenationString = concatenationString.Replace("%EXTERNALID%", objVerEx.Info.DisplayID);
-
-			// Try and get all property placeholders.
-			return extractPlaceholders.Replace(concatenationString, (Match match) =>
+			// Try and get all placeholders.
+			return ExtractPlaceholders.Replace(concatenationString, (Match match) =>
 			{
 				// Sanity.
 				if(!match.Success)
 					return match.Value;
 
-				// Extract the vault structural references.
-				var aliasOrIds = match.Groups["aliasorid"];
-
-				// No type, die.
-				if(!aliasOrIds.Success)
-					return match.Value;
-
-				// Iterate over the references to build up the string.
-				var host = objVerEx;
-				for(var i =0; i<aliasOrIds.Captures.Count; i++)
+				// What is the type?
+				switch(match.Groups["type"]?.Value?.ToLower())
 				{
-					// Get the vault structural reference string.
-					var propertyReference = aliasOrIds.Captures[i].Value;
-
-					// If it is not an integer then treat it as an alias.
-					if (!Int32.TryParse(propertyReference, out int propertyId))
+					case "internalid":
+						return objVerEx.ID.ToString();
+					case "externalid":
+						return objVerEx.Info?.DisplayID;
+					case "property":
 					{
-						// It's an alias - resolve it to an id.
-						propertyId = objVerEx
-							.Vault
-							.PropertyDefOperations
-							.GetPropertyDefIDByAlias(propertyReference);
+						// Extract the vault structural references.
+						var aliasOrIds = match.Groups["aliasorid"];
+
+						// No type, die.
+						if(!aliasOrIds.Success)
+							return match.Value;
+
+						// Get the property ID references.
+						var propertyIds = aliasOrIds.ToPropertyIds(objVerEx.Vault);
+
+						// Iterate over the properties to build up the string.
+						var host = objVerEx;
+						for(var i =0; i<propertyIds.Count; i++)
+						{
+							// Get the property ID.
+							var propertyId = propertyIds[i];
+
+							// Not found or invalid value?
+							if (propertyId < 0)
+								return $"(Property as part of '{aliasOrIds.Value}' not found)";
+
+							// If we are on the last one then get the property value.
+							if (i == propertyIds.Count - 1)
+								return host.GetPropertyText(propertyId);
+
+							// Otherwise, alter the host.
+							host = host.GetDirectReference(propertyId);
+						}
+
+						// No replacement.
+						return match.Value;
+
 					}
-
-					// Not found or invalid value?
-					if (propertyId < 0)
-						return $"(Property {propertyReference} not found)";
-
-					// If we are on the last one then get the property value.
-					if (i == aliasOrIds.Captures.Count - 1)
-						return host.GetPropertyText(propertyId);
-
-					// Otherwise, alter the host.
-					host = host.GetDirectReference(propertyId);
+					default:
+						return match.Value;
 				}
-
-				// No replacement.
-				return match.Value;
 			});
 
+		}
+
+		/// <summary>
+		/// Converts property definition aliases or IDs found in a <paramref name="group"/>'s captures into
+		/// property definition IDs from the provided vault.
+		/// </summary>
+		/// <param name="group">The group to extract captures from.</param>
+		/// <param name="vault">The vault to look aliases up in.</param>
+		/// <returns>A set of property ids.</returns>
+		public static IList<int> ToPropertyIds(this Group group, Vault vault)
+		{
+			// Sanity.
+			if (null == group)
+				throw new ArgumentNullException(nameof(group));
+			if (null == vault)
+				throw new ArgumentNullException(nameof(vault));
+
+			// Output for the properties.
+			var output = new List<int>(group.Captures.Count);
+
+			// Iterate over the references to build up the string.
+			for(var i =0; i<group.Captures.Count; i++)
+			{
+				// Get the vault structural reference string.
+				var propertyReference = group.Captures[i].Value;
+
+				// If it is not an integer then treat it as an alias.
+				if (!Int32.TryParse(propertyReference, out int propertyId))
+				{
+					// It's an alias - resolve it to an id.
+					propertyId = vault
+						.PropertyDefOperations
+						.GetPropertyDefIDByAlias(propertyReference);
+				}
+
+				// Add the resolved property ID to the collection.
+				output.Add(propertyId < 0 ? -1 : propertyId);
+			}
+
+			// Return the collection.
+			return output;
 		}
 	}
 }

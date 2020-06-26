@@ -1,5 +1,4 @@
-﻿using MFiles.VAF.Extensions.ExtensionMethods;
-using MFilesAPI;
+﻿using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
@@ -98,35 +97,152 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			Assert.AreEqual("document is called: hello world", objVerEx.ExpandSimpleConcatenation("document is called: %PROPERTY_{MF.PD.Title}%"));
 		}
 
-		//[TestMethod]
-		//public void IndirectProperties()
-		//{
-		//	var vaultMock = this.GetVaultMock
-		//	(
-		//		new Tuple<string, int>("MF.PD.Company", 123),
-		//		new Tuple<string, int>("Name", 0)
-		//	);
-		//	var related2 = this.GetObjectVersionAndPropertiesMock
-		//	(
-		//		vaultMock,
-		//		propertyValues: new Tuple<int, MFDataType, object>(0, MFDataType.MFDatatypeText, "hello world")
-		//	);
-		//	var related1 = this.GetObjectVersionAndPropertiesMock
-		//	(
-		//		vaultMock,
-		//		propertyValues: new Tuple<int, MFDataType, object>(0, MFDataType.MFDatatypeText, "hello world")
-		//	);
-		//	var source = this.GetObjectVersionAndPropertiesMock
-		//	(
-		//		vaultMock,
-		//		propertyValues: new []
-		//		{
-		//			new Tuple<int, MFDataType, object>(123, MFDataType.MFDatatypeLookup, "hello world")
-		//		}
-		//	);
-		//	var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
-		//	Assert.AreEqual("document is called: hello world", objVerEx.ExpandPropertyConcatenation("document is called: %PROPERTY_{MF.PD.Company}.PROPERTY_456.PROPERTY_{Name}%"));
-		//}
+		[TestMethod]
+		public void InternalIDPlaceholderIsExtracted()
+		{
+			var input = "document ID: %INTERNALID%";
+			var matches = ObjVerExExtensionMethods
+				.ExtractPlaceholders
+				.Matches(input);
+			Assert.AreEqual(1, matches.Count);
+			var match = matches[0];
+			Assert.IsTrue(match.Success);
+			Assert.AreEqual("INTERNALID", match.Groups["type"]?.Value);
+		}
+
+		[TestMethod]
+		public void ExternalIDPlaceholderIsExtracted()
+		{
+			var input = "document external ID: %EXTERNALID%";
+			var matches = ObjVerExExtensionMethods
+				.ExtractPlaceholders
+				.Matches(input);
+			Assert.AreEqual(1, matches.Count);
+			var match = matches[0];
+			Assert.IsTrue(match.Success);
+			Assert.AreEqual("EXTERNALID", match.Groups["type"]?.Value);
+		}
+
+		[TestMethod]
+		public void IntegerPropertyReferencePlaceholderIsExtracted()
+		{
+			var vaultMock = this.GetVaultMock();
+			var input = "document name: %PROPERTY_0%";
+			var matches = ObjVerExExtensionMethods
+				.ExtractPlaceholders
+				.Matches(input);
+			Assert.AreEqual(1, matches.Count);
+			var match = matches[0];
+			Assert.IsTrue(match.Success);
+			Assert.AreEqual("PROPERTY", match.Groups["type"]?.Value);
+			var propertyIds = match.Groups["aliasorid"].ToPropertyIds(vaultMock.Object);
+			Assert.AreEqual(1, propertyIds.Count); // Only got one property.
+			Assert.AreEqual(0, propertyIds[0]); // Property ID was 0.
+		}
+
+		[TestMethod]
+		public void AliasPropertyReferencePlaceholderIsExtracted()
+		{
+			var vaultMock = this.GetVaultMock
+			(
+				new Tuple<string, int>("MF.PD.Title", 1234)
+			);
+			var input = "document name: %PROPERTY_{MF.PD.Title}%";
+			var matches = ObjVerExExtensionMethods
+				.ExtractPlaceholders
+				.Matches(input);
+			Assert.AreEqual(1, matches.Count);
+			var match = matches[0];
+			Assert.IsTrue(match.Success);
+			Assert.AreEqual("PROPERTY", match.Groups["type"]?.Value);
+			var propertyIds = match.Groups["aliasorid"].ToPropertyIds(vaultMock.Object);
+			Assert.AreEqual(1, propertyIds.Count); // Only got one property.
+			Assert.AreEqual(1234, propertyIds[0]); // Property ID was 1234.
+		}
+
+		[TestMethod]
+		public void IndirectPropertyReferencePlaceholderIsExtracted_AllIntegers()
+		{
+			var vaultMock = this.GetVaultMock();
+			var input = "document name: %PROPERTY_123.PROPERTY_456.PROPERTY_789%";
+			var matches = ObjVerExExtensionMethods
+				.ExtractPlaceholders
+				.Matches(input);
+
+			// One match.
+			Assert.AreEqual(1, matches.Count);
+			var match = matches[0];
+			Assert.IsTrue(match.Success);
+
+			// Still a property
+			Assert.AreEqual("PROPERTY", match.Groups["type"]?.Value);
+
+			// Get hte property IDs.
+			var propertyIds = match.Groups["aliasorid"].ToPropertyIds(vaultMock.Object);
+			Assert.AreEqual(3, propertyIds.Count);
+			Assert.AreEqual(123, propertyIds[0]); // First is 123
+			Assert.AreEqual(456, propertyIds[1]); // Then 456
+			Assert.AreEqual(789, propertyIds[2]); // Finally 789
+		}
+
+		[TestMethod]
+		public void IndirectPropertyReferencePlaceholderIsExtracted_AllAliases()
+		{
+			var vaultMock = this.GetVaultMock
+			(
+				new Tuple<string, int>("MF.PD.Contact", 987),
+				new Tuple<string, int>("MF.PD.Customer", 654),
+				new Tuple<string, int>("MF.PD.Country", 321)
+			);
+			var input = "document name: %PROPERTY_{MF.PD.Contact}.PROPERTY_{MF.PD.Customer}.PROPERTY_{MF.PD.Country}%";
+			var matches = ObjVerExExtensionMethods
+				.ExtractPlaceholders
+				.Matches(input);
+
+			// One match.
+			Assert.AreEqual(1, matches.Count);
+			var match = matches[0];
+			Assert.IsTrue(match.Success);
+
+			// Still a property
+			Assert.AreEqual("PROPERTY", match.Groups["type"]?.Value);
+
+			// Get hte property IDs.
+			var propertyIds = match.Groups["aliasorid"].ToPropertyIds(vaultMock.Object);
+			Assert.AreEqual(3, propertyIds.Count);
+			Assert.AreEqual(987, propertyIds[0]); // First is 987
+			Assert.AreEqual(654, propertyIds[1]); // Then 654
+			Assert.AreEqual(321, propertyIds[2]); // Finally 321
+		}
+
+		[TestMethod]
+		public void IndirectPropertyReferencePlaceholderIsExtracted_Mixture()
+		{
+			var vaultMock = this.GetVaultMock
+			(
+				new Tuple<string, int>("MF.PD.Contact", 987),
+				new Tuple<string, int>("MF.PD.Country", 321)
+			);
+			var input = "document name: %PROPERTY_{MF.PD.Contact}.PROPERTY_123.PROPERTY_{MF.PD.Country}%";
+			var matches = ObjVerExExtensionMethods
+				.ExtractPlaceholders
+				.Matches(input);
+
+			// One match.
+			Assert.AreEqual(1, matches.Count);
+			var match = matches[0];
+			Assert.IsTrue(match.Success);
+
+			// Still a property
+			Assert.AreEqual("PROPERTY", match.Groups["type"]?.Value);
+
+			// Get hte property IDs.
+			var propertyIds = match.Groups["aliasorid"].ToPropertyIds(vaultMock.Object);
+			Assert.AreEqual(3, propertyIds.Count);
+			Assert.AreEqual(987, propertyIds[0]); // First is 987
+			Assert.AreEqual(123, propertyIds[1]); // Then 123
+			Assert.AreEqual(321, propertyIds[2]); // Finally 321
+		}
 
 		protected virtual Mock<Vault> GetVaultMock(params Tuple<string, int>[] propertyDefinitions)
 		{
