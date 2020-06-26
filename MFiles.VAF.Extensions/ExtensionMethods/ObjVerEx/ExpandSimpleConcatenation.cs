@@ -63,19 +63,19 @@ namespace MFiles.VAF.Extensions.ExtensionMethods
 					// Get the vault structural reference string.
 					var propertyReference = aliasOrIds.Captures[i].Value;
 
-					// If it's an integer then it's a property id.
-					if (Int32.TryParse(propertyReference, out int propertyId))
-						return objVerEx.GetPropertyText(propertyId);
+					// If it is not an integer then treat it as an alias.
+					if (!Int32.TryParse(propertyReference, out int propertyId))
+					{
+						// It's an alias - resolve it to an id.
+						propertyId = objVerEx
+							.Vault
+							.PropertyDefOperations
+							.GetPropertyDefIDByAlias(propertyReference);
+					}
 
-					// It's an alias - resolve it to an id.
-					propertyId = objVerEx
-						.Vault
-						.PropertyDefOperations
-						.GetPropertyDefIDByAlias(propertyReference);
-
-					// Not found == empty string.
-					if (-1 == propertyId)
-						return string.Empty;
+					// Not found or invalid value?
+					if (propertyId < 0)
+						return $"(Property {propertyReference} not found)";
 
 					// If we are on the last one then get the property value.
 					if (i == aliasOrIds.Captures.Count - 1)
