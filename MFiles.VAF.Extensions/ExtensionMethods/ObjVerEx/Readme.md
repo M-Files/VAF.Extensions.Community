@@ -97,3 +97,9 @@ Returns the value of a property as an `double?` instance.  Returns null if the p
 ```csharp
 double? value = env.ObjVerEx.GetPropertyAsDouble(1234);
 ```
+
+## ExpandSimpleConcatenation
+
+```csharp
+var output = objVerEx.ExpandSimpleConcatenation("The internal ID of object %PROPERTY_0% is %INTERNALID%, and the external ID is %EXTERNALID%.")
+```
