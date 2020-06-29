@@ -1,4 +1,5 @@
-﻿using MFilesAPI;
+﻿using MFiles.VAF.Configuration;
+using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
@@ -161,7 +162,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 		}
 
 		[TestMethod]
-		public void IndirectPropertyReferencePlaceholderIsExtracted_AllIntegers()
+		public void IndirectPropertyReferencePlaceholderIsExtractedIDs()
 		{
 			var vaultMock = this.GetVaultMock();
 			var input = "document name: %PROPERTY_123.PROPERTY_456.PROPERTY_789%";
@@ -186,7 +187,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 		}
 
 		[TestMethod]
-		public void IndirectPropertyReferencePlaceholderIsExtracted_AllAliases()
+		public void IndirectPropertyReferencePlaceholderIsExtractedAliases()
 		{
 			var vaultMock = this.GetVaultMock
 			(
@@ -216,7 +217,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 		}
 
 		[TestMethod]
-		public void IndirectPropertyReferencePlaceholderIsExtracted_Mixture()
+		public void IndirectPropertyReferencePlaceholderIsExtractedMixture()
 		{
 			var vaultMock = this.GetVaultMock
 			(
@@ -242,6 +243,171 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			Assert.AreEqual(987, propertyIds[0]); // First is 987
 			Assert.AreEqual(123, propertyIds[1]); // Then 123
 			Assert.AreEqual(321, propertyIds[2]); // Finally 321
+		}
+		
+		[TestMethod]
+		public void IndirectPropertyReferencePlaceholderIDs()
+		{
+			// Create our mock objects.
+			var vaultMock = this.GetVaultMock();
+			var objectTwo = new Common.ObjVerEx
+			(
+				vaultMock.Object,
+				this.GetObjectVersionAndPropertiesMock(vaultMock, 0, 456).Object
+			);
+			var objectOne = new Common.ObjVerEx
+			(
+				vaultMock.Object,
+				this.GetObjectVersionAndPropertiesMock(vaultMock, 0, 123).Object
+			);
+			var root = new Common.ObjVerEx
+			(
+				vaultMock.Object,
+				this.GetObjectVersionAndPropertiesMock(vaultMock, 0, 1).Object
+			);
+
+			// Create our methods for passing data around.
+			Func<Common.ObjVerEx, int, string> getPropertyText = (Common.ObjVerEx o, int id) =>
+			{
+				switch( id )
+				{
+					case 789:
+						return "hello world";
+					default:
+						Assert.Fail("Unexpected property retrieval");
+						throw new InvalidOperationException();
+				}
+			};
+			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
+			{
+				switch( id )
+				{
+					case 123:
+						return objectOne;
+					case 456:
+						return objectTwo;
+					default:
+						Assert.Fail("Unexpected property retrieval");
+						throw new InvalidOperationException();
+				}
+			};
+
+			// Output is expected.
+			var input = "resolves to: %PROPERTY_123.PROPERTY_456.PROPERTY_789%";
+			Assert.AreEqual("resolves to: hello world", root.ExpandSimpleConcatenation(input, getPropertyText, getDirectReference));
+		}
+		
+		[TestMethod]
+		public void IndirectPropertyReferencePlaceholderAliases()
+		{
+			// Create our mock objects.
+			var vaultMock = this.GetVaultMock
+			(
+				new Tuple<string, int>("first", 123),
+				new Tuple<string, int>("second", 456),
+				new Tuple<string, int>("last", 789)
+			);
+			var objectTwo = new Common.ObjVerEx
+			(
+				vaultMock.Object,
+				this.GetObjectVersionAndPropertiesMock(vaultMock, 0, 456).Object
+			);
+			var objectOne = new Common.ObjVerEx
+			(
+				vaultMock.Object,
+				this.GetObjectVersionAndPropertiesMock(vaultMock, 0, 123).Object
+			);
+			var root = new Common.ObjVerEx
+			(
+				vaultMock.Object,
+				this.GetObjectVersionAndPropertiesMock(vaultMock, 0, 1).Object
+			);
+
+			// Create our methods for passing data around.
+			Func<Common.ObjVerEx, int, string> getPropertyText = (Common.ObjVerEx o, int id) =>
+			{
+				switch( id )
+				{
+					case 789:
+						return "hello world";
+					default:
+						Assert.Fail("Unexpected property retrieval");
+						throw new InvalidOperationException();
+				}
+			};
+			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
+			{
+				switch( id )
+				{
+					case 123:
+						return objectOne;
+					case 456:
+						return objectTwo;
+					default:
+						Assert.Fail("Unexpected property retrieval");
+						throw new InvalidOperationException();
+				}
+			};
+
+			// Output is expected.
+			var input = "resolves to: %PROPERTY_{first}.PROPERTY_{second}.PROPERTY_{last}%";
+			Assert.AreEqual("resolves to: hello world", root.ExpandSimpleConcatenation(input, getPropertyText, getDirectReference));
+		}
+		
+		[TestMethod]
+		public void IndirectPropertyReferencePlaceholderMixture()
+		{
+			// Create our mock objects.
+			var vaultMock = this.GetVaultMock
+			(
+				new Tuple<string, int>("first", 123),
+				new Tuple<string, int>("last", 789)
+			);
+			var objectTwo = new Common.ObjVerEx
+			(
+				vaultMock.Object,
+				this.GetObjectVersionAndPropertiesMock(vaultMock, 0, 456).Object
+			);
+			var objectOne = new Common.ObjVerEx
+			(
+				vaultMock.Object,
+				this.GetObjectVersionAndPropertiesMock(vaultMock, 0, 123).Object
+			);
+			var root = new Common.ObjVerEx
+			(
+				vaultMock.Object,
+				this.GetObjectVersionAndPropertiesMock(vaultMock, 0, 1).Object
+			);
+
+			// Create our methods for passing data around.
+			Func<Common.ObjVerEx, int, string> getPropertyText = (Common.ObjVerEx o, int id) =>
+			{
+				switch( id )
+				{
+					case 789:
+						return "hello world";
+					default:
+						Assert.Fail("Unexpected property retrieval");
+						throw new InvalidOperationException();
+				}
+			};
+			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
+			{
+				switch( id )
+				{
+					case 123:
+						return objectOne;
+					case 456:
+						return objectTwo;
+					default:
+						Assert.Fail("Unexpected property retrieval");
+						throw new InvalidOperationException();
+				}
+			};
+
+			// Output is expected.
+			var input = "resolves to: %PROPERTY_{first}.PROPERTY_456.PROPERTY_{last}%";
+			Assert.AreEqual("resolves to: hello world", root.ExpandSimpleConcatenation(input, getPropertyText, getDirectReference));
 		}
 
 		protected virtual Mock<Vault> GetVaultMock(params Tuple<string, int>[] propertyDefinitions)

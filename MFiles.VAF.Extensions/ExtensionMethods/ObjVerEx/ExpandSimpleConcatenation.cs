@@ -42,6 +42,43 @@ namespace MFiles.VAF.Extensions
 			if (string.IsNullOrWhiteSpace(concatenationString))
 				return string.Empty;
 
+			// Use the internal implementation.
+			return objVerEx.ExpandSimpleConcatenation
+			(
+				concatenationString,
+				(o, id) => o.GetPropertyText(id),
+				(o, id) => o.GetDirectReference(id)
+			);
+
+		}
+
+		/// <summary>
+		/// Expands a simple string using similar logic to the "concatenated properties"
+		/// functionality in M-Files Admin.
+		/// More lightweight than <see cref="ObjVerEx.ExpandPlaceholderText(string, bool, bool)"/> by only supporting
+		/// simple property expressions (%PROPERTY_123%, %PROPERTY_{Alias}%, %PROPERTY_{Alias1}.PROPERTY_{Alias2}%, %EXTERNALID% and %INTERNALID%).
+		/// </summary>
+		/// <param name="objVerEx">The object containing information to use for the expansion.</param>
+		/// <param name="concatenationString">The string containing the placeholders.</param>
+		/// <returns>The expanded string.</returns>
+		internal static string ExpandSimpleConcatenation
+		(
+			this ObjVerEx objVerEx,
+			string concatenationString,
+			Func<ObjVerEx, int, string> getPropertyText,
+			Func<ObjVerEx, int, ObjVerEx> getDirectReference
+		)
+		{	
+			// Sanity.
+			if (null == objVerEx)
+				throw new ArgumentNullException(nameof(objVerEx));
+			if (string.IsNullOrWhiteSpace(concatenationString))
+				return string.Empty;
+			if (null == getPropertyText)
+				throw new ArgumentNullException(nameof(getPropertyText));
+			if (null == getDirectReference)
+				throw new ArgumentNullException(nameof(getDirectReference));
+
 			// Try and get all placeholders.
 			return ExtractPlaceholders.Replace(concatenationString, (Match match) =>
 			{
@@ -81,10 +118,10 @@ namespace MFiles.VAF.Extensions
 
 							// If we are on the last one then get the property value.
 							if (i == propertyIds.Count - 1)
-								return host.GetPropertyText(propertyId);
+								return getPropertyText(host, propertyId);
 
 							// Otherwise, alter the host.
-							host = host.GetDirectReference(propertyId);
+							host = getDirectReference(host, propertyId);
 						}
 
 						// No replacement.
@@ -105,7 +142,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="group">The group to extract captures from.</param>
 		/// <param name="vault">The vault to look aliases up in.</param>
 		/// <returns>A set of property ids.</returns>
-		public static IList<int> ToPropertyIds(this Group group, Vault vault)
+		internal static IList<int> ToPropertyIds(this Group group, Vault vault)
 		{
 			// Sanity.
 			if (null == group)
