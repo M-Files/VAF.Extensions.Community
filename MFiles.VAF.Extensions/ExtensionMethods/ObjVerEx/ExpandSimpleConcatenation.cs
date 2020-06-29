@@ -114,7 +114,11 @@ namespace MFiles.VAF.Extensions
 
 							// Not found or invalid value?
 							if (propertyId < 0)
-								return $"(Property as part of '{aliasOrIds.Value}' not found)";
+								throw new ArgumentException
+								(
+									$"Property with reference '{aliasOrIds.Captures[i]}' (as part of '{aliasOrIds.Value}') not found in the vault.",
+									nameof(concatenationString)
+								);
 
 							// If we are on the last one then get the property value.
 							if (i == propertyIds.Count - 1)
@@ -122,6 +126,10 @@ namespace MFiles.VAF.Extensions
 
 							// Otherwise, alter the host.
 							host = getDirectReference(host, propertyId);
+
+							// Sanity.
+							if (null == host)
+								return string.Empty;
 						}
 
 						// No replacement.

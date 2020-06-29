@@ -409,6 +409,77 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			var input = "resolves to: %PROPERTY_{first}.PROPERTY_456.PROPERTY_{last}%";
 			Assert.AreEqual("resolves to: hello world", root.ExpandSimpleConcatenation(input, getPropertyText, getDirectReference));
 		}
+		
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void InvalidPropertyDefinitionThrows()
+		{
+			// Create our mock objects.
+			var vaultMock = this.GetVaultMock();
+			var root = new Common.ObjVerEx
+			(
+				vaultMock.Object,
+				this.GetObjectVersionAndPropertiesMock(vaultMock, 0, 1).Object
+			);
+
+			// Create our methods for passing data around.
+			Func<Common.ObjVerEx, int, string> getPropertyText = (Common.ObjVerEx o, int id) =>
+			{
+				Assert.Fail("Unexpected property retrieval");
+				throw new InvalidOperationException();
+			};
+			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
+			{
+				Assert.Fail("Unexpected property retrieval");
+				throw new InvalidOperationException();
+			};
+
+			// Output is expected.
+			// Note: property definition with alias "first" is not found in the vault, so an exception is expected.
+			var input = "resolves to: %PROPERTY_{first}.PROPERTY_456.PROPERTY_{last}%";
+			root.ExpandSimpleConcatenation(input, getPropertyText, getDirectReference);
+		}
+		
+		[TestMethod]
+		public void IndirectPropertyReferencePlaceholderNullReference()
+		{
+			// Create our mock objects.
+			var vaultMock = this.GetVaultMock
+			(
+				new Tuple<string, int>("first", 123),
+				new Tuple<string, int>("last", 789)
+			);
+			var root = new Common.ObjVerEx
+			(
+				vaultMock.Object,
+				this.GetObjectVersionAndPropertiesMock(vaultMock, 0, 1).Object
+			);
+
+			// Create our methods for passing data around.
+			Func<Common.ObjVerEx, int, string> getPropertyText = (Common.ObjVerEx o, int id) =>
+			{
+				Assert.Fail("Unexpected property retrieval");
+				throw new InvalidOperationException();
+			};
+			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
+			{
+				switch( id )
+				{
+					case 123:
+						return null;
+					default:
+						Assert.Fail("Unexpected property retrieval");
+						throw new InvalidOperationException();
+				}
+			};
+
+			// Output is expected.
+			// Note: property "first" returns null, as if the lookup were empty.
+			// So the system should stop at this point and return an empty string.
+			// BUT the other tokens (e.g. EXTERNALID) should still be resolved.
+			var input = "resolves to: %PROPERTY_{first}.PROPERTY_456.PROPERTY_{last}% (%EXTERNALID%)";
+			Assert.AreEqual("resolves to:  (123ABCDEF123)", root.ExpandSimpleConcatenation(input, getPropertyText, getDirectReference));
+		}
 
 		protected virtual Mock<Vault> GetVaultMock(params Tuple<string, int>[] propertyDefinitions)
 		{
