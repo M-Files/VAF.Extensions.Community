@@ -108,6 +108,24 @@ Performs replacement of content in a similar manner to the built-in [simple conc
 var output = objVerEx.ExpandSimpleConcatenation("The internal ID of object %PROPERTY_0% is %INTERNALID%")
 ```
 
+### Object type ID
+
+```csharp
+var output = objVerEx.ExpandSimpleConcatenation("The object type ID is %OBJECTTYPEID%.")
+```
+
+### Object version ID
+
+```csharp
+var output = objVerEx.ExpandSimpleConcatenation("The object version ID is %OBJECTVERSIONID%.")
+```
+
+### Object GUID
+
+```csharp
+var output = objVerEx.ExpandSimpleConcatenation("The object GUID is %OBJECTGUID%.")
+```
+
 ### External ID
 
 ```csharp
@@ -132,4 +150,10 @@ var output = objVerEx.ExpandSimpleConcatenation("The internal ID of object %PROP
 
 ```csharp
 var output = objVerEx.ExpandSimpleConcatenation("The customer's country of object %PROPERTY_0% is %PROPERTY_{MF.PD.Customer}.PROPERTY_{MF.PD.Country}%.")
+```
+
+### Vault GUID
+
+```csharp
+var output = objVerEx.ExpandSimpleConcatenation("The vault GUID is %VAULTGUID%.")
 ```
