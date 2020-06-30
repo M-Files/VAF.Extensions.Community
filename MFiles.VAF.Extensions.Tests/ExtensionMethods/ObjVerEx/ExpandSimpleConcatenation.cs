@@ -97,6 +97,45 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 		}
 
 		[TestMethod]
+		public void ObjectTypeID()
+		{
+			var vaultMock = this.GetVaultMock();
+			var objectVersionAndPropertiesMock = this.GetObjectVersionAndPropertiesMock(vaultMock, objectTypeId: 543);
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
+			Assert.AreEqual("hello 543 world", objVerEx.ExpandSimpleConcatenation("hello %OBJECTTYPEID% world"));
+		}
+
+		[TestMethod]
+		public void ObjectVersionID()
+		{
+			var vaultMock = this.GetVaultMock();
+			var objectVersionAndPropertiesMock = this.GetObjectVersionAndPropertiesMock(vaultMock, version: 23);
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
+			Assert.AreEqual("hello 23 world", objVerEx.ExpandSimpleConcatenation("hello %OBJECTVERSIONID% world"));
+		}
+
+		[TestMethod]
+		public void ObjectGUID()
+		{
+			var guid = Guid.NewGuid();
+			var vaultMock = this.GetVaultMock();
+			var objectVersionAndPropertiesMock = this.GetObjectVersionAndPropertiesMock(vaultMock, objectGuid: guid);
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
+			Assert.AreEqual($"hello {guid.ToString("B")} world", objVerEx.ExpandSimpleConcatenation("hello %OBJECTGUID% world"));
+		}
+
+		[TestMethod]
+		public void VaultGUID()
+		{
+			var guid = Guid.NewGuid().ToString("B");
+			var vaultMock = this.GetVaultMock();
+			vaultMock.Setup(o => o.GetGUID()).Returns(guid);
+			var objectVersionAndPropertiesMock = this.GetObjectVersionAndPropertiesMock(vaultMock);
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
+			Assert.AreEqual($"hello {guid} world", objVerEx.ExpandSimpleConcatenation("hello %VAULTGUID% world"));
+		}
+
+		[TestMethod]
 		public void MultipleExternalID()
 		{
 			var vaultMock = this.GetVaultMock();
@@ -542,6 +581,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			int version = 1,
 			string externalId = "123ABCDEF123",
 			ObjID originalId = null,
+			Guid? objectGuid = null,
 			params Tuple<int, MFDataType, object>[] propertyValues
 			)
 		{
@@ -562,6 +602,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 					data.Setup(o => o.DisplayIDAvailable).Returns(!string.IsNullOrWhiteSpace(externalId));
 					data.Setup(o => o.DisplayID).Returns(externalId);
 					data.Setup(o => o.OriginalObjID).Returns(originalId);
+					if (objectGuid.HasValue)
+						data.Setup(o => o.ObjectGUID).Returns(objectGuid.Value.ToString("B"));
 					return data.Object;
 				});
 			objectVersionAndPropertiesMock

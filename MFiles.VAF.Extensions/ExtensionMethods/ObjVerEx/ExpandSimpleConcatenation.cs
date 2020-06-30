@@ -14,7 +14,7 @@ namespace MFiles.VAF.Extensions
 		/// The regular expression used to extract property matches ("%PROPERTY_0%").
 		/// </summary>
 		public static readonly Regex ExtractPlaceholders = new Regex(
-			"(?<replacementText>(?<prefix>\\%)(?<type>DISPLAYID)?(?<type>INTERNALID)?(?<type>EXTERNALID)?(?<reference>(?<type>PROPERTY)_(\\{?(?<aliasorid>[^%]+?)\\}?)?\\.?)*(?<suffix>\\%))",
+			"(?<replacementText>(?<prefix>\\%)(?<type>[a-zA-Z]*?ID)?(?<reference>(?<type>PROPERTY)_(\\{?(?<aliasorid>[^%]+?)\\}?)?\\.?)*(?<suffix>\\%))",
 			RegexOptions.Multiline
 			| RegexOptions.ExplicitCapture
 			| RegexOptions.CultureInvariant
@@ -95,6 +95,14 @@ namespace MFiles.VAF.Extensions
 						: objVerEx.Info?.OriginalObjID != null
 						? objVerEx.Info.OriginalObjID.ID.ToString() // Original ID if we have it.
 						: objVerEx.ID.ToString(); // Internal ID otherwise.
+					case "objecttypeid":
+						return objVerEx.Type.ToString();
+					case "objectversionid":
+						return objVerEx.Version.ToString();
+					case "objectguid":
+						return objVerEx.Info?.ObjectGUID;
+					case "vaultguid":
+						return objVerEx.Vault?.GetGUID();
 					case "internalid":
 						return objVerEx.ID.ToString();
 					case "externalid":
