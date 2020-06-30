@@ -122,7 +122,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			var vaultMock = this.GetVaultMock();
 			var objectVersionAndPropertiesMock = this.GetObjectVersionAndPropertiesMock(vaultMock, objectGuid: guid);
 			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
-			Assert.AreEqual($"hello {guid.ToString("B")} world", objVerEx.ExpandSimpleConcatenation("hello %OBJECTGUID% world"));
+			Assert.AreEqual($"hello {guid:B} world", objVerEx.ExpandSimpleConcatenation("hello %OBJECTGUID% world"));
 		}
 
 		[TestMethod]
@@ -343,35 +343,35 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			);
 
 			// Create our methods for passing data around.
-			Func<Common.ObjVerEx, int, string> getPropertyText = (Common.ObjVerEx o, int id) =>
+			string getPropertyText( Common.ObjVerEx o, int id )
 			{
 				switch( id )
 				{
-					case 789:
-						return "hello world";
-					default:
-						Assert.Fail("Unexpected property retrieval");
-						throw new InvalidOperationException();
+				case 789:
+					return "hello world";
+				default:
+					Assert.Fail( "Unexpected property retrieval" );
+					throw new InvalidOperationException();
 				}
-			};
-			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
+			}
+			Common.ObjVerEx getDirectReference( Common.ObjVerEx o, int id )
 			{
 				switch( id )
 				{
-					case 123:
-						return objectOne;
-					case 456:
-						return objectTwo;
-					default:
-						Assert.Fail("Unexpected property retrieval");
-						throw new InvalidOperationException();
+				case 123:
+					return objectOne;
+				case 456:
+					return objectTwo;
+				default:
+					Assert.Fail( "Unexpected property retrieval" );
+					throw new InvalidOperationException();
 				}
-			};
-			Func<Common.ObjVerEx, UrlTargetPlatform, string> getObjectUrl = (Common.ObjVerEx o, UrlTargetPlatform platform) =>
+			}
+			string getObjectUrl( Common.ObjVerEx o, UrlTargetPlatform platform )
 			{
-				Assert.Fail("Unexpected url access");
+				Assert.Fail( "Unexpected url access" );
 				throw new InvalidOperationException();
-			};
+			}
 
 			// Output is expected.
 			var input = "resolves to: %PROPERTY_123.PROPERTY_456.PROPERTY_789%";
@@ -405,35 +405,35 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			);
 
 			// Create our methods for passing data around.
-			Func<Common.ObjVerEx, int, string> getPropertyText = (Common.ObjVerEx o, int id) =>
+			string getPropertyText( Common.ObjVerEx o, int id )
 			{
 				switch( id )
 				{
-					case 789:
-						return "hello world";
-					default:
-						Assert.Fail("Unexpected property retrieval");
-						throw new InvalidOperationException();
+				case 789:
+					return "hello world";
+				default:
+					Assert.Fail( "Unexpected property retrieval" );
+					throw new InvalidOperationException();
 				}
-			};
-			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
+			}
+			Common.ObjVerEx getDirectReference( Common.ObjVerEx o, int id )
 			{
 				switch( id )
 				{
-					case 123:
-						return objectOne;
-					case 456:
-						return objectTwo;
-					default:
-						Assert.Fail("Unexpected property retrieval");
-						throw new InvalidOperationException();
+				case 123:
+					return objectOne;
+				case 456:
+					return objectTwo;
+				default:
+					Assert.Fail( "Unexpected property retrieval" );
+					throw new InvalidOperationException();
 				}
-			};
-			Func<Common.ObjVerEx, UrlTargetPlatform, string> getObjectUrl = (Common.ObjVerEx o, UrlTargetPlatform platform) =>
+			}
+			string getObjectUrl( Common.ObjVerEx o, UrlTargetPlatform platform )
 			{
-				Assert.Fail("Unexpected url access");
+				Assert.Fail( "Unexpected url access" );
 				throw new InvalidOperationException();
-			};
+			}
 
 			// Output is expected.
 			var input = "resolves to: %PROPERTY_{first}.PROPERTY_{second}.PROPERTY_{last}%";
@@ -466,35 +466,35 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			);
 
 			// Create our methods for passing data around.
-			Func<Common.ObjVerEx, int, string> getPropertyText = (Common.ObjVerEx o, int id) =>
+			string getPropertyText( Common.ObjVerEx o, int id )
 			{
 				switch( id )
 				{
-					case 789:
-						return "hello world";
-					default:
-						Assert.Fail("Unexpected property retrieval");
-						throw new InvalidOperationException();
+				case 789:
+					return "hello world";
+				default:
+					Assert.Fail( "Unexpected property retrieval" );
+					throw new InvalidOperationException();
 				}
-			};
-			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
+			}
+			Common.ObjVerEx getDirectReference( Common.ObjVerEx o, int id )
 			{
 				switch( id )
 				{
-					case 123:
-						return objectOne;
-					case 456:
-						return objectTwo;
-					default:
-						Assert.Fail("Unexpected property retrieval");
-						throw new InvalidOperationException();
+				case 123:
+					return objectOne;
+				case 456:
+					return objectTwo;
+				default:
+					Assert.Fail( "Unexpected property retrieval" );
+					throw new InvalidOperationException();
 				}
-			};
-			Func<Common.ObjVerEx, UrlTargetPlatform, string> getObjectUrl = (Common.ObjVerEx o, UrlTargetPlatform platform) =>
+			}
+			string getObjectUrl( Common.ObjVerEx o, UrlTargetPlatform platform )
 			{
-				Assert.Fail("Unexpected url access");
+				Assert.Fail( "Unexpected url access" );
 				throw new InvalidOperationException();
-			};
+			}
 
 			// Output is expected.
 			var input = "resolves to: %PROPERTY_{first}.PROPERTY_456.PROPERTY_{last}%";
@@ -514,21 +514,21 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			);
 
 			// Create our methods for passing data around.
-			Func<Common.ObjVerEx, int, string> getPropertyText = (Common.ObjVerEx o, int id) =>
+			string getPropertyText( Common.ObjVerEx o, int id )
 			{
-				Assert.Fail("Unexpected property retrieval");
+				Assert.Fail( "Unexpected property retrieval" );
 				throw new InvalidOperationException();
-			};
-			Func<Common.ObjVerEx, UrlTargetPlatform, string> getObjectUrl = (Common.ObjVerEx o, UrlTargetPlatform platform) =>
+			}
+			string getObjectUrl( Common.ObjVerEx o, UrlTargetPlatform platform )
 			{
-				Assert.Fail("Unexpected url access");
+				Assert.Fail( "Unexpected url access" );
 				throw new InvalidOperationException();
-			};
-			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
+			}
+			Common.ObjVerEx getDirectReference( Common.ObjVerEx o, int id )
 			{
-				Assert.Fail("Unexpected property retrieval");
+				Assert.Fail( "Unexpected property retrieval" );
 				throw new InvalidOperationException();
-			};
+			}
 
 			// Output is expected.
 			// Note: property definition with alias "first" is not found in the vault, so an exception is expected.
@@ -552,27 +552,27 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			);
 
 			// Create our methods for passing data around.
-			Func<Common.ObjVerEx, int, string> getPropertyText = (Common.ObjVerEx o, int id) =>
+			string getPropertyText( Common.ObjVerEx o, int id )
 			{
-				Assert.Fail("Unexpected property retrieval");
+				Assert.Fail( "Unexpected property retrieval" );
 				throw new InvalidOperationException();
-			};
-			Func<Common.ObjVerEx, UrlTargetPlatform, string> getObjectUrl = (Common.ObjVerEx o, UrlTargetPlatform platform) =>
+			}
+			string getObjectUrl( Common.ObjVerEx o, UrlTargetPlatform platform )
 			{
-				Assert.Fail("Unexpected url access");
+				Assert.Fail( "Unexpected url access" );
 				throw new InvalidOperationException();
-			};
-			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
+			}
+			Common.ObjVerEx getDirectReference( Common.ObjVerEx o, int id )
 			{
 				switch( id )
 				{
-					case 123:
-						return null;
-					default:
-						Assert.Fail("Unexpected property retrieval");
-						throw new InvalidOperationException();
+				case 123:
+					return null;
+				default:
+					Assert.Fail( "Unexpected property retrieval" );
+					throw new InvalidOperationException();
 				}
-			};
+			}
 
 			// Output is expected.
 			// Note: property "first" returns null, as if the lookup were empty.
@@ -607,21 +607,21 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
 
 			// Create our methods for passing data around.
-			Func<Common.ObjVerEx, int, string> getPropertyText = (Common.ObjVerEx o, int id) =>
+			string getPropertyText( Common.ObjVerEx o, int id )
 			{
-				Assert.Fail("Unexpected property retrieval");
+				Assert.Fail( "Unexpected property retrieval" );
 				throw new InvalidOperationException();
-			};
-			Func<Common.ObjVerEx, UrlTargetPlatform, string> getObjectUrl = (Common.ObjVerEx o, UrlTargetPlatform platform) =>
+			}
+			string getObjectUrl( Common.ObjVerEx o, UrlTargetPlatform platform )
 			{
-				Assert.AreEqual(UrlTargetPlatform.Desktop, platform);
+				Assert.AreEqual( UrlTargetPlatform.Desktop, platform );
 				return "m-files://desktopurl";
-			};
-			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
+			}
+			Common.ObjVerEx getDirectReference( Common.ObjVerEx o, int id )
 			{
-				Assert.Fail("Unexpected property retrieval");
+				Assert.Fail( "Unexpected property retrieval" );
 				throw new InvalidOperationException();
-			};
+			}
 
 			Assert.AreEqual
 			(
@@ -638,21 +638,21 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
 
 			// Create our methods for passing data around.
-			Func<Common.ObjVerEx, int, string> getPropertyText = (Common.ObjVerEx o, int id) =>
+			string getPropertyText( Common.ObjVerEx o, int id )
 			{
-				Assert.Fail("Unexpected property retrieval");
+				Assert.Fail( "Unexpected property retrieval" );
 				throw new InvalidOperationException();
-			};
-			Func<Common.ObjVerEx, UrlTargetPlatform, string> getObjectUrl = (Common.ObjVerEx o, UrlTargetPlatform platform) =>
+			}
+			string getObjectUrl( Common.ObjVerEx o, UrlTargetPlatform platform )
 			{
-				Assert.AreEqual(UrlTargetPlatform.Web, platform);
+				Assert.AreEqual( UrlTargetPlatform.Web, platform );
 				return "https://weburl";
-			};
-			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
+			}
+			Common.ObjVerEx getDirectReference( Common.ObjVerEx o, int id )
 			{
-				Assert.Fail("Unexpected property retrieval");
+				Assert.Fail( "Unexpected property retrieval" );
 				throw new InvalidOperationException();
-			};
+			}
 
 			Assert.AreEqual
 			(
@@ -669,21 +669,21 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
 
 			// Create our methods for passing data around.
-			Func<Common.ObjVerEx, int, string> getPropertyText = (Common.ObjVerEx o, int id) =>
+			string getPropertyText( Common.ObjVerEx o, int id )
 			{
-				Assert.Fail("Unexpected property retrieval");
+				Assert.Fail( "Unexpected property retrieval" );
 				throw new InvalidOperationException();
-			};
-			Func<Common.ObjVerEx, UrlTargetPlatform, string> getObjectUrl = (Common.ObjVerEx o, UrlTargetPlatform platform) =>
+			}
+			string getObjectUrl( Common.ObjVerEx o, UrlTargetPlatform platform )
 			{
-				Assert.AreEqual(UrlTargetPlatform.Mobile, platform);
+				Assert.AreEqual( UrlTargetPlatform.Mobile, platform );
 				return "https://weburl";
-			};
-			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
+			}
+			Common.ObjVerEx getDirectReference( Common.ObjVerEx o, int id )
 			{
-				Assert.Fail("Unexpected property retrieval");
+				Assert.Fail( "Unexpected property retrieval" );
 				throw new InvalidOperationException();
-			};
+			}
 
 			Assert.AreEqual
 			(
