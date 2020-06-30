@@ -114,6 +114,14 @@ var output = objVerEx.ExpandSimpleConcatenation("The internal ID of object %PROP
 var output = objVerEx.ExpandSimpleConcatenation("The external ID of object %PROPERTY_0% is %EXTERNALID%.")
 ```
 
+### Display ID
+
+This will return the external ID (if set), the original object ID (if set), or the internal ID (if neither set).
+
+```csharp
+var output = objVerEx.ExpandSimpleConcatenation("The display ID of object %PROPERTY_0% is %DISPLAYID%")
+```
+
 ### Combined internal and external ID
 
 ```csharp

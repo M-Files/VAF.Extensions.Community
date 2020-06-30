@@ -1,12 +1,8 @@
-﻿using MFiles.VAF.Configuration;
-using MFilesAPI;
+﻿using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 {
@@ -40,6 +36,46 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			var objectVersionAndPropertiesMock = this.GetObjectVersionAndPropertiesMock(vaultMock);
 			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
 			Assert.AreEqual("hello 123 world", objVerEx.ExpandSimpleConcatenation("hello %INTERNALID% world"));
+		}
+
+		[TestMethod]
+		public void DisplayID_NoExternalNoOriginal()
+		{
+			var vaultMock = this.GetVaultMock();
+			var objectVersionAndPropertiesMock = this.GetObjectVersionAndPropertiesMock(vaultMock, externalId: null);
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
+			Assert.AreEqual("hello 123 world", objVerEx.ExpandSimpleConcatenation("hello %DISPLAYID% world"));
+		}
+
+		[TestMethod]
+		public void DisplayID_WithExternalNoOriginal()
+		{
+			var vaultMock = this.GetVaultMock();
+			var objectVersionAndPropertiesMock = this.GetObjectVersionAndPropertiesMock(vaultMock);
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
+			Assert.AreEqual("hello 123ABCDEF123 world", objVerEx.ExpandSimpleConcatenation("hello %DISPLAYID% world"));
+		}
+
+		[TestMethod]
+		public void DisplayID_NoExternalWithOriginal()
+		{
+			var originalId = new ObjID();
+			originalId.SetIDs(101, 1234);
+			var vaultMock = this.GetVaultMock();
+			var objectVersionAndPropertiesMock = this.GetObjectVersionAndPropertiesMock(vaultMock, externalId: null, originalId: originalId);
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
+			Assert.AreEqual("hello 1234 world", objVerEx.ExpandSimpleConcatenation("hello %DISPLAYID% world"));
+		}
+
+		[TestMethod]
+		public void DisplayID_WithExternalWithOriginal()
+		{
+			var originalId = new ObjID();
+			originalId.SetIDs(101, 1234);
+			var vaultMock = this.GetVaultMock();
+			var objectVersionAndPropertiesMock = this.GetObjectVersionAndPropertiesMock(vaultMock, originalId: originalId);
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
+			Assert.AreEqual("hello 123ABCDEF123 world", objVerEx.ExpandSimpleConcatenation("hello %DISPLAYID% world"));
 		}
 
 		[TestMethod]
@@ -505,6 +541,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			int objectId = 123,
 			int version = 1,
 			string externalId = "123ABCDEF123",
+			ObjID originalId = null,
 			params Tuple<int, MFDataType, object>[] propertyValues
 			)
 		{
@@ -522,8 +559,9 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 				.Returns(() =>
 				{
 					var data = new Mock<ObjectVersion>();
-					data.Setup(o => o.DisplayIDAvailable).Returns(true);
+					data.Setup(o => o.DisplayIDAvailable).Returns(!string.IsNullOrWhiteSpace(externalId));
 					data.Setup(o => o.DisplayID).Returns(externalId);
+					data.Setup(o => o.OriginalObjID).Returns(originalId);
 					return data.Object;
 				});
 			objectVersionAndPropertiesMock
