@@ -14,7 +14,7 @@ namespace MFiles.VAF.Extensions
 		/// The regular expression used to extract property matches ("%PROPERTY_0%").
 		/// </summary>
 		public static readonly Regex ExtractPlaceholders = new Regex(
-			"(?<replacementText>(?<prefix>\\%)(?<type>[a-zA-Z]*?ID)?(?<reference>(?<type>PROPERTY)_(\\{?(?<aliasorid>[^%]+?)\\}?)?\\.?)*(?<suffix>\\%))",
+			"(?<replacementText>(?<prefix>\\%)(?<type>[a-zA-Z]*?ID)?(?<type>OBJECTURL_[a-zA-Z]*?)?(?<reference>(?<type>PROPERTY)_(\\{?(?<aliasorid>[^%]+?)\\}?)?\\.?)*(?<suffix>\\%))",
 			RegexOptions.Multiline
 			| RegexOptions.ExplicitCapture
 			| RegexOptions.CultureInvariant
@@ -47,7 +47,8 @@ namespace MFiles.VAF.Extensions
 			(
 				concatenationString,
 				(o, id) => o.GetPropertyText(id),
-				(o, id) => o.GetDirectReference(id)
+				(o, id) => o.GetDirectReference(id),
+				(o, platform) => UrlHelper.GetObjectUrl(o, platform)
 			);
 
 		}
@@ -66,7 +67,8 @@ namespace MFiles.VAF.Extensions
 			this ObjVerEx objVerEx,
 			string concatenationString,
 			Func<ObjVerEx, int, string> getPropertyText,
-			Func<ObjVerEx, int, ObjVerEx> getDirectReference
+			Func<ObjVerEx, int, ObjVerEx> getDirectReference,
+			Func<ObjVerEx, UrlTargetPlatform, string> getObjectUrl
 		)
 		{	
 			// Sanity.
@@ -78,6 +80,8 @@ namespace MFiles.VAF.Extensions
 				throw new ArgumentNullException(nameof(getPropertyText));
 			if (null == getDirectReference)
 				throw new ArgumentNullException(nameof(getDirectReference));
+			if (null == getObjectUrl)
+				throw new ArgumentNullException(nameof(getObjectUrl));
 
 			// Try and get all placeholders.
 			return ExtractPlaceholders.Replace(concatenationString, (Match match) =>
@@ -150,6 +154,12 @@ namespace MFiles.VAF.Extensions
 						return match.Value;
 
 					}
+					case "objecturl_web":
+						return getObjectUrl(objVerEx, UrlTargetPlatform.Web);
+					case "objecturl_desktop":
+						return getObjectUrl(objVerEx, UrlTargetPlatform.Desktop);
+					case "objecturl_mobile":
+						return getObjectUrl(objVerEx, UrlTargetPlatform.Mobile);
 					default:
 						return match.Value;
 				}

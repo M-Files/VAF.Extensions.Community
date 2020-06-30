@@ -1,4 +1,5 @@
-﻿using MFilesAPI;
+﻿using MFiles.VAF.Common;
+using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
@@ -366,10 +367,15 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 						throw new InvalidOperationException();
 				}
 			};
+			Func<Common.ObjVerEx, UrlTargetPlatform, string> getObjectUrl = (Common.ObjVerEx o, UrlTargetPlatform platform) =>
+			{
+				Assert.Fail("Unexpected url access");
+				throw new InvalidOperationException();
+			};
 
 			// Output is expected.
 			var input = "resolves to: %PROPERTY_123.PROPERTY_456.PROPERTY_789%";
-			Assert.AreEqual("resolves to: hello world", root.ExpandSimpleConcatenation(input, getPropertyText, getDirectReference));
+			Assert.AreEqual("resolves to: hello world", root.ExpandSimpleConcatenation(input, getPropertyText, getDirectReference, getObjectUrl));
 		}
 		
 		[TestMethod]
@@ -423,10 +429,15 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 						throw new InvalidOperationException();
 				}
 			};
+			Func<Common.ObjVerEx, UrlTargetPlatform, string> getObjectUrl = (Common.ObjVerEx o, UrlTargetPlatform platform) =>
+			{
+				Assert.Fail("Unexpected url access");
+				throw new InvalidOperationException();
+			};
 
 			// Output is expected.
 			var input = "resolves to: %PROPERTY_{first}.PROPERTY_{second}.PROPERTY_{last}%";
-			Assert.AreEqual("resolves to: hello world", root.ExpandSimpleConcatenation(input, getPropertyText, getDirectReference));
+			Assert.AreEqual("resolves to: hello world", root.ExpandSimpleConcatenation(input, getPropertyText, getDirectReference, getObjectUrl));
 		}
 		
 		[TestMethod]
@@ -479,10 +490,15 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 						throw new InvalidOperationException();
 				}
 			};
+			Func<Common.ObjVerEx, UrlTargetPlatform, string> getObjectUrl = (Common.ObjVerEx o, UrlTargetPlatform platform) =>
+			{
+				Assert.Fail("Unexpected url access");
+				throw new InvalidOperationException();
+			};
 
 			// Output is expected.
 			var input = "resolves to: %PROPERTY_{first}.PROPERTY_456.PROPERTY_{last}%";
-			Assert.AreEqual("resolves to: hello world", root.ExpandSimpleConcatenation(input, getPropertyText, getDirectReference));
+			Assert.AreEqual("resolves to: hello world", root.ExpandSimpleConcatenation(input, getPropertyText, getDirectReference, getObjectUrl));
 		}
 		
 		[TestMethod]
@@ -503,6 +519,11 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 				Assert.Fail("Unexpected property retrieval");
 				throw new InvalidOperationException();
 			};
+			Func<Common.ObjVerEx, UrlTargetPlatform, string> getObjectUrl = (Common.ObjVerEx o, UrlTargetPlatform platform) =>
+			{
+				Assert.Fail("Unexpected url access");
+				throw new InvalidOperationException();
+			};
 			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
 			{
 				Assert.Fail("Unexpected property retrieval");
@@ -512,7 +533,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			// Output is expected.
 			// Note: property definition with alias "first" is not found in the vault, so an exception is expected.
 			var input = "resolves to: %PROPERTY_{first}.PROPERTY_456.PROPERTY_{last}%";
-			root.ExpandSimpleConcatenation(input, getPropertyText, getDirectReference);
+			root.ExpandSimpleConcatenation(input, getPropertyText, getDirectReference, getObjectUrl);
 		}
 		
 		[TestMethod]
@@ -536,6 +557,11 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 				Assert.Fail("Unexpected property retrieval");
 				throw new InvalidOperationException();
 			};
+			Func<Common.ObjVerEx, UrlTargetPlatform, string> getObjectUrl = (Common.ObjVerEx o, UrlTargetPlatform platform) =>
+			{
+				Assert.Fail("Unexpected url access");
+				throw new InvalidOperationException();
+			};
 			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
 			{
 				switch( id )
@@ -553,7 +579,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			// So the system should stop at this point and return an empty string.
 			// BUT the other tokens (e.g. EXTERNALID) should still be resolved.
 			var input = "resolves to: %PROPERTY_{first}.PROPERTY_456.PROPERTY_{last}% (%EXTERNALID%)";
-			Assert.AreEqual("resolves to:  (123ABCDEF123)", root.ExpandSimpleConcatenation(input, getPropertyText, getDirectReference));
+			Assert.AreEqual("resolves to:  (123ABCDEF123)", root.ExpandSimpleConcatenation(input, getPropertyText, getDirectReference, getObjectUrl));
 		}
 
 		protected virtual Mock<Vault> GetVaultMock(params Tuple<string, int>[] propertyDefinitions)
@@ -571,6 +597,99 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			var vault = base.GetVaultMock();
 			vault.Setup(v => v.PropertyDefOperations).Returns(propertyDefOperationsMock.Object);
 			return vault;
+		}
+
+		[TestMethod]
+		public void ObjectUrl_Desktop()
+		{
+			var vaultMock = this.GetVaultMock();
+			var objectVersionAndPropertiesMock = this.GetObjectVersionAndPropertiesMock(vaultMock);
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
+
+			// Create our methods for passing data around.
+			Func<Common.ObjVerEx, int, string> getPropertyText = (Common.ObjVerEx o, int id) =>
+			{
+				Assert.Fail("Unexpected property retrieval");
+				throw new InvalidOperationException();
+			};
+			Func<Common.ObjVerEx, UrlTargetPlatform, string> getObjectUrl = (Common.ObjVerEx o, UrlTargetPlatform platform) =>
+			{
+				Assert.AreEqual(UrlTargetPlatform.Desktop, platform);
+				return "m-files://desktopurl";
+			};
+			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
+			{
+				Assert.Fail("Unexpected property retrieval");
+				throw new InvalidOperationException();
+			};
+
+			Assert.AreEqual
+			(
+				"url is: m-files://desktopurl",
+				objVerEx.ExpandSimpleConcatenation("url is: %OBJECTURL_DESKTOP%", getPropertyText, getDirectReference, getObjectUrl)
+			);
+		}
+
+		[TestMethod]
+		public void ObjectUrl_Web()
+		{
+			var vaultMock = this.GetVaultMock();
+			var objectVersionAndPropertiesMock = this.GetObjectVersionAndPropertiesMock(vaultMock);
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
+
+			// Create our methods for passing data around.
+			Func<Common.ObjVerEx, int, string> getPropertyText = (Common.ObjVerEx o, int id) =>
+			{
+				Assert.Fail("Unexpected property retrieval");
+				throw new InvalidOperationException();
+			};
+			Func<Common.ObjVerEx, UrlTargetPlatform, string> getObjectUrl = (Common.ObjVerEx o, UrlTargetPlatform platform) =>
+			{
+				Assert.AreEqual(UrlTargetPlatform.Web, platform);
+				return "https://weburl";
+			};
+			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
+			{
+				Assert.Fail("Unexpected property retrieval");
+				throw new InvalidOperationException();
+			};
+
+			Assert.AreEqual
+			(
+				"url is: https://weburl",
+				objVerEx.ExpandSimpleConcatenation("url is: %OBJECTURL_WEB%", getPropertyText, getDirectReference, getObjectUrl)
+			);
+		}
+
+		[TestMethod]
+		public void ObjectUrl_Mobile()
+		{
+			var vaultMock = this.GetVaultMock();
+			var objectVersionAndPropertiesMock = this.GetObjectVersionAndPropertiesMock(vaultMock);
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
+
+			// Create our methods for passing data around.
+			Func<Common.ObjVerEx, int, string> getPropertyText = (Common.ObjVerEx o, int id) =>
+			{
+				Assert.Fail("Unexpected property retrieval");
+				throw new InvalidOperationException();
+			};
+			Func<Common.ObjVerEx, UrlTargetPlatform, string> getObjectUrl = (Common.ObjVerEx o, UrlTargetPlatform platform) =>
+			{
+				Assert.AreEqual(UrlTargetPlatform.Mobile, platform);
+				return "https://weburl";
+			};
+			Func<Common.ObjVerEx, int, Common.ObjVerEx> getDirectReference = (Common.ObjVerEx o, int id) =>
+			{
+				Assert.Fail("Unexpected property retrieval");
+				throw new InvalidOperationException();
+			};
+
+			Assert.AreEqual
+			(
+				"url is: https://weburl",
+				objVerEx.ExpandSimpleConcatenation("url is: %OBJECTURL_MOBILE%", getPropertyText, getDirectReference, getObjectUrl)
+			);
 		}
 
 		protected virtual Mock<ObjectVersionAndProperties> GetObjectVersionAndPropertiesMock
