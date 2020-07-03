@@ -6,7 +6,7 @@ using System;
 
 namespace MFiles.VAF.Extensions.MultiServerMode
 {
-	public class ConfigurableVaultApplicationBase<TSecureConfiguration>
+	public abstract class ConfigurableVaultApplicationBase<TSecureConfiguration>
 		: MFiles.VAF.Core.ConfigurableVaultApplicationBase<TSecureConfiguration>, IUsesTaskQueue
 	where TSecureConfiguration : class, new()
 	{
