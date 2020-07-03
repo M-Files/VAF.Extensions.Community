@@ -2362,6 +2362,31 @@
             <param name="separatorBefore">Creates a separator before this menu item.</param>
             <param name="noSeparatorAfter">Prevents any line separators from being drawn after this item.</param>
         </member>
+        <member name="T:MFiles.VAF.Configuration.Domain.Dashboards.AvailabilityGroupStatusList">
+             <summary>
+            Multi-server mode availability status dashboard list.
+             </summary>
+        </member>
+        <member name="M:MFiles.VAF.Configuration.Domain.Dashboards.AvailabilityGroupStatusList.GenerateList(MFilesAPI.Vault,System.String,System.String,System.Boolean)">
+            <summary>
+            Generates a <see cref="T:MFiles.VAF.Configuration.Domain.Dashboards.DashboardList"/> containing the health status of the availability group.
+            </summary>
+            <param name="vault">The connection object.</param>
+            <param name="configKey">The config key for the vault app or module.</param>
+            <param name="listTitle">The title of the dashboard list..</param>
+            <param name="excludeCurrent">When true, the current server is not present in the list.</param>
+            <returns><see cref="T:MFiles.VAF.Configuration.Domain.Dashboards.DashboardList"/> containing the health status of the availability group.</returns>
+        </member>
+        <member name="M:MFiles.VAF.Configuration.Domain.Dashboards.AvailabilityGroupStatusList.#ctor(MFilesAPI.Vault,System.String,System.String,System.Boolean)">
+            <summary>
+            Generates a <see cref="T:MFiles.VAF.Configuration.Domain.Dashboards.DashboardList"/> containing the health status of the availability group.
+            </summary>
+            <param name="vault">The connection object.</param>
+            <param name="configKey">The config key for the vault app or module.</param>
+            <param name="listTitle">The title of the dashboard list..</param>
+            <param name="excludeCurrent">When true, the current server is not present in the list.</param>
+            <returns><see cref="T:MFiles.VAF.Configuration.Domain.Dashboards.DashboardList"/> containing the health status of the availability group.</returns>
+        </member>
         <member name="T:MFiles.VAF.Configuration.Domain.Dashboards.DashboardCommandStyle">
             <summary>
             The ways in which a dashboard command can be rendered.
@@ -3273,6 +3298,31 @@
             </summary>
             <param name="xml">The html document the status stub will be added to.</param>
             <returns>The list item xml fragment.</returns>
+        </member>
+        <member name="T:MFiles.VAF.Configuration.Domain.Dashboards.VaultApplicationHealthReport">
+            <summary>
+            Holds the health status of a Vault Application.
+            </summary>
+        </member>
+        <member name="P:MFiles.VAF.Configuration.Domain.Dashboards.VaultApplicationHealthReport.HostName">
+            <summary>
+            Server hostname.
+            </summary>
+        </member>
+        <member name="P:MFiles.VAF.Configuration.Domain.Dashboards.VaultApplicationHealthReport.ServerID">
+            <summary>
+            Multi-server mode server id.
+            </summary>
+        </member>
+        <member name="P:MFiles.VAF.Configuration.Domain.Dashboards.VaultApplicationHealthReport.StatusSummary">
+            <summary>
+            Status summary.
+            </summary>
+        </member>
+        <member name="P:MFiles.VAF.Configuration.Domain.Dashboards.VaultApplicationHealthReport.LastUpdatedAtUtc">
+            <summary>
+            Time of the last status update.
+            </summary>
         </member>
         <member name="T:MFiles.VAF.Configuration.Domain.DomainMenuCommandLocation">
             <summary>
@@ -7951,6 +8001,16 @@
             <param name="parent">Parent of the object reference. Can be null.</param>
             <param name="validationResult">The validation state that receives the validation results.</param>
             <returns>Returns true if the validation succeeded.</returns>
+        </member>
+        <member name="M:MFiles.VAF.Configuration.MetadataStructureValidator.TryGetPropertyDefAdmin(MFilesAPI.Vault,System.Int32,MFilesAPI.PropertyDefAdmin@)">
+            <summary>
+            Attempts to get the property def admin for the passed property def id.
+            Does not expose any potential errors in the resolution. Returns false if resolution fails.
+            </summary>
+            <param name="vault">Vault connection.</param>
+            <param name="propertyDefId">Property def id to resolve.</param>
+            <param name="propDefAdmin">The resulting <see cref="T:MFilesAPI.PropertyDefAdmin"/> object ( or null )</param>
+            <returns>True when the property def was resolved.</returns>
         </member>
         <member name="M:MFiles.VAF.Configuration.MetadataStructureValidator.IsValid(MFilesAPI.Vault,MFiles.VAF.Configuration.IConfiguration,MFiles.VAF.Configuration.MFPropertyDefAttribute,System.Object,System.Object,MFiles.VAF.Configuration.ValidationResultBase)">
             <summary>

@@ -38,6 +38,13 @@
             <param name="env">The environment received from the vault extension method.</param>
             <returns>The request response.</returns>
         </member>
+        <member name="M:MFiles.VAF.AdminConfigurations.AdminConfigurationManager.RebroadcastVaultExtMethod(MFiles.VAF.Common.EventHandlerEnvironment,MFiles.VAF.AdminConfigurations.EventHandlerRequestContext)">
+            <summary>
+            Broadcasts a Vault Extension method call to others servers.
+            </summary>
+            <param name="env"><see cref="T:MFiles.VAF.Common.EventHandlerEnvironment"></see> from the original call.</param>
+            <param name="context">The request context.</param>
+        </member>
         <member name="M:MFiles.VAF.AdminConfigurations.AdminConfigurationManager.CreateVaultExtensionMethodCall(MFiles.VAF.Configuration.AdminConfigurations.DomainNodeLocation,System.String,System.String[])">
             <summary>
             Creates a VaultExtensionMethodCall for use in SourceDefinitions.
@@ -788,6 +795,24 @@
             - Requesting a cancellation will cause all queues and all their respective tasks to be cancelled as well.
             </summary>
         </member>
+        <member name="M:MFiles.VAF.Common.ApplicationTaskQueue.TaskQueueManager.CallServerSafe(System.Action)">
+            <summary>
+            Wraps server calls with a try catch, that checks connectivity loss from the
+            server and vault when certain errors are encountered. When the connectivity
+            has been lost, the task polling is disabled until the connectivity has been restored.
+            </summary>
+            <param name="action">Action containing the server call.</param>
+        </member>
+        <member name="M:MFiles.VAF.Common.ApplicationTaskQueue.TaskQueueManager.CallServerSafe``1(System.Func{``0})">
+            <summary>
+            Wraps server calls with a try catch, that checks connectivity loss from the
+            server and vault when certain errors are encountered. When the connectivity
+            has been lost, the task polling is disabled until the connectivity has been restored.
+            </summary>
+            <param name="func">Function containing the server call.</param>
+            <typeparam name="T">Return type.</typeparam>
+            <returns>Returns T.</returns>
+        </member>
         <member name="M:MFiles.VAF.Common.ApplicationTaskQueue.TaskQueueManager.AdjustPollingTimerInterval(MFiles.VAF.Common.ApplicationTaskQueue.TaskQueueManager.TaskQueue)">
             <summary>
             Updates the polling timer to ensure the timers interval is less than or equal to the passed
@@ -879,6 +904,13 @@
             May return null if there are no queue ids to query or in the event of an error in the server request.
             </returns>
         </member>
+        <member name="M:MFiles.VAF.Common.ApplicationTaskQueue.TaskQueueManager.CanConnectToServerAndVault(System.Exception@)">
+            <summary>
+            Tests the connectivity to the server and vault.
+            </summary>
+            <param name="failEx">When an exception is encountered it is set into this out param.</param>
+            <returns>True when the connectivity tests is successful.</returns>
+        </member>
         <member name="M:MFiles.VAF.Common.ApplicationTaskQueue.TaskQueueManager.GetNewBroadcastMessages(System.String,System.String)">
             <summary>
             Gets new broadcast messages from the server.
@@ -886,6 +918,14 @@
             <param name="queueId">Task queue identifier to resolve broadcast messages from.</param>
             <param name="lastProcessedBroadcastId">Last broadcast message id to be processed by 'this' server.</param>
             <returns><see cref="T:MFilesAPI.ApplicationBroadcastMessages"/></returns>
+        </member>
+        <member name="M:MFiles.VAF.Common.ApplicationTaskQueue.TaskQueueManager.ThrowIfConnectionHasBeenLost(System.Exception)">
+            <summary>
+            Tests the connectivity to the server and vault.
+            Enables, <see cref="P:MFiles.VAF.Common.ApplicationTaskQueue.TaskQueueManager.TestConnectivityBeforePolling"/> and throws
+            an <see cref="T:System.AggregateException"/> if connectivity has been lost.
+            </summary>
+            <param name="ex">Exception to check for connectivity loss.</param>
         </member>
         <member name="M:MFiles.VAF.Common.ApplicationTaskQueue.TaskQueueManager.GetBroadcastTasks(MFiles.VAF.Common.ApplicationTaskQueue.TaskQueueManager.TaskQueue)">
             <summary>
@@ -956,6 +996,12 @@
         <member name="P:MFiles.VAF.Common.ApplicationTaskQueue.TaskQueueManager.PollingStopwatch">
             <summary>
             Stopwatch that keeps track of time since the last elapsed event of the polling timer.
+            </summary>
+        </member>
+        <member name="P:MFiles.VAF.Common.ApplicationTaskQueue.TaskQueueManager.TestConnectivityBeforePolling">
+            <summary>
+            Enable when the connection has been lost.
+            - When true this forces a connectivity check before polling the server.
             </summary>
         </member>
         <member name="M:MFiles.VAF.Common.ApplicationTaskQueue.TaskQueueManager.OnPollingTimeElapsed(System.Object)">
@@ -1517,6 +1563,11 @@
             The extension object name element name.
             </summary>
         </member>
+        <member name="F:MFiles.VAF.Common.ApplicationDefinition.ApplicationDefinitionData.ElementNames.MultiServerCompatible">
+            <summary>
+            The multi-server mode compatible flag.
+            </summary>
+        </member>
         <member name="M:MFiles.VAF.Common.ApplicationDefinition.ApplicationDefinitionData.#ctor">
             <summary>
             Default constructor needed by the serialization.
@@ -1567,6 +1618,11 @@
             The name of the application's extension object that is responsible of the event handling and dispatching.
             </summary>
         </member>
+        <member name="P:MFiles.VAF.Common.ApplicationDefinition.ApplicationDefinitionData.MultiServerCompatible">
+            <summary>
+            The multi-server mode compatibility flag.
+            </summary>
+        </member>
         <member name="M:MFiles.VAF.Common.ApplicationDefinition.ApplicationDefinitionData.GetSchema">
             <summary>
             Method for returning the schema. Documentation says that this needs to return null.
@@ -1613,6 +1669,11 @@
         <member name="P:MFiles.VAF.Common.ApplicationDefinition.MasterApplicationGuid">
             <summary>
             The master application's GUID.
+            </summary>
+        </member>
+        <member name="P:MFiles.VAF.Common.ApplicationDefinition.MultiServerCompatible">
+            <summary>
+            The multi-server mode compatibility flag.
             </summary>
         </member>
         <member name="P:MFiles.VAF.Common.ApplicationDefinition.Name">
@@ -2630,6 +2691,23 @@
             	Indicates whether the url should point to this specific version, or the latest version of the object.
             </param>
             <returns>Formatted platform links wrapped in an 'a' tag.</returns>
+        </member>
+        <member name="T:MFiles.VAF.Common.ModuleValidationException">
+            <summary>
+            Exception thrown when modular applications have modules that fail validation.
+            </summary>
+        </member>
+        <member name="P:MFiles.VAF.Common.ModuleValidationException.ErrorModules">
+            <summary>
+            Modules that failed to load ( had errors ).
+            </summary>
+        </member>
+        <member name="M:MFiles.VAF.Common.ModuleValidationException.#ctor(System.String,System.Collections.Generic.List{System.String})">
+            <summary>
+            Self populating constructor.
+            </summary>
+            <param name="message">The exception message.</param>
+            <param name="errorModules">Collection of modules that failed validation.</param>
         </member>
         <member name="T:MFiles.VAF.Common.ObjectVersionsExtensionMethods">
             <summary>
@@ -5566,6 +5644,27 @@
             <param name="exception">The COMException that should be checked.</param>
             <returns>True, when the exception is an M-Files access denied error.</returns>
         </member>
+        <member name="M:MFiles.VAF.Common.MFUtils.IsSessionWithServerNoLongerValidError(System.Exception)">
+            <summary>
+            Determines if this error is a "The current session with M-Files Server is no longer valid" error.
+            </summary>
+            <param name="ex">The exception to check.</param>
+            <returns>True if the error is a session no longer valid error.</returns>
+        </member>
+        <member name="M:MFiles.VAF.Common.MFUtils.IsRpcServerUnavailableError(System.Exception)">
+            <summary>
+            Determines if this error is a RPC Server Unavailable error.
+            </summary>
+            <param name="ex">The exception to check.</param>
+            <returns>True if the error is a RPC Server Unavailable error.</returns>
+        </member>
+        <member name="M:MFiles.VAF.Common.MFUtils.IsRemoteProcedureCallFailedError(System.Exception)">
+            <summary>
+            Determines if this error is a Remote procedure call failed error..
+            </summary>
+            <param name="ex">The exception to check.</param>
+            <returns>True if the error is a Remote procedure call failed error.</returns>
+        </member>
         <member name="M:MFiles.VAF.Common.MFUtils.IsAlreadyCheckedOutError(System.Exception)">
             <summary>
             Checks if the Exception is an 'Already checked out' error.
@@ -7281,6 +7380,22 @@
             Provides some common utility methods for system operations.
             </summary>
         </member>
+        <member name="P:MFiles.VAF.Common.SysUtils.VaultName">
+            <summary>
+            Vault name.
+            </summary>
+        </member>
+        <member name="P:MFiles.VAF.Common.SysUtils.VaultGuid">
+            <summary>
+            Vault guid.
+            </summary>
+        </member>
+        <member name="M:MFiles.VAF.Common.SysUtils.SetVaultIdentifier(MFilesAPI.Vault)">
+            <summary>
+            Sets the static Name and GUID identifiers for the vault.
+            </summary>
+            <param name="vault">Vault to store the name and guid for.</param>
+        </member>
         <member name="M:MFiles.VAF.Common.SysUtils.CreateTempFolder">
             <summary>
             Creates a temporary folder.
@@ -7514,6 +7629,72 @@
             <param name="updateFromServer">True if the information should always be updated from the server. If false, the client local cache may be used. This flag is relevant only when M-Files API is used in client mode.</param>
             <param name="maxBatchSize">Batch size limit per GetObjectVersionAndPropertiesOfMultipleObjects () call.</param>
             <returns><see cref="T:MFilesAPI.ObjectVersionAndPropertiesOfMultipleObjects"/></returns>
+        </member>
+        <member name="T:MFiles.VAF.Common.VaultObjectPropertyOperationsExtensionMethods">
+            <summary>
+            Vault ObjectPropertyOperations Extension Methods.
+            </summary>
+        </member>
+        <member name="T:MFiles.VAF.Common.VaultObjectPropertyOperationsExtensionMethods.PropertyValuesOfMultipleObjectsImpl">
+            <summary>
+            Private implementation of the <see cref="T:MFilesAPI.PropertyValuesOfMultipleObjects"/> interface, so we can populate it.
+            </summary>
+        </member>
+        <member name="M:MFiles.VAF.Common.VaultObjectPropertyOperationsExtensionMethods.PropertyValuesOfMultipleObjectsImpl.#ctor(System.Collections.Generic.IEnumerable{MFilesAPI.PropertyValues})">
+            <summary>
+            Self initializing constructor.
+            </summary>
+            <param name="items">Property values items to populate.</param>
+        </member>
+        <member name="P:MFiles.VAF.Common.VaultObjectPropertyOperationsExtensionMethods.PropertyValuesOfMultipleObjectsImpl.items">
+            <summary>
+            Backing collection.
+            </summary>
+        </member>
+        <member name="M:MFiles.VAF.Common.VaultObjectPropertyOperationsExtensionMethods.PropertyValuesOfMultipleObjectsImpl.System#Collections#IEnumerable#GetEnumerator">
+            <summary>
+            IEnumerable.GetEnumerator() interface method.
+            </summary>
+            <returns><see cref="T:System.Collections.IEnumerator"/></returns>
+        </member>
+        <member name="M:MFiles.VAF.Common.VaultObjectPropertyOperationsExtensionMethods.PropertyValuesOfMultipleObjectsImpl.Clone">
+            <summary>
+            Clones the collection.
+            </summary>
+            <returns><see cref="T:MFilesAPI.PropertyValuesOfMultipleObjects"/>.</returns>
+        </member>
+        <member name="P:MFiles.VAF.Common.VaultObjectPropertyOperationsExtensionMethods.PropertyValuesOfMultipleObjectsImpl.Count">
+            <summary>
+            Number of items in the collection.
+            </summary>
+        </member>
+        <member name="P:MFiles.VAF.Common.VaultObjectPropertyOperationsExtensionMethods.PropertyValuesOfMultipleObjectsImpl.Item(System.Int32)">
+            <summary>
+            Index accessor that accounts for the 1 indexed COM type.
+            </summary>
+            <param name="Index">Index to access.</param>
+            <returns></returns>
+        </member>
+        <member name="M:MFiles.VAF.Common.VaultObjectPropertyOperationsExtensionMethods.PropertyValuesOfMultipleObjectsImpl.MFilesAPI#IPropertyValuesOfMultipleObjects#GetEnumerator">
+            <summary>
+            IPropertyValuesOfMultipleObjects.GetEnumerator() interface method.
+            </summary>
+            <returns><see cref="T:System.Collections.IEnumerator"/></returns>
+        </member>
+        <member name="M:MFiles.VAF.Common.VaultObjectPropertyOperationsExtensionMethods.PropertyValuesOfMultipleObjectsImpl.Add(MFilesAPI.PropertyValuesOfMultipleObjects)">
+            <summary>
+            Adds a collection of <see cref="T:MFilesAPI.PropertyValues"/>to this collection.
+            </summary>
+            <param name="collection">Collection to merge into this collection</param>
+        </member>
+        <member name="M:MFiles.VAF.Common.VaultObjectPropertyOperationsExtensionMethods.GetPropertiesOfMultipleObjectsInBatches(MFilesAPI.VaultObjectPropertyOperations,MFilesAPI.ObjVers,System.Int32)">
+            <summary>
+            Resolves the <see cref="T:MFilesAPI.ObjectVersionAndPropertiesOfMultipleObjects"/> in batches.
+            </summary>
+            <param name="ops">This.</param>
+            <param name="objVers">The object version identifiers of the object versions for which the information is requested.</param>
+            <param name="maxBatchSize">Batch size limit per GetPropertiesOfMultipleObjects() call.</param>
+            <returns><see cref="T:MFilesAPI.PropertyValuesOfMultipleObjects"/></returns>
         </member>
         <member name="T:MFiles.VAF.Common.VaultServerAttachmentsExtensions">
             <summary>
@@ -8875,6 +9056,54 @@
             <param name="context">The context for the request.</param>
             <returns>The application node's currently available commands.</returns>
         </member>
+        <!-- Badly formed XML comment ignored for member "M:MFiles.VAF.Core.ConfigurableVaultApplicationBase`1.CanRebroadcastVaultExtentionMethodCalls" -->
+        <member name="M:MFiles.VAF.Core.ConfigurableVaultApplicationBase`1.GetRebroadcastQueueId">
+            <summary>
+            No re-broadcast queue defined by default.
+            </summary>
+            <returns>Task queue id of the queue that will handle the re-broadcast tasks.</returns>
+        </member>
+        <member name="M:MFiles.VAF.Core.ConfigurableVaultApplicationBase`1.BroadcastVaultExtensionMethodCall(System.String,System.Int32,MFilesAPI.Vault,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Broadcasts the vault extension method to all servers, via a task queue broadcast message.
+            </summary>
+            <param name="vaultExtensionMethodProxyId">
+            The VaultExtensionMethod proxy identifier.
+            => $"{VaultAppFullName}.MFEventHandlerVaultExtensionMethod"
+            </param>
+            <param name="currentUserId">The current user id of the user who triggered this call.</param>
+            <param name="vault">Vault object.</param>
+            <param name="inputParams">The same input params that were received, will be forwarded.</param>
+        </member>
+        <member name="T:MFiles.VAF.Core.IRebroadcastsVaultExtensionMethods">
+            <summary>
+            Defines an interface for re-broadcasting vault extension methods.
+            </summary>
+        </member>
+        <member name="M:MFiles.VAF.Core.IRebroadcastsVaultExtensionMethods.CanRebroadcastVaultExtentionMethodCalls">
+            <summary>
+            Used to determine if the vault app can re-broadcast.
+            </summary>
+            <returns>True when the vault re-broadcasting vault extension methods is supported.</returns>
+        </member>
+        <member name="M:MFiles.VAF.Core.IRebroadcastsVaultExtensionMethods.GetRebroadcastQueueId">
+            <summary>
+            Returns the task queue id of the broadcast queue that will handle re-broadcast task types.
+            </summary>
+            <returns>Task queue id of the broadcast queue that will handle re-broadcast task types.</returns>
+        </member>
+        <member name="M:MFiles.VAF.Core.IRebroadcastsVaultExtensionMethods.BroadcastVaultExtensionMethodCall(System.String,System.Int32,MFilesAPI.Vault,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Broadcasts the vault extension method to all servers, via a task queue broadcast message.
+            </summary>
+            <param name="vaultExtensionMethodProxyId">
+            The VaultExtensionMethod proxy identifier.
+            => $"{VaultAppFullName}.MFEventHandlerVaultExtensionMethod"
+            </param>
+            <param name="currentUserId">The current user id of the user who triggered this call.</param>
+            <param name="vault">Vault object.</param>
+            <param name="inputParams">The same input params that were received, will be forwarded.</param>
+        </member>
         <member name="T:MFiles.VAF.LicenseManagerBase`1">
             <summary>
             License Manager used by the VaultApplicationBase.
@@ -10082,6 +10311,11 @@
             A manager for creating background operations.
             </summary>
         </member>
+        <member name="P:MFiles.VAF.VaultApplicationBase.AvailabilityGroupStatusWriter">
+            <summary>
+            Multi-server availability group status reporter.
+            </summary>
+        </member>
         <member name="P:MFiles.VAF.VaultApplicationBase.MetadataStructureValidationResult">
             <summary>
             The results from the metadata structure validation.
@@ -10252,7 +10486,7 @@
             - NOTE: Once this method releases the vault object will have been disposed.
             - When overriding this method in classes that extend this one, any logic that
             - needs to use that vault must be processed before the base.Install() method is
-            - called. Alternativley you can place the logic inside an override of the
+            - called. Alternatively you can place the logic inside an override of the
             - InstallApplication() method.
             </summary>
             <param name="vaultSrc">The vault in which the application should be installed.</param>
@@ -10263,7 +10497,7 @@
             - NOTE: Once this method releases the vault object will have been disposed.
             - When overriding this method in classes that extend this one, any logic that
             - needs to use that vault must be processed before the base.Uninstall() method is
-            - called. Alternativley you can place the logic inside an override of the
+            - called. Alternatively you can place the logic inside an override of the
             - UninstallApplication() method.
             </summary>
             <param name="vaultSrc">The vault from which the application should be uninstalled.</param>
@@ -10338,7 +10572,7 @@
             - NOTE: Once this method releases the vault object will have been disposed.
             - When overriding this method in classes that extend this one, any logic that
             - needs to use that vault must be processed before the base.Initialize() method is
-            - called. Alternativley you can place the logic inside an override of the
+            - called. Alternatively you can place the logic inside an override of the
             - InitializeImpl() method.
             </summary>
             <param name="vaultSrc">The target vault.</param>
@@ -10362,8 +10596,9 @@
             - NOTE: Once this method releases the vault object will have been disposed.
             - When overriding this method in classes that extend this one, any logic that
             - needs to use that vault must be processed before the base.StartOperations() method is
-            - called. Alternativley you can place the logic inside an override of the
-            - UninitializeApplication() method.
+            - called. Alternatively you can place the logic inside an override of the
+            - StartApplication() method or inside the RegisterTaskQueues() method for
+            - Vault applications that implement the IUsesTaskQueue interface.
             - ADDITIONAL NOTE: The PermanentVault reference will still be available.
             </summary>
             <param name="vaultPersistent">The persist-able target vault.</param>
@@ -10389,6 +10624,18 @@
             Protected overridable for the child classes to override so they can pass in their own settings.
             PermanentVault is initialized and should be used as the vault connection.
             </summary>
+        </member>
+        <member name="F:MFiles.VAF.VaultApplicationBase.MultiserverHealthStatusNamespace">
+            <summary>
+            Namespace holds the multi-server mode health status entries (one per host machine).
+            </summary>
+        </member>
+        <member name="M:MFiles.VAF.VaultApplicationBase.InitializeAvailabilityGroupStatusWriter(MFilesAPI.Vault)">
+            <summary>
+            Protected overridable for the child classes to override so they can pass in their own settings.
+            PermanentVault is initialized and should be used as the vault connection.
+            </summary>
+            <param name="vault">Optional vault, <see cref="P:MFiles.VAF.VaultApplicationBase.PermanentVault"/> will be used when this is not provided.</param>
         </member>
         <member name="M:MFiles.VAF.VaultApplicationBase.StartApplication">
             <summary>
@@ -10418,7 +10665,7 @@
             - NOTE: Once this method releases the vault object will have been disposed.
             - When overriding this method in classes that extend this one, any logic that
             - needs to use that vault must be processed before the base.Uninitialize() method is
-            - called. Alternativley you can place the logic inside an override of the
+            - called. Alternatively you can place the logic inside an override of the
             - UninitializeApplication() method.
             </summary>
             <param name="vaultSrc">The target vault.</param>
@@ -10746,11 +10993,12 @@
         <member name="M:MFiles.VAF.VaultApplicationBase.CreateMetadataStructureCacheEventSink(MFilesAPI.Vault,MFiles.VAF.MetadataCache.IMetadataStructureCacheUpdate)">
             <summary>
             Creates the metadata structure cache event sink that can be used to update the cache based on events. Currently
-            only updating the users, user groups and logins is supported. If one does not want to register the event handlers
-            and update the cache then this method should be overridden and it should return null.
+            only updating the users, user groups and logins is supported.
+            - The default setting is to disable all event driven caches, so we return a null value.
+            - To enable event driven caches, override to return a `new MetadataStructureCacheEventSink( cache );`
             </summary>
             <param name="vault">The vault object.</param>
-            <param name="cache">The updatable cache pobject that should be the target of the updates.</param>
+            <param name="cache">The updateable cache object that should be the target of the updates.</param>
             <returns>The created cache updater object or null if cache updating is not wanted.</returns>
         </member>
         <member name="M:MFiles.VAF.VaultApplicationBase.GetEventHandlerEnvironment(MFiles.VAF.ScriptEnvironment)">
@@ -13022,6 +13270,12 @@
             that have been dispatched for processing. The key is the <see cref="P:MFiles.VAF.MultiserverMode.BatchProcessorJob.Guid"/>.
             </summary>
         </member>
+        <member name="P:MFiles.VAF.MultiserverMode.AppTaskBatchProcessor.ActiveTasks">
+            <summary>
+            Collection of task jobs(<see cref="!:ConcurrentDictionary&lt;string, Task&gt;"/>),
+            that have been dispatched for processing. The key is the <see cref="P:MFiles.VAF.MultiserverMode.BatchProcessorJob.Guid"/>.
+            </summary>
+        </member>
         <member name="M:MFiles.VAF.MultiserverMode.AppTaskBatchProcessor.#ctor(MFiles.VAF.MultiserverMode.AppTaskBatchProcessorSettings,System.Threading.CancellationToken)">
             <summary>
             Primary constructor.
@@ -13041,21 +13295,30 @@
             </summary>
             <param name="args">Batch task processor job that args.</param>
         </member>
+        <member name="E:MFiles.VAF.MultiserverMode.AppTaskBatchProcessor.BatchCreated">
+            <summary>
+            The Event fired when a new batch is created.
+            - Used to bind to each new batch job, which in turn exposes that individual batch job's life-cycle events.
+            </summary>
+        </member>
+        <member name="M:MFiles.VAF.MultiserverMode.AppTaskBatchProcessor.OnBatchCreated(MFiles.VAF.MultiserverMode.BatchProcessorJobArgs)">
+            <summary>
+            <see cref="E:MFiles.VAF.MultiserverMode.AppTaskBatchProcessor.BatchCreated"/> event invoker.
+            </summary>
+            <param name="args">Batch task processor job that args.</param>
+        </member>
         <member name="M:MFiles.VAF.MultiserverMode.AppTaskBatchProcessor.BindToBatchLifecycleEvents(MFiles.VAF.MultiserverMode.BatchProcessorJob)">
             <summary>
             Binds to the Completed / Failed / Canceled events, keeping the active batches list in sync.
             </summary>
             <param name="batchJob">Batch job to bind to.</param>
         </member>
-        <member name="M:MFiles.VAF.MultiserverMode.AppTaskBatchProcessor.UpdateTaskInfo(MFiles.VAF.Common.ApplicationTaskQueue.ApplicationTask,MFilesAPI.MFTaskState,System.String,System.Boolean)">
+        <member name="M:MFiles.VAF.MultiserverMode.AppTaskBatchProcessor.ProcessBatch(MFiles.VAF.MultiserverMode.BatchProcessorJob)">
             <summary>
-            Updates the task info inside the task queue for the passed application task.
+            Assigns the processing of a batch to a system task.
             </summary>
-            <param name="appTask">App task to update.</param>
-            <param name="taskState">Task state.</param>
-            <param name="remarks">Remarks property value.</param>
-            <param name="appendRemarks">Append to any existing remarks or replace in full?</param>
-            <returns>Updated application task object.</returns>
+            <param name="batchJob">Batch job to process.</param>
+            <returns>System <see cref="T:System.Threading.Tasks.Task"/> that processes the batch.</returns>
         </member>
         <member name="M:MFiles.VAF.MultiserverMode.AppTaskBatchProcessor.ProcessTasks(MFilesAPI.Vault,System.Collections.Generic.IEnumerable{MFiles.VAF.Common.ApplicationTaskQueue.ApplicationTask},System.Threading.CancellationToken)">
             <summary>
@@ -13888,6 +14151,104 @@
             </summary>
             <param name="data">Data value to store.</param>
         </member>
+        <member name="T:MFiles.VAF.MultiserverMode.AvailabilityGroupStatusSettings">
+            <summary>
+            Settings object used to get and set the availability group status of a server.
+            </summary>
+        </member>
+        <member name="P:MFiles.VAF.MultiserverMode.AvailabilityGroupStatusSettings.Vault">
+            <summary>
+            The connection object.
+            </summary>
+        </member>
+        <member name="P:MFiles.VAF.MultiserverMode.AvailabilityGroupStatusSettings.Namespace">
+            <summary>
+            The named value namespace.
+            </summary>
+        </member>
+        <member name="P:MFiles.VAF.MultiserverMode.AvailabilityGroupStatusSettings.Type">
+            <summary>
+            Named value security type.
+            </summary>
+        </member>
+        <member name="P:MFiles.VAF.MultiserverMode.AvailabilityGroupStatusSettings.ConfigKey">
+            <summary>
+            The config key for the vault app or module.
+            </summary>
+        </member>
+        <member name="M:MFiles.VAF.MultiserverMode.AvailabilityGroupStatusSettings.#ctor(MFilesAPI.Vault,System.String,MFilesAPI.MFNamedValueType,System.String)">
+            <summary>
+            Self initializing constructor.
+            </summary>
+            <param name="vault">Vault object.</param>
+            <param name="namedValueNs">The named value namespace.</param>
+            <param name="type">The named value type.</param>
+            <param name="configKey">The unique config key for your module of application.</param>
+        </member>
+        <member name="T:MFiles.VAF.MultiserverMode.AvailabilityGroupStatusWriter">
+            <summary>
+            Multi-server mode availability group health status writer.
+            </summary>
+        </member>
+        <member name="M:MFiles.VAF.MultiserverMode.AvailabilityGroupStatusWriter.ReportStatus(MFiles.VAF.Configuration.Domain.DomainStatusSummary,MFiles.VAF.MultiserverMode.AvailabilityGroupStatusSettings)">
+            <summary>
+            Publishes the health status for this machines.
+            </summary>
+            <param name="statusSummary">Vault app or module's status summary.</param>
+            <param name="settings">AG status settings.</param>
+        </member>
+        <member name="M:MFiles.VAF.MultiserverMode.AvailabilityGroupStatusWriter.ReportFindings(MFiles.VAF.MultiserverMode.AvailabilityGroupStatusSettings,System.String,System.Boolean,System.Collections.Generic.IEnumerable{MFiles.VAF.Configuration.ValidationFinding})">
+            <summary>
+            Publishes the multi-server mode health status to named value storage.
+            </summary>
+            <param name="settings">AG status settings.</param>
+            <param name="label">The host display name.</param>
+            <param name="isInError">Is the module or app in error?</param>
+            <param name="findings">Vault validation findings.</param>
+        </member>
+        <member name="P:MFiles.VAF.MultiserverMode.AvailabilityGroupStatusWriter.CurrentServer">
+            <summary>
+            Current vault server attachment.
+            </summary>
+        </member>
+        <member name="P:MFiles.VAF.MultiserverMode.AvailabilityGroupStatusWriter.Settings">
+            <summary>
+             Settings object.
+            </summary>
+        </member>
+        <member name="M:MFiles.VAF.MultiserverMode.AvailabilityGroupStatusWriter.#ctor(MFiles.VAF.MultiserverMode.AvailabilityGroupStatusSettings)">
+            <summary>
+            Self initializing constructor.
+            </summary>
+            <param name="settings">AG status settings.</param>
+        </member>
+        <member name="M:MFiles.VAF.MultiserverMode.AvailabilityGroupStatusWriter.TryRepeatedly(System.Action,System.Int32,System.Int32)">
+            <summary>
+            Concurrent operations may fail... so we retry them here.
+            </summary>
+            <param name="action">Action to execute.</param>
+            <param name="delayInMs">Delay between attempts.</param>
+            <param name="attemptsRemaining">Attempts remaining.</param>
+        </member>
+        <member name="M:MFiles.VAF.MultiserverMode.AvailabilityGroupStatusWriter.RemoveHost">
+            <summary>
+            Removes the current host from the active entries list.
+            </summary>
+        </member>
+        <member name="M:MFiles.VAF.MultiserverMode.AvailabilityGroupStatusWriter.ReportStatus(MFiles.VAF.Configuration.Domain.DomainStatusSummary)">
+            <summary>
+            Publishes the health status for this machines.
+            </summary>
+            <param name="statusSummary">Vault app or module's domain status summary.</param>
+        </member>
+        <member name="M:MFiles.VAF.MultiserverMode.AvailabilityGroupStatusWriter.ReportFindings(System.String,System.Boolean,System.Collections.Generic.IEnumerable{MFiles.VAF.Configuration.ValidationFinding})">
+            <summary>
+            Publishes the multi-server mode health status to named value storage.
+            </summary>
+            <param name="label">Vault object.</param>
+            <param name="isInError">Is the module or app in error?</param>
+            <param name="findings">Vault validation findings.</param>
+        </member>
         <member name="T:MFiles.VAF.MultiserverMode.DataUpdater`1">
             <summary>
             Delegate for updating the data value. Receives a clone copy of the data object and returns
@@ -14083,16 +14444,6 @@
              Active job lock object.
             </summary>
         </member>
-        <member name="M:MFiles.VAF.MultiserverMode.SequentialTaskProcessor.UpdateTaskInfo(MFiles.VAF.Common.ApplicationTaskQueue.ApplicationTask,MFilesAPI.MFTaskState,System.String,System.Boolean)">
-            <summary>
-            Updates the task info inside the task queue for the passed application task.
-            </summary>
-            <param name="appTask">App task to update.</param>
-            <param name="taskState">Task state.</param>
-            <param name="remarks">Remarks property value.</param>
-            <param name="appendRemarks">Append to any existing remarks or replace in full?</param>
-            <returns>Updated application task object.</returns>
-        </member>
         <member name="M:MFiles.VAF.MultiserverMode.SequentialTaskProcessor.ProcessTasks(MFilesAPI.Vault,System.Collections.Generic.IEnumerable{MFiles.VAF.Common.ApplicationTaskQueue.ApplicationTask},System.Threading.CancellationToken)">
             <summary>
             Task collection processor.
@@ -14100,6 +14451,16 @@
             <param name="vault">Vault object.</param>
             <param name="tasks">Collection of tasks to process.</param>
             <param name="cancellationToken">Cancellation token, used to cancel all processing for this batch of tasks.</param>
+        </member>
+        <member name="M:MFiles.VAF.MultiserverMode.SequentialTaskProcessor.CreateTaskProcessorJob(MFilesAPI.Vault,MFiles.VAF.Common.ApplicationTaskQueue.ApplicationTask,System.Threading.CancellationToken)">
+            <summary>
+            Creates the task processor job.
+            - Throws an error is the task processor job handler for the appTask.Type cannot be resolved.
+            </summary>
+            <param name="vault">Vault object.</param>
+            <param name="appTask">Task to process.</param>
+            <param name="cancellationToken">Cancellation token, used to cancel processing for this task.</param>
+            <returns><see cref="T:MFiles.VAF.MultiserverMode.TaskProcessorJob"/></returns>
         </member>
         <member name="M:MFiles.VAF.MultiserverMode.SequentialTaskProcessor.ProcessTask(MFilesAPI.Vault,MFiles.VAF.Common.ApplicationTaskQueue.ApplicationTask,System.Threading.CancellationToken)">
             <summary>
@@ -14296,23 +14657,27 @@
             <param name="id">Task Id.</param>
             <returns><see cref="T:MFiles.VAF.Common.ApplicationTaskQueue.ApplicationTask"/></returns>
         </member>
-        <member name="M:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.UpdateTaskAsAssignedToProcessor(MFiles.VAF.MultiserverMode.TaskProcessorJob)">
+        <member name="M:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.UpdateTaskAsAssignedToProcessor(MFiles.VAF.MultiserverMode.TaskProcessorJob,System.Boolean)">
             <summary>
             Update task info as having been assigned implementation.
             </summary>
             <param name="job">Task processor job.</param>
+            <param name="appendRemarks">
+            - When true appends the remarks to the pre-existing value.
+            - Replaces when false.
+            </param>
         </member>
         <member name="M:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.UpdateTaskInfo(MFiles.VAF.Common.ApplicationTaskQueue.ApplicationTask,MFilesAPI.MFTaskState,System.String,System.Boolean)">
             <summary>
-            Update task info implementation.
+            Updates the task info inside the task queue for the passed application task.
             </summary>
-            <param name="appTask">AppTask to update.</param>
-            <param name="taskState">State to set.</param>
-            <param name="remarks">custom data for the remarks property.</param>
+            <param name="appTask">App task to update.</param>
+            <param name="taskState">Task state.</param>
+            <param name="remarks">Remarks property value.</param>
             <param name="appendRemarks">Append to any existing remarks or replace in full?</param>
-            <returns>Updated version.</returns>
+            <returns>Updated application task object.</returns>
         </member>
-        <member name="M:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.UpdateFailedJobInTaskQueue(MFiles.VAF.Common.ApplicationTaskQueue.ApplicationTask,System.String,System.Exception,System.String)">
+        <member name="M:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.UpdateFailedJobInTaskQueue(MFiles.VAF.Common.ApplicationTaskQueue.ApplicationTask,System.String,System.Exception,System.String,System.Boolean)">
             <summary>
             Updates the task in the application task queue, with failed info.
             </summary>
@@ -14320,16 +14685,24 @@
             <param name="processingTargetIdentifiers">Identifiers for the objects that are the target of processing.</param>
             <param name="ex">Failure Exception</param>
             <param name="remarks">Custom remarks (default is used if not provided).</param>
+            <param name="appendRemarks">
+            - When true appends the remarks to the pre-existing value.
+            - Replaces when false.
+            </param>
         </member>
-        <member name="M:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.UpdateCompletedJobInTaskQueue(MFiles.VAF.Common.ApplicationTaskQueue.ApplicationTask,System.String,System.String)">
+        <member name="M:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.UpdateCompletedJobInTaskQueue(MFiles.VAF.Common.ApplicationTaskQueue.ApplicationTask,System.String,System.String,System.Boolean)">
             <summary>
             Updates the completed app task in the task queue.
             </summary>
             <param name="appTask">App task that completed successfully.</param>
             <param name="processingTargetIdentifiers">Identifiers for the objects that are the target of processing.</param>
             <param name="remarks">Custom remarks (default is used if not provided).</param>
+            <param name="appendRemarks">
+            - When true appends the remarks to the pre-existing value.
+            - Replaces when false.
+            </param>
         </member>
-        <member name="M:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.UpdateCancelledJobInTaskQueue(MFiles.VAF.Common.ApplicationTaskQueue.ApplicationTask,System.String,System.String)">
+        <member name="M:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.UpdateCancelledJobInTaskQueue(MFiles.VAF.Common.ApplicationTaskQueue.ApplicationTask,System.String,System.String,System.Boolean)">
             <summary>
             Updates the passed job as having been cancelled in the task queue.
             </summary>
@@ -14338,6 +14711,10 @@
             Identifiers for the objects that are the target of processing.
             </param>
             <param name="remarks">Custom remarks (default is used if not provided).</param>
+            <param name="appendRemarks">
+            - When true appends the remarks to the pre-existing value.
+            - Replaces when false.
+            </param>
         </member>
         <member name="M:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.UpdateTaskInfo(MFiles.VAF.MultiserverMode.TaskProcessorJob,MFilesAPI.MFTaskState,System.String,System.Boolean)">
             <summary>
@@ -14348,7 +14725,7 @@
             <param name="remarks">custom data for the remarks property.</param>
             <param name="appendRemarks">Append to any existing remarks or replace in full?</param>
         </member>
-        <member name="M:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.UpdateFailedJobInTaskQueue(MFiles.VAF.MultiserverMode.TaskProcessorJob,System.String,System.Exception,System.String)">
+        <member name="M:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.UpdateFailedJobInTaskQueue(MFiles.VAF.MultiserverMode.TaskProcessorJob,System.String,System.Exception,System.String,System.Boolean)">
             <summary>
             Updates the task in the application task queue, with failed info.
             </summary>
@@ -14358,8 +14735,12 @@
             </param>
             <param name="ex">Failure Exception</param>
             <param name="remarks">Custom remarks (default is used if not provided).</param>
+            <param name="appendRemarks">
+            - When true appends the remarks to the pre-existing value.
+            - Replaces when false.
+            </param>
         </member>
-        <member name="M:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.UpdateCompletedJobInTaskQueue(MFiles.VAF.MultiserverMode.TaskProcessorJob,System.String,System.String)">
+        <member name="M:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.UpdateCompletedJobInTaskQueue(MFiles.VAF.MultiserverMode.TaskProcessorJob,System.String,System.String,System.Boolean)">
             <summary>
             Updates the completed app task in the task queue.
             </summary>
@@ -14368,8 +14749,12 @@
             Identifiers for the objects that are the target of processing.
             </param>
             <param name="remarks">Custom remarks (default is used if not provided).</param>
+            <param name="appendRemarks">
+            - When true appends the remarks to the pre-existing value.
+            - Replaces when false.
+            </param>
         </member>
-        <member name="M:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.UpdateCancelledJobInTaskQueue(MFiles.VAF.MultiserverMode.TaskProcessorJob,System.String,System.String)">
+        <member name="M:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.UpdateCancelledJobInTaskQueue(MFiles.VAF.MultiserverMode.TaskProcessorJob,System.String,System.String,System.Boolean)">
             <summary>
             Updates the passed job as having been cancelled in the task queue.
             </summary>
@@ -14378,6 +14763,10 @@
             Identifiers for the objects that are the target of processing.
             </param>
             <param name="remarks">Custom remarks (default is used if not provided).</param>
+            <param name="appendRemarks">
+            - When true appends the remarks to the pre-existing value.
+            - Replaces when false.
+            </param>
         </member>
         <member name="E:MFiles.VAF.MultiserverMode.TaskProcessorBase`1.JobCreated">
             <summary>
@@ -18941,6 +19330,11 @@
             .
              </summary>
         </member>
+        <member name="P:MFiles.VAF.Resources.TextResources.BatchProcessorJobFailedToResolveHandler">
+            <summary>
+              Looks up a localized string similar to Task {0} failed to process in batch {1}. TaskProcessorJobHandler was not found for type, {2}..
+            </summary>
+        </member>
         <member name="P:MFiles.VAF.Resources.TextResources.BothArgsNull">
             <summary>
               Looks up a localized string similar to Both arguments cannot be null..
@@ -19602,11 +19996,6 @@
               Looks up a localized string similar to The property &quot;{0}&quot; has a wrong datatype..
             </summary>
         </member>
-        <member name="P:MFiles.VAF.Resources.TextResources.PropertyMustBeBasedOnRealObjectTypeException">
-            <summary>
-              Looks up a localized string similar to The property &quot;{0}&quot; must point to objects..
-            </summary>
-        </member>
         <member name="P:MFiles.VAF.Resources.TextResources.PropertyRequiredAny">
             <summary>
               Looks up a localized string similar to Any.
@@ -19651,6 +20040,13 @@
             <summary>
               Looks up a localized string similar to A multi-tree string was passed to a &quot;ReferenceTree&quot; object. Use the &quot;ReferenceTrees&quot; object instead..
             </summary>
+        </member>
+        <member name="P:MFiles.VAF.Resources.TextResources.ReportToEventLogHeaderInfo">
+             <summary>
+               Looks up a localized string similar to {0} {1}
+            {2} (Process ID: {3})
+            ----.
+             </summary>
         </member>
         <member name="P:MFiles.VAF.Resources.TextResources.SequentialTaskProcessor_ActiveJobAlreadyInProgress">
             <summary>
@@ -19702,6 +20098,11 @@
               Looks up a localized string similar to Unable to generate trigger VBScript for the state transition &quot;{0} ({1})&quot;. Custom script exists..
             </summary>
         </member>
+        <member name="P:MFiles.VAF.Resources.TextResources.TaskPollingDisabledBecauseConnectionHasBeenLost">
+            <summary>
+              Looks up a localized string similar to Connectivity has been lost, task polling will not resume until the vault connection has been restored..
+            </summary>
+        </member>
         <member name="P:MFiles.VAF.Resources.TextResources.TaskProcessor_NoTasksPassed">
             <summary>
               Looks up a localized string similar to The task processor wasn&apos;t passed any tasks..
@@ -19735,6 +20136,11 @@
         <member name="P:MFiles.VAF.Resources.TextResources.TaskProcessor_UpdateTaskAsStarted">
             <summary>
               Looks up a localized string similar to Started at: UTC( {0} )..
+            </summary>
+        </member>
+        <member name="P:MFiles.VAF.Resources.TextResources.TaskProcessorFailedToResolveTaskProcessorJobHandler">
+            <summary>
+              Looks up a localized string similar to Task {0} failed to process. TaskProcessorJobHandler was not found for type, {1}..
             </summary>
         </member>
         <member name="P:MFiles.VAF.Resources.TextResources.TaskQueue_Source">

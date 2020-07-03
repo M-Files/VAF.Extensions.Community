@@ -225,7 +225,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			int maxConcurrentJobs = 5,
 			int maxPollingInterval = 10,
 			bool automaticallyRegisterQueues = true,
-			bool automaticallyStartPolling = true
+			bool automaticallyStartPolling = true,
+			string vaultExtensionProxyMethodId = null
 		)
 		{
 			// Sanity.
@@ -290,7 +291,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 					TaskQueueManager = vaultApplication.TaskQueueManager,
 					EnableAutomaticTaskUpdates = true,
 					DisableAutomaticProgressUpdates = false,
-					PollTasksOnJobCompletion = true
+					PollTasksOnJobCompletion = true,
+					VaultExtensionMethodProxyId = vaultExtensionProxyMethodId
 				},
 				cancellationToken
 			);
