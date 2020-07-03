@@ -220,7 +220,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			this VaultApplicationBase vaultApplication,
 			string queueId,
 			Dictionary<string, TaskProcessorJobHandler> taskHandlers,
-			CancellationToken cancellationToken = default(CancellationToken),
+			CancellationToken cancellationToken = default,
 			int maxConcurrentBatches = 5,
 			int maxConcurrentJobs = 5,
 			int maxPollingInterval = 10,
