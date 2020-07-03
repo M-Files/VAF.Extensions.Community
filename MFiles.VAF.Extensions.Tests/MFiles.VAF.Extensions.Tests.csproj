@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="MultiServerMode\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 
