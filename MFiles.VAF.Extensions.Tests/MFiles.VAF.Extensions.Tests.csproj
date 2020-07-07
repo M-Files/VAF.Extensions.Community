@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MFiles.VAF" Version="2.2.0.5-rc" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="Moq" Version="4.13.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.0.0" />
@@ -15,33 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="MultiServerMode\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MFiles.VAF.Extensions\MFiles.VAF.Extensions.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Interop.MFilesAPI">
-      <HintPath>..\lib\VAF\Interop.MFilesAPI.dll</HintPath>
-    </Reference>
-    <Reference Include="MFiles.Crypto">
-      <HintPath>..\lib\VAF\MFiles.Crypto.dll</HintPath>
-    </Reference>
-    <Reference Include="MFiles.VAF">
-      <HintPath>..\lib\VAF\MFiles.VAF.dll</HintPath>
-    </Reference>
-    <Reference Include="MFiles.VAF.Configuration">
-      <HintPath>..\lib\VAF\MFiles.VAF.Configuration.dll</HintPath>
-    </Reference>
-    <Reference Include="MFiles.VAF.Configuration.Interfaces">
-      <HintPath>..\lib\VAF\MFiles.VAF.Configuration.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\lib\VAF\Newtonsoft.Json.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

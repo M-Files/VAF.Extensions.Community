@@ -214,6 +214,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="maxPollingInterval">The maximum interval (in seconds) between polling.</param>
 		/// <param name="automaticallyRegisterQueues">If true, automatically calls <see cref="AppTaskBatchProcessor.RegisterTaskQueues"/>.</param>
 		/// <param name="automaticallyStartPolling">If true, automatically calls <see cref="TaskQueueManager.EnableTaskPolling"/>.</param>
+		/// <param name="vaultExtensionProxyMethodId">The Id of the vault extension method proxy to use for re-broadcasts.</param>
 		/// <returns>The broadcast batch processor.</returns>
 		public static AppTaskBatchProcessor CreateBroadcastTaskProcessor
 		(

@@ -38,8 +38,12 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				// Use the rebroadcast queue ID for this.
 				this.GetRebroadcastQueueId(),
 
-				// No task handlers required.
-				new System.Collections.Generic.Dictionary<string, TaskProcessorJobHandler>(),
+				// No task handlers required but the base settings instance requires us to provide one.
+				taskHandlers: new System.Collections.Generic.Dictionary<string, TaskProcessorJobHandler>
+				{
+					// Pass something that won't be matched.
+					{ Guid.NewGuid().ToString("B"), (j) => { } }
+				},
 
 				// Use the default vault extension proxy method ID.
 				vaultExtensionProxyMethodId: this.GetVaultExtensionMethodEventHandlerProxyName()

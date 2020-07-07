@@ -25,29 +25,10 @@
     <None Include="MFiles.VAF.Extensions.nuspec" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="MFiles.VAF" Version="2.2.0.5-rc" />
     <PackageReference Include="MFilesAPI.Extensions">
       <Version>1.0.0</Version>
     </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Interop.MFilesAPI">
-      <HintPath>..\lib\VAF\Interop.MFilesAPI.dll</HintPath>
-    </Reference>
-    <Reference Include="MFiles.Crypto">
-      <HintPath>..\lib\VAF\MFiles.Crypto.dll</HintPath>
-    </Reference>
-    <Reference Include="MFiles.VAF">
-      <HintPath>..\lib\VAF\MFiles.VAF.dll</HintPath>
-    </Reference>
-    <Reference Include="MFiles.VAF.Configuration">
-      <HintPath>..\lib\VAF\MFiles.VAF.Configuration.dll</HintPath>
-    </Reference>
-    <Reference Include="MFiles.VAF.Configuration.Interfaces">
-      <HintPath>..\lib\VAF\MFiles.VAF.Configuration.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\lib\VAF\Newtonsoft.Json.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
