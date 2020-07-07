@@ -39,20 +39,20 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 			var vaultMock = base.GetVaultMock();
 
 			// Set up the server attachments.
-			var vaultServerAttachments = new VaultServerAttachments
-			{
-				{
-					-1,
-					new VaultServerAttachment()
-					{
-						IsCurrent = true,
-						Address = "127.0.0.1",
-						HostName = "localhost",
-						ServerID = Guid.NewGuid().ToString( "B" ),
-						LatestTimestamp = new Timestamp()
-					}
-				}
-			};
+			var vaultServerAttachments = new VaultServerAttachments();
+			//{
+			//	{
+			//		-1,
+			//		new VaultServerAttachment()
+			//		{
+			//			IsCurrent = true,
+			//			Address = "127.0.0.1",
+			//			HostName = "localhost",
+			//			ServerID = Guid.NewGuid().ToString( "B" ),
+			//			LatestTimestamp = new Timestamp()
+			//		}
+			//	}
+			//};
 			vaultMock.Setup(v => v.GetVaultServerAttachments())
 				.Returns(vaultServerAttachments);
 
