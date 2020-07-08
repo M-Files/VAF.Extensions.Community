@@ -1,66 +1,25 @@
 ﻿// ReSharper disable once CheckNamespace
 using MFiles.VAF.Common.ApplicationTaskQueue;
 using MFiles.VAF.Core;
+using MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods;
 using MFiles.VAF.MultiserverMode;
 using System;
 
 namespace MFiles.VAF.Extensions.MultiServerMode
 {
 	public abstract class ConfigurableVaultApplicationBase<TSecureConfiguration>
-		: MFiles.VAF.Core.ConfigurableVaultApplicationBase<TSecureConfiguration>, IUsesTaskQueue
+		: MFiles.VAF.Core.ConfigurableVaultApplicationBase<TSecureConfiguration>
 	where TSecureConfiguration : class, new()
 	{
-		/// <summary>
-		/// The broadcast task processor used to broadcast
-		/// application configuration changes to other servers.
-		/// </summary>
-		/// <remarks>Automatically populated during <see cref="RegisterTaskQueues" />
-		/// with the value returned by
-		/// <see cref="GetConfigurationRebroadcastTaskProcessor"/>.</remarks>
-		protected AppTaskBatchProcessor ConfigurationRebroadcastTaskProcessor { get; private set; }
+		private string rebroadcastQueueId = null;
 
 		/// <inheritdoc />
 		public override string GetRebroadcastQueueId()
 		{
-			return $"{this.GetType().FullName.Replace(".", "-")}-ConfigurationRebroadcastQueue";
+			if (string.IsNullOrWhiteSpace(this.rebroadcastQueueId))
+				this.rebroadcastQueueId = this.EnableConfigurationRebroadcasting();
+			return this.rebroadcastQueueId;
 		}
-		
-		/// <summary>
-		/// Returns the broadcast task processor that should be used to
-		/// rebroadcast application configuration changes to other servers.
-		/// </summary>
-		/// <returns>The task processor to use.</returns>
-		protected virtual AppTaskBatchProcessor GetConfigurationRebroadcastTaskProcessor()
-		{
-			// Create the broadcast processor.
-			return this.CreateBroadcastTaskProcessor
-			(
-				// Use the rebroadcast queue ID for this.
-				this.GetRebroadcastQueueId(),
-
-				// No task handlers required but the base settings instance requires us to provide one.
-				taskHandlers: new System.Collections.Generic.Dictionary<string, TaskProcessorJobHandler>
-				{
-					// Pass something that won't be matched.
-					{ Guid.NewGuid().ToString("B"), (j) => { } }
-				},
-
-				// Use the default vault extension proxy method ID.
-				vaultExtensionProxyMethodId: this.GetVaultExtensionMethodEventHandlerProxyName()
-			);
-		}
-
-		#region Implementation of IUsesTaskQueue
-
-		/// <inheritdoc />
-		public virtual void RegisterTaskQueues()
-		{
-			// Create the configuration rebroadcast task processor.
-			this.ConfigurationRebroadcastTaskProcessor
-				= this.GetConfigurationRebroadcastTaskProcessor();
-		}
-
-		#endregion
 
 	}
 }

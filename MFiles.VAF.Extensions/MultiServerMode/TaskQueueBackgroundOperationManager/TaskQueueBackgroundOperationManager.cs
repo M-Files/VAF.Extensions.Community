@@ -107,7 +107,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 					{
 						{ TaskQueueBackgroundOperation.TaskTypeId, this.ProcessJobHandler }
 					},
-					cancellationTokenSource == null
+					cancellationTokenSource: cancellationTokenSource == null
 						? new CancellationTokenSource()
 						: CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token)
 				);
