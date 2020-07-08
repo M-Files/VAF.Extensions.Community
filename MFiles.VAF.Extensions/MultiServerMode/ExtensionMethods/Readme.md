@@ -28,6 +28,30 @@ public override string GetRebroadcastQueueId()
 Note that this method should be called only once and the queue ID cached, as in the example above.
 {:.note}
 
+Where a vault application needs to react to its own broadcast tasks, a collection of task types and task handlers can be provided and the same queue utilised.  This is more efficient than using multiple broadcast queues.
+
+```csharp
+/// <summary>
+/// The cached rebroadcast queue Id.
+/// </summary>
+private string rebroadcastQueueId = null;
+
+/// <inheritdoc />
+public override string GetRebroadcastQueueId()
+{
+	if (string.IsNullOrWhiteSpace(this.rebroadcastQueueId))
+	{
+		// Set up the other task handlers that this queue should process.
+		var taskHandlers = new Dictionary<string, TaskProcessorJobHandler>();
+		taskHandlers.Add( "myTaskTypeId", this.TaskTypeHandler );
+
+		// Enable rebroadcasting.
+		this.rebroadcastQueueId = this.EnableConfigurationRebroadcasting(taskHandlers: taskHandlers);
+	}
+	return this.rebroadcastQueueId;
+}
+```
+
 ## TaskProcessorJobExtensionMethods
 
 Provides methods for interacting with task processor jobs.

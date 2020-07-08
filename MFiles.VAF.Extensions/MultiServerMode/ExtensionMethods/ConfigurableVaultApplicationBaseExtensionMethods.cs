@@ -14,6 +14,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods
 		/// </summary>
 		/// <typeparam name="TSecureConfiguration">The configuration type.</typeparam>
 		/// <param name="vaultApplication">The vault application to enable rebroadcasting for.</param>
+		/// <param name="taskHandlers">Handlers for any additional tasks that the queue should handle.</param>
 		/// <param name="maxConcurrentBatches">The maximum number of concurrent batches.</param>
 		/// <param name="maxConcurrentJobs">The maximum number of concurrent jobs.</param>
 		/// <param name="maxPollingInterval">The maximum polling interval.</param>
@@ -22,6 +23,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods
 		public static string EnableConfigurationRebroadcasting<TSecureConfiguration>
 		(
 			this ConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication,
+			Dictionary<string, TaskProcessorJobHandler> taskHandlers = null,
 			int maxConcurrentBatches = 5,
 			int maxConcurrentJobs = 5,
 			int maxPollingInterval = 10,
@@ -32,6 +34,11 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods
 			// Sanity.
 			if (null == vaultApplication)
 				throw new ArgumentNullException(nameof(vaultApplication));
+
+			// We must have at least one task handler or the underlying implementation throws.
+			taskHandlers = taskHandlers ?? new Dictionary<string, TaskProcessorJobHandler>();
+			if (taskHandlers.Count == 0)
+				taskHandlers.Add(Guid.NewGuid().ToString(), (j) => { });
 
 			// Set up the broadcast task queue ID.  This is specific for this application.
 			var broadcastTaskQueueId = $"{vaultApplication.GetType().FullName.Replace(".", "-")}-ConfigurationRebroadcastQueue";
@@ -50,12 +57,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods
 				PermanentVault = vaultApplication.PermanentVault,
 				MaxConcurrentBatches = maxConcurrentBatches,
 				MaxConcurrentJobs = maxConcurrentJobs,
-				// This does not require any task handlers, but if other broadcast tasks are used then they could be added here.
-				TaskHandlers = new Dictionary<string, TaskProcessorJobHandler>()
-				{
-					// Note that we have to provide at least one task handler or the underlying call excepts.
-					{ Guid.NewGuid().ToString(), (j) => { } }
-				},
+				TaskHandlers = taskHandlers,
 				TaskQueueManager = vaultApplication.TaskQueueManager,
 				EnableAutomaticTaskUpdates = true,
 				DisableAutomaticProgressUpdates = false,
