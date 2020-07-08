@@ -84,6 +84,25 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		public TaskQueueBackgroundOperationManager
 		(
 			VaultApplicationBase vaultApplication,
+			CancellationTokenSource cancellationTokenSource = default
+		) : this
+		(
+			vaultApplication,
+			$"{vaultApplication?.GetType()?.FullName?.Replace(".", "-")}-BackgroundOperations",
+			cancellationTokenSource
+		)
+		{
+		}
+
+		/// <summary>
+		/// Creates a background operation manager for a given queue.
+		/// </summary>
+		/// <param name="vaultApplication">The vault application that contains this background operation manager.</param>
+		/// <param name="queueId">The queue Id.</param>
+		/// <param name="cancellationTokenSource">The cancellation token source, if cancellation should be supported.</param>
+		public TaskQueueBackgroundOperationManager
+		(
+			VaultApplicationBase vaultApplication,
 			string queueId,
 			CancellationTokenSource cancellationTokenSource = default
 		)
