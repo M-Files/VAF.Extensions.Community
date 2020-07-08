@@ -18,21 +18,38 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 	where TSecureConfiguration : class, new()
 	{
 		/// <summary>
-		/// The rebroadcast queue.  Populated during the first call to
-		/// <see cref="GetRebroadcastQueueId"/>.
+		/// The rebroadcast queue Id.
+		/// Populated during the first call to <see cref="GetRebroadcastQueueId"/>.
 		/// </summary>
-		private string configurationRebroadcastQueueId = null;
+		protected string ConfigurationRebroadcastQueueId { get; private set; }
+
+		/// <summary>
+		/// The rebroadcast queue processor.
+		/// Populated during the first call to <see cref="GetRebroadcastQueueId"/>.
+		/// </summary>
+		protected AppTaskBatchProcessor ConfigurationRebroadcastTaskProcessor { get; private set; }
 
 		/// <inheritdoc />
 		public override string GetRebroadcastQueueId()
 		{
 			// If we do not have a rebroadcast queue for the configuration data
 			// then create one.
-			if (string.IsNullOrWhiteSpace(this.configurationRebroadcastQueueId))
-				this.configurationRebroadcastQueueId = this.EnableConfigurationRebroadcasting();
+			if (null == this.ConfigurationRebroadcastTaskProcessor)
+			{
+				// Enable the configuration rebroadcasting.
+				this.EnableConfigurationRebroadcasting
+					(
+					out AppTaskBatchProcessor processor,
+					out string queueId
+					);
 
-			// Return the broadcast queue.
-			return this.configurationRebroadcastQueueId;
+				// Populate references to the task processor and queue Id.
+				this.ConfigurationRebroadcastQueueId = queueId;
+				this.ConfigurationRebroadcastTaskProcessor = processor;
+			}
+
+			// Return the broadcast queue Id.
+			return this.ConfigurationRebroadcastQueueId;
 		}
 
 	}

@@ -14,15 +14,18 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods
 		/// </summary>
 		/// <typeparam name="TSecureConfiguration">The configuration type.</typeparam>
 		/// <param name="vaultApplication">The vault application to enable rebroadcasting for.</param>
+		/// <param name="broadcastTaskProcessor">The processor used to process the configuration rebroadcasting queue.</param>
+		/// <param name="broadcastTaskQueueId">The queue Id used for the configuration rebroadcasting.</param>
 		/// <param name="taskHandlers">Handlers for any additional tasks that the queue should handle.</param>
 		/// <param name="maxConcurrentBatches">The maximum number of concurrent batches.</param>
 		/// <param name="maxConcurrentJobs">The maximum number of concurrent jobs.</param>
 		/// <param name="maxPollingInterval">The maximum polling interval.</param>
 		/// <param name="cancellationTokenSource">The token source for cancellation.</param>
-		/// <returns>The queue ID for rebroadcasting.</returns>
-		public static string EnableConfigurationRebroadcasting<TSecureConfiguration>
+		public static void EnableConfigurationRebroadcasting<TSecureConfiguration>
 		(
 			this ConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication,
+			out AppTaskBatchProcessor broadcastTaskProcessor,
+			out string broadcastTaskQueueId,
 			Dictionary<string, TaskProcessorJobHandler> taskHandlers = null,
 			int maxConcurrentBatches = 5,
 			int maxConcurrentJobs = 5,
@@ -41,7 +44,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods
 				taskHandlers.Add(Guid.NewGuid().ToString(), (j) => { });
 
 			// Set up the broadcast task queue ID.  This is specific for this application.
-			var broadcastTaskQueueId = $"{vaultApplication.GetType().FullName.Replace(".", "-")}-ConfigurationRebroadcastQueue";
+			broadcastTaskQueueId = $"{vaultApplication.GetType().FullName.Replace(".", "-")}-ConfigurationRebroadcastQueue";
 
 			// Create the settings instance.
 			var processorSettings = new AppTaskBatchProcessorSettings
@@ -71,14 +74,11 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods
 				: CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token);
 			
 			// Create the broadcast processor using the vault extension method.
-			var broadcastProcessor = vaultApplication.CreateBroadcastTaskProcessor
+			broadcastTaskProcessor = vaultApplication.CreateBroadcastTaskProcessor
 			(
 				processorSettings,
 				cancellationTokenSource: cancellationTokenSource
 			);
-
-			// Return the queue ID.
-			return broadcastTaskQueueId;
 		}
 	}
 }

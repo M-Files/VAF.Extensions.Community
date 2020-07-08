@@ -12,16 +12,38 @@ The calling vault application must override `GetRebroadcastQueueId` and return t
 
 ```csharp
 /// <summary>
-/// The cached rebroadcast queue Id.
+/// The rebroadcast queue Id.
+/// Populated during the first call to <see cref="GetRebroadcastQueueId"/>.
 /// </summary>
-private string rebroadcastQueueId = null;
+protected string ConfigurationRebroadcastQueueId { get; private set; }
+
+/// <summary>
+/// The rebroadcast queue processor.
+/// Populated during the first call to <see cref="GetRebroadcastQueueId"/>.
+/// </summary>
+protected AppTaskBatchProcessor ConfigurationRebroadcastTaskProcessor { get; private set; }
 
 /// <inheritdoc />
 public override string GetRebroadcastQueueId()
 {
-	if (string.IsNullOrWhiteSpace(this.rebroadcastQueueId))
-		this.rebroadcastQueueId = this.EnableConfigurationRebroadcasting();
-	return this.rebroadcastQueueId;
+	// If we do not have a rebroadcast queue for the configuration data
+	// then create one.
+	if (null == this.ConfigurationRebroadcastTaskProcessor)
+	{
+		// Enable the configuration rebroadcasting.
+		this.EnableConfigurationRebroadcasting
+			(
+			out AppTaskBatchProcessor processor,
+			out string queueId
+			);
+
+		// Populate references to the task processor and queue Id.
+		this.ConfigurationRebroadcastQueueId = queueId;
+		this.ConfigurationRebroadcastTaskProcessor = processor;
+	}
+
+	// Return the broadcast queue Id.
+	return this.ConfigurationRebroadcastQueueId;
 }
 ```
 
@@ -32,23 +54,43 @@ Where a vault application needs to react to its own broadcast tasks, a collectio
 
 ```csharp
 /// <summary>
-/// The cached rebroadcast queue Id.
+/// The rebroadcast queue Id.
+/// Populated during the first call to <see cref="GetRebroadcastQueueId"/>.
 /// </summary>
-private string rebroadcastQueueId = null;
+protected string ConfigurationRebroadcastQueueId { get; private set; }
+
+/// <summary>
+/// The rebroadcast queue processor.
+/// Populated during the first call to <see cref="GetRebroadcastQueueId"/>.
+/// </summary>
+protected AppTaskBatchProcessor ConfigurationRebroadcastTaskProcessor { get; private set; }
 
 /// <inheritdoc />
 public override string GetRebroadcastQueueId()
 {
-	if (string.IsNullOrWhiteSpace(this.rebroadcastQueueId))
+	// If we do not have a rebroadcast queue for the configuration data
+	// then create one.
+	if (null == this.ConfigurationRebroadcastTaskProcessor)
 	{
 		// Set up the other task handlers that this queue should process.
 		var taskHandlers = new Dictionary<string, TaskProcessorJobHandler>();
 		taskHandlers.Add( "myTaskTypeId", this.TaskTypeHandler );
 
-		// Enable rebroadcasting.
-		this.rebroadcastQueueId = this.EnableConfigurationRebroadcasting(taskHandlers: taskHandlers);
+		// Enable the configuration rebroadcasting.
+		this.EnableConfigurationRebroadcasting
+			(
+			out AppTaskBatchProcessor processor,
+			out string queueId,
+			taskHandlers: taskHandlers
+			);
+
+		// Populate references to the task processor and queue Id.
+		this.ConfigurationRebroadcastQueueId = queueId;
+		this.ConfigurationRebroadcastTaskProcessor = processor;
 	}
-	return this.rebroadcastQueueId;
+
+	// Return the broadcast queue Id.
+	return this.ConfigurationRebroadcastQueueId;
 }
 ```
 
