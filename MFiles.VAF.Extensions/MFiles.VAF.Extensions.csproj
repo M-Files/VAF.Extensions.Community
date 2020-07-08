@@ -36,7 +36,7 @@
     </AssemblyAttribute>
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="Pack" Condition=" '$(Configuration)' == 'Release'">
-    <RemoveDir Directories="..\current-release" />
-    <Copy SourceFiles="$(OutputPath)$(PackageId).$(PackageVersion).nupkg" DestinationFolder="..\current-release" />
+    <RemoveDir Directories="..\current" />
+    <Copy SourceFiles="$(OutputPath)$(PackageId).$(PackageVersion).nupkg" DestinationFolder="..\current" />
 </Target>
 </Project>
