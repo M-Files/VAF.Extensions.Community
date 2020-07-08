@@ -11,6 +11,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 	public class ConfigurableVaultApplicationBaseTests
 		: TestBaseWithVaultMock
 	{
+		// Commented out whilst tracker item 156295 is resolved.
 		//[TestMethod]
 		//public void GetRebroadcastQueueIdCorrect()
 		//{
