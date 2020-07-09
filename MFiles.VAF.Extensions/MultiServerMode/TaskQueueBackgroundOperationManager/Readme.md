@@ -11,6 +11,7 @@ The `TaskQueueBackgroundOperationManager` class wraps the above approach, allowi
 In the following sample a task queue background operation manager is instantiated and then used to schedule a lambda to be run once every 10 seconds:
 
 ```csharp
+using System;
 using MFiles.VAF.Common;
 using MFiles.VAF.Extensions.MultiServerMode;
 using MFiles.VAF.MultiserverMode;
@@ -56,6 +57,7 @@ Note that the name of the background operation **must be unique within each task
 ## Creating a background operation that will be run on demand
 
 ```csharp
+using System;
 using MFiles.VAF.Common;
 using MFiles.VAF.Extensions.MultiServerMode;
 using MFiles.VAF.MultiserverMode;
@@ -111,6 +113,7 @@ namespace RecurringTask
 It is important to note that the server which schedules the background operation may not be the one that executes it.  Therefore you must not attempt to access vault application instance variables from within your background operation method.  You can, however, pass custom data into the background operation call by using a custom directive:
 
 ```csharp
+using System;
 using MFiles.VAF.Common;
 using MFiles.VAF.Extensions.MultiServerMode;
 using MFiles.VAF.MultiserverMode;
