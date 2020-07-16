@@ -14,7 +14,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 	/// <typeparam name="TSecureConfiguration">The configuration type.</typeparam>
 	/// <remarks>See https://developer.m-files.com/Frameworks/Vault-Application-Framework/Multi-Server-Mode/#configuration-changes for further details.</remarks>
 	public abstract class ConfigurableVaultApplicationBase<TSecureConfiguration>
-		: MFiles.VAF.Core.ConfigurableVaultApplicationBase<TSecureConfiguration>
+		: MFiles.VAF.Core.ConfigurableVaultApplicationBase<TSecureConfiguration>, IUsesTaskQueue
 	where TSecureConfiguration : class, new()
 	{
 		/// <summary>
@@ -52,5 +52,13 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			return this.ConfigurationRebroadcastQueueId;
 		}
 
+		#region Implementation of IUsesTaskQueue
+
+		/// <inheritdoc />
+		public virtual void RegisterTaskQueues()
+		{
+		}
+
+		#endregion
 	}
 }
