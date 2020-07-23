@@ -3,7 +3,7 @@
     <TargetFrameworks>net45</TargetFrameworks>
     <Copyright>M-Files Corporation 2020 onwards</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.1.1-alpha</Version>
+    <Version>1.1.2-alpha</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Company>M-Files Corporation</Company>
     <Authors>M-Files Corporation</Authors>
