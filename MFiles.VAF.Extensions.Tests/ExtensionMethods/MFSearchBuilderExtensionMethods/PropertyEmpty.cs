@@ -24,7 +24,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		/// adds a search condition.
 		/// </summary>
 		[TestMethod]
-		public void AddsSearchCondition()
+		public new void AddsSearchCondition()
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
