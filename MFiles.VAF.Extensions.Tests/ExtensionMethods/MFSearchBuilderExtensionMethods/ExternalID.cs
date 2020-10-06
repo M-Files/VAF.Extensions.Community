@@ -14,7 +14,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 	{
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFSearchBuilderExtensionMethods.ExternalId"/>
+		/// <see cref="MFiles.VAF.Extensions.MFSearchBuilderExtensionMethods.ExternalId"/>
 		/// adds a search condition.
 		/// </summary>
 		[TestMethod]

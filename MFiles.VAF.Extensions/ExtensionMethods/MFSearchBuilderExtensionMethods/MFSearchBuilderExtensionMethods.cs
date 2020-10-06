@@ -29,9 +29,9 @@ namespace MFiles.VAF.Extensions
 			MFDataType dataType,
 			object value,
 			MFConditionType conditionType,
-			MFParentChildBehavior parentChildBehavior,
-			PropertyDefOrObjectTypes indirectionLevels,
-			DataFunctionCall dataFunctionCall
+			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
+			PropertyDefOrObjectTypes indirectionLevels = null,
+			DataFunctionCall dataFunctionCall = null
 		)
 		{
 			// Sanity.
