@@ -137,6 +137,21 @@ namespace MFiles.VAF.Extensions.Email
 		}
 
 		/// <summary>
+		/// The default email headers.
+		/// </summary>
+		[DataMember(Order = 8)]
+		[JsonConfEditor
+		(
+			Label = "Default email headers",
+			HelpText = "If your mail system requires specific headers to be added to all outgoing emails then configure those here."
+		)]
+		public new List<EmailHeader> DefaultEmailHeader
+		{
+			get => base.DefaultEmailHeader;
+			set => base.DefaultEmailHeader = value;
+		}
+
+		/// <summary>
 		/// Performs validation of the configuration for visualisation into the admin editor.
 		/// </summary>
 		/// <param name="vault">The vault to use for validation, if appropriate.</param>
