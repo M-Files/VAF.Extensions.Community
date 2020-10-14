@@ -52,7 +52,6 @@ namespace RecurringTask
 ```
 
 Note that the name of the background operation **must be unique within each task queue**.
-{:.note}
 
 ## Creating a background operation that will be run on demand
 
@@ -184,5 +183,4 @@ namespace RecurringTask
 ```
 
 Note that the name of the background operation **must be unique within each task queue**.
-{:.note}
 
