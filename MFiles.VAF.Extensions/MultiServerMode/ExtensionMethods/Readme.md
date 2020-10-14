@@ -48,7 +48,6 @@ public override string GetRebroadcastQueueId()
 ```
 
 Note that this method should be called only once and the queue ID cached, as in the example above.
-{:.note}
 
 Where a vault application needs to react to its own broadcast tasks, a collection of task types and task handlers can be provided and the same queue utilised.  This is more efficient than using multiple broadcast queues.
 
