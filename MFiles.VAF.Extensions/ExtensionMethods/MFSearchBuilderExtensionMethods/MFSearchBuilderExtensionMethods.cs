@@ -46,9 +46,24 @@ namespace MFiles.VAF.Extensions
 			int segmentSize = MFSearchBuilderExtensionMethods.DefaultNumberOfItemsInSegment,
 			int searchTimeoutInSeconds = MFSearchBuilderExtensionMethods.DefaultSearchTimeoutInSeconds )
 		{
+			// Sanity checks
+			if( builder == null )
+				throw new ArgumentNullException( nameof(builder) );
+			if( objVerExDelegate == null )
+				throw new ArgumentNullException( nameof(objVerExDelegate) );
+			if( startSegment < 0 )
+				throw new ArgumentOutOfRangeException( nameof(startSegment), "value must be greater than or equal to 0" );
+			if( segmentLimit <= 0 )
+				throw new ArgumentOutOfRangeException( nameof(segmentLimit), "value must be greater 0" );
+			if( segmentSize <= 0 )
+				throw new ArgumentOutOfRangeException( nameof(segmentSize), "value must be greater than 0" );
+			if( searchTimeoutInSeconds <= 0 )
+				throw new ArgumentOutOfRangeException( nameof(searchTimeoutInSeconds), "value must be greater than 0" );
+
 			int DefaultSearchHandler( Vault vault, SearchConditions searchConditions )
 			{
-				var searchResults = new MFSearchBuilder( vault, searchConditions ).FindEx( searchTimeoutInSeconds: searchTimeoutInSeconds );
+				var newBuilder = new MFSearchBuilder( vault, searchConditions );
+				var searchResults = newBuilder.FindEx( searchTimeoutInSeconds: searchTimeoutInSeconds );
 
 				searchConditions.Remove( searchConditions.Count );
 
@@ -81,6 +96,16 @@ namespace MFiles.VAF.Extensions
 			int segmentLimit = MFSearchBuilderExtensionMethods.DefaultMaximumSegmentIndex,
 			int segmentSize = MFSearchBuilderExtensionMethods.DefaultNumberOfItemsInSegment )
 		{
+			// Sanity checks
+			if( builder == null )
+				throw new ArgumentNullException( nameof(builder) );
+			if( startSegment < 0 )
+				throw new ArgumentOutOfRangeException( nameof(startSegment), "value must be greater than or equal to 0" );
+			if( segmentLimit <= 0 )
+				throw new ArgumentOutOfRangeException( nameof(segmentLimit), "value must be greater 0" );
+			if( segmentSize <= 0 )
+				throw new ArgumentOutOfRangeException( nameof(segmentSize), "value must be greater than 0" );
+
 			return ForEachSegment( builder,
 				// Note: this method is required because func needs to return the count to be summed by ForEachSegment
 				( vault, conditions ) => vault.ObjectSearchOperations.GetObjectCountInSearch( conditions, MFSearchFlags.MFSearchFlagDisableRelevancyRanking ),
