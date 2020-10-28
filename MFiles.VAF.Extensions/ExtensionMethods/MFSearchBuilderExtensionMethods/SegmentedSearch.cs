@@ -133,13 +133,13 @@ namespace MFiles.VAF.Extensions
 			var segment = startSegment;
 			long resultCount = 0; // The total number of matched items in all segments.
 
+			// Clone the search conditions from the supplied builder.
+			var searchConditions = builder.Conditions.Clone();
+
 			// Iterate over segments until we hit the sanity limit,
 			// or until there are no items left to find.
 			while (segment < segmentLimit)
 			{
-				// Clone the search conditions from the supplied builder.
-				var searchConditions = builder.Conditions.Clone();
-
 				// Add a condition for the current segment that we want.
 				searchConditions.Add(-1, SearchConditionSegment(segment, segmentSize));
 
@@ -155,11 +155,9 @@ namespace MFiles.VAF.Extensions
 				// If we got no items back then we need to check whether a higher segment has items.
 				if (searchResultsCount == 0)
 				{
-					// Clone the original builder conditions.
-					var searchConditionsTopId = builder.Conditions.Clone();
 
 					// Add a condition to see whether there are any items that have an ID in a higher segment.
-					searchConditionsTopId.Add(-1, SearchConditionMinObjId(segment, segmentSize));
+					searchConditions.Add(-1, SearchConditionMinObjId(segment, segmentSize));
 
 					// Find any matching items that exist in a higher segment.
 					var resultsTopId = builder
@@ -167,11 +165,14 @@ namespace MFiles.VAF.Extensions
 						.ObjectSearchOperations
 						.SearchForObjectsByConditionsEx
 						(
-							searchConditionsTopId,
+							searchConditions,
 							MFSearchFlags.MFSearchFlagDisableRelevancyRanking,
 							SortResults: false,
 							MaxResultCount: 1
 						);
+
+					// Remove the condition for the min obj id because it is reused in the loop.
+					searchConditions.Remove(searchConditions.Count);
 
 					// If there are none then break out of the while loop
 					// as there is no point checking further segments.
