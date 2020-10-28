@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods;
 using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -222,6 +221,56 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				(o) => { },
 				searchTimeoutInSeconds: 200
 			);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void SearchConditionMinObjIdNegativeSegmentThrows()
+		{
+			MFiles.VAF.Extensions.MFSearchBuilderExtensionMethods.SearchConditionMinObjId
+			(
+				-1,
+				1
+			);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void SearchConditionMinObjIdNegativeSegmentSizeThrows()
+		{
+			MFiles.VAF.Extensions.MFSearchBuilderExtensionMethods.SearchConditionMinObjId
+			(
+				1,
+				-1
+			);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void SearchConditionMinObjIdZeroSegmentSizeThrows()
+		{
+			MFiles.VAF.Extensions.MFSearchBuilderExtensionMethods.SearchConditionMinObjId
+			(
+				1,
+				0
+			);
+		}
+
+		[TestMethod]
+		public void SearchConditionMinObjIdReturnsValidSearchCondition()
+		{
+			// Create the condition.
+			var condition = Extensions.MFSearchBuilderExtensionMethods.SearchConditionMinObjId
+			(
+				10,
+				50
+			);
+
+			// Condition must have valid data.
+			Assert.IsNotNull(condition);
+			Assert.AreEqual(MFConditionType.MFConditionTypeGreaterThanOrEqual, condition.ConditionType);
+			Assert.AreEqual(MFStatusType.MFStatusTypeObjectID, condition.Expression.DataStatusValueType);
+			Assert.AreEqual(500, condition.TypedValue.Value);
 		}
 
 		protected override Mock<Vault> GetVaultMock()

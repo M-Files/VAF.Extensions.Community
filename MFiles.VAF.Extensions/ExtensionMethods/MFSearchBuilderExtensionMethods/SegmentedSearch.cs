@@ -2,7 +2,7 @@
 using MFilesAPI;
 using System;
 
-namespace MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods
+namespace MFiles.VAF.Extensions
 {
 	public static partial class MFSearchBuilderExtensionMethods
 	{
@@ -119,7 +119,7 @@ namespace MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods
 		/// <param name="segmentLimit">The number of total segments to process. See <see cref="DefaultMaximumSegmentIndex"/>.</param>
 		/// <param name="segmentSize">The number of items to include in each segment. See <see cref="DefaultNumberOfItemsInSegment"/>.</param>
 		/// <returns>Total count of objects across vault.</returns>
-		private static long ForEachSegment(
+		internal static long ForEachSegment(
 			this MFSearchBuilder builder,
 			Func<Vault, SearchConditions, int> func,
 			int startSegment = 0,
@@ -164,7 +164,7 @@ namespace MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods
 		/// <param name="segment">Used to calculate the segment expression.</param>
 		/// <param name="range">Used to calculate the segment expression.</param>
 		/// <returns></returns>
-		private static SearchCondition SearchConditionSegment(int segment, int range)
+		internal static SearchCondition SearchConditionSegment(int segment, int range)
 		{
 			var searchCondition = new SearchCondition
 			{
@@ -178,17 +178,24 @@ namespace MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods
 		/// <summary>
 		/// Creates a search condition using the minimum object id for use in segmented search.
 		/// </summary>
-		/// <param name="segment">Used to calculate the minimum Id.</param>
-		/// <param name="range">Used to calculate the minimum Id.</param>
-		/// <returns></returns>
-		private static SearchCondition SearchConditionMinObjId(int segment, int range)
+		/// <param name="segment">The segment (starting at zero) to retrieve.</param>
+		/// <param name="segmentSize">The number of items in the segment.</param>
+		/// <returns>A <see cref="SearchCondition"/> that represents finding items that have the correct minimum object ID.</returns>
+		internal static SearchCondition SearchConditionMinObjId(int segment, int segmentSize)
 		{
+			// Sanity.
+			if (segment < 0)
+				throw new ArgumentOutOfRangeException(nameof(segment), "The segment must be greater than or equal to zero");
+			if (segmentSize <= 0)
+				throw new ArgumentOutOfRangeException(nameof(segmentSize), "The segmentSize must be greater than zero");
+
+			// Create and return the search condition.
 			var searchCondition = new SearchCondition
 			{
 				ConditionType = MFConditionType.MFConditionTypeGreaterThanOrEqual
 			};
 			searchCondition.Expression.SetStatusValueExpression(MFStatusType.MFStatusTypeObjectID);
-			searchCondition.TypedValue.SetValue(MFDataType.MFDatatypeInteger, range * segment);
+			searchCondition.TypedValue.SetValue(MFDataType.MFDatatypeInteger, segmentSize * segment);
 			return searchCondition;
 		}
 
