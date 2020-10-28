@@ -178,7 +178,8 @@ namespace MFiles.VAF.Extensions
 							MaxResultCount: 1
 						);
 
-					// If there are none then break out of the while loop.
+					// If there are none then break out of the while loop
+					// as there is no point checking further segments.
 					if (resultsTopId.Count == 0)
 					{
 						break;
