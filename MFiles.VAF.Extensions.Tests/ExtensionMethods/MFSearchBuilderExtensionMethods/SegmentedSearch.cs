@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MFiles.VAF.Extensions.ExtensionMethods.MFSearchBuilderExtensionMethods;
 using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -61,8 +62,166 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
 
-			// Attempt to execute null method.
-			mfSearchBuilder.ForEach( null );
+			// Attempt to execute with null delegate.
+			mfSearchBuilder.ForEach(null);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void NegativeStartSegmentThrows()
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Attempt to execute method.
+			mfSearchBuilder.ForEach
+			(
+				(o) => { },
+				startSegment: -1
+			);
+		}
+
+		[TestMethod]
+		public void ZeroStartSegmentDoesNotThrow()
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Add the search condition for the extension.
+			mfSearchBuilder.ObjType(0);
+
+			// Attempt to execute method.
+			mfSearchBuilder.ForEach
+			(
+				(o) => { },
+				startSegment: 0
+			);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void NegativeSegmentLimitThrows()
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Attempt to execute method.
+			mfSearchBuilder.ForEach
+			(
+				(o) => { },
+				segmentLimit: -1
+			);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void ZeroSegmentLimitThrows()
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Attempt to execute method.
+			mfSearchBuilder.ForEach
+			(
+				(o) => { },
+				segmentLimit: 0
+			);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void NegativeSegmentSizeThrows()
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Attempt to execute method.
+			mfSearchBuilder.ForEach
+			(
+				(o) => { },
+				segmentSize: -1
+			);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void ZeroSegmentSizeThrows()
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Attempt to execute method.
+			mfSearchBuilder.ForEach
+			(
+				(o) => { },
+				segmentSize: 0
+			);
+		}
+
+		[TestMethod]
+		public void PositiveSegmentSizeDoesNotThrow()
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Add the search condition for the extension.
+			mfSearchBuilder.ObjType(0);
+
+			// Attempt to execute method.
+			mfSearchBuilder.ForEach
+			(
+				(o) => { },
+				segmentSize: 1
+			);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void NegativeTimeoutThrows()
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Attempt to execute method.
+			mfSearchBuilder.ForEach
+			(
+				(o) => { },
+				searchTimeoutInSeconds: -1
+			);
+		}
+
+		[TestMethod]
+		public void ZeroTimeoutDoesNotThrow()
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Add the search condition for the extension.
+			mfSearchBuilder.ObjType(0);
+
+			// Attempt to execute method.
+			mfSearchBuilder.ForEach
+			(
+				(o) => { },
+				searchTimeoutInSeconds: 0
+			);
+		}
+
+		[TestMethod]
+		public void PositiveTimeoutDoesNotThrow()
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Add the search condition for the extension.
+			mfSearchBuilder.ObjType(0);
+
+			// Attempt to execute method.
+			mfSearchBuilder.ForEach
+			(
+				(o) => { },
+				searchTimeoutInSeconds: 200
+			);
 		}
 
 		protected override Mock<Vault> GetVaultMock()
