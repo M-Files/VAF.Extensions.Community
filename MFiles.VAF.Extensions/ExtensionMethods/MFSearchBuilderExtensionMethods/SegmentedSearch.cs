@@ -161,16 +161,27 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// Creates a search condition for a segment to use in segmented search.
 		/// </summary>
-		/// <param name="segment">Used to calculate the segment expression.</param>
-		/// <param name="range">Used to calculate the segment expression.</param>
-		/// <returns></returns>
-		internal static SearchCondition SearchConditionSegment(int segment, int range)
+		/// <param name="segment">The segment (starting at zero) to retrieve.</param>
+		/// <param name="segmentSize">The number of items in the segment.</param>
+		/// <returns>A <see cref="SearchCondition"/> that represents finding items that have object IDs in the provided segment.</returns>
+		/// <remarks>
+		/// A <paramref name="segment"/> of zero and <paramref name="segmentSize"/> of 1000 will return items with IDs between 1 and 1000.
+		/// A <paramref name="segment"/> of one and <paramref name="segmentSize"/> of 1000 will return items with IDs between 1001 and 2000.
+		/// </remarks>
+		internal static SearchCondition SearchConditionSegment(int segment, int segmentSize)
 		{
+			// Sanity.
+			if (segment < 0)
+				throw new ArgumentOutOfRangeException(nameof(segment), "The segment must be greater than or equal to zero");
+			if (segmentSize <= 0)
+				throw new ArgumentOutOfRangeException(nameof(segmentSize), "The segmentSize must be greater than zero");
+
+			// Create and return the search condition.
 			var searchCondition = new SearchCondition
 			{
 				ConditionType = MFConditionType.MFConditionTypeEqual
 			};
-			searchCondition.Expression.SetObjectIDSegmentExpression(range);
+			searchCondition.Expression.SetObjectIDSegmentExpression(segmentSize);
 			searchCondition.TypedValue.SetValue(MFDataType.MFDatatypeInteger, segment);
 			return searchCondition;
 		}

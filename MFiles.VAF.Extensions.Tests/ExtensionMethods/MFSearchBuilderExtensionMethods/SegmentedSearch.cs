@@ -223,6 +223,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			);
 		}
 
+		#region SearchConditionMinObjId
+
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void SearchConditionMinObjIdNegativeSegmentThrows()
@@ -272,6 +274,63 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			Assert.AreEqual(MFStatusType.MFStatusTypeObjectID, condition.Expression.DataStatusValueType);
 			Assert.AreEqual(500, condition.TypedValue.Value);
 		}
+
+		#endregion
+
+		#region SearchConditionSegment
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void SearchConditionSegmentNegativeSegmentThrows()
+		{
+			MFiles.VAF.Extensions.MFSearchBuilderExtensionMethods.SearchConditionSegment
+			(
+				-1,
+				1
+			);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void SearchConditionSegmentNegativeSegmentSizeThrows()
+		{
+			MFiles.VAF.Extensions.MFSearchBuilderExtensionMethods.SearchConditionSegment
+			(
+				1,
+				-1
+			);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void SearchConditionSegmentZeroSegmentSizeThrows()
+		{
+			MFiles.VAF.Extensions.MFSearchBuilderExtensionMethods.SearchConditionSegment
+			(
+				1,
+				0
+			);
+		}
+
+		[TestMethod]
+		public void SearchConditionSegmentReturnsValidSearchCondition()
+		{
+			// Create the condition.
+			var condition = Extensions.MFSearchBuilderExtensionMethods.SearchConditionSegment
+			(
+				10,
+				50
+			);
+
+			// Condition must have valid data.
+			Assert.IsNotNull(condition);
+			Assert.AreEqual(MFConditionType.MFConditionTypeEqual, condition.ConditionType);
+			Assert.AreEqual(MFExpressionType.MFExpressionTypeObjectIDSegment, condition.Expression.Type);
+			Assert.AreEqual(50, condition.Expression.DataObjectIDSegmentSegmentSize);
+			Assert.AreEqual(10, condition.TypedValue.Value);
+		}
+
+		#endregion
 
 		protected override Mock<Vault> GetVaultMock()
 		{
