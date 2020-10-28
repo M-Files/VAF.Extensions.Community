@@ -332,6 +332,66 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 
 		#endregion
 
+		#region ForEachSegment
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ForEachSegmentNullFuncThrows()
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Attempt to execute with null delegate.
+			mfSearchBuilder.ForEachSegment(null);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void ForEachSegmentNegativeStartSegmentThrows()
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Attempt to execute with null delegate.
+			mfSearchBuilder.ForEachSegment
+			(
+				(v, sc) => { return 0; },
+				startSegment: -1
+			);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void ForEachSegmentNegativeSegmentSizeThrows()
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Attempt to execute with null delegate.
+			mfSearchBuilder.ForEachSegment
+			(
+				(v, sc) => { return 0; },
+				segmentSize: -1
+			);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void ForEachSegmentZeroSegmentSizeThrows()
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Attempt to execute with null delegate.
+			mfSearchBuilder.ForEachSegment
+			(
+				(v, sc) => { return 0; },
+				segmentSize: 0
+			);
+		}
+
+		#endregion
+
 		protected override Mock<Vault> GetVaultMock()
 		{
 			// Get the standard vault mock.

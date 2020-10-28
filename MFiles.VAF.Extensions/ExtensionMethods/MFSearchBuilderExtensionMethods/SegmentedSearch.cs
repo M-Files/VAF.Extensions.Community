@@ -126,35 +126,73 @@ namespace MFiles.VAF.Extensions
 			int segmentLimit = MFSearchBuilderExtensionMethods.DefaultMaximumSegmentIndex,
 			int segmentSize = MFSearchBuilderExtensionMethods.DefaultNumberOfItemsInSegment)
 		{
-			var segment = startSegment;
-			long resultCount = 0;
+			// Sanity.
+			if (null == func)
+				throw new ArgumentNullException(nameof(func));
+			if (startSegment < 0)
+				throw new ArgumentOutOfRangeException(nameof(startSegment), "The start segment must be greater than or equal to zero.");
+			if (segmentSize <= 0)
+				throw new ArgumentOutOfRangeException(nameof(segmentSize), "The segment size must be greater than zero.");
 
+			// Set our start values.
+			var segment = startSegment;
+			long resultCount = 0; // The total number of matched items in all segments.
+
+			// Iterate over segments until we hit the sanity limit,
+			// or until there are no items left to find.
 			while (segment < segmentLimit)
 			{
+				// Clone the search conditions from the supplied builder.
 				var searchConditions = builder.Conditions.Clone();
 
+				// Add a condition for the current segment that we want.
 				searchConditions.Add(-1, SearchConditionSegment(segment, segmentSize));
+
+				// Execute the provided function.
+				// This must return a count of items that were in the current segment,
+				// but it may also execute other code against the items, depending on
+				// what the calling function needs.
 				var searchResultsCount = func(builder.Vault, searchConditions);
 
+				// Remove the condition for the segment.
 				searchConditions.Remove(searchConditions.Count);
 
+				// If we got no items back then we need to check whether a higher segment has items.
 				if (searchResultsCount == 0)
 				{
+					// Clone the original builder conditions.
 					var searchConditionsTopId = builder.Conditions.Clone();
 
+					// Add a condition to see whether there are any items that have an ID in a higher segment.
 					searchConditionsTopId.Add(-1, SearchConditionMinObjId(segment, segmentSize));
-					var resultsTopId = builder.Vault.ObjectSearchOperations.SearchForObjectsByConditionsEx(searchConditionsTopId, MFSearchFlags.MFSearchFlagDisableRelevancyRanking, false, 1);
+
+					// Find any matching items that exist in a higher segment.
+					var resultsTopId = builder
+						.Vault
+						.ObjectSearchOperations
+						.SearchForObjectsByConditionsEx
+						(
+							searchConditionsTopId,
+							MFSearchFlags.MFSearchFlagDisableRelevancyRanking,
+							SortResults: false,
+							MaxResultCount: 1
+						);
+
+					// If there are none then break out of the while loop.
 					if (resultsTopId.Count == 0)
 					{
 						break;
 					}
 				}
 
+				// Increment the total count by the count in this segment.
 				resultCount += searchResultsCount;
 
+				// Advance to the next segment.
 				segment += 1;
 			}
 
+			// Return the total number of matched items across all segments.
 			return resultCount;
 		}
 
