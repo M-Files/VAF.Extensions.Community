@@ -61,11 +61,6 @@ namespace MFiles.VAF.Extensions
 				var newBuilder = new MFSearchBuilder(vault, searchConditions);
 				var searchResults = newBuilder.FindEx(searchTimeoutInSeconds: searchTimeoutInSeconds);
 
-				searchConditions.Remove(searchConditions.Count);
-
-				if (searchConditions.Count <= 0)
-					return searchResults.Count;
-
 				foreach (var searchResult in searchResults)
 				{
 					objVerExDelegate(searchResult);
