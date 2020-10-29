@@ -13,7 +13,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 	{
 		/// <summary>
 		/// Tests that calling
-		/// <see cref="MFSearchBuilderExtensionMethods.ForEach"/>
+		/// <see cref="MFSearchBuilderExtensionMethods.ForEachEx"/>
 		/// executes a segmented search.
 		/// </summary>
 		[TestMethod]
@@ -29,7 +29,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			mfSearchBuilder.ObjType( 0 );
 
 			var count1 = 0;
-			var count2 = mfSearchBuilder.ForEach( obj => { count1 += 1; } );
+			var count2 = mfSearchBuilder.ForEachEx( obj => { count1 += 1; } );
 
 			// Ensure that there is one item in the vault.
 			Assert.AreEqual( 1, count1 );
@@ -62,7 +62,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			var mfSearchBuilder = this.GetSearchBuilder();
 
 			// Attempt to execute with null delegate.
-			mfSearchBuilder.ForEach(null);
+			mfSearchBuilder.ForEachEx(null);
 		}
 
 		[TestMethod]
@@ -73,7 +73,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			var mfSearchBuilder = this.GetSearchBuilder();
 
 			// Attempt to execute method.
-			mfSearchBuilder.ForEach
+			mfSearchBuilder.ForEachEx
 			(
 				(o) => { },
 				startSegment: -1
@@ -90,7 +90,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			mfSearchBuilder.ObjType(0);
 
 			// Attempt to execute method.
-			mfSearchBuilder.ForEach
+			mfSearchBuilder.ForEachEx
 			(
 				(o) => { },
 				startSegment: 0
@@ -105,7 +105,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			var mfSearchBuilder = this.GetSearchBuilder();
 
 			// Attempt to execute method.
-			mfSearchBuilder.ForEach
+			mfSearchBuilder.ForEachEx
 			(
 				(o) => { },
 				segmentLimit: -1
@@ -120,7 +120,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			var mfSearchBuilder = this.GetSearchBuilder();
 
 			// Attempt to execute method.
-			mfSearchBuilder.ForEach
+			mfSearchBuilder.ForEachEx
 			(
 				(o) => { },
 				segmentLimit: 0
@@ -135,7 +135,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			var mfSearchBuilder = this.GetSearchBuilder();
 
 			// Attempt to execute method.
-			mfSearchBuilder.ForEach
+			mfSearchBuilder.ForEachEx
 			(
 				(o) => { },
 				segmentSize: -1
@@ -150,7 +150,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			var mfSearchBuilder = this.GetSearchBuilder();
 
 			// Attempt to execute method.
-			mfSearchBuilder.ForEach
+			mfSearchBuilder.ForEachEx
 			(
 				(o) => { },
 				segmentSize: 0
@@ -167,7 +167,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			mfSearchBuilder.ObjType(0);
 
 			// Attempt to execute method.
-			mfSearchBuilder.ForEach
+			mfSearchBuilder.ForEachEx
 			(
 				(o) => { },
 				segmentSize: 1
@@ -182,7 +182,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			var mfSearchBuilder = this.GetSearchBuilder();
 
 			// Attempt to execute method.
-			mfSearchBuilder.ForEach
+			mfSearchBuilder.ForEachEx
 			(
 				(o) => { },
 				searchTimeoutInSeconds: -1
@@ -199,7 +199,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			mfSearchBuilder.ObjType(0);
 
 			// Attempt to execute method.
-			mfSearchBuilder.ForEach
+			mfSearchBuilder.ForEachEx
 			(
 				(o) => { },
 				searchTimeoutInSeconds: 0
@@ -216,7 +216,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			mfSearchBuilder.ObjType(0);
 
 			// Attempt to execute method.
-			mfSearchBuilder.ForEach
+			mfSearchBuilder.ForEachEx
 			(
 				(o) => { },
 				searchTimeoutInSeconds: 200

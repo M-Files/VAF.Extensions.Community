@@ -31,10 +31,10 @@ namespace MFiles.VAF.Extensions
 		/// <param name="startSegment">The (zero-based) index of the segment to start at.</param>
 		/// <param name="segmentLimit">The number of total segments to process. See <see cref="DefaultMaximumSegmentIndex"/>.</param>
 		/// <param name="segmentSize">The number of items to include in each segment. See <see cref="DefaultNumberOfItemsInSegment"/>.</param>
-		/// <param name="searchTimeoutInSeconds">The timeout for each search. See <see cref="DefaultSearchTimeoutInSeconds"/>.</param>
+		/// <param name="searchTimeoutInSeconds">The timeout for each search. See <see cref="DefaultSearchTimeoutInSeconds"/>. Zero indicates indefinite timeout.</param>
 		/// <returns>Total count of objects matching conditions.</returns>
 		/// <remarks>Note that <paramref name="searchTimeoutInSeconds"/> applies to the timeout on each segment search; if multiple segments are needed then the maximum time that this method takes to return will exceed the provided value.</remarks>
-		public static long ForEach(
+		public static long ForEachEx(
 			this MFSearchBuilder builder,
 			Action<ObjVerEx> objVerExDelegate,
 			int startSegment = 0,
