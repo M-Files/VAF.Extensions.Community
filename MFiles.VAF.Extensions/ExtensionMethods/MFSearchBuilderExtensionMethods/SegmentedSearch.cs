@@ -68,7 +68,7 @@ namespace MFiles.VAF.Extensions
 				return searchResults.Count;
 			}
 
-			var resultCount = ForEachSegment(builder, DefaultSearchHandler, startSegment, segmentLimit, segmentSize);
+			var resultCount = ForEachSegment(builder, DefaultSearchHandler, startSegment, segmentLimit, segmentSize, searchTimeoutInSeconds);
 			return resultCount;
 		}
 
@@ -112,13 +112,16 @@ namespace MFiles.VAF.Extensions
 		/// <param name="startSegment">The (zero-based) index of the segment to start at.</param>
 		/// <param name="segmentLimit">The number of total segments to process. See <see cref="DefaultMaximumSegmentIndex"/>.</param>
 		/// <param name="segmentSize">The number of items to include in each segment. See <see cref="DefaultNumberOfItemsInSegment"/>.</param>
+		/// <param name="searchTimeoutInSeconds">The timeout for each search. See <see cref="DefaultSearchTimeoutInSeconds"/>. Zero indicates indefinite timeout.</param>
 		/// <returns>Total count of objects across vault.</returns>
+		/// <remarks>Note that <paramref name="searchTimeoutInSeconds"/> applies to the timeout on each segment search; if multiple segments are needed then the maximum time that this method takes to return will exceed the provided value.</remarks>
 		internal static long ForEachSegment(
 			this MFSearchBuilder builder,
 			Func<Vault, SearchConditions, int> func,
 			int startSegment = 0,
 			int segmentLimit = MFSearchBuilderExtensionMethods.DefaultMaximumSegmentIndex,
-			int segmentSize = MFSearchBuilderExtensionMethods.DefaultNumberOfItemsInSegment)
+			int segmentSize = MFSearchBuilderExtensionMethods.DefaultNumberOfItemsInSegment,
+			int searchTimeoutInSeconds = MFSearchBuilderExtensionMethods.DefaultSearchTimeoutInSeconds)
 		{
 			// Sanity.
 			if (null == func)
@@ -127,6 +130,8 @@ namespace MFiles.VAF.Extensions
 				throw new ArgumentOutOfRangeException(nameof(startSegment), "The start segment must be greater than or equal to zero.");
 			if (segmentSize <= 0)
 				throw new ArgumentOutOfRangeException(nameof(segmentSize), "The segment size must be greater than zero.");
+			if (searchTimeoutInSeconds < 0)
+				throw new ArgumentOutOfRangeException(nameof(searchTimeoutInSeconds), "The search timeout must be greater than zero, or zero to indicate an indefinite timeout");
 
 			// Set our start values.
 			var segment = startSegment;
@@ -152,7 +157,7 @@ namespace MFiles.VAF.Extensions
 				if (searchResultsCount == 0)
 				{
 					// Add a condition to see whether there are any items that have an ID in a higher segment.
-					builder.MinObjId(segment, segmentSize);
+					builder.MinObjId(segment + 1, segmentSize);
 
 					// Find any matching items that exist in a higher segment.
 					var resultsTopId = builder
@@ -163,7 +168,8 @@ namespace MFiles.VAF.Extensions
 							builder.Conditions,
 							MFSearchFlags.MFSearchFlagDisableRelevancyRanking,
 							SortResults: false,
-							MaxResultCount: 1
+							MaxResultCount: 1,
+							SearchTimeoutInSeconds: searchTimeoutInSeconds
 						);
 
 					// Remove the condition for the min obj id because it is reused in the loop.
@@ -192,28 +198,22 @@ namespace MFiles.VAF.Extensions
 		/// Creates a search condition using the minimum object id for use in segmented search.
 		/// </summary>
 		/// <param name="searchBuilder">Search Builder to add condition to.</param>
-		/// <param name="segment">The segment (starting at zero) to retrieve.</param>
+		/// <param name="segment">The segment (starting at one) to retrieve.</param>
 		/// <param name="segmentSize">The number of items in the segment.</param>
 		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
+		/// <remarks>Note that <paramref name="segment"/>  has a minimum of 1 because it is used to find any items in the next segment.</remarks>
 		internal static MFSearchBuilder MinObjId(this MFSearchBuilder searchBuilder, int segment, int segmentSize)
 		{
 			// Sanity.
 			if (null == searchBuilder)
 				throw new ArgumentNullException(nameof(searchBuilder));
-			if (segment < 0)
-				throw new ArgumentOutOfRangeException(nameof(segment), "The segment must be greater than or equal to zero");
+			if (segment <= 0)
+				throw new ArgumentOutOfRangeException(nameof(segment), "The segment must be greater than zero");
 			if (segmentSize <= 0)
 				throw new ArgumentOutOfRangeException(nameof(segmentSize), "The segmentSize must be greater than zero");
 
-			// Calculate the minimum id
-			var objectId = segmentSize * segment;
-
-			// ObjectId must be greater than 0
-			if(objectId == 0)
-				objectId = 1;
-
 			// Add a minimum object id condition
-			searchBuilder.ObjectId(objectId, MFConditionType.MFConditionTypeGreaterThanOrEqual);
+			searchBuilder.ObjectId(segmentSize * segment, MFConditionType.MFConditionTypeGreaterThanOrEqual);
 
 			return searchBuilder;
 		}
