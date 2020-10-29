@@ -374,7 +374,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
 
-			// Attempt to execute with null delegate.
+			// Attempt to execute with negative start segment.
 			mfSearchBuilder.ForEachSegment
 			(
 				(v, sc) => { return 0; },
@@ -389,7 +389,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
 
-			// Attempt to execute with null delegate.
+			// Attempt to execute with negative segment size.
 			mfSearchBuilder.ForEachSegment
 			(
 				(v, sc) => { return 0; },
@@ -404,7 +404,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
 
-			// Attempt to execute with null delegate.
+			// Attempt to execute with 0 segment size.
 			mfSearchBuilder.ForEachSegment
 			(
 				(v, sc) => { return 0; },
