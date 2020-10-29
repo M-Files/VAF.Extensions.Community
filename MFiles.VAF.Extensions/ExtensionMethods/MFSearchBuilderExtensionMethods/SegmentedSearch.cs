@@ -6,7 +6,6 @@ namespace MFiles.VAF.Extensions
 {
 	public static partial class MFSearchBuilderExtensionMethods
 	{
-
 		/// <summary>
 		/// The number of items to match in one segment.
 		/// </summary>

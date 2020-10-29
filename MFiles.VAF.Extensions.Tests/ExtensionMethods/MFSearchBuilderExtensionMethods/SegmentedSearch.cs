@@ -23,17 +23,17 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			var mfSearchBuilder = this.GetSearchBuilder();
 
 			// Ensure it has no items in the collection.
-			Assert.AreEqual( 0, mfSearchBuilder.Conditions.Count );
+			Assert.AreEqual(0, mfSearchBuilder.Conditions.Count);
 
 			// Add the search condition for the extension.
-			mfSearchBuilder.ObjType( 0 );
+			mfSearchBuilder.ObjType(0);
 
 			var count1 = 0;
 			var count2 = mfSearchBuilder.ForEachEx( obj => { count1 += 1; } );
 
 			// Ensure that there is one item in the vault.
-			Assert.AreEqual( 1, count1 );
-			Assert.AreEqual( 1, count2 );
+			Assert.AreEqual(1, count1);
+			Assert.AreEqual(1, count2);
 		}
 
 		[TestMethod]
@@ -43,15 +43,15 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			var mfSearchBuilder = this.GetSearchBuilder();
 
 			// Ensure it has no items in the collection.
-			Assert.AreEqual( 0, mfSearchBuilder.Conditions.Count );
+			Assert.AreEqual(0, mfSearchBuilder.Conditions.Count);
 
 			// Add the search condition for the extension.
-			mfSearchBuilder.ObjType( 0 );
+			mfSearchBuilder.ObjType(0);
 
 			var count = mfSearchBuilder.SegmentedCount();
 
 			// Ensure that there is one item in the vault.
-			Assert.AreEqual( 1, count );
+			Assert.AreEqual(1, count);
 		}
 
 		[TestMethod]
