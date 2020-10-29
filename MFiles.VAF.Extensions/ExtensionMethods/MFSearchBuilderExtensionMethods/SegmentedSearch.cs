@@ -205,8 +205,15 @@ namespace MFiles.VAF.Extensions
 			if (segmentSize <= 0)
 				throw new ArgumentOutOfRangeException(nameof(segmentSize), "The segmentSize must be greater than zero");
 
+			// Calculate the minimum id
+			var objectId = segmentSize * segment;
+
+			// ObjectId must be greater than 0
+			if(objectId == 0)
+				objectId = 1;
+
 			// Add a minimum object id condition
-			searchBuilder.ObjectId(segmentSize * segment, MFConditionType.MFConditionTypeGreaterThanOrEqual);
+			searchBuilder.ObjectId(objectId, MFConditionType.MFConditionTypeGreaterThanOrEqual);
 
 			return searchBuilder;
 		}
