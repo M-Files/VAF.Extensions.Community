@@ -10,6 +10,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 	public class SegmentedSearch
 		: MFSearchBuilderExtensionMethodTestBase
 	{
+		#region ForEachEx
+
 		/// <summary>
 		/// Tests that calling
 		/// <see cref="MFSearchBuilderExtensionMethods.ForEachEx"/>
@@ -34,23 +36,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		}
 
 		[TestMethod]
-		public void SegmentedCount()
-		{
-			// Create the search builder.
-			var mfSearchBuilder = this.GetSearchBuilder();
-
-			// Ensure it has no items in the collection.
-			Assert.AreEqual(0, mfSearchBuilder.Conditions.Count);
-
-			var count = mfSearchBuilder.SegmentedCount();
-
-			// Ensure that nothing is returned as there are no items.
-			Assert.AreEqual(0, count);
-		}
-
-		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
-		public void NullMethodThrows()
+		public void SegmentedSearchForEachEx_NullMethodThrows()
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
@@ -61,7 +48,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void NegativeStartSegmentThrows()
+		public void SegmentedSearchForEachEx_NegativeStartSegmentThrows()
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
@@ -75,7 +62,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		}
 
 		[TestMethod]
-		public void ZeroStartSegmentDoesNotThrow()
+		public void SegmentedSearchForEachEx_ZeroStartSegmentDoesNotThrow()
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
@@ -93,7 +80,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void NegativeSegmentLimitThrows()
+		public void SegmentedSearchForEachEx_NegativeSegmentLimitThrows()
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
@@ -108,7 +95,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void ZeroSegmentLimitThrows()
+		public void SegmentedSearchForEachEx_ZeroSegmentLimitThrows()
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
@@ -123,7 +110,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void NegativeSegmentSizeThrows()
+		public void SegmentedSearchForEachEx_NegativeSegmentSizeThrows()
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
@@ -138,7 +125,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void ZeroSegmentSizeThrows()
+		public void SegmentedSearchForEachEx_ZeroSegmentSizeThrows()
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
@@ -152,7 +139,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		}
 
 		[TestMethod]
-		public void PositiveSegmentSizeDoesNotThrow()
+		public void SegmentedSearchForEachEx_PositiveSegmentSizeDoesNotThrow()
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
@@ -170,7 +157,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void NegativeTimeoutThrows()
+		public void SegmentedSearchForEachEx_NegativeTimeoutThrows()
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
@@ -184,7 +171,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		}
 
 		[TestMethod]
-		public void ZeroTimeoutDoesNotThrow()
+		public void SegmentedSearchForEachEx_ZeroTimeoutDoesNotThrow()
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
@@ -201,7 +188,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		}
 
 		[TestMethod]
-		public void PositiveTimeoutDoesNotThrow()
+		public void SegmentedSearchForEachEx_PositiveTimeoutDoesNotThrow()
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
@@ -215,6 +202,23 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				(o) => { },
 				searchTimeoutInSeconds: 200
 			);
+		}
+
+		#endregion ForEachEx
+
+		[TestMethod]
+		public void SegmentedCount()
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Ensure it has no items in the collection.
+			Assert.AreEqual(0, mfSearchBuilder.Conditions.Count);
+
+			var count = mfSearchBuilder.SegmentedCount();
+
+			// Ensure that nothing is returned as there are no items.
+			Assert.AreEqual(0, count);
 		}
 
 		#region MinObjId
