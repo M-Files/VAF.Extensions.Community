@@ -23,6 +23,56 @@ namespace MFiles.VAF.Extensions
 		public const int DefaultSearchTimeoutInSeconds = 10;
 
 		/// <summary>
+		/// Executes a method for each <see cref="ObjectVersion"/> using a segmented search.
+		/// </summary>
+		/// <param name="builder">Search Builder to use for queries.</param>
+		/// <param name="objectVersionDelegate">Method to execute for each object.</param>
+		/// <param name="startSegment">The (zero-based) index of the segment to start at.</param>
+		/// <param name="segmentLimit">The number of total segments to process. See <see cref="DefaultMaximumSegmentIndex"/>.</param>
+		/// <param name="segmentSize">The number of items to include in each segment. See <see cref="DefaultNumberOfItemsInSegment"/>.</param>
+		/// <param name="searchTimeoutInSeconds">The timeout for each search. See <see cref="DefaultSearchTimeoutInSeconds"/>. Zero indicates indefinite timeout.</param>
+		/// <returns>Total count of objects matching conditions.</returns>
+		/// <remarks>Note that <paramref name="searchTimeoutInSeconds"/> applies to the timeout on each segment search; if multiple segments are needed then the maximum time that this method takes to return will exceed the provided value.</remarks>
+		public static long ForEach(
+			this MFSearchBuilder builder,
+			Action<ObjectVersion> objectVersionDelegate,
+			int startSegment = 0,
+			int segmentLimit = MFSearchBuilderExtensionMethods.DefaultMaximumSegmentIndex,
+			int segmentSize = MFSearchBuilderExtensionMethods.DefaultNumberOfItemsInSegment,
+			int searchTimeoutInSeconds = MFSearchBuilderExtensionMethods.DefaultSearchTimeoutInSeconds )
+		{
+			// Sanity checks
+			if (builder == null)
+				throw new ArgumentNullException(nameof(builder));
+			if (objectVersionDelegate == null)
+				throw new ArgumentNullException(nameof(objectVersionDelegate));
+			if (startSegment < 0)
+				throw new ArgumentOutOfRangeException(nameof(startSegment), "value must be greater than or equal to 0");
+			if (segmentLimit <= 0)
+				throw new ArgumentOutOfRangeException(nameof(segmentLimit), "value must be greater 0");
+			if (segmentSize <= 0)
+				throw new ArgumentOutOfRangeException(nameof(segmentSize), "value must be greater than 0");
+			if (searchTimeoutInSeconds < 0)
+				throw new ArgumentOutOfRangeException(nameof(searchTimeoutInSeconds), "The search timeout must be greater than zero, or zero to indicate an indefinite timeout");
+
+			int DefaultSearchHandler(Vault vault, SearchConditions searchConditions)
+			{
+				var newBuilder = new MFSearchBuilder(vault, searchConditions);
+				var searchResults = newBuilder.Find(searchTimeoutInSeconds: searchTimeoutInSeconds);
+
+				foreach (ObjectVersion searchResult in searchResults)
+				{
+					objectVersionDelegate(searchResult);
+				}
+
+				return searchResults.Count;
+			}
+
+			var resultCount = ForEachSegment(builder, DefaultSearchHandler, startSegment, segmentLimit, segmentSize, searchTimeoutInSeconds);
+			return resultCount;
+		}
+
+		/// <summary>
 		/// Executes a method for each <see cref="ObjVerEx"/> using a segmented search.
 		/// </summary>
 		/// <param name="builder">Search Builder to use for queries.</param>
