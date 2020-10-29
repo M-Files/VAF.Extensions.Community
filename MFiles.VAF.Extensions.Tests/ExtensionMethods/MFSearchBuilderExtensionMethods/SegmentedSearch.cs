@@ -223,50 +223,52 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			);
 		}
 
-		#region SearchConditionMinObjId
+		#region MinObjId
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void SearchConditionMinObjIdNegativeSegmentThrows()
+		public void MinObjIdNegativeSegmentThrows()
 		{
-			MFiles.VAF.Extensions.MFSearchBuilderExtensionMethods.SearchConditionMinObjId
-			(
-				-1,
-				1
-			);
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			mfSearchBuilder.MinObjId(-1, 1);
 		}
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void SearchConditionMinObjIdNegativeSegmentSizeThrows()
+		public void MinObjIdNegativeSegmentSizeThrows()
 		{
-			MFiles.VAF.Extensions.MFSearchBuilderExtensionMethods.SearchConditionMinObjId
-			(
-				1,
-				-1
-			);
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			mfSearchBuilder.MinObjId(1, -1);
 		}
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void SearchConditionMinObjIdZeroSegmentSizeThrows()
+		public void MinObjIdZeroSegmentSizeThrows()
 		{
-			MFiles.VAF.Extensions.MFSearchBuilderExtensionMethods.SearchConditionMinObjId
-			(
-				1,
-				0
-			);
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			mfSearchBuilder.MinObjId(1, 0);
 		}
 
 		[TestMethod]
-		public void SearchConditionMinObjIdReturnsValidSearchCondition()
+		public void MinObjIdReturnsValidSearchCondition()
 		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
 			// Create the condition.
-			var condition = Extensions.MFSearchBuilderExtensionMethods.SearchConditionMinObjId
-			(
-				10,
-				50
-			);
+			mfSearchBuilder.MinObjId(10, 50);
+
+			// If there's anything other than one condition then fail.
+			if (mfSearchBuilder.Conditions.Count != 1)
+				Assert.Fail("Only one search condition should exist");
+
+			var condition = mfSearchBuilder.Conditions[1];
 
 			// Condition must have valid data.
 			Assert.IsNotNull(condition);
@@ -275,62 +277,82 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			Assert.AreEqual(500, condition.TypedValue.Value);
 		}
 
-		#endregion
+		#endregion MinObjId
 
-		#region SearchConditionSegment
+		#region RemoveLastCondition
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void SearchConditionSegmentNegativeSegmentThrows()
+		public void RemoveLastConditionIsANoopWithNoConditions()
 		{
-			MFiles.VAF.Extensions.MFSearchBuilderExtensionMethods.SearchConditionSegment
-			(
-				-1,
-				1
-			);
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// If there are any conditions then fail.
+			if (mfSearchBuilder.Conditions.Count != 0)
+				Assert.Fail("No search conditions should exist");
+
+			// Should not throw but also not affect the count of conditions
+			mfSearchBuilder.RemoveLastCondition();
+
+			// If there are any conditions then fail.
+			if (mfSearchBuilder.Conditions.Count != 0)
+				Assert.Fail("No search conditions should exist");
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void SearchConditionSegmentNegativeSegmentSizeThrows()
+		public void RemoveLastConditionCorrectlyRemovesOnlyCondition()
 		{
-			MFiles.VAF.Extensions.MFSearchBuilderExtensionMethods.SearchConditionSegment
-			(
-				1,
-				-1
-			);
-		}
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
 
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void SearchConditionSegmentZeroSegmentSizeThrows()
-		{
-			MFiles.VAF.Extensions.MFSearchBuilderExtensionMethods.SearchConditionSegment
-			(
-				1,
-				0
-			);
-		}
-
-		[TestMethod]
-		public void SearchConditionSegmentReturnsValidSearchCondition()
-		{
 			// Create the condition.
-			var condition = Extensions.MFSearchBuilderExtensionMethods.SearchConditionSegment
-			(
-				10,
-				50
-			);
+			mfSearchBuilder.MinObjId(10, 50);
+
+			// If there's anything other than one condition then fail.
+			if (mfSearchBuilder.Conditions.Count != 1)
+				Assert.Fail("Only one search condition should exist");
+
+			// Should remove the only condition
+			mfSearchBuilder.RemoveLastCondition();
+
+			// If there are any conditions then fail.
+			if (mfSearchBuilder.Conditions.Count != 0)
+				Assert.Fail("No search conditions should exist");
+		}
+
+		[TestMethod]
+		public void RemoveLastConditionCorrectlyRemovesLastCondition()
+		{
+			// Create the search builder.
+			var mfSearchBuilder = this.GetSearchBuilder();
+
+			// Create the condition.
+			mfSearchBuilder.MinObjId(10, 50);
+
+			// Add the condition that will be removed
+			mfSearchBuilder.ObjectIdSegment(20, 500);
+
+			// If there's anything other than two conditions then fail.
+			if (mfSearchBuilder.Conditions.Count != 2)
+				Assert.Fail("Two search conditions should exist");
+
+			// Should remove the latest condition
+			mfSearchBuilder.RemoveLastCondition();
+
+			// If there's anything other than one condition then fail.
+			if (mfSearchBuilder.Conditions.Count != 1)
+				Assert.Fail("Only one search condition should exist");
+
+			var condition = mfSearchBuilder.Conditions[1];
 
 			// Condition must have valid data.
 			Assert.IsNotNull(condition);
-			Assert.AreEqual(MFConditionType.MFConditionTypeEqual, condition.ConditionType);
-			Assert.AreEqual(MFExpressionType.MFExpressionTypeObjectIDSegment, condition.Expression.Type);
-			Assert.AreEqual(50, condition.Expression.DataObjectIDSegmentSegmentSize);
-			Assert.AreEqual(10, condition.TypedValue.Value);
+			Assert.AreEqual(MFConditionType.MFConditionTypeGreaterThanOrEqual, condition.ConditionType);
+			Assert.AreEqual(MFStatusType.MFStatusTypeObjectID, condition.Expression.DataStatusValueType);
+			Assert.AreEqual(500, condition.TypedValue.Value);
 		}
 
-		#endregion
+		#endregion RemoveLastCondition
 
 		#region ForEachSegment
 

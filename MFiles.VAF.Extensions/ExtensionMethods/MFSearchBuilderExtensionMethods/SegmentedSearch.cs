@@ -132,31 +132,27 @@ namespace MFiles.VAF.Extensions
 			var segment = startSegment;
 			long resultCount = 0; // The total number of matched items in all segments.
 
-			// Clone the search conditions from the supplied builder.
-			var searchConditions = builder.Conditions.Clone();
-
 			// Iterate over segments until we hit the sanity limit,
 			// or until there are no items left to find.
 			while (segment < segmentLimit)
 			{
 				// Add a condition for the current segment that we want.
-				searchConditions.Add(-1, SearchConditionSegment(segment, segmentSize));
+				builder.ObjectIdSegment(segment, segmentSize);
 
 				// Execute the provided function.
 				// This must return a count of items that were in the current segment,
 				// but it may also execute other code against the items, depending on
 				// what the calling function needs.
-				var searchResultsCount = func(builder.Vault, searchConditions);
+				var searchResultsCount = func(builder.Vault, builder.Conditions);
 
 				// Remove the condition for the segment.
-				searchConditions.Remove(searchConditions.Count);
+				builder.RemoveLastCondition();
 
 				// If we got no items back then we need to check whether a higher segment has items.
 				if (searchResultsCount == 0)
 				{
-
 					// Add a condition to see whether there are any items that have an ID in a higher segment.
-					searchConditions.Add(-1, SearchConditionMinObjId(segment, segmentSize));
+					builder.MinObjId(segment, segmentSize);
 
 					// Find any matching items that exist in a higher segment.
 					var resultsTopId = builder
@@ -164,14 +160,14 @@ namespace MFiles.VAF.Extensions
 						.ObjectSearchOperations
 						.SearchForObjectsByConditionsEx
 						(
-							searchConditions,
+							builder.Conditions,
 							MFSearchFlags.MFSearchFlagDisableRelevancyRanking,
 							SortResults: false,
 							MaxResultCount: 1
 						);
 
 					// Remove the condition for the min obj id because it is reused in the loop.
-					searchConditions.Remove(searchConditions.Count);
+					builder.RemoveLastCondition();
 
 					// If there are none then break out of the while loop
 					// as there is no point checking further segments.
@@ -193,56 +189,47 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
-		/// Creates a search condition for a segment to use in segmented search.
+		/// Creates a search condition using the minimum object id for use in segmented search.
 		/// </summary>
+		/// <param name="searchBuilder">Search Builder to add condition to.</param>
 		/// <param name="segment">The segment (starting at zero) to retrieve.</param>
 		/// <param name="segmentSize">The number of items in the segment.</param>
-		/// <returns>A <see cref="SearchCondition"/> that represents finding items that have object IDs in the provided segment.</returns>
-		/// <remarks>
-		/// A <paramref name="segment"/> of zero and <paramref name="segmentSize"/> of 1000 will return items with IDs between 1 and 1000.
-		/// A <paramref name="segment"/> of one and <paramref name="segmentSize"/> of 1000 will return items with IDs between 1001 and 2000.
-		/// </remarks>
-		internal static SearchCondition SearchConditionSegment(int segment, int segmentSize)
+		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
+		internal static MFSearchBuilder MinObjId(this MFSearchBuilder searchBuilder, int segment, int segmentSize)
 		{
 			// Sanity.
+			if (null == searchBuilder)
+				throw new ArgumentNullException(nameof(searchBuilder));
 			if (segment < 0)
 				throw new ArgumentOutOfRangeException(nameof(segment), "The segment must be greater than or equal to zero");
 			if (segmentSize <= 0)
 				throw new ArgumentOutOfRangeException(nameof(segmentSize), "The segmentSize must be greater than zero");
 
-			// Create and return the search condition.
-			var searchCondition = new SearchCondition
-			{
-				ConditionType = MFConditionType.MFConditionTypeEqual
-			};
-			searchCondition.Expression.SetObjectIDSegmentExpression(segmentSize);
-			searchCondition.TypedValue.SetValue(MFDataType.MFDatatypeInteger, segment);
-			return searchCondition;
+			// Add a minimum object id condition
+			searchBuilder.ObjectId(segmentSize * segment, MFConditionType.MFConditionTypeGreaterThanOrEqual);
+
+			return searchBuilder;
 		}
 
 		/// <summary>
-		/// Creates a search condition using the minimum object id for use in segmented search.
+		/// Removes the last search condition, by index, from the search builder.
 		/// </summary>
-		/// <param name="segment">The segment (starting at zero) to retrieve.</param>
-		/// <param name="segmentSize">The number of items in the segment.</param>
-		/// <returns>A <see cref="SearchCondition"/> that represents finding items that have the correct minimum object ID.</returns>
-		internal static SearchCondition SearchConditionMinObjId(int segment, int segmentSize)
+		/// <param name="searchBuilder">Search Builder to remove condition from.</param>
+		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
+		internal static MFSearchBuilder RemoveLastCondition(this MFSearchBuilder searchBuilder)
 		{
 			// Sanity.
-			if (segment < 0)
-				throw new ArgumentOutOfRangeException(nameof(segment), "The segment must be greater than or equal to zero");
-			if (segmentSize <= 0)
-				throw new ArgumentOutOfRangeException(nameof(segmentSize), "The segmentSize must be greater than zero");
+			if (null == searchBuilder)
+				throw new ArgumentNullException(nameof(searchBuilder));
 
-			// Create and return the search condition.
-			var searchCondition = new SearchCondition
-			{
-				ConditionType = MFConditionType.MFConditionTypeGreaterThanOrEqual
-			};
-			searchCondition.Expression.SetStatusValueExpression(MFStatusType.MFStatusTypeObjectID);
-			searchCondition.TypedValue.SetValue(MFDataType.MFDatatypeInteger, segmentSize * segment);
-			return searchCondition;
+			// If there are no conditions to remove then this is a no-op
+			if (searchBuilder.Conditions.Count == 0)
+				return searchBuilder;
+
+			// Remove the last condition
+			searchBuilder.Conditions.Remove(searchBuilder.Conditions.Count);
+
+			return searchBuilder;
 		}
-
 	}
 }
