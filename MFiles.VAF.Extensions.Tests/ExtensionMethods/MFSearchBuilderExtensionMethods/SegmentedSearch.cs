@@ -67,9 +67,6 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
 
-			// Add the search condition for the extension.
-			mfSearchBuilder.ObjType(0);
-
 			// Attempt to execute method.
 			mfSearchBuilder.ForEach
 			(
@@ -144,9 +141,6 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
 
-			// Add the search condition for the extension.
-			mfSearchBuilder.ObjType(0);
-
 			// Attempt to execute method.
 			mfSearchBuilder.ForEach
 			(
@@ -176,9 +170,6 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
 
-			// Add the search condition for the extension.
-			mfSearchBuilder.ObjType(0);
-
 			// Attempt to execute method.
 			mfSearchBuilder.ForEach
 			(
@@ -192,9 +183,6 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
-
-			// Add the search condition for the extension.
-			mfSearchBuilder.ObjType(0);
 
 			// Attempt to execute method.
 			mfSearchBuilder.ForEach
@@ -262,9 +250,6 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
-
-			// Add the search condition for the extension.
-			mfSearchBuilder.ObjType(0);
 
 			// Attempt to execute method.
 			mfSearchBuilder.ForEachEx
@@ -340,9 +325,6 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
 
-			// Add the search condition for the extension.
-			mfSearchBuilder.ObjType(0);
-
 			// Attempt to execute method.
 			mfSearchBuilder.ForEachEx
 			(
@@ -372,9 +354,6 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
 
-			// Add the search condition for the extension.
-			mfSearchBuilder.ObjType(0);
-
 			// Attempt to execute method.
 			mfSearchBuilder.ForEachEx
 			(
@@ -388,9 +367,6 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		{
 			// Create the search builder.
 			var mfSearchBuilder = this.GetSearchBuilder();
-
-			// Add the search condition for the extension.
-			mfSearchBuilder.ObjType(0);
 
 			// Attempt to execute method.
 			mfSearchBuilder.ForEachEx
