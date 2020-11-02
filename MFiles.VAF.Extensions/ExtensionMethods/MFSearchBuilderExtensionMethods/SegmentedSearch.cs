@@ -191,39 +191,40 @@ namespace MFiles.VAF.Extensions
 			// or until there are no items left to find.
 			while (segment < segmentLimit)
 			{
+				// Make a copy of the builder that we can interact with and not
+				// affect the one passed in.
+				var internalBuilder = new MFSearchBuilder(builder.Vault, builder.Conditions);
+
 				// Add a condition for the current segment that we want.
-				builder.ObjectIdSegment(segment, segmentSize);
+				internalBuilder.ObjectIdSegment(segment, segmentSize);
 
 				// Execute the provided function.
 				// This must return a count of items that were in the current segment,
 				// but it may also execute other code against the items, depending on
 				// what the calling function needs.
-				var searchResultsCount = func(builder.Vault, builder.Conditions);
-
-				// Remove the condition for the segment.
-				builder.RemoveLastCondition();
+				var searchResultsCount = func(internalBuilder.Vault, internalBuilder.Conditions);
 
 				// If we got no items back then we need to check whether a higher segment has items.
 				if (searchResultsCount == 0)
 				{
+					// Recreate the internal builder.
+					internalBuilder = new MFSearchBuilder(builder.Vault, builder.Conditions);
+
 					// Add a condition to see whether there are any items that have an ID in a higher segment.
-					builder.MinObjId(segment + 1, segmentSize);
+					internalBuilder.MinObjId(segment + 1, segmentSize);
 
 					// Find any matching items that exist in a higher segment.
-					var resultsTopId = builder
+					var resultsTopId = internalBuilder
 						.Vault
 						.ObjectSearchOperations
 						.SearchForObjectsByConditionsEx
 						(
-							builder.Conditions,
+							internalBuilder.Conditions,
 							MFSearchFlags.MFSearchFlagDisableRelevancyRanking,
 							SortResults: false,
 							MaxResultCount: 1,
 							SearchTimeoutInSeconds: searchTimeoutInSeconds
 						);
-
-					// Remove the condition for the min obj id because it is reused in the loop.
-					builder.RemoveLastCondition();
 
 					// If there are none then break out of the while loop
 					// as there is no point checking further segments.
@@ -264,27 +265,6 @@ namespace MFiles.VAF.Extensions
 
 			// Add a minimum object id condition
 			searchBuilder.ObjectId(segmentSize * segment, MFConditionType.MFConditionTypeGreaterThanOrEqual);
-
-			return searchBuilder;
-		}
-
-		/// <summary>
-		/// Removes the last search condition, by index, from the search builder.
-		/// </summary>
-		/// <param name="searchBuilder">Search Builder to remove condition from.</param>
-		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
-		internal static MFSearchBuilder RemoveLastCondition(this MFSearchBuilder searchBuilder)
-		{
-			// Sanity.
-			if (null == searchBuilder)
-				throw new ArgumentNullException(nameof(searchBuilder));
-
-			// If there are no conditions to remove then this is a no-op
-			if (searchBuilder.Conditions.Count == 0)
-				return searchBuilder;
-
-			// Remove the last condition
-			searchBuilder.Conditions.Remove(searchBuilder.Conditions.Count);
 
 			return searchBuilder;
 		}
