@@ -347,7 +347,7 @@ This library adds three related extension methods for `MFSearchBuilder`:
 
 *Note: in all cases the `MFSearchBuilder` should already be populated with the search conditions required to identify the objects to search for.*
 
-** Counting the total number of non-deleted documents in the vault:**
+**Counting the total number of non-deleted documents in the vault:**
 ```csharp
 // Build the search conditions.
 var searchBuilder = new MFSearchBuilder(env.Vault);
@@ -358,7 +358,7 @@ searchBuilder.ObjType((int)MFBuiltInObjectType.MFBuiltInObjectTypeDocument));
 var count = searchBuilder.SegmentedCount();
 ```
 
-** Execute some code for all documents in the vault:**
+**Execute some code for all documents in the vault:**
 ```csharp
 // Build the search conditions.
 var searchBuilder = new MFSearchBuilder(env.Vault);
