@@ -333,3 +333,44 @@ searchBuilder.Property
     indirectionLevels: indirectionLevels
 );
 ```
+
+
+## Segmented searches
+
+Searches against the M-Files API are subject to a number of limits, including both timout and number-of-returned-item limits.  It is possible to [alter some of the parameters](https://www.m-files.com/api/documentation/latest/index.html#MFilesAPI~VaultObjectSearchOperations~SearchForObjectsByConditionsEx.html) to increase the timeouts, but the only guaranteed way to get all items returned is to execute a [segmented search](https://github.com/M-Files/MFilesSamplesAndLibraries/tree/master/Samples/COM%20API/SegmentedSearch).
+
+This library adds three related extension methods for `MFSearchBuilder`:
+
+* `MFSearchBuilder.SegmentedCount` executes a search against the vault and counts the items returned, even if the count requires multiple calls to the vault to retrieve all items.
+* `MFSearchBuilder.ForEach` executes a search against the vault and executes a callback method for each [ObjectVersion](https://www.m-files.com/api/documentation/latest/index.html#MFilesAPI~ObjectVersion.html) that matches the conditions.  This method does not automatically load the object properties, so is more efficient if you do not need the object property information.
+* `MFSearchBuilder.ForEachEx` executes a search against the vault and executes a callback method for each [ObjVerEx](https://developer.m-files.com/Frameworks/Vault-Application-Framework/Helpers/ObjVerEx/) that matches the conditions.  This method should be used if you need to access the object's properties.
+
+*Note: in all cases the `MFSearchBuilder` should already be populated with the search conditions required to identify the objects to search for.*
+
+** Counting the total number of non-deleted documents in the vault:**
+```csharp
+// Build the search conditions.
+var searchBuilder = new MFSearchBuilder(env.Vault);
+searchBuilder.Deleted(false);
+searchBuilder.ObjType((int)MFBuiltInObjectType.MFBuiltInObjectTypeDocument));
+
+// Get the count.
+var count = searchBuilder.SegmentedCount();
+```
+
+** Execute some code for all documents in the vault:**
+```csharp
+// Build the search conditions.
+var searchBuilder = new MFSearchBuilder(env.Vault);
+searchBuilder.Deleted(false);
+searchBuilder.ObjType((int)MFBuiltInObjectType.MFBuiltInObjectTypeDocument));
+
+// Create the delegate (run for each matching object).
+var callback = (ObjVerEx o) =>
+{
+    Console.WriteLine(o.Title);
+};
+
+// Execute.
+searchBuilder.ForEach(callback);
+```
