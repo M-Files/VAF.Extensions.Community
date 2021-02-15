@@ -1,5 +1,6 @@
 ﻿using System;
 using MFiles.VAF.MultiserverMode;
+using MFilesAPI;
 
 namespace MFiles.VAF.Extensions.MultiServerMode
 {
@@ -12,12 +13,14 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="backgroundOperationName">The name of the background operation that should be invoked when this job is run.</param>
 		/// <param name="runAt">If specified, schedules an execution at the provided time.  Otherwise schedules a call immediately.</param>
 		/// <param name="directive">The directive - if any - to pass to the job.</param>
+		/// <param name="vault">The vault reference to add the task.  Set to a transactional vault to only add the task if the transaction completes.</param>
 		/// <remarks>Does not remove any scheduled executions.  Use <see cref="StopRunningAtIntervals"/>.</remarks>
 		public void RunOnce
 		(
 			string backgroundOperationName,
 			DateTime? runAt = null,
-			TaskQueueDirective directive = null
+			TaskQueueDirective directive = null,
+			Vault vault = null
 		)
 		{
 			// Use the other overload.
@@ -25,7 +28,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			(
 				backgroundOperationName,
 				runAt,
-				directive
+				directive,
+				vault
 			);
 		}
 
@@ -35,12 +39,14 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="backgroundOperationName">The name of the background operation that should be invoked when this job is run.</param>
 		/// <param name="runAt">If specified, schedules an execution at the provided time.  Otherwise schedules a call immediately.</param>
 		/// <param name="directive">The directive - if any - to pass to the job.</param>
+		/// <param name="vault">The vault reference to add the task.  Set to a transactional vault to only add the task if the transaction completes.</param>
 		/// <remarks>Does not remove any scheduled executions.  Use <see cref="StopRunningAtIntervals"/>.</remarks>
 		public void RunOnce<TDirective>
 		(
 			string backgroundOperationName,
 			DateTime? runAt = null,
-			TDirective directive = null
+			TDirective directive = null,
+			Vault vault = null
 		)
 			where TDirective : TaskQueueDirective
 		{
@@ -55,7 +61,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				this.QueueId,
 				TaskQueueBackgroundOperation.TaskTypeId,
 				backgroundOperationDirective?.ToBytes(),
-				runAt.HasValue ? runAt.Value.ToUniversalTime() : DateTime.UtcNow
+				runAt.HasValue ? runAt.Value.ToUniversalTime() : DateTime.UtcNow,
+				vault: vault ?? this.VaultApplication?.PermanentVault
 			);
 		}
 
