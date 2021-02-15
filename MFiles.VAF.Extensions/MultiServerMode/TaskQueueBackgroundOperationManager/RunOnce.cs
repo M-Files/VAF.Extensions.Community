@@ -13,7 +13,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="backgroundOperationName">The name of the background operation that should be invoked when this job is run.</param>
 		/// <param name="runAt">If specified, schedules an execution at the provided time.  Otherwise schedules a call immediately.</param>
 		/// <param name="directive">The directive - if any - to pass to the job.</param>
-		/// <param name="vault">The vault reference to add the task.  Set to a transactional vault to only add the task if the transaction completes.</param>
+		/// <param name="vault">The vault reference to add the task.  Set to a transactional vault to only run the task if the transaction completes.</param>
 		/// <remarks>Does not remove any scheduled executions.  Use <see cref="StopRunningAtIntervals"/>.</remarks>
 		public void RunOnce
 		(
@@ -39,7 +39,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="backgroundOperationName">The name of the background operation that should be invoked when this job is run.</param>
 		/// <param name="runAt">If specified, schedules an execution at the provided time.  Otherwise schedules a call immediately.</param>
 		/// <param name="directive">The directive - if any - to pass to the job.</param>
-		/// <param name="vault">The vault reference to add the task.  Set to a transactional vault to only add the task if the transaction completes.</param>
+		/// <param name="vault">The vault reference to add the task.  Set to a transactional vault to only run the task if the transaction completes.</param>
 		/// <remarks>Does not remove any scheduled executions.  Use <see cref="StopRunningAtIntervals"/>.</remarks>
 		public void RunOnce<TDirective>
 		(
