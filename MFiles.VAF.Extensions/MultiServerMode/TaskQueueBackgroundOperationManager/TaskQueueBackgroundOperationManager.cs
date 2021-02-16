@@ -48,8 +48,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				{
 					TaskQueueBackgroundOperationManager.CurrentServer
 						= vaultApplication
-							.PermanentVault
-							.GetVaultServerAttachments()
+							.PermanentVault?
+							.GetVaultServerAttachments()?
 							.GetCurrent();
 				}
 			}
