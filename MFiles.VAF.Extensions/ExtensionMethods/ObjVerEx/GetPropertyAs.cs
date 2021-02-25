@@ -80,6 +80,25 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
+		/// Returns the <see cref="bool"/> value of the property specified in <paramref name="propertyDef"/>.
+		/// </summary>
+		/// <param name="objVerEx">The object version to check.</param>
+		/// <param name="propertyDef">The property definition Id.</param>
+		/// <returns>The value of the property, or null if not set.</returns>
+		public static bool? GetPropertyAsBoolean
+		(
+			this ObjVerEx objVerEx,
+			int propertyDef
+		)
+		{
+			return objVerEx.GetPropertyAs<bool?>
+			(
+				propertyDef,
+				MFDataType.MFDatatypeBoolean
+			);
+		}
+
+		/// <summary>
 		/// Returns the <see cref="int"/> value of the property specified in <paramref name="propertyDef"/>.
 		/// </summary>
 		/// <param name="objVerEx">The object version to check.</param>
@@ -87,7 +106,7 @@ namespace MFiles.VAF.Extensions
 		/// <returns>The value of the property, or null if not set.</returns>
 		public static int? GetPropertyAsInteger
 		(
-			this ObjVerEx objVerEx, 
+			this ObjVerEx objVerEx,
 			int propertyDef
 		)
 		{
