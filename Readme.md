@@ -1,3 +1,9 @@
+![GitHub](https://img.shields.io/github/license/M-Files/VAF.Extensions.Community) ![GitHub last commit](https://img.shields.io/github/last-commit/M-Files/VAF.Extensions.Community)
+
+[![Nuget version](https://img.shields.io/nuget/v/MFiles.VAF.Extensions?label=nuget%20version)](https://www.nuget.org/packages/MFiles.VAF.Extensions/) ![Nuget](https://img.shields.io/nuget/dt/MFiles.VAF.Extensions?label=nuget%20downloads)
+
+![GitHub issues](https://img.shields.io/github/issues-raw/M-Files/VAF.Extensions.Community) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/M-Files/VAF.Extensions.Community) ![GitHub repo size](https://img.shields.io/github/repo-size/M-Files/VAF.Extensions.Community) 
+
 # M-Files Vault Application Framework Extensions (Community)
 
 _Please note that this library is provided "as-is" and with no warranty, explicit or otherwise. You should ensure that the functionality meets your requirements, and thoroughly test them, prior to using in any production scenarios._
