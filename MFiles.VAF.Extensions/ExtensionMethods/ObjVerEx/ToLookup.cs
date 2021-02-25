@@ -4,8 +4,8 @@ using System;
 
 namespace MFiles.VAF.Extensions
 {
-	public static partial class ObjVerExExtensionMethods
-	{
+    public static partial class ObjVerExExtensionMethods
+    {
         /// <summary>
         /// Function to return MFilesAPI.Lookup representation of this MFiles.VAF.Common.ObjVerEx with a specific lookup version or the always latest
         /// </summary>
