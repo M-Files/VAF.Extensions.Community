@@ -1,0 +1,10 @@
+root = true
+
+[.editorconfig]
+end_of_line = crlf
+
+[*.cs]
+charset = utf-8-bom
+end_of_line = crlf
+indent_style = tab
+indent_size = 4
