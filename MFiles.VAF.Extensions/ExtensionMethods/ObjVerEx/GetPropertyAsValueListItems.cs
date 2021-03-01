@@ -15,7 +15,7 @@ namespace MFiles.VAF.Extensions
         /// <param name="objVerEx">The child/owned object.</param>
         /// <param name="propDefId">The property definition id.</param>
         /// <returns>List of value list item objects if available</returns>
-        /// <remarks>Can return null entries within the list if the value list item is deleted or not set.</remarks>
+		/// <remarks>If one or more value list items cannot be loaded (e.g. permissions or ID does not exist) then they will be skipped in the returned collection.</remarks>
         /// <exception cref="ArgumentException">Thrown if <paramref name="propDefId"/> does not point to a suitable property definition.</exception>
         public static List<ValueListItem> GetPropertyAsValueListItems(
             this ObjVerEx objVerEx,
@@ -76,9 +76,18 @@ namespace MFiles.VAF.Extensions
             // Loop through the lookup elements
             foreach (Lookup lookup in lookups)
             {
-                listResults.Add(
-                    vliOps.GetValueListItemByID(propDef.ValueList, lookup.Item)
-                );
+				try
+				{
+					listResults.Add(
+						vliOps.GetValueListItemByID(propDef.ValueList, lookup.Item)
+					);
+				}
+				catch
+				{
+					// If we cannot load the value list item then we can skip this item.
+					// This would only happen if the lookup points to an item that no longer
+					// exists.
+				}
             }
 
             // return the list with the value list items for the multiselect lookup entries
