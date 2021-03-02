@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 using System;
+using System.Runtime.InteropServices;
 
 namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 {
@@ -69,12 +70,412 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentException))]
-		public void ThrowsIfPropIsNoMultiSelectLookup()
+		public void ThrowsIfPropIsNotMultiSelectLookup()
 		{
 			DefaultObjVerEx.GetPropertyAsValueListItems((int) MFBuiltInPropertyDef.MFBuiltInPropertyDefWorkflow);
 		}
 
-		// TODO Think about further test methods + Question how lookups to object types were handled
+		[TestMethod]
+		public void ReturnsEmptyCollectionIfPropertyNotInCollection()
+		{
+			// IDs used.
+			var propertyDefId = 1234;
+			var valueListId = 123;
+
+			// Mock the property definition operations object.
+			var propertyDefinitionsMock = new Mock<VaultPropertyDefOperations>();
+			propertyDefinitionsMock.Setup(m => m.GetPropertyDef(It.IsAny<int>()))
+				.Returns((int propertyDef) =>
+				{
+					// Ensure that the property definition Id is correct.
+					Assert.AreEqual(propertyDefId, propertyDef);
+
+					// Return a property definition that is not based on a value list.
+					return new PropertyDef()
+					{
+						ID = propertyDefId,
+						DataType = MFDataType.MFDatatypeMultiSelectLookup,
+						BasedOnValueList = true,
+						ValueList = valueListId
+					};
+				})
+				.Verifiable();
+
+			// Mock the object type operations object.
+			var objectTypeOperationsMock = new Mock<VaultObjectTypeOperations>();
+			objectTypeOperationsMock.Setup(m => m.GetObjectType(It.IsAny<int>()))
+				.Returns((int objectTypeId) =>
+				{
+					return new ObjType()
+					{
+						ID = 101
+					};
+				});
+
+			// Mock the vault.
+			var vaultMock = this.GetVaultMock();
+			vaultMock.Setup(m => m.PropertyDefOperations).Returns(propertyDefinitionsMock.Object);
+			vaultMock.Setup(m => m.ObjectTypeOperations).Returns(objectTypeOperationsMock.Object);
+
+			// Set up the data for the ObjVerEx.
+			var objVer = new ObjVer();
+			objVer.SetIDs(0, 1, 1);
+			var objectVersionMock = new Mock<ObjectVersion>();
+			objectVersionMock.SetupGet(m => m.ObjVer)
+				.Returns(objVer);
+			var properties = new PropertyValues();
+
+			// Create the ObjVerEx.
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionMock.Object, properties);
+
+			// Use the method.
+			var items = objVerEx.GetPropertyAsValueListItems(propertyDefId);
+			Assert.IsNotNull(items);
+			Assert.AreEqual(0, items.Count);
+		}
+
+		[TestMethod]
+		public void ReturnsEmptyCollectionIfPropertyIsNull()
+		{
+			// IDs used.
+			var propertyDefId = 1234;
+			var valueListId = 123;
+
+			// Mock the property definition operations object.
+			var propertyDefinitionsMock = new Mock<VaultPropertyDefOperations>();
+			propertyDefinitionsMock.Setup(m => m.GetPropertyDef(It.IsAny<int>()))
+				.Returns((int propertyDef) =>
+				{
+					// Ensure that the property definition Id is correct.
+					Assert.AreEqual(propertyDefId, propertyDef);
+
+					// Return a property definition that is not based on a value list.
+					return new PropertyDef()
+					{
+						ID = propertyDefId,
+						DataType = MFDataType.MFDatatypeMultiSelectLookup,
+						BasedOnValueList = true,
+						ValueList = valueListId
+					};
+				})
+				.Verifiable();
+
+			// Mock the object type operations object.
+			var objectTypeOperationsMock = new Mock<VaultObjectTypeOperations>();
+			objectTypeOperationsMock.Setup(m => m.GetObjectType(It.IsAny<int>()))
+				.Returns((int objectTypeId) =>
+				{
+					return new ObjType()
+					{
+						ID = 101
+					};
+				});
+
+			// Mock the vault.
+			var vaultMock = this.GetVaultMock();
+			vaultMock.Setup(m => m.PropertyDefOperations).Returns(propertyDefinitionsMock.Object);
+			vaultMock.Setup(m => m.ObjectTypeOperations).Returns(objectTypeOperationsMock.Object);
+
+			// Set up the data for the ObjVerEx.
+			var objVer = new ObjVer();
+			objVer.SetIDs(0, 1, 1);
+			var objectVersionMock = new Mock<ObjectVersion>();
+			objectVersionMock.SetupGet(m => m.ObjVer)
+				.Returns(objVer);
+			var properties = new PropertyValues();
+			{
+				var pv = new PropertyValue();
+				pv.PropertyDef = propertyDefId;
+				pv.TypedValue.SetValueToNULL(MFDataType.MFDatatypeMultiSelectLookup);
+				properties.Add(1, pv);
+			}
+
+			// Create the ObjVerEx.
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionMock.Object, properties);
+
+			// Use the method.
+			var items = objVerEx.GetPropertyAsValueListItems(propertyDefId);
+			Assert.IsNotNull(items);
+			Assert.AreEqual(0, items.Count);
+		}
+
+		[TestMethod]
+		public void ReturnsCorrectValueListItems_AllAvailable()
+		{
+			// IDs used.
+			var propertyDefId = 1234;
+			var valueListId = 123;
+
+			// Mock the property definition operations object.
+			var propertyDefinitionsMock = new Mock<VaultPropertyDefOperations>();
+			propertyDefinitionsMock.Setup(m => m.GetPropertyDef(It.IsAny<int>()))
+				.Returns((int propertyDef) =>
+				{
+					// Ensure that the property definition Id is correct.
+					Assert.AreEqual(propertyDefId, propertyDef);
+
+					// Return a property definition that is not based on a value list.
+					return new PropertyDef()
+					{
+						ID = propertyDefId,
+						DataType = MFDataType.MFDatatypeMultiSelectLookup,
+						BasedOnValueList = true,
+						ValueList = valueListId
+					};
+				})
+				.Verifiable();
+
+			// Mock the value list item operations object.
+			var valueListItemsMock = new Mock<VaultValueListItemOperations>();
+			valueListItemsMock.Setup(m => m.GetValueListItemByID(It.IsAny<int>(), It.IsAny<int>()))
+				.Returns((int vlid, int vliid) =>
+				{
+					// Did we get the right list and item ids?
+					Assert.AreEqual(valueListId, vlid);
+
+					// Return an undeleted item.
+					return Mock.Of<ValueListItem>(i => i.ID == vliid && i.ValueListID == valueListId && i.Deleted == false);
+
+				});
+
+			// Mock the object type operations object.
+			var objectTypeOperationsMock = new Mock<VaultObjectTypeOperations>();
+			objectTypeOperationsMock.Setup(m => m.GetObjectType(It.IsAny<int>()))
+				.Returns((int objectTypeId) =>
+				{
+					return new ObjType()
+					{
+						ID = 101
+					};
+				});
+
+			// Mock the vault.
+			var vaultMock = this.GetVaultMock();
+			vaultMock.Setup(m => m.PropertyDefOperations).Returns(propertyDefinitionsMock.Object);
+			vaultMock.Setup(m => m.ValueListItemOperations).Returns(valueListItemsMock.Object);
+			vaultMock.Setup(m => m.ObjectTypeOperations).Returns(objectTypeOperationsMock.Object);
+
+			// Set up the data for the ObjVerEx.
+			var objVer = new ObjVer();
+			objVer.SetIDs(0, 1, 1);
+			var objectVersionMock = new Mock<ObjectVersion>();
+			objectVersionMock.SetupGet(m => m.ObjVer)
+				.Returns(objVer);
+			var properties = new PropertyValues();
+			{
+				var pv = new PropertyValue();
+				pv.PropertyDef = propertyDefId;
+				pv.TypedValue.SetValue(MFDataType.MFDatatypeMultiSelectLookup, new object[]{
+					123,
+					456,
+					789
+				});
+				properties.Add(1, pv);
+			}
+
+			// Create the ObjVerEx.
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionMock.Object, properties);
+
+			// Use the method.
+			var items = objVerEx.GetPropertyAsValueListItems(propertyDefId);
+			Assert.IsNotNull(items);
+			Assert.AreEqual(3, items.Count);
+			Assert.AreEqual(123, items[0].ID);
+			Assert.AreEqual(456, items[1].ID);
+			Assert.AreEqual(789, items[2].ID);
+			Assert.IsFalse(items[0].Deleted);
+			Assert.IsFalse(items[1].Deleted);
+			Assert.IsFalse(items[2].Deleted);
+		}
+
+		[TestMethod]
+		public void ReturnsCorrectValueListItems_OneDeleted()
+		{
+			// IDs used.
+			var propertyDefId = 1234;
+			var valueListId = 123;
+
+			// Mock the property definition operations object.
+			var propertyDefinitionsMock = new Mock<VaultPropertyDefOperations>();
+			propertyDefinitionsMock.Setup(m => m.GetPropertyDef(It.IsAny<int>()))
+				.Returns((int propertyDef) =>
+				{
+					// Ensure that the property definition Id is correct.
+					Assert.AreEqual(propertyDefId, propertyDef);
+
+					// Return a property definition that is not based on a value list.
+					return new PropertyDef()
+					{
+						ID = propertyDefId,
+						DataType = MFDataType.MFDatatypeMultiSelectLookup,
+						BasedOnValueList = true,
+						ValueList = valueListId
+					};
+				})
+				.Verifiable();
+
+			// Mock the value list item operations object.
+			var valueListItemsMock = new Mock<VaultValueListItemOperations>();
+			valueListItemsMock.Setup(m => m.GetValueListItemByID(It.IsAny<int>(), It.IsAny<int>()))
+				.Returns((int vlid, int vliid) =>
+				{
+					// Did we get the right list and item ids?
+					Assert.AreEqual(valueListId, vlid);
+
+					// Return an undeleted item.
+					return Mock.Of<ValueListItem>
+					(
+						i => i.ID == vliid
+							&& i.ValueListID == valueListId
+							&& i.Deleted == (789 == vliid)
+					);
+
+				});
+
+			// Mock the object type operations object.
+			var objectTypeOperationsMock = new Mock<VaultObjectTypeOperations>();
+			objectTypeOperationsMock.Setup(m => m.GetObjectType(It.IsAny<int>()))
+				.Returns((int objectTypeId) =>
+				{
+					return new ObjType()
+					{
+						ID = 101
+					};
+				});
+
+			// Mock the vault.
+			var vaultMock = this.GetVaultMock();
+			vaultMock.Setup(m => m.PropertyDefOperations).Returns(propertyDefinitionsMock.Object);
+			vaultMock.Setup(m => m.ValueListItemOperations).Returns(valueListItemsMock.Object);
+			vaultMock.Setup(m => m.ObjectTypeOperations).Returns(objectTypeOperationsMock.Object);
+
+			// Set up the data for the ObjVerEx.
+			var objVer = new ObjVer();
+			objVer.SetIDs(0, 1, 1);
+			var objectVersionMock = new Mock<ObjectVersion>();
+			objectVersionMock.SetupGet(m => m.ObjVer)
+				.Returns(objVer);
+			var properties = new PropertyValues();
+			{
+				var pv = new PropertyValue();
+				pv.PropertyDef = propertyDefId;
+				pv.TypedValue.SetValue(MFDataType.MFDatatypeMultiSelectLookup, new object[]{
+					123,
+					456,
+					789
+				});
+				properties.Add(1, pv);
+			}
+
+			// Create the ObjVerEx.
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionMock.Object, properties);
+
+			// Use the method.
+			var items = objVerEx.GetPropertyAsValueListItems(propertyDefId);
+			Assert.IsNotNull(items);
+			Assert.AreEqual(3, items.Count);
+			Assert.AreEqual(123, items[0].ID);
+			Assert.AreEqual(456, items[1].ID);
+			Assert.AreEqual(789, items[2].ID);
+			Assert.IsFalse(items[0].Deleted);
+			Assert.IsFalse(items[1].Deleted);
+			Assert.IsTrue(items[2].Deleted);
+		}
+
+		[TestMethod]
+		public void ReturnsCorrectValueListItems_OneInvalid()
+		{
+			// IDs used.
+			var propertyDefId = 1234;
+			var valueListId = 123;
+
+			// Mock the property definition operations object.
+			var propertyDefinitionsMock = new Mock<VaultPropertyDefOperations>();
+			propertyDefinitionsMock.Setup(m => m.GetPropertyDef(It.IsAny<int>()))
+				.Returns((int propertyDef) =>
+				{
+					// Ensure that the property definition Id is correct.
+					Assert.AreEqual(propertyDefId, propertyDef);
+
+					// Return a property definition that is not based on a value list.
+					return new PropertyDef()
+					{
+						ID = propertyDefId,
+						DataType = MFDataType.MFDatatypeMultiSelectLookup,
+						BasedOnValueList = true,
+						ValueList = valueListId
+					};
+				})
+				.Verifiable();
+
+			// Mock the value list item operations object.
+			var valueListItemsMock = new Mock<VaultValueListItemOperations>();
+			valueListItemsMock.Setup(m => m.GetValueListItemByID(It.IsAny<int>(), It.IsAny<int>()))
+				.Returns((int vlid, int vliid) =>
+				{
+					// Did we get the right list and item ids?
+					Assert.AreEqual(valueListId, vlid);
+
+					if (vliid == 456)
+						throw new COMException();
+
+					// Return an undeleted item.
+					return Mock.Of<ValueListItem>
+					(
+						i => i.ID == vliid
+							&& i.ValueListID == valueListId
+							&& i.Deleted == false
+					);
+
+				});
+
+			// Mock the object type operations object.
+			var objectTypeOperationsMock = new Mock<VaultObjectTypeOperations>();
+			objectTypeOperationsMock.Setup(m => m.GetObjectType(It.IsAny<int>()))
+				.Returns((int objectTypeId) =>
+				{
+					return new ObjType()
+					{
+						ID = 101
+					};
+				});
+
+			// Mock the vault.
+			var vaultMock = this.GetVaultMock();
+			vaultMock.Setup(m => m.PropertyDefOperations).Returns(propertyDefinitionsMock.Object);
+			vaultMock.Setup(m => m.ValueListItemOperations).Returns(valueListItemsMock.Object);
+			vaultMock.Setup(m => m.ObjectTypeOperations).Returns(objectTypeOperationsMock.Object);
+
+			// Set up the data for the ObjVerEx.
+			var objVer = new ObjVer();
+			objVer.SetIDs(0, 1, 1);
+			var objectVersionMock = new Mock<ObjectVersion>();
+			objectVersionMock.SetupGet(m => m.ObjVer)
+				.Returns(objVer);
+			var properties = new PropertyValues();
+			{
+				var pv = new PropertyValue();
+				pv.PropertyDef = propertyDefId;
+				pv.TypedValue.SetValue(MFDataType.MFDatatypeMultiSelectLookup, new object[]{
+					123,
+					456,
+					789
+				});
+				properties.Add(1, pv);
+			}
+
+			// Create the ObjVerEx.
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionMock.Object, properties);
+
+			// Use the method.
+			var items = objVerEx.GetPropertyAsValueListItems(propertyDefId);
+			Assert.IsNotNull(items);
+			Assert.AreEqual(2, items.Count);
+			Assert.AreEqual(123, items[0].ID);
+			Assert.AreEqual(789, items[1].ID);
+			Assert.IsFalse(items[0].Deleted);
+			Assert.IsFalse(items[1].Deleted);
+		}
 
 	}
 }
