@@ -32,8 +32,7 @@ namespace RecurringTask
 			// Instantiate the background operation manager.
 			this.TaskQueueBackgroundOperationManager = new TaskQueueBackgroundOperationManager
 			(
-				this,
-				this.GetType().FullName.Replace(".", "-") + "-BackgroundOperations"
+				this
 			);
 
 			// Create a background operation that runs once every ten seconds.
@@ -41,9 +40,22 @@ namespace RecurringTask
 			(
 				"This is my background operation",
 				TimeSpan.FromSeconds(10),
-				() =>
+				(job) =>
 				{
 					SysUtils.ReportInfoToEventLog("Hello world");
+					
+					// If your background job processing takes more than a few seconds then
+					// you should periodically report back its status:
+					this.TaskQueueBackgroundOperationManager.TaskProcessor.UpdateTaskInfo
+					(
+						job,
+						MFTaskState.MFTaskStateInProgress,
+						"The process is ongoing...",
+						false
+					);
+
+					// If you fail to do the above then the system may think that the task has
+					// aborted, and start it running a second time!
 				});
 		}
 
@@ -82,17 +94,29 @@ namespace RecurringTask
 			// Instantiate the background operation manager.
 			this.TaskQueueBackgroundOperationManager = new TaskQueueBackgroundOperationManager
 			(
-				this,
-				this.GetType().FullName.Replace(".", "-") + "-BackgroundOperations"
+				this
 			);
 
 			// Create a background operation that can be run on demand.
 			this.MyBackgroundOperation = this.TaskQueueBackgroundOperationManager.CreateBackgroundOperation
 			(
 				"My on-demand background operation",
-				() =>
+				(job) =>
 				{
 					SysUtils.ReportInfoToEventLog("I have been run on demand.");
+					
+					// If your background job processing takes more than a few seconds then
+					// you should periodically report back its status:
+					this.TaskQueueBackgroundOperationManager.TaskProcessor.UpdateTaskInfo
+					(
+						job,
+						MFTaskState.MFTaskStateInProgress,
+						"The process is ongoing...",
+						false
+					);
+
+					// If you fail to do the above then the system may think that the task has
+					// aborted, and start it running a second time!
 				}
 			);
 		}
@@ -152,6 +176,19 @@ namespace RecurringTask
 					{
 						var objVerEx = ObjVerEx.Parse(job.Vault, directive.ObjVerEx);
 						SysUtils.ReportInfoToEventLog($"I have been run on demand for object {objVerEx.Title}");
+					
+						// If your background job processing takes more than a few seconds then
+						// you should periodically report back its status:
+						this.TaskQueueBackgroundOperationManager.TaskProcessor.UpdateTaskInfo
+						(
+							job,
+							MFTaskState.MFTaskStateInProgress,
+							"The process is ongoing...",
+							false
+						);
+
+						// If you fail to do the above then the system may think that the task has
+						// aborted, and start it running a second time!
 					}
 				);
 		}
