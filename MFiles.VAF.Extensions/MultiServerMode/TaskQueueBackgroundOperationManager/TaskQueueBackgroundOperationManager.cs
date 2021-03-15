@@ -156,7 +156,20 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			job.ThrowIfCancellationRequested();
 
 			// Update the progress of the task in the task queue.
-			this.TaskProcessor.UpdateTaskAsAssignedToProcessor( job );
+			try
+			{
+				this.TaskProcessor.UpdateTaskAsAssignedToProcessor(job);
+			}
+			catch
+			{
+				// Could not mark the task as assigned to a processor.
+				SysUtils.ReportToEventLog
+				(
+					$"Could not mark task {job.AppTaskId} as assigned to a processor (queue id: {job.AppTaskQueueId}, state: {job.AppTaskState}).",
+					System.Diagnostics.EventLogEntryType.Warning
+				);
+				return;
+			}
 
 			// Sanity.
 			if (null == job.Data?.Value)
@@ -164,7 +177,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				// This is an issue.  We have no way to decide what background operation should run it.  Die.
 				SysUtils.ReportErrorToEventLog
 				(
-					$"Job loaded with no application task (queue: {job.AppTaskQueueId}, task type: {job.AppTaskId})."
+					$"Job loaded with no application task (queue: {job.AppTaskQueueId}, task id: {job.AppTaskId})."
 				);
 				return;
 			}
@@ -176,7 +189,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				// This is an issue.  We have no way to decide what background operation should run it.  Die.
 				SysUtils.ReportErrorToEventLog
 				(
-					$"Job loaded with no background operation name loaded (queue: {job.AppTaskQueueId}, task type: {job.AppTaskId})."
+					$"Job loaded with no background operation name loaded (queue: {job.AppTaskQueueId}, task id: {job.AppTaskId})."
 				);
 				return;
 			}
@@ -201,7 +214,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 					// We have no registered background operation to handle the callback.
 					SysUtils.ReportErrorToEventLog
 					(
-						$"No background operation found with name {backgroundOperationDirective.BackgroundOperationName}(queue: {job.AppTaskQueueId}, task type: {job.AppTaskId})."
+						$"No background operation found with name {backgroundOperationDirective.BackgroundOperationName}(queue: {job.AppTaskQueueId}, task id: {job.AppTaskId})."
 					);
 					return;
 				} 
