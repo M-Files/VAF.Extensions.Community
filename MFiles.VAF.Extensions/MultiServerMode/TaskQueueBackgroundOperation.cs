@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using MFiles.VAF.Common;
@@ -278,78 +277,6 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		{
 			// Execute the callback.
 			this.UserMethod(job, directive);
-		}
-	}
-	public class Schedule
-	{
-		public List<TimeSpan> TriggerTimes { get; set; } = new List<TimeSpan>();
-		public List<DayOfWeek> TriggerDays { get; set; } = new List<DayOfWeek>();
-		public DateTime GetNextExecutionTime(DateTime? after = null)
-		{
-			// When should we start looking?
-			after = (after ?? DateTime.UtcNow).ToLocalTime();
-			
-			// Get the next execution time (this will not find run times today).
-			return this.TriggerDays
-				.SelectMany(d => GetNextDayOfWeek(after.Value, d))
-				.SelectMany(d => this.TriggerTimes.Select(t => d.Add(t)))
-				.Where(d => d > after.Value)
-				.OrderBy(d => d)
-				.FirstOrDefault();
-		}
-
-		internal static IEnumerable<DateTime> GetNextDayOfWeek(DateTime after, DayOfWeek dayOfWeek)
-		{
-			// Get the number of days ahead.
-			var daysToAdd = (7 - (after.DayOfWeek - dayOfWeek)) % 7;
-
-			// If we get today then return it and also next week.
-			if (daysToAdd == 0)
-			{
-				yield return after.Date;
-				daysToAdd = 7;
-			}
-
-			// Get the next one of this day.
-			yield return after.Date.AddDays(daysToAdd);
-		}
-
-	}
-
-	public class ScheduleDirective<TWrappedDirective>
-		: TaskQueueDirective
-		where TWrappedDirective : TaskQueueDirective
-	{
-		public Schedule Schedule { get; set; }
-		public TWrappedDirective WrappedDirective { get; set; }
-		public ScheduleDirective()
-		{
-		}
-		public ScheduleDirective(Schedule schedule)
-			: this()
-		{
-			this.Schedule = schedule;
-		}
-		public ScheduleDirective(Schedule schedule, TWrappedDirective wrappedDirective)
-			: this(schedule)
-		{
-			this.WrappedDirective = wrappedDirective;
-		}
-	}
-	public class ScheduleDirective
-		: ScheduleDirective<TaskQueueDirective>
-	{
-		public ScheduleDirective()
-			: base()
-		{
-		}
-		public ScheduleDirective(Schedule schedule)
-			: base(schedule)
-		{
-		}
-		public ScheduleDirective(Schedule schedule, TaskQueueDirective wrappedDirective)
-			: base(schedule, wrappedDirective)
-		{
 		}
 	}
 }
