@@ -229,12 +229,23 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 						continue;
 
 					// Mark each task as superseded.
-					this.BackgroundOperationManager.TaskProcessor.UpdateCancelledJobInTaskQueue
-					(
-						task.ToApplicationTask(),
-						string.Empty,
-						remarks
-					);
+					try
+					{
+						this.BackgroundOperationManager.TaskProcessor.UpdateCancelledJobInTaskQueue
+						(
+							task.ToApplicationTask(),
+							string.Empty,
+							remarks
+						);
+					}
+					catch (Exception e)
+					{
+						SysUtils.ReportErrorToEventLog
+						(
+							$"Exception cancelling task {task.ToApplicationTask().Id} for background operation {this.Name} of type {TaskQueueBackgroundOperation.TaskTypeId} on queue {this.BackgroundOperationManager.QueueId}.",
+							e
+						);
+					}
 				}
 			}
 			catch(Exception e)
