@@ -6,28 +6,21 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 
 {
 	/// <summary>
-	/// Represents a schedule in which a job should be re-run.
+	/// Represents a trigger that runs on some days in a week, potentially multiple times per day.
+	/// It always runs at the same time every day.  If different time triggers are required then create
+	/// multiple instances of a weekly trigger (e.g. one for Wednesdays at 3pm, one for Fridays at 9pm).
 	/// </summary>
-	public class Schedule
+	public class WeeklyTrigger
+		: DailyTrigger
 	{
 		/// <summary>
-		/// The times of day to trigger the schedule.
-		/// There must be at least one item in this collection for the schedule to be active.
-		/// </summary>
-		public List<TimeSpan> TriggerTimes { get; set; } = new List<TimeSpan>();
-
-		/// <summary>
 		/// The days on which to trigger the schedule.
-		/// There must be at least one item in this collection for the schedule to be active.
+		/// There must be at least one item in this collection for the trigger to be active.
 		/// </summary>
 		public List<DayOfWeek> TriggerDays { get; set; } = new List<DayOfWeek>();
 
-		/// <summary>
-		/// Gets the next execution time for this schedule.
-		/// </summary>
-		/// <param name="after">The time after which the schedule should run.  Defaults to now (i.e. next-run time) if not provided.</param>
-		/// <returns>The next execution time.</returns>
-		public DateTime? GetNextExecutionTime(DateTime? after = null)
+		/// <inheritdoc />
+		public override DateTime? GetNextExecutionTime(DateTime? after = null)
 		{
 			// Sanity.
 			if (
@@ -36,9 +29,10 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				(null == this.TriggerTimes || 0 == this.TriggerTimes.Count)
 				)
 				return null;
+
 			// When should we start looking?
 			after = (after ?? DateTime.UtcNow).ToLocalTime();
-			
+
 			// Get the next execution time (this will not find run times today).
 			return this.TriggerDays
 				.SelectMany(d => GetNextDayOfWeek(after.Value, d))
@@ -74,6 +68,5 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			// Get the next one of this day.
 			yield return after.Date.AddDays(daysToAdd);
 		}
-
 	}
 }

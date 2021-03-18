@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 {
 	[TestClass]
-	public class ScheduleTests
+	public class WeeklyTriggerTests
 	{
 		[TestMethod]
 		[DynamicData(nameof(GetNextDayOfWeekData), DynamicDataSourceType.Method)]
@@ -20,7 +20,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 			DateTime[] expected
 		)
 		{
-			var result = Extensions.MultiServerMode.Schedule.GetNextDayOfWeek(after, dayOfWeek)?.ToArray();
+			var result = WeeklyTrigger.GetNextDayOfWeek(after, dayOfWeek)?.ToArray();
 			Assert.IsNotNull(result);
 			Assert.AreEqual(expected.Length, result.Length);
 			for(var i=0; i<result.Length; i++)
@@ -30,8 +30,8 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 		}
 
 		[TestMethod]
-		[DynamicData(nameof(ScheduleData), DynamicDataSourceType.Method)]
-		public void Schedule
+		[DynamicData(nameof(GetNextExecutionTimeData), DynamicDataSourceType.Method)]
+		public void GetNextExecutionTime
 		(
 			IEnumerable<TimeSpan> triggerTimes,
 			IEnumerable<DayOfWeek> triggerDays,
@@ -42,7 +42,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 			Assert.AreEqual
 			(
 				expected,
-				new Schedule()
+				new WeeklyTrigger()
 				{
 					TriggerTimes = triggerTimes.ToList(),
 					TriggerDays = triggerDays.ToList()
@@ -50,7 +50,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 			);
 		}
 
-		public static IEnumerable<object[]> ScheduleData()
+		public static IEnumerable<object[]> GetNextExecutionTimeData()
 		{
 			// Execution later same day.
 			yield return new object[]
