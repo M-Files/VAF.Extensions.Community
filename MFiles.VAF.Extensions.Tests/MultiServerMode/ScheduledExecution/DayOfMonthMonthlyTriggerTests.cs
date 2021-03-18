@@ -136,6 +136,15 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 				new DateTime(2021, 03, 17, 18, 00, 00), // Wednesday @ 6pm
 				(DateTime?)null
 			};
+
+			// Exact current time returns next month.
+			yield return new object[]
+			{
+				new []{ new TimeSpan(2, 0, 0) },
+				new []{ 17 },
+				new DateTime(2021, 03, 17, 02, 00, 00),
+				new DateTime(2021, 04, 17, 02, 00, 00),
+			};
 		}
 
 		public static IEnumerable<object[]> GetNextDayOfMonthData()

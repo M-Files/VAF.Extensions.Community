@@ -78,6 +78,22 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 				new DateTime(2021, 03, 17, 01, 00, 00), // Wednesday @ 1am
 				(DateTime?)null
 			};
+
+			// Trigger at exact current time returns next day.
+			yield return new object[]
+			{
+				new TriggerBase[]
+				{
+					new DailyTrigger(){
+						TriggerTimes = new List<TimeSpan>()
+						{
+							new TimeSpan(17, 0, 0)
+						}
+					}
+				},
+				new DateTime(2021, 03, 17, 17, 00, 00), // Wednesday @ 1am
+				new DateTime(2021, 03, 18, 17, 00, 00)
+			};
 		}
 	}
 }

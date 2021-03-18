@@ -20,7 +20,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 		/// </summary>
 		/// <param name="after">The time after which the schedule should run.  Defaults to now (i.e. next-run time) if not provided.</param>
 		/// <returns>The next execution time.</returns>
-		public DateTime? GetNextExecution(DateTime? after)
+		public DateTime? GetNextExecution(DateTime? after = null)
 		{
 			return this.Triggers?
 				.Select(t => t.GetNextExecution(after))

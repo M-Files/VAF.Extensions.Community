@@ -33,7 +33,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 			return this.TriggerTimes
 				.Select(
 					t =>
-						after.Value.TimeOfDay <= t
+						after.Value.TimeOfDay < t
 							? after.Value.Date.Add(t) // Time is yet to come today.
 							: after.Value.Date.AddDays(1).Add(t) // Time has passed - return tomorrow.
 				)

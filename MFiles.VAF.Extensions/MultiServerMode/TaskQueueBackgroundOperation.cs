@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using MFiles.VAF.Common;
 using MFiles.VAF.Common.ApplicationTaskQueue;
+using MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution;
 using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
 
@@ -74,11 +75,40 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// </summary>
 		/// <param name="interval">The interval between consecutive runs.</param>
 		/// <param name="directive">The directive ("data") to pass to the execution.</param>
-		public void RunAtIntervals( TimeSpan interval, TDirective directive = null )
+		public void RunAtIntervals(TimeSpan interval, TDirective directive = null)
 		{
 			// Use the base implementation.
 			base.RunAtIntervals(interval, directive);
 		}
+
+		/// <summary>
+		/// Begins running the operation according to the given schedule.
+		/// </summary>
+		/// <param name="schedule">The schedule to run on.</param>
+		/// <param name="directive">The directive ("data") to pass to the execution.</param>
+		public void RunOnSchedule(Schedule schedule, TDirective directive = null)
+		{
+			// Use the base implementation.
+			base.RunOnSchedule(schedule, directive);
+		}
+	}
+
+	public enum TaskQueueBackgroundOperationRepeatType
+	{
+		/// <summary>
+		/// The background operation does not have any explicit repetition.
+		/// </summary>
+		NotRepeating = 0,
+
+		/// <summary>
+		/// The background operation repeats on a period (e.g. every 10 minutes).
+		/// </summary>
+		Interval = 1,
+
+		/// <summary>
+		/// The background operation repeats on a schedule (e.g. On Mondays and Wednesdays at 1pm).
+		/// </summary>
+		Schedule = 2
 	}
 
 	public class TaskQueueBackgroundOperation
@@ -87,6 +117,12 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// The task type for this background operation.
 		/// </summary>
 		public const string TaskTypeId = "VaultApplication-BackgroundOperation";
+
+		/// <summary>
+		/// How the background operation should repeat.
+		/// </summary>
+		public TaskQueueBackgroundOperationRepeatType RepeatType { get; set; }
+			= TaskQueueBackgroundOperationRepeatType.NotRepeating;
 
 		/// <summary>
 		/// The manager that manages this operation.
@@ -123,14 +159,16 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		public bool Cancelled => this.ExplicitlyCancelled || (this.CancellationTokenSource?.Token.IsCancellationRequested ?? false);
 
 		/// <summary>
-		/// Is the operation recurring.
-		/// </summary>
-		public bool Recurring { get; private set; }
-
-		/// <summary>
-		/// The interval between runs, when the operation is recurring. Only available when the operation is recurring.
+		/// The interval between runs, when the operation is recurring.
+		/// Only used when <see cref="RepeatType"/> is <see cref="TaskQueueBackgroundOperationRepeatType.Interval"/>.
 		/// </summary>
 		public TimeSpan? Interval { get; private set; }
+
+		/// <summary>
+		/// The schedule for execution.
+		/// Only used when <see cref="RepeatType"/> is <see cref="TaskQueueBackgroundOperationRepeatType.Schedule"/>.
+		/// </summary>
+		public Schedule Schedule { get; private set; }
 
 		/// <summary>
 		/// The method to run.
@@ -163,7 +201,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			this.Name = name ?? throw new ArgumentNullException( nameof(name) );
 
 			// Initialize default values.
-			this.Recurring = false;
+			this.RepeatType = TaskQueueBackgroundOperationRepeatType.NotRepeating;
 			this.Interval = null;
 		}
 
@@ -185,14 +223,14 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// </summary>
 		/// <param name="interval">The interval between consecutive runs.</param>
 		/// <param name="directive">The directive ("data") to pass to the execution.</param>
-		public void RunAtIntervals( TimeSpan interval, TaskQueueDirective directive = null )
+		public void RunAtIntervals(TimeSpan interval, TaskQueueDirective directive = null)
 		{
 			// Check for validity.
-			if( interval < TimeSpan.Zero )
+			if (interval < TimeSpan.Zero)
 				throw new ArgumentOutOfRangeException
 				(
 					nameof(interval),
-					"The timer interval cannot be less than zero." 
+					"The timer interval cannot be less than zero."
 				);
 
 			// Cancel any existing executions.
@@ -200,10 +238,34 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 
 			// Set up the recurrance data.
 			this.Interval = interval;
-			this.Recurring = true;
-			
+			this.RepeatType = TaskQueueBackgroundOperationRepeatType.Interval;
+
 			// Run (which will set up the next iteration).
 			this.RunOnce(directive: directive);
+		}
+
+		/// <summary>
+		/// Begins running the operation according to the given schedule.
+		/// </summary>
+		/// <param name="schedule">The schedule to run on.</param>
+		/// <param name="directive">The directive ("data") to pass to the execution.</param>
+		public void RunOnSchedule(Schedule schedule, TaskQueueDirective directive = null)
+		{
+			// Check for validity.
+			if (null == schedule)
+				throw new ArgumentNullException(nameof(schedule));
+
+			// Cancel any existing executions.
+			this.StopRunningAtIntervals();
+
+			// Set up the recurrance data.
+			this.Schedule = schedule;
+			this.RepeatType = TaskQueueBackgroundOperationRepeatType.Schedule;
+
+			// Run (which will set up the next iteration).
+			var nextRun = this.Schedule?.GetNextExecution();
+			if(nextRun.HasValue)
+				this.RunOnce(runAt: nextRun.Value, directive: directive);
 		}
 
 		/// <summary>
@@ -267,7 +329,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		public void StopRunningAtIntervals()
 		{
 			// Stop any new ones.
-			this.Recurring = false;
+			this.RepeatType = TaskQueueBackgroundOperationRepeatType.NotRepeating;
 
 			// Cancel any future executions.
 			this.CancelFutureExecutions("Superseded.");

@@ -220,8 +220,26 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				} 
 			}
 
-			// If it is recurring then use the ProcessingComplete event to schedule the next execution.
-			if (bo.Recurring && bo.Interval.HasValue)
+			// Should we repeat?
+			DateTime? nextRun = null;
+			switch (bo.RepeatType)
+			{
+				case TaskQueueBackgroundOperationRepeatType.Interval:
+					
+					// Add the interval to the current datetime.
+					if (bo.Interval.HasValue)
+						nextRun = DateTime.UtcNow.Add(bo.Interval.Value);
+					break;
+
+				case TaskQueueBackgroundOperationRepeatType.Schedule:
+
+					// Get the next execution time from the schedule.
+					nextRun = bo.Schedule?.GetNextExecution(DateTime.Now);
+					break;
+			}
+
+			// If we have a next run time then re-run.
+			if (null != nextRun)
 			{
 				// Bind to the completed event ( called always ) of the job.
 				// That way even if the job is canceled, fails, or finishes successfully
@@ -230,7 +248,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 					=> this.RunOnce
 					(
 						bo.Name,
-						DateTime.UtcNow.Add(bo.Interval.Value),
+						nextRun.Value.ToUniversalTime(),
 						dir
 					);
 			}
