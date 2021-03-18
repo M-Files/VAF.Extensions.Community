@@ -221,3 +221,58 @@ namespace RecurringTask
 
 Note that the name of the background operation **must be unique within each task queue**.
 
+## Creating a background operation that runs on a schedule
+
+The `StartBackgroundOperationOnSchedule` method can be used to create a schedule that defines when a background operation should be run.
+Multiple triggers can be provided to tailor exactly how the schedule should be calculated.
+
+```csharp
+public class VaultApplication
+    : MFiles.VAF.Extensions.MultiServerMode.ConfigurableVaultApplicationBase<Configuration>
+{
+    /// <summary>
+    /// The task queue background operation manager for this application.
+    /// </summary>
+    protected TaskQueueBackgroundOperationManager TaskQueueBackgroundOperationManager { get; private set; }
+    /// <inheritdoc />
+    protected override void StartApplication()
+    {
+        // Instantiate the background operation manager.
+        this.TaskQueueBackgroundOperationManager = new TaskQueueBackgroundOperationManager
+        (
+            this
+        );
+        // Create the schedule.
+        var schedule = new MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution.Schedule();
+        schedule.Triggers.Add
+        (
+            // Run every day at the specified times.
+            new MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution.DailyTrigger()
+            {
+                TriggerTimes = new System.Collections.Generic.List<TimeSpan>()
+                {
+                    new TimeSpan(09, 00, 00), // 9am
+                    new TimeSpan(14, 00, 00), // 2pm
+                    new TimeSpan(15, 00, 00), // 3pm
+                }
+            }
+        );
+        // Create a background operation that runs once every ten seconds.
+        this.TaskQueueBackgroundOperationManager.StartBackgroundOperationOnSchedule
+        (
+            "This is my scheduled background operation",
+            schedule,
+            (job) =>
+            {
+                var nextRunString = "NO FUTURE EXECUTIONS";
+                {
+                    var nextRun = schedule.GetNextExecution();
+                    if (nextRun.HasValue)
+                        nextRunString = nextRun.Value.ToString("O");
+                }
+                SysUtils.ReportInfoToEventLog($"Hello world, it is now {DateTime.UtcNow} (re-scheduling for {nextRunString}).");
+            }
+        );
+    }
+}
+```

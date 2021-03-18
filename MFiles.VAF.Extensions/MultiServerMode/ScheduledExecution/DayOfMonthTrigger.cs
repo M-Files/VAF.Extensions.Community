@@ -14,7 +14,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 	/// Represents a trigger that runs on specifically-numbered days of the month
 	/// (e.g. 1st, 5th, 12th).
 	/// </summary>
-	public class DayOfMonthMonthlyTrigger
+	public class DayOfMonthTrigger
 		: DailyTrigger
 	{
 		/// <summary>

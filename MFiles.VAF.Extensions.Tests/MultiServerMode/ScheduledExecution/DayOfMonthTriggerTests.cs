@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 {
 	[TestClass]
-	public class DayOfMonthMonthlyTriggerTests
+	public class DayOfMonthTriggerTests
 	{
 		[TestMethod]
 		[DynamicData(nameof(GetNextDayOfMonthData), DynamicDataSourceType.Method)]
@@ -22,7 +22,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 			DateTime?[] expected
 		)
 		{
-			var result = DayOfMonthMonthlyTrigger
+			var result = DayOfMonthTrigger
 				.GetNextDayOfMonth(after, dayOfMonth, unrepresentableDateHandling)?
 				.ToArray();
 			Assert.IsNotNull(result);
@@ -46,7 +46,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 			Assert.AreEqual
 			(
 				expected,
-				new DayOfMonthMonthlyTrigger()
+				new DayOfMonthTrigger()
 				{
 					TriggerTimes = triggerTimes.ToList(),
 					TriggerDays = triggerDays.ToList()
