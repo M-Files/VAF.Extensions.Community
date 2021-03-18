@@ -1,4 +1,5 @@
 ﻿using MFiles.VAF.MultiserverMode;
+using MFilesAPI;
 using System;
 
 namespace MFiles.VAF.Extensions.MultiServerMode
@@ -18,8 +19,9 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="taskType">The task type.</param>
 		/// <param name="directive">The directive - if any - to associate with the job.</param>
 		/// <param name="allowRetry">Whether to allow retries if needed.</param>
+		/// <param name="vault">The vault reference to add the task.  Set to a transactional vault to only add the task if the transaction completes.</param>
 		/// <param name="activationTimestamp">The datetime to activate the task (otherwise ASAP).</param>
-		/// <returns></returns>
+		/// <returns>The task id.</returns>
 		public static string AddTask<TSettings, TTaskQueueDirectiveType>
 		(
 			this TaskProcessorBase<TSettings> taskProcessor,
@@ -27,7 +29,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			string taskType,
 			TTaskQueueDirectiveType directive = null,
 			bool allowRetry = true,
-			DateTime? activationTimestamp = null
+			DateTime? activationTimestamp = null,
+			Vault vault = null
 		)
 		where TTaskQueueDirectiveType : TaskQueueDirective
 		where TSettings : AppTaskProcessorSettings
@@ -39,10 +42,11 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				taskQueue,
 				taskType,
 				directive?.ToBytes(),
-				activationTimestamp ?? default
+				activationTimestamp ?? default,
+				vault: vault
 			);
 		}
-		
+
 		/// <summary>
 		/// Adds a task to the task queue, optionally with a directive.
 		/// </summary>
@@ -53,6 +57,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="directive">The directive - if any - to associate with the job.</param>
 		/// <param name="allowRetry">Whether to allow retries if needed.</param>
 		/// <param name="activationTimestamp">The datetime to activate the task (otherwise ASAP).</param>
+		/// <param name="vault">The vault reference to add the task.  Set to a transactional vault to only add the task if the transaction completes.</param>
+		/// <returns>The task id.</returns>
 		public static string AddTask<TSettings>
 		(
 			this TaskProcessorBase<TSettings> taskProcessor,
@@ -60,7 +66,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			string taskType,
 			TaskQueueDirective directive = null,
 			bool allowRetry = true,
-			DateTime? activationTimestamp = null
+			DateTime? activationTimestamp = null,
+			Vault vault = null
 		)
 			where TSettings : AppTaskProcessorSettings
 		{
@@ -71,7 +78,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				taskType,
 				directive,
 				allowRetry: allowRetry,
-				activationTimestamp
+				activationTimestamp,
+				vault: vault
 			);
 		}
 	}
