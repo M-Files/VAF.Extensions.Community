@@ -45,7 +45,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		}
 
 		/// <inheritdoc />
-		public override void RunJob(TaskProcessorJob job, TaskQueueDirective directive)
+		internal override void RunJob(TaskProcessorJob job, TaskQueueDirective directive)
 		{
 			// Execute the callback.
 			this.UserMethod(job, directive as TDirective);
@@ -56,15 +56,17 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// </summary>
 		/// <param name="runAt">If specified, schedules an execution at the provided time.  Otherwise schedules a call immediately.</param>
 		/// <param name="directive">The directive ("data") to pass to the execution.</param>
+		/// <param name="vault">The vault reference to add the task.  Set to a transactional vault to only run the task if the transaction completes.</param>
 		/// <remarks>Does not remove any scheduled executions.  Use <see cref="StopRunningAtIntervals"/>.</remarks>
 		public void RunOnce
 		(
 			DateTime? runAt = null,
-			TDirective directive = null
+			TDirective directive = null,
+			Vault vault = null
 		)
 		{
 			// Use the base implementation.
-			base.RunOnce(runAt, directive);
+			base.RunOnce(runAt, directive, vault: vault);
 		}
 
 		/// <summary>
@@ -170,11 +172,12 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// </summary>
 		/// <param name="runAt">If specified, schedules an execution at the provided time.  Otherwise schedules a call immediately.</param>
 		/// <param name="directive">The directive ("data") to pass to the execution.</param>
+		/// <param name="vault">The vault reference to add the task.  Set to a transactional vault to only run the task if the transaction completes.</param>
 		/// <remarks>Does not remove any scheduled executions.  Use <see cref="StopRunningAtIntervals"/>.</remarks>
-		public void RunOnce(DateTime? runAt = null, TaskQueueDirective directive = null)
+		public void RunOnce(DateTime? runAt = null, TaskQueueDirective directive = null, Vault vault = null)
 		{
 			// Schedule the next task to execute ASAP.
-			this.BackgroundOperationManager.RunOnce(this.Name, runAt, directive);
+			this.BackgroundOperationManager.RunOnce(this.Name, runAt, directive, vault: vault);
 		}
 
 		/// <summary>
@@ -228,12 +231,23 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 						continue;
 
 					// Mark each task as superseded.
-					this.BackgroundOperationManager.TaskProcessor.UpdateCancelledJobInTaskQueue
-					(
-						task.ToApplicationTask(),
-						string.Empty,
-						remarks
-					);
+					try
+					{
+						this.BackgroundOperationManager.TaskProcessor.UpdateCancelledJobInTaskQueue
+						(
+							task.ToApplicationTask(),
+							string.Empty,
+							remarks
+						);
+					}
+					catch (Exception e)
+					{
+						SysUtils.ReportErrorToEventLog
+						(
+							$"Exception cancelling task {task.ToApplicationTask().Id} for background operation {this.Name} of type {TaskQueueBackgroundOperation.TaskTypeId} on queue {this.BackgroundOperationManager.QueueId}.",
+							e
+						);
+					}
 				}
 			}
 			catch(Exception e)
@@ -273,7 +287,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// </summary>
 		/// <param name="job">The job to run.</param>
 		/// <param name="directive">The directive, if any, passed in.</param>
-		public virtual void RunJob(TaskProcessorJob job, TaskQueueDirective directive)
+		internal virtual void RunJob(TaskProcessorJob job, TaskQueueDirective directive)
 		{
 			// Execute the callback.
 			this.UserMethod(job, directive);
