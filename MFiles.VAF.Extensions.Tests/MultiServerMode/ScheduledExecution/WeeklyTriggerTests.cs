@@ -1,4 +1,5 @@
 ﻿using MFiles.VAF.Extensions.MultiServerMode;
+using MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MFiles.VAF.Extensions.Tests.MultiServerMode
+namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 {
 	[TestClass]
 	public class WeeklyTriggerTests
@@ -17,7 +18,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 		(
 			DateTime after,
 			DayOfWeek dayOfWeek,
-			DateTime[] expected
+			DateTime?[] expected
 		)
 		{
 			var result = WeeklyTrigger.GetNextDayOfWeek(after, dayOfWeek)?.ToArray();
@@ -30,13 +31,13 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 		}
 
 		[TestMethod]
-		[DynamicData(nameof(GetNextExecutionTimeData), DynamicDataSourceType.Method)]
-		public void GetNextExecutionTime
+		[DynamicData(nameof(GetNextExecutionData), DynamicDataSourceType.Method)]
+		public void GetNextExecution
 		(
 			IEnumerable<TimeSpan> triggerTimes,
 			IEnumerable<DayOfWeek> triggerDays,
-			DateTime after,
-			DateTime expected
+			DateTime? after,
+			DateTime? expected
 		)
 		{
 			Assert.AreEqual
@@ -46,11 +47,11 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 				{
 					TriggerTimes = triggerTimes.ToList(),
 					TriggerDays = triggerDays.ToList()
-				}.GetNextExecutionTime(after)
+				}.GetNextExecution(after)
 			);
 		}
 
-		public static IEnumerable<object[]> GetNextExecutionTimeData()
+		public static IEnumerable<object[]> GetNextExecutionData()
 		{
 			// Execution later same day.
 			yield return new object[]
@@ -123,6 +124,15 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 				new DateTime(2021, 03, 17, 03, 00, 00), // Wednesday @ 3am
 				new DateTime(2021, 03, 22, 02, 00, 00), // Monday @ 5pm
 			};
+
+			// No valid executions = null.
+			yield return new object[]
+			{
+				new TimeSpan[0],
+				new [] { DayOfWeek.Monday },
+				new DateTime(2021, 03, 17, 18, 00, 00), // Wednesday @ 6pm
+				(DateTime?)null
+			};
 		}
 
 		public static IEnumerable<object[]> GetNextDayOfWeekData()
@@ -132,7 +142,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 			{
 				new DateTime(2021, 03, 17), // Wednesday
 				DayOfWeek.Wednesday, // Get the next Wednesday
-				new []
+				new DateTime?[]
 				{
 					new DateTime(2021, 03, 17), // It should return the same day.
 					new DateTime(2021, 03, 24), // It should return next week too.
@@ -144,7 +154,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 			{
 				new DateTime(2021, 03, 17), // Wednesday
 				DayOfWeek.Tuesday, // Get the next Tuesday
-				new [] { new DateTime(2021, 03, 23) }
+				new DateTime ?[] { new DateTime(2021, 03, 23) }
 			};
 
 			// Wednesday and want this Thursday.
@@ -152,7 +162,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 			{
 				new DateTime(2021, 03, 17), // Wednesday
 				DayOfWeek.Thursday, // Get the next Thursday
-				new [] { new DateTime(2021, 03, 18) }
+				new DateTime ?[] { new DateTime(2021, 03, 18) }
 			};
 
 			// Thursday and want this Sunday.
@@ -160,7 +170,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 			{
 				new DateTime(2021, 03, 18), // Thursday
 				DayOfWeek.Sunday, // Get the next Sunday
-				new [] { new DateTime(2021, 03, 21) }
+				new DateTime ?[] { new DateTime(2021, 03, 21) }
 			};
 
 			// Monday and want this Saturday.
@@ -168,7 +178,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 			{
 				new DateTime(2021, 03, 15), // Monday
 				DayOfWeek.Saturday, // Get the next Saturday
-				new [] { new DateTime(2021, 03, 20) }
+				new DateTime ?[] { new DateTime(2021, 03, 20) }
 			};
 		}
 	}

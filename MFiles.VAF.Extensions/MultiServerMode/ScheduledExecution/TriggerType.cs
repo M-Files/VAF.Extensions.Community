@@ -1,4 +1,4 @@
-﻿namespace MFiles.VAF.Extensions.MultiServerMode
+﻿namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 
 {
 	public enum TriggerType

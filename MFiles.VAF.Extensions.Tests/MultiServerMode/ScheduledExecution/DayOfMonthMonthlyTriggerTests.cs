@@ -1,4 +1,5 @@
 ﻿using MFiles.VAF.Extensions.MultiServerMode;
+using MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MFiles.VAF.Extensions.Tests.MultiServerMode
+namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 {
 	[TestClass]
 	public class DayOfMonthMonthlyTriggerTests
@@ -17,10 +18,13 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 		(
 			DateTime after,
 			int dayOfMonth,
-			DateTime[] expected
+			UnrepresentableDateHandling unrepresentableDateHandling,
+			DateTime?[] expected
 		)
 		{
-			var result = DayOfMonthMonthlyTrigger.GetNextDayOfMonth(after, dayOfMonth)?.ToArray();
+			var result = DayOfMonthMonthlyTrigger
+				.GetNextDayOfMonth(after, dayOfMonth, unrepresentableDateHandling)?
+				.ToArray();
 			Assert.IsNotNull(result);
 			Assert.AreEqual(expected.Length, result.Length);
 			for(var i=0; i<result.Length; i++)
@@ -30,13 +34,13 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 		}
 
 		[TestMethod]
-		[DynamicData(nameof(GetNextExecutionTimeData), DynamicDataSourceType.Method)]
-		public void GetNextExecutionTime
+		[DynamicData(nameof(GetNextExecutionData), DynamicDataSourceType.Method)]
+		public void GetNextExecution
 		(
 			IEnumerable<TimeSpan> triggerTimes,
 			IEnumerable<int> triggerDays,
-			DateTime after,
-			DateTime expected
+			DateTime? after,
+			DateTime? expected
 		)
 		{
 			Assert.AreEqual
@@ -46,11 +50,11 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 				{
 					TriggerTimes = triggerTimes.ToList(),
 					TriggerDays = triggerDays.ToList()
-				}.GetNextExecutionTime(after)
+				}.GetNextExecution(after)
 			);
 		}
 
-		public static IEnumerable<object[]> GetNextExecutionTimeData()
+		public static IEnumerable<object[]> GetNextExecutionData()
 		{
 			// Execution later same day.
 			yield return new object[]
@@ -123,6 +127,15 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 				new DateTime(2021, 03, 17, 03, 00, 00), // 17th @ 3am
 				new DateTime(2021, 03, 20, 02, 00, 00), // 20th @ 5pm
 			};
+
+			// No valid executions = null.
+			yield return new object[]
+			{
+				new TimeSpan[0],
+				new [] { 20 },
+				new DateTime(2021, 03, 17, 18, 00, 00), // Wednesday @ 6pm
+				(DateTime?)null
+			};
 		}
 
 		public static IEnumerable<object[]> GetNextDayOfMonthData()
@@ -132,7 +145,8 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 			{
 				new DateTime(2021, 03, 17), // Wednesday
 				17, // Get the 17th
-				new []
+				UnrepresentableDateHandling.Skip,
+				new DateTime?[]
 				{
 					new DateTime(2021, 03, 17), // It should return the same day.
 					new DateTime(2021, 04, 17), // It should return next month too.
@@ -144,7 +158,8 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 			{
 				new DateTime(2021, 03, 17),
 				18,
-				new [] { new DateTime(2021, 03, 18) }
+				UnrepresentableDateHandling.Skip,
+				new DateTime?[] { new DateTime(2021, 03, 18) }
 			};
 
 			// 17th and want 16th.
@@ -152,7 +167,51 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 			{
 				new DateTime(2021, 03, 17),
 				16,
-				new [] { new DateTime(2021, 04, 16) }
+				UnrepresentableDateHandling.Skip,
+				new DateTime?[] { new DateTime(2021, 04, 16) }
+			};
+
+			// Invalid day of the month.
+			yield return new object[]
+			{
+				new DateTime(2021, 03, 17),
+				-1,
+				UnrepresentableDateHandling.Skip,
+				new DateTime?[0]
+			};
+			yield return new object[]
+			{
+				new DateTime(2021, 03, 17),
+				45,
+				UnrepresentableDateHandling.Skip,
+				new DateTime?[0]
+			};
+
+			// 30th of February -> 30th March (no valid day in Feb).
+			yield return new object[]
+			{
+				new DateTime(2021, 02, 17),
+				30,
+				UnrepresentableDateHandling.Skip,
+				new DateTime?[] { new DateTime(2021, 03, 30) }
+			};
+
+			// 30th of February -> 28th Feb (no valid day in Feb).
+			yield return new object[]
+			{
+				new DateTime(2021, 02, 17),
+				30,
+				UnrepresentableDateHandling.LastDayOfMonth,
+				new DateTime?[] { new DateTime(2021, 02, 28) }
+			};
+
+			// 30th of February -> 29th Feb (leap year, and no valid day in Feb).
+			yield return new object[]
+			{
+				new DateTime(2024, 02, 17),
+				30,
+				UnrepresentableDateHandling.LastDayOfMonth,
+				new DateTime?[] { new DateTime(2024, 02, 29) }
 			};
 		}
 	}

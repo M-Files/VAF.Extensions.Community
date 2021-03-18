@@ -1,4 +1,5 @@
 ﻿using MFiles.VAF.Extensions.MultiServerMode;
+using MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -6,18 +7,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MFiles.VAF.Extensions.Tests.MultiServerMode
+namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 {
 	[TestClass]
 	public class DailyTriggerTests
 	{
 		[TestMethod]
-		[DynamicData(nameof(GetNextExecutionTimeData), DynamicDataSourceType.Method)]
-		public void GetNextExecutionTime
+		[DynamicData(nameof(GetNextExecutionData), DynamicDataSourceType.Method)]
+		public void GetNextExecution
 		(
 			IEnumerable<TimeSpan> triggerTimes,
-			DateTime after,
-			DateTime expected
+			DateTime? after,
+			DateTime? expected
 		)
 		{
 			Assert.AreEqual
@@ -26,11 +27,11 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 				new DailyTrigger()
 				{
 					TriggerTimes = triggerTimes.ToList()
-				}.GetNextExecutionTime(after)
+				}.GetNextExecution(after)
 			);
 		}
 
-		public static IEnumerable<object[]> GetNextExecutionTimeData()
+		public static IEnumerable<object[]> GetNextExecutionData()
 		{
 			// Execution later same day.
 			yield return new object[]
@@ -70,6 +71,14 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode
 				new []{ new TimeSpan(0, 0, 0), new TimeSpan(17, 0, 0) },
 				new DateTime(2021, 03, 17, 18, 00, 00), // Wednesday @ 6pm
 				new DateTime(2021, 03, 18, 00, 00, 00), // Thursday @ midnight
+			};
+
+			// No valid executions = null.
+			yield return new object[]
+			{
+				new TimeSpan[0],
+				new DateTime(2021, 03, 17, 18, 00, 00), // Wednesday @ 6pm
+				(DateTime?)null
 			};
 		}
 	}

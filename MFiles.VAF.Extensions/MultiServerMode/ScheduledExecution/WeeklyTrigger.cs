@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MFiles.VAF.Extensions.MultiServerMode
+namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 
 {
 	/// <summary>
@@ -20,7 +20,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		public List<DayOfWeek> TriggerDays { get; set; } = new List<DayOfWeek>();
 
 		/// <inheritdoc />
-		public override DateTime? GetNextExecutionTime(DateTime? after = null)
+		public override DateTime? GetNextExecution(DateTime? after = null)
 		{
 			// Sanity.
 			if (

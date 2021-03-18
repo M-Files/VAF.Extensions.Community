@@ -2,9 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MFiles.VAF.Extensions.MultiServerMode
+namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 
 {
+	public enum UnrepresentableDateHandling
+	{
+		Skip = 0,
+		LastDayOfMonth = 1
+	}
 	/// <summary>
 	/// Represents a trigger that runs on specifically-numbered days of the month
 	/// (e.g. 1st, 5th, 12th).
@@ -13,13 +18,19 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		: DailyTrigger
 	{
 		/// <summary>
+		/// How to handle unrepresentable dates (e.g. 30th February).
+		/// </summary>
+		public UnrepresentableDateHandling UnrepresentableDateHandling { get; set; }
+			= UnrepresentableDateHandling.Skip;
+
+		/// <summary>
 		/// The days of the month to trigger the schedule.
 		/// Days outside of a valid range (e.g. 30th February, or 99th October) are ignored.
 		/// </summary>
 		public List<int> TriggerDays { get; set; } = new List<int>();
 
 		/// <inheritdoc />
-		public override DateTime? GetNextExecutionTime(DateTime? after = null)
+		public override DateTime? GetNextExecution(DateTime? after = null)
 		{
 			// Sanity.
 			if (
@@ -36,7 +47,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			return this.TriggerDays
 				.SelectMany
 				(
-					d => GetNextDayOfMonth(after.Value, d)
+					d => GetNextDayOfMonth(after.Value, d, this.UnrepresentableDateHandling)
 				)
 				.SelectMany(d => this.TriggerTimes.Select(t => d.Add(t)))
 				.Where(d => d > after.Value)
@@ -55,38 +66,76 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// If not then it will return one item - for the next time that this day occurs
 		/// (later this month or next, depending on parameters).
 		/// </returns>
-		internal static IEnumerable<DateTime> GetNextDayOfMonth(DateTime after, int dayOfMonth)
+		internal static IEnumerable<DateTime> GetNextDayOfMonth
+		(
+			DateTime after, 
+			int dayOfMonth,
+			UnrepresentableDateHandling unrepresentableDateHandling
+		)
 		{
+			// If the day of the month is invalid then return no values.
+			if (dayOfMonth < 1 || dayOfMonth > 32)
+				yield break;
+
 			// Switch logic depending on the current day.
 			if (dayOfMonth == after.Day)
 			{
 				// It's today.
 				// We could be running today or the same day next month (depending on trigger times).
 				// Return both options.
-				return new[]
-				{
-					after.Date,
+				yield return after.Date;
+
+				yield return
 					new DateTime(after.Year, after.Month, 1)
 						.AddMonths(1) // One month
-						.AddDays(dayOfMonth - 1) // Move forward to the correct day.
-				};
+						.AddDays(dayOfMonth - 1); // Move forward to the correct day.
 			}
 			else if (dayOfMonth < after.Day)
 			{
 				// This day has already passed.
 				// Return the correct day next month.
-				return new[]
-				{
-					new DateTime(after.Year, after.Month, dayOfMonth).AddMonths(1)
-				};
+				yield return new DateTime(after.Year, after.Month, dayOfMonth).AddMonths(1);
 			}
 			else
 			{
 				// Day is in the future this month.
-				return new[]
+				var sanity = 0;
+				var month = after.Month;
+				while (sanity++ < 6)
 				{
-					new DateTime(after.Year, after.Month, dayOfMonth) // This month
-				};
+					DateTime? date = null;
+					try
+					{
+						// Can we represent this date?
+						// If not then we've asked for 30th Feb or similar.
+						date = new DateTime(after.Year, month, dayOfMonth);
+					}
+					catch
+					{
+						// What should we do?
+						switch (unrepresentableDateHandling)
+						{
+							case UnrepresentableDateHandling.LastDayOfMonth:
+								// Get the last day of this month instead.
+								date = new DateTime(after.Year, month, 1)
+									.AddMonths(1)
+									.AddDays(-1);
+								break;
+							default:
+								// Allow it to try the next month.
+								date = null;
+								month++;
+								break;
+						}
+					}
+
+					// If we can represent it then return it, otherwise move to next month.
+					if (date.HasValue)
+					{
+						yield return date.Value;
+						break;
+					}
+				}
 			}
 		}
 	}
