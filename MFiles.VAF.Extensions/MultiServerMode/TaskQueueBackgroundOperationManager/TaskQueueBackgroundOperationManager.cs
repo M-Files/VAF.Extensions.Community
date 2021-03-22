@@ -155,6 +155,9 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			// Ensure cancellation has not been requested.
 			job.ThrowIfCancellationRequested();
 
+			// What is the current state?
+			var state = job.AppTaskState;
+
 			// Update the progress of the task in the task queue.
 			try
 			{
@@ -165,7 +168,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				// Could not mark the task as assigned to a processor.
 				SysUtils.ReportToEventLog
 				(
-					$"Could not mark task {job.AppTaskId} as assigned to a processor (queue id: {job.AppTaskQueueId}, state: {job.AppTaskState}).",
+					$"Could not mark task {job.AppTaskId} as assigned to a processor (queue id: {job.AppTaskQueueId}, state: {state}).",
 					System.Diagnostics.EventLogEntryType.Warning
 				);
 				return;
@@ -245,12 +248,19 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				// That way even if the job is canceled, fails, or finishes successfully
 				// ...we always schedule the next run.
 				job.ProcessingCompleted += (s, op)
-					=> this.RunOnce
-					(
-						bo.Name,
-						nextRun.Value.ToUniversalTime(),
-						dir
-					);
+					=>
+					{
+						// Cancel any future executions (we only want the single one created below).
+						this.CancelFutureExecutions();
+
+						// Now schedule it to run according to the interval.
+						this.RunOnce
+						(
+							bo.Name,
+							nextRun.Value.ToUniversalTime(),
+							dir
+						);
+					};
 			}
 
 			// Perform the action.

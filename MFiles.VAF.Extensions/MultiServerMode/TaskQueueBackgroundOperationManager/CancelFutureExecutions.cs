@@ -26,20 +26,31 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				);
 				foreach (var task in tasksToCancel.Cast<ApplicationTaskInfo>())
 				{
-					// Mark each task as superseded.
-					this.TaskProcessor.UpdateCancelledJobInTaskQueue
-					(
-						task.ToApplicationTask(),
-						string.Empty,
-						remarks
-					);
+					try
+					{
+						// Mark each task as superseded.
+						this.TaskProcessor.UpdateCancelledJobInTaskQueue
+						(
+							task.ToApplicationTask(),
+							string.Empty,
+							remarks
+						);
+					}
+					catch (Exception e)
+					{
+						SysUtils.ReportErrorToEventLog
+						(
+							$"Exception cancelling task {task.TaskID} of type {TaskQueueBackgroundOperation.TaskTypeId} on queue {this.QueueId} to cancel.",
+							e
+						);
+					}
 				}
 			}
 			catch(Exception e)
 			{
 				SysUtils.ReportErrorToEventLog
 				(
-					$"Exception cancelling tasks of type {TaskQueueBackgroundOperation.TaskTypeId} on queue {this.QueueId}.",
+					$"Exception retrieving tasks of type {TaskQueueBackgroundOperation.TaskTypeId} on queue {this.QueueId} to cancel.",
 					e
 				);
 			}
