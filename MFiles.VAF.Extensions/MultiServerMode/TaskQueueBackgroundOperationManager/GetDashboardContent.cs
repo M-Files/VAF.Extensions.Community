@@ -71,8 +71,12 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 					}
 					else
 					{
-						htmlString += $"Last run: {kvp.Value.LastRun.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.LastRun)}.<br />";
-						htmlString += $"Next run: {kvp.Value.NextRun.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.NextRun)}.";
+						htmlString += !kvp.Value.LastRun.HasValue
+							? "This background operation has not run since the vault was brought online.<br />"
+							: $"Last run was {kvp.Value.LastRun.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.LastRun)}.<br />";
+						htmlString += !kvp.Value.NextRun.HasValue
+							? "The background operation is not scheduled to run again."
+							: $"Next run is {kvp.Value.NextRun.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.NextRun)}.";
 					}
 					listItem.InnerContent = new DashboardCustomContent(htmlString);
 
@@ -149,8 +153,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			// No value?
 			if (null == value)
 				return representation == DateTimeRepresentationOf.LastRun
-					? "not since last vault start"
-					: "not scheduled";
+					? "(not since last vault start)"
+					: "(not scheduled)";
 
 			// Find the difference between the scheduled time and now.
 			var universalValue = value.Value.ToUniversalTime();
@@ -159,7 +163,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			if (diff.TotalSeconds == 0)
 			{
 				// Now!
-				return "now";
+				return "due now";
 			}
 			else
 			{
@@ -212,7 +216,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				else
 				{
 					// Future.
-					return "in " + diffString;
+					return "in " + diffString + ", at " + universalValue.ToShortTimeString() + " on " + universalValue.ToString("D");
 				}
 			}
 		}
