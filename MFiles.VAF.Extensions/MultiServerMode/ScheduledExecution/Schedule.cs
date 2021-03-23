@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
-
 {
 	/// <summary>
 	/// Represents a schedule in which a job should be re-run.
@@ -27,6 +26,24 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 				.Where(d => d.HasValue)
 				.OrderBy(d => d)
 				.FirstOrDefault();
+		}
+
+		public override string ToString()
+		{
+			if (this.Triggers == null || this.Triggers.Count == 0)
+				return "no schedule triggers specified.<br />";
+
+			var output = "according to the following schedule:";
+
+			output += "<ul>";
+			foreach (var trigger in this.Triggers)
+			{
+				var triggerOutput = trigger.ToString();
+				output += $"<li>{triggerOutput}</li>";
+			}
+			output += "</ul>";
+
+			return output;
 		}
 	}
 }

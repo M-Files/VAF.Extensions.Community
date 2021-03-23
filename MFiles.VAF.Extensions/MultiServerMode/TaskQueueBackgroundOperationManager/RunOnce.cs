@@ -54,16 +54,26 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			var backgroundOperationDirective =
 				new BackgroundOperationTaskQueueDirective(backgroundOperationName, directive);
 
-			// Schedule the next task to execute ASAP.
+			// Schedule the next task to execute at the correct time.
+			var nextRun = runAt.HasValue ? runAt.Value.ToUniversalTime() : DateTime.UtcNow;
 			this.TaskProcessor.CreateApplicationTaskSafe
 			(
 				true,
 				this.QueueId,
 				TaskQueueBackgroundOperation.TaskTypeId,
 				backgroundOperationDirective?.ToBytes(),
-				runAt.HasValue ? runAt.Value.ToUniversalTime() : DateTime.UtcNow,
+				nextRun,
 				vault: vault ?? this.VaultApplication?.PermanentVault
 			);
+
+			// Update the status and next run times.
+			{
+				if (this.BackgroundOperations.TryGetValue(backgroundOperationName, out TaskQueueBackgroundOperationOverview bo))
+				{
+					bo.Status = TaskQueueBackgroundOperationStatus.Scheduled;
+					bo.NextRun = nextRun;
+				}
+			}
 		}
 
 	}

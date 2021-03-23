@@ -68,5 +68,16 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 			// Get the next one of this day.
 			yield return after.Date.AddDays(daysToAdd);
 		}
+
+		public override string ToString()
+		{
+			// Sanity.
+			if (null == this.TriggerDays || this.TriggerDays.Count == 0)
+				return null;
+			if (null == this.TriggerTimes || this.TriggerTimes.Count == 0)
+				return null;
+
+			return $"Every {string.Join(", ", this.TriggerDays)} at the following times: {string.Join(", ", this.TriggerTimes.Select(t => t.ToString()))}.";
+		}
 	}
 }

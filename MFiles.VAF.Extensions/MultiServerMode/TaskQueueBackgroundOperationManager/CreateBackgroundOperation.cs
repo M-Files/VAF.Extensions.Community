@@ -94,7 +94,10 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				);
 
 				// Add it to the dictionary.
-				this.BackgroundOperations.Add(name, backgroundOperation);
+				this.BackgroundOperations.Add(name, new TaskQueueBackgroundOperationOverview()
+				{
+					BackgroundOperation = backgroundOperation
+				});
 			}
 
 			// Return it.

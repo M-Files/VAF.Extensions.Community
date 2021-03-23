@@ -41,5 +41,14 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 				.FirstOrDefault();
 		}
 
+		public override string ToString()
+		{
+			// Sanity.
+			if (null == this.TriggerTimes || this.TriggerTimes.Count == 0)
+				return null;
+
+			return $"Daily at the following times: {string.Join(", ", this.TriggerTimes.Select(t => t.ToString()))}.";
+		}
+
 	}
 }
