@@ -250,16 +250,20 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				job.ProcessingCompleted += (s, op)
 					=>
 					{
-						// Cancel any future executions (we only want the single one created below).
-						this.CancelFutureExecutions();
+						// Ensure that if two threads both run this at once we don't end up with a race condition.
+						lock (_lock)
+						{
+							// Cancel any future executions (we only want the single one created below).
+							this.CancelFutureExecutions(bo.Name);
 
-						// Now schedule it to run according to the interval.
-						this.RunOnce
-						(
-							bo.Name,
-							nextRun.Value.ToUniversalTime(),
-							dir
-						);
+							// Now schedule it to run according to the interval.
+							this.RunOnce
+							(
+								bo.Name,
+								nextRun.Value.ToUniversalTime(),
+								dir
+							);
+						}
 					};
 			}
 

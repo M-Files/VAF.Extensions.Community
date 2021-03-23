@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Common;
 using MFiles.VAF.Common.ApplicationTaskQueue;
+using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
 using System;
 using System.Linq;
@@ -8,11 +9,12 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 {
 	public partial class TaskQueueBackgroundOperationManager
 	{
-
 		/// <summary>
 		/// Marks any future executions of this job in this queue as cancelled.
 		/// </summary>
-		public void CancelFutureExecutions(string remarks = null)
+		/// <param name="backgroundOperationName">If set, cancels only future executions for the specified background operation.</param>
+		/// <param name="remarks">Remarks to set on the cancellation.</param>
+		public void CancelFutureExecutions(string backgroundOperationName = null, string remarks = null)
 		{
 			try
 			{
@@ -26,12 +28,24 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				);
 				foreach (var task in tasksToCancel.Cast<ApplicationTaskInfo>())
 				{
+					var applicationTask = task.ToApplicationTask();
+
+					// Skip any that are not for this background operation.
+					if (false == string.IsNullOrWhiteSpace(backgroundOperationName))
+					{
+						var backgroundOperationDirective = TaskQueueDirective.Parse<BackgroundOperationTaskQueueDirective>(applicationTask);
+						if (null == backgroundOperationDirective?.BackgroundOperationName)
+							continue;
+						if (!backgroundOperationDirective.BackgroundOperationName.Equals(backgroundOperationName))
+							continue;
+					}
+
 					try
 					{
 						// Mark each task as superseded.
 						this.TaskProcessor.UpdateCancelledJobInTaskQueue
 						(
-							task.ToApplicationTask(),
+							applicationTask,
 							string.Empty,
 							remarks
 						);
@@ -46,7 +60,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 					}
 				}
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				SysUtils.ReportErrorToEventLog
 				(
