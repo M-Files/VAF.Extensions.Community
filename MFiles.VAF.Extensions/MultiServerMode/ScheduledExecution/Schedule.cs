@@ -28,6 +28,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 				.FirstOrDefault();
 		}
 
+		/// <inheritdoc />
 		public override string ToString()
 		{
 			if (this.Triggers == null || this.Triggers.Count == 0)
@@ -35,6 +36,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 
 			var output = "according to the following schedule:";
 
+			// Output the triggers as a HTML list.
 			output += "<ul>";
 			foreach (var trigger in this.Triggers)
 			{

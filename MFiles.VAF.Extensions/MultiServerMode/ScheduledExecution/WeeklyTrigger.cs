@@ -69,6 +69,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 			yield return after.Date.AddDays(daysToAdd);
 		}
 
+		/// <inheritdoc />
 		public override string ToString()
 		{
 			// Sanity.
