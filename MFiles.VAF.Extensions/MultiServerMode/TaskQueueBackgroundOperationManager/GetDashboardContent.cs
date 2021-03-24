@@ -97,12 +97,30 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 	}
 	internal static class FormattingExtensionMethods
 	{
+		/// <summary>
+		/// A flag to note whether the datetime is in the future or past.
+		/// </summary>
 		internal enum DateTimeRepresentationOf
 		{
 			Unknown = 0,
+
+			/// <summary>
+			/// The datetime represents when the code last run (i.e. expected to be in the past).
+			/// </summary>
 			LastRun = 1,
+
+			/// <summary>
+			/// The datetime represents when the code will next run (i.e. expected to be in the future).
+			/// </summary>
 			NextRun = 2
 		}
+
+		/// <summary>
+		/// Converts <paramref name="timespan"/> to a string.
+		/// If <paramref name="timespan"/> is null or zero, returns "no timespan specified".
+		/// </summary>
+		/// <param name="timespan">The timespan to convert.</param>
+		/// <returns>A string in English describing the timespan.</returns>
 		internal static string ToDisplayString(this TimeSpan? timespan)
 		{
 			// Sanity.
@@ -125,7 +143,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				components.Add($"{timespan.Value.Seconds} seconds");
 
 			// Build a text representation
-			var output = "";
+			var output = "every ";
 			for (var i = 0; i < components.Count; i++)
 			{
 				if (i == 0)
@@ -143,11 +161,27 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			}
 			return output;
 		}
+
+		/// <summary>
+		/// Converts <paramref name="schedule"/> to a string.
+		/// If <paramref name="schedule"/> is null, returns "never", otherwise returns <see cref="Schedule.ToString"/>.
+		/// </summary>
+		/// <param name="schedule">The schedule to convert.</param>
+		/// <returns>A string in English describing the schedule.</returns>
 		internal static string ToDisplayString(this Schedule schedule)
 		{
 			return schedule?.ToString()
 				?? "never";
 		}
+
+		/// <summary>
+		/// Converts <paramref name="value"/> to a representation such as "in 20 minutes".
+		/// If <paramref name="value"/> is null then returns a flag stating not scheduled / not run, depending on whether
+		/// <paramref name="representation"/> is expected to be in the past or future.
+		/// </summary>
+		/// <param name="value">The value to represent.</param>
+		/// <param name="representation">Whether the value is supposed to be last-run (past) or next-run (future).</param>
+		/// <returns>A string in English stating when it should run.</returns>
 		internal static string ToTimeOffset(this DateTime? value, DateTimeRepresentationOf representation)
 		{
 			// No value?
@@ -163,7 +197,9 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			if (diff.TotalSeconds == 0)
 			{
 				// Now!
-				return "due now";
+				return representation == DateTimeRepresentationOf.LastRun
+					? "now"
+					: "due now";
 			}
 			else
 			{
