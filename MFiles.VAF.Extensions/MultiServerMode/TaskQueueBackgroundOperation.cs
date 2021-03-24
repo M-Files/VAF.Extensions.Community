@@ -8,7 +8,6 @@ using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
 
 namespace MFiles.VAF.Extensions.MultiServerMode
-
 {
 	public class TaskQueueBackgroundOperation<TDirective>
 		: TaskQueueBackgroundOperation

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
-
 {
 	/// <summary>
 	/// Represents a trigger that runs every day, potentially multiple times per day.
