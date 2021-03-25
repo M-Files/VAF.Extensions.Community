@@ -81,7 +81,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			{
 				if (this.BackgroundOperations.ContainsKey(name))
 					throw new ArgumentException(
-						$"A background operation with the name {name} in queue {this.QueueId} could not be found.",
+						$"A background operation with the name {name} in queue {this.QueueId} already exists.",
 						nameof(name));
 
 				// Create the background operation.
