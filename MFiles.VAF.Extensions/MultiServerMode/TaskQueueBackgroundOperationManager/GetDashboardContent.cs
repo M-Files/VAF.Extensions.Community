@@ -14,24 +14,9 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// Returns some dashboard content that shows the background operations and their current status.
 		/// </summary>
 		/// <returns>The dashboard content.</returns>
-		public virtual IDashboardContent GetDashboardContent(string baseContent)
+		public virtual IEnumerable<DashboardListItem> GetDashboardContent()
 		{
-			// Add in any base content, if we have it.
-			var contentCollection = new DashboardContentCollection();
-			if (null != baseContent)
-				contentCollection.Add(new DashboardCustomContent(baseContent));
-
-			// Create the dashboard list.
-			var list = new DashboardList();
-			if (this.BackgroundOperations.Count == 0)
-			{
-				// No background operations.
-				list.Items.Add(new DashboardListItem()
-				{
-					InnerContent = new DashboardCustomContent("<em>There are no current background operations.</em>")
-				});
-			}
-			else
+			if (this.BackgroundOperations.Count > 0)
 			{
 				// Output each background operation as a list item.
 				foreach (var kvp in this.BackgroundOperations)
@@ -81,18 +66,10 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 					listItem.InnerContent = new DashboardCustomContent(htmlString);
 
 					// Add the list item.
-					list.Items.Add(listItem);
+					yield return listItem;
 				}
 
 			}
-
-			// Set the panel content and return it.
-			contentCollection.Add(new DashboardPanel()
-			{
-				Title = "Background Operations",
-				InnerContent = list
-			});
-			return contentCollection;
 		}
 	}
 	internal static class FormattingExtensionMethods
