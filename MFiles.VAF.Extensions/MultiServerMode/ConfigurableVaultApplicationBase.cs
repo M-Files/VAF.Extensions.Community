@@ -104,7 +104,11 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			if (0 == list.Items.Count)
 				list.Items.Add(new DashboardListItem()
 				{
-					InnerContent = new DashboardCustomContent("<em>There are no current background operations.</em>")
+					Title = "There are no current background operations.",
+					StatusSummary = new Configuration.Domain.DomainStatusSummary()
+					{
+						Status = VAF.Configuration.Domain.DomainStatus.Undefined
+					}
 				});
 
 			// Return the panel.
