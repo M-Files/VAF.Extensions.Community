@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 {
@@ -14,7 +15,9 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 		/// The times of day to trigger the schedule.
 		/// There must be at least one item in this collection for the trigger to be active.
 		/// </summary>
-		public List<TimeSpan> TriggerTimes { get; set; } = new List<TimeSpan>();
+		[DataMember]
+		public List<TriggerTime> TriggerTimes { get; set; } = new List<TriggerTime>();
+
 
 		/// <inheritdoc />
 		public override DateTime? GetNextExecution(DateTime? after = null)

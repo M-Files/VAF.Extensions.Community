@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 {
 	/// <summary>
 	/// Represents a schedule in which a job should be re-run.
 	/// </summary>
+	[DataContract]
 	public class Schedule
 	{
 		/// <summary>
 		/// The rules that should trigger the schedule to run.
 		/// </summary>
-		public List<TriggerBase> Triggers { get; set; } = new List<TriggerBase>();
+		[DataMember]
+		public List<Trigger> Triggers { get; set; } = new List<Trigger>();
 
 		/// <summary>
 		/// Gets the next execution datetime for this trigger.
@@ -41,6 +44,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 			foreach (var trigger in this.Triggers)
 			{
 				var triggerOutput = trigger.ToString();
+				if (string.IsNullOrWhiteSpace(triggerOutput))
+					continue;
 				output += $"<li>{triggerOutput}</li>";
 			}
 			output += "</ul>";

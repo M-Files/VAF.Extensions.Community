@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 {
@@ -16,6 +17,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 		/// The days on which to trigger the schedule.
 		/// There must be at least one item in this collection for the trigger to be active.
 		/// </summary>
+		[DataMember]
 		public List<DayOfWeek> TriggerDays { get; set; } = new List<DayOfWeek>();
 
 		/// <inheritdoc />

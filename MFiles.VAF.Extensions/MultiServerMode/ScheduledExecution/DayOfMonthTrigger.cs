@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 {
@@ -19,6 +20,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 		/// <summary>
 		/// How to handle unrepresentable dates (e.g. 30th February).
 		/// </summary>
+		[DataMember]
 		public UnrepresentableDateHandling UnrepresentableDateHandling { get; set; }
 			= UnrepresentableDateHandling.Skip;
 
@@ -26,6 +28,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 		/// The days of the month to trigger the schedule.
 		/// Days outside of a valid range (e.g. 30th February, or 99th October) are ignored.
 		/// </summary>
+		[DataMember]
 		public List<int> TriggerDays { get; set; } = new List<int>();
 
 		/// <inheritdoc />

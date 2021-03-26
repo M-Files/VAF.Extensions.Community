@@ -286,9 +286,9 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				{
 					// If this task is not for this background operation then ignore it.
 					var directive = TaskQueueDirective.Parse<BackgroundOperationTaskQueueDirective>(task.ToApplicationTask());
-					if(null == directive)
+					if (null == directive)
 						continue;
-					if(directive.BackgroundOperationName != this.Name)
+					if (directive.BackgroundOperationName != this.Name)
 						continue;
 
 					// Mark each task as superseded.
@@ -311,13 +311,21 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 					}
 				}
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				SysUtils.ReportErrorToEventLog
 				(
 					$"Exception cancelling tasks for background operation {this.Name} of type {TaskQueueBackgroundOperation.TaskTypeId} on queue {this.BackgroundOperationManager.QueueId}.",
 					e
 				);
+			}
+			finally
+			{
+				// Next run isn't now scheduled.
+				if (this.BackgroundOperationManager.BackgroundOperations.TryGetValue(this.Name, out TaskQueueBackgroundOperationOverview o))
+				{
+					o.NextRun = null;
+				}
 			}
 		}
 
