@@ -251,13 +251,13 @@ public class VaultApplication
             // Run every day at the specified times.
             new MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution.DailyTrigger()
             {
-                TriggerTimes = new System.Collections.Generic.List<TimeSpan>()
+                TriggerTimes = new List<TriggerTime>
                 {
                     new TimeSpan(09, 00, 00), // 9am
                     new TimeSpan(14, 00, 00), // 2pm
                     new TimeSpan(15, 00, 00), // 3pm
                 }
-            }
+            }.ToTrigger()
         );
 
         // Create a background operation that runs according to the provided schedule.

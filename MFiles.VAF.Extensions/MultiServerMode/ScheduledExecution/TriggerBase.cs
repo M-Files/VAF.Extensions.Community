@@ -84,33 +84,30 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 			}
 		}
 
+		public Trigger()
+		{
+		}
+		public Trigger(ScheduleTriggerType type)
+			: this()
+		{
+			this.Type = type;
+		}
+
 		internal static Trigger FromTriggerBase(TriggerBase trigger)
 		{
 			switch (trigger.Type)
 			{
 				case ScheduleTriggerType.Daily:
 					{
-						return new Trigger()
-						{
-							Type = ScheduleTriggerType.Daily,
-							DailyTriggerConfiguration = (trigger as DailyTrigger)
-						};
+						return ((DailyTrigger)trigger).ToTrigger();
 					}
 				case ScheduleTriggerType.Weekly:
 					{
-						return new Trigger()
-						{
-							Type = ScheduleTriggerType.Weekly,
-							WeeklyTriggerConfiguration = (trigger as WeeklyTrigger)
-						};
+						return ((WeeklyTrigger)trigger).ToTrigger();
 					}
 				case ScheduleTriggerType.Monthly:
 					{
-						return new Trigger()
-						{
-							Type = ScheduleTriggerType.Monthly,
-							DayOfMonthTriggerConfiguration = (trigger as DayOfMonthTrigger)
-						};
+						return ((DayOfMonthTrigger)trigger).ToTrigger();
 					}
 				case ScheduleTriggerType.Unknown:
 				default:

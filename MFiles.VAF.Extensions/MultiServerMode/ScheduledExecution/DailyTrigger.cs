@@ -60,5 +60,17 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 			return $"Daily at the following times: {string.Join(", ", this.TriggerTimes.Select(t => t.ToString()))}.";
 		}
 
+		/// <summary>
+		/// Returns this trigger as a generic trigger for serialisation.
+		/// </summary>
+		/// <returns>The trigger.</returns>
+		public virtual Trigger ToTrigger()
+		{
+			return new Trigger(ScheduleTriggerType.Daily)
+			{
+				DailyTriggerConfiguration = this
+			};
+		}
+
 	}
 }

@@ -18,6 +18,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		public override string GetDashboardContent(IConfigurationRequestContext context)
 		{
 			var dashboard = new StatusDashboard();
+			dashboard.RefreshInterval = 30;
 
 			// If there's some base content then add that.
 			var baseContent = base.GetDashboardContent(context);
@@ -64,7 +65,11 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			return new DashboardPanel()
 			{
 				Title = "Background Operations",
-				InnerContent = list
+				InnerContent = new DashboardContentCollection
+				{
+					list,
+					new DashboardCustomContent($"<em>Time on server: {DateTime.Now.ToLocalTime().ToString("HH:mm:ss")}</em>")
+				}
 			};
 		}
 

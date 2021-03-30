@@ -56,12 +56,12 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 					}
 					else
 					{
-						htmlString += !kvp.Value.LastRun.HasValue
-							? "This background operation has not run since the vault was brought online.<br />"
-							: $"Last run was {kvp.Value.LastRun.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.LastRun)}.<br />";
 						htmlString += !kvp.Value.NextRun.HasValue
 							? "The background operation is not scheduled to run again."
-							: $"Next run is {kvp.Value.NextRun.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.NextRun)}.";
+							: $"Next run is {kvp.Value.NextRun.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.NextRun)}.<br />";
+						//htmlString += !kvp.Value.LastRun.HasValue
+						//	? "This background operation has not run since the vault was brought online.<br />"
+						//	: $"Last run was {kvp.Value.LastRun.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.LastRun)}.";
 					}
 					listItem.InnerContent = new DashboardCustomContent(htmlString);
 
@@ -169,6 +169,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 
 			// Find the difference between the scheduled time and now.
 			var universalValue = value.Value.ToUniversalTime();
+			var localTime = universalValue.ToLocalTime();
 			var diff = universalValue.Subtract(DateTime.UtcNow);
 			var isInPast = diff < TimeSpan.Zero;
 			if (diff.TotalSeconds == 0)
@@ -212,7 +213,9 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				else
 				{
 					// Default to the specific time.
-					return "at " + universalValue.ToShortTimeString() + " on " + universalValue.ToString("D");
+					return localTime.Date == DateTime.Now.ToLocalTime().Date
+						? $"at {localTime.ToString("HH:mm:ss")} server-time"
+						: $"at {localTime.ToString("HH:mm:ss")} server-time on {localTime.ToString("yyyy-MM-dd")}";
 				}
 
 				// Render out ago vs in.
@@ -229,7 +232,9 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				else
 				{
 					// Future.
-					return "in " + diffString + ", at " + universalValue.ToShortTimeString() + " on " + universalValue.ToString("D");
+					return localTime.Date == DateTime.Now.ToLocalTime().Date
+						? $"at {localTime.ToString("HH:mm:ss")} server-time (in {diffString})"
+						: $"at {localTime.ToString("HH:mm:ss")} server-time on {localTime.ToString("yyyy-MM-dd")} (in {diffString})";
 				}
 			}
 		}
