@@ -8,11 +8,24 @@ using MFiles.VAF.MultiserverMode;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using MFiles.VAF.AdminConfigurations;
+using MFiles.VAF.Configuration.Domain;
+using MFiles.VAF.Extensions.Dashboard;
 
 namespace MFiles.VAF.Extensions.MultiServerMode
 {
 	public abstract partial class ConfigurableVaultApplicationBase<TSecureConfiguration>
 	{
+		// TODO: remove commented code, just indicating usage example
+		//[BackgroundOperationTriggerableByDashboard( LabelText = "Label", ButtonText = "Run", Name = "Process Stuff" )]
+		//protected TaskQueueBackgroundOperation ProcessStuffBackgroundOperation { get; private set; }
+
+		protected override AdminConfigurationManager CreateAdminConfigurationManager()
+		{
+			// TODO: not sure if this belongs in this file, but this is pretty critical and we need some way of enforcing that if this is overriden it inherits from BackgroundOperationAdminConfigurationManager
+			return new BackgroundOperationAdminConfigurationManager( this, this.GetBackgroundOperationsForDashboard() );
+		}
 
 		/// <inheritdoc />
 		public override string GetDashboardContent(IConfigurationRequestContext context)
@@ -29,6 +42,12 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			var backgroundOperationContent = this.GetBackgroundOperationDashboardContent();
 			if(null != backgroundOperationContent)
 				dashboard.AddContent(backgroundOperationContent);
+
+			// Do we have any background operations content?
+			// TODO: clean this up, confusing with the above, this one is for running operations above is for showing schedule...might want to merge them
+			var backgroundOperationsDashboardContent = this.GetBackgroundOperationsDashboardContent();
+			if( null != backgroundOperationsDashboardContent )
+				dashboard.AddContent( backgroundOperationsDashboardContent );
 
 			// Return the dashboard.
 			return dashboard.ToString();
@@ -117,6 +136,94 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				if (null != value)
 					yield return value;
 			}
+		}
+
+		private List<DashboardBackgroundOperationConfiguration> backgroundOperationsForDashboard;
+
+		public List<DashboardBackgroundOperationConfiguration> GetBackgroundOperationsForDashboard()
+		{
+			if( backgroundOperationsForDashboard != null )
+				return this.backgroundOperationsForDashboard;
+
+			this.backgroundOperationsForDashboard = new List<DashboardBackgroundOperationConfiguration>();
+
+			// TODO: there should be validation here around enforcing that the property/field is TaskQueueBackgroundOperation (no directives)
+			// TODO: shouldn't be this...and may need bindingAttrs
+			foreach( var propertyInfo in this.GetType().GetProperties( BindingFlags.Instance | BindingFlags.NonPublic ) )
+			{
+				var attr = propertyInfo.GetCustomAttribute<BackgroundOperationTriggerableByDashboardAttribute>();
+				if( attr != null )
+				{
+					this.backgroundOperationsForDashboard.Add( new DashboardBackgroundOperationConfiguration { Attribute = attr, MemberInfo = propertyInfo } );
+				}
+			}
+
+			foreach( var fieldInfo in this.GetType().GetFields() )
+			{
+				var attr = fieldInfo.GetCustomAttribute<BackgroundOperationTriggerableByDashboardAttribute>();
+				if( attr != null )
+				{
+					this.backgroundOperationsForDashboard.Add( new DashboardBackgroundOperationConfiguration { Attribute = attr, MemberInfo = fieldInfo } );
+				}
+			}
+
+			return this.backgroundOperationsForDashboard;
+		}
+
+		/// <summary>
+		/// Returns the dashboard content showing background operations configuration.
+		/// </summary>
+		/// <returns>The dashboard content.  Can be null if no background operations.</returns>
+		public virtual DashboardPanel GetBackgroundOperationsDashboardContent()
+		{
+			// Get the current background operations configuration and die if we don't have one.
+			// TODO: where should this retrieve from
+			var backgroundOperationConfiguration = this.GetBackgroundOperationsForDashboard();
+			if( null == backgroundOperationConfiguration || !backgroundOperationConfiguration.Any() )
+				return null;
+
+			// Add the panel for the background operations content.
+			var panel = new DashboardPanel
+			{
+				Title = "Background Operations"
+			};
+
+			// Set up the list of log targets.
+			var list = new DashboardList();
+			int count = 0;
+			foreach( var configuration in backgroundOperationConfiguration )
+			{
+				// Set up the basic list item contents.
+				var listItem = new DashboardListItem
+				{
+					Title = configuration.Attribute.Name,
+					InnerContent = Dashboard.DashboardHelper.CreateSimpleButtonContent( configuration.Attribute.LabelText, configuration.Attribute.ButtonText, configuration.CommandId ),
+					StatusSummary = new DomainStatusSummary
+					{
+						Status = DomainStatus.Enabled,
+						Label = "Enabled"
+					}
+				};
+				count++;
+
+				// Add the item to the list.
+				list.Items.Add( listItem );
+			}
+
+			// If there are no background operations then highlight that.
+			if( 0 == list.Items.Count )
+				list.Items.Add( new DashboardListItem()
+				{
+					Title = "There are currently no commands configured.",
+					StatusSummary = new DomainStatusSummary()
+					{
+						Status = DomainStatus.Undefined
+					}
+				} );
+
+			// Add the list to the panel.
+			panel.InnerContent = list;
+			return panel;
 		}
 	}
 }
