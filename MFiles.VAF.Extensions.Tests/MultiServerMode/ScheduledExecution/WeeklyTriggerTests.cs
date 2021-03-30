@@ -45,7 +45,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 				expected,
 				new WeeklyTrigger()
 				{
-					TriggerTimes = triggerTimes.ToList(),
+					TriggerTimes = triggerTimes.Select(t => new TriggerTime() { Time = t }).ToList().ToList(),
 					TriggerDays = triggerDays.ToList()
 				}.GetNextExecution(after)
 			);

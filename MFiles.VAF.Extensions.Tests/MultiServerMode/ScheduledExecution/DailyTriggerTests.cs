@@ -26,7 +26,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 				expected,
 				new DailyTrigger()
 				{
-					TriggerTimes = triggerTimes.ToList()
+					TriggerTimes = triggerTimes.Select(t => new TriggerTime() { Time = t }).ToList()
 				}.GetNextExecution(after)
 			);
 		}

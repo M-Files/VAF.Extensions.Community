@@ -20,6 +20,14 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 		[DataMember]
 		public List<DayOfWeek> TriggerDays { get; set; } = new List<DayOfWeek>();
 
+		/// <summary>
+		/// Creates a <see cref="WeeklyTrigger"/> instance.
+		/// </summary>
+		public WeeklyTrigger()
+		{
+			base.Type = ScheduleTriggerType.Weekly;
+		}
+
 		/// <inheritdoc />
 		public override DateTime? GetNextExecution(DateTime? after = null)
 		{

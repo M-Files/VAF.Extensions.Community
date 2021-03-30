@@ -1,7 +1,7 @@
 ﻿namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 
 {
-	public enum TriggerType
+	public enum ScheduleTriggerType
 	{
 		Unknown = 0,
 		Daily = 1,

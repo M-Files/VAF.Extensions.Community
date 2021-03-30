@@ -31,6 +31,14 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 		[DataMember]
 		public List<int> TriggerDays { get; set; } = new List<int>();
 
+		/// <summary>
+		/// Creates a <see cref="DayOfMonthTrigger"/> instance.
+		/// </summary>
+		public DayOfMonthTrigger()
+		{
+			base.Type = ScheduleTriggerType.Monthly;
+		}
+
 		/// <inheritdoc />
 		public override DateTime? GetNextExecution(DateTime? after = null)
 		{

@@ -21,3 +21,5 @@ The `TaskQueueBackgroundOperationManager` class wraps the above approach, allowi
 ## TaskQueueBackgroundOperation
 
 The `TaskQueueBackgroundOperation` class is returned by the `TaskQueueBackgroundOperationManager` and represents a single background operation.
+
+**View more details on creating and running background operations are here: [TaskQueueBackgroundOperationManager](TaskQueueBackgroundOperationManager)**

@@ -16,10 +16,10 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 		/// The type of trigger this is (e.g. Daily, Weekly).
 		/// </summary>
 		[DataMember]
-		public new TriggerType Type
+		public new ScheduleTriggerType Type
 		{
 			get => base.Type;
-			set => base.Type = value;
+			protected set => base.Type = value;
 		}
 
 		[DataMember]
@@ -57,11 +57,11 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 		{
 			switch (this.Type)
 			{
-				case TriggerType.Daily:
+				case ScheduleTriggerType.Daily:
 					return this.DailyTriggerConfiguration?.GetNextExecution(after);
-				case TriggerType.Weekly:
+				case ScheduleTriggerType.Weekly:
 					return this.WeeklyTriggerConfiguration?.GetNextExecution(after);
-				case TriggerType.Monthly:
+				case ScheduleTriggerType.Monthly:
 					return this.DayOfMonthTriggerConfiguration?.GetNextExecution(after);
 				default:
 					return null;
@@ -73,12 +73,46 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 		{
 			switch (this.Type)
 			{
-				case TriggerType.Daily:
+				case ScheduleTriggerType.Daily:
 					return this.DailyTriggerConfiguration?.ToString();
-				case TriggerType.Weekly:
+				case ScheduleTriggerType.Weekly:
 					return this.WeeklyTriggerConfiguration?.ToString();
-				case TriggerType.Monthly:
+				case ScheduleTriggerType.Monthly:
 					return this.DayOfMonthTriggerConfiguration?.ToString();
+				default:
+					return null;
+			}
+		}
+
+		internal static Trigger FromTriggerBase(TriggerBase trigger)
+		{
+			switch (trigger.Type)
+			{
+				case ScheduleTriggerType.Daily:
+					{
+						return new Trigger()
+						{
+							Type = ScheduleTriggerType.Daily,
+							DailyTriggerConfiguration = (trigger as DailyTrigger)
+						};
+					}
+				case ScheduleTriggerType.Weekly:
+					{
+						return new Trigger()
+						{
+							Type = ScheduleTriggerType.Weekly,
+							WeeklyTriggerConfiguration = (trigger as WeeklyTrigger)
+						};
+					}
+				case ScheduleTriggerType.Monthly:
+					{
+						return new Trigger()
+						{
+							Type = ScheduleTriggerType.Monthly,
+							DayOfMonthTriggerConfiguration = (trigger as DayOfMonthTrigger)
+						};
+					}
+				case ScheduleTriggerType.Unknown:
 				default:
 					return null;
 			}
@@ -89,7 +123,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 		/// <summary>
 		/// The type of trigger this is (e.g. Daily, Weekly).
 		/// </summary>
-		public TriggerType Type { get; set; } = TriggerType.Unknown;
+		public ScheduleTriggerType Type { get; set; } = ScheduleTriggerType.Unknown;
 
 		/// <summary>
 		/// Gets the next execution datetime for this trigger.

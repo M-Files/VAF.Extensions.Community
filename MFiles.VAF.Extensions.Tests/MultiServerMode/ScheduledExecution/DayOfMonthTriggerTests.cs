@@ -48,7 +48,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 				expected,
 				new DayOfMonthTrigger()
 				{
-					TriggerTimes = triggerTimes.ToList(),
+					TriggerTimes = triggerTimes.Select(t => new TriggerTime() { Time = t }).ToList(),
 					TriggerDays = triggerDays.ToList()
 				}.GetNextExecution(after)
 			);

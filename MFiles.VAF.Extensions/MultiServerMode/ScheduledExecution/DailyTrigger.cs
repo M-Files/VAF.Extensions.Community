@@ -18,6 +18,13 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 		[DataMember]
 		public List<TriggerTime> TriggerTimes { get; set; } = new List<TriggerTime>();
 
+		/// <summary>
+		/// Creates a <see cref="DailyTrigger"/> instance.
+		/// </summary>
+		public DailyTrigger()
+		{
+			base.Type = ScheduleTriggerType.Daily;
+		}
 
 		/// <inheritdoc />
 		public override DateTime? GetNextExecution(DateTime? after = null)

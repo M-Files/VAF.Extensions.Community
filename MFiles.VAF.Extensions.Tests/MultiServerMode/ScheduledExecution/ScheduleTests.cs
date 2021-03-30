@@ -26,7 +26,10 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 				expected,
 				new Schedule()
 				{
-					Triggers = new List<TriggerBase>(triggers)
+					Triggers = triggers
+						.Select(t => Trigger.FromTriggerBase(t))
+						.Where(t => t != null)
+						.ToList()
 				}.GetNextExecution(after)
 			);
 		}
@@ -42,7 +45,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 						TriggerTimes = new List<TimeSpan>()
 						{
 							new TimeSpan(17, 0, 0)
-						}
+						}.Select(t => new TriggerTime() { Time = t }).ToList()
 					}
 				},
 				new DateTime(2021, 03, 17, 01, 00, 00), // Wednesday @ 1am
@@ -58,13 +61,13 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 						TriggerTimes = new List<TimeSpan>()
 						{
 							new TimeSpan(17, 0, 0)
-						}
+						}.Select(t => new TriggerTime() { Time = t }).ToList()
 					},
 					new DailyTrigger(){
 						TriggerTimes = new List<TimeSpan>()
 						{
 							new TimeSpan(12, 0, 0)
-						}
+						}.Select(t => new TriggerTime() { Time = t }).ToList()
 					}
 				},
 				new DateTime(2021, 03, 17, 01, 00, 00), // Wednesday @ 1am
@@ -88,7 +91,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 						TriggerTimes = new List<TimeSpan>()
 						{
 							new TimeSpan(17, 0, 0)
-						}
+						}.Select(t => new TriggerTime() { Time = t }).ToList()
 					}
 				},
 				new DateTime(2021, 03, 17, 17, 00, 00), // Wednesday @ 1am

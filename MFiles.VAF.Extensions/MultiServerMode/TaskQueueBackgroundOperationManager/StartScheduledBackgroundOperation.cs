@@ -7,20 +7,21 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 	public partial class TaskQueueBackgroundOperationManager
 	{
 		/// <summary>
-		/// Creates a new background operation and starts it. The background operation runs the given method at given intervals.
+		/// Creates a new background operation and starts it.
+		/// The background operation runs the given method according to the <paramref name="schedule"/>.
 		/// </summary>
 		/// <param name="name">The name of the operation.</param>
 		/// <param name="schedule">The schedule that defines when the operation should run.</param>
 		/// <param name="method">The method to invoke at given intervals.</param>
 		/// <returns>A scheduled background operation.</returns>
-		public TaskQueueBackgroundOperation StartBackgroundOperationOnSchedule
+		public TaskQueueBackgroundOperation StartScheduledBackgroundOperation
 		(
 			string name,
 			Schedule schedule,
 			Action method
 		)
 		{
-			return this.StartBackgroundOperationOnSchedule
+			return this.StartScheduledBackgroundOperation
 			(
 				name,
 				schedule,
@@ -29,20 +30,21 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		}
 
 		/// <summary>
-		/// Creates a new background operation and starts it. The background operation runs the given method at given intervals.
+		/// Creates a new background operation and starts it.
+		/// The background operation runs the given method according to the <paramref name="schedule"/>.
 		/// </summary>
 		/// <param name="name">The name of the operation.</param>
 		/// <param name="schedule">The schedule that defines when the operation should run.</param>
 		/// <param name="method">The method to invoke at given intervals.</param>
 		/// <returns>A scheduled background operation.</returns>
-		public TaskQueueBackgroundOperation StartBackgroundOperationOnSchedule
+		public TaskQueueBackgroundOperation StartScheduledBackgroundOperation
 		(
 			string name,
 			Schedule schedule,
 			Action<TaskProcessorJob> method
 		)
 		{
-			return this.StartBackgroundOperationOnSchedule
+			return this.StartScheduledBackgroundOperation
 			(
 				name,
 				schedule,
@@ -51,14 +53,15 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		}
 
 		/// <summary>
-		/// Creates a new background operation and starts it. The background operation runs the given method at given intervals.
+		/// Creates a new background operation and starts it.
+		/// The background operation runs the given method according to the <paramref name="schedule"/>.
 		/// </summary>
 		/// <param name="name">The name of the operation.</param>
 		/// <param name="schedule">The schedule that defines when the operation should run.</param>
 		/// <param name="method">The method to invoke at given intervals.</param>
 		/// <param name="directive">The directive to pass to the job.</param>
 		/// <returns>A started background operation.</returns>
-		public TaskQueueBackgroundOperation StartBackgroundOperationOnSchedule
+		public TaskQueueBackgroundOperation StartScheduledBackgroundOperation
 		(
 			string name,
 			Schedule schedule,
@@ -66,7 +69,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			TaskQueueDirective directive = null
 		)
 		{
-			return this.StartBackgroundOperationOnSchedule<TaskQueueDirective>
+			return this.StartScheduledBackgroundOperation<TaskQueueDirective>
 			(
 				name,
 				schedule,
@@ -76,14 +79,15 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		}
 
 		/// <summary>
-		/// Creates a new background operation and starts it. The background operation runs the given method at given intervals.
+		/// Creates a new background operation and starts it.
+		/// The background operation runs the given method according to the <paramref name="schedule"/>.
 		/// </summary>
 		/// <param name="name">The name of the operation.</param>
 		/// <param name="schedule">The schedule that defines when the operation should run.</param>
 		/// <param name="method">The method to invoke at given intervals.</param>
 		/// <param name="directive">The directive to pass to the job.</param>
 		/// <returns>A started background operation.</returns>
-		public TaskQueueBackgroundOperation<TDirective> StartBackgroundOperationOnSchedule<TDirective>
+		public TaskQueueBackgroundOperation<TDirective> StartScheduledBackgroundOperation<TDirective>
 		(
 			string name,
 			Schedule schedule,

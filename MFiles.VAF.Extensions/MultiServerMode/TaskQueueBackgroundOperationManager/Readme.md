@@ -234,6 +234,7 @@ public class VaultApplication
     /// The task queue background operation manager for this application.
     /// </summary>
     protected TaskQueueBackgroundOperationManager TaskQueueBackgroundOperationManager { get; private set; }
+
     /// <inheritdoc />
     protected override void StartApplication()
     {
@@ -242,6 +243,7 @@ public class VaultApplication
         (
             this
         );
+
         // Create the schedule.
         var schedule = new MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution.Schedule();
         schedule.Triggers.Add
@@ -257,8 +259,9 @@ public class VaultApplication
                 }
             }
         );
-        // Create a background operation that runs once every ten seconds.
-        this.TaskQueueBackgroundOperationManager.StartBackgroundOperationOnSchedule
+
+        // Create a background operation that runs according to the provided schedule.
+        this.TaskQueueBackgroundOperationManager.StartScheduledBackgroundOperation
         (
             "This is my scheduled background operation",
             schedule,
@@ -270,7 +273,7 @@ public class VaultApplication
                     if (nextRun.HasValue)
                         nextRunString = nextRun.Value.ToString("O");
                 }
-                SysUtils.ReportInfoToEventLog($"Hello world, it is now {DateTime.UtcNow} (re-scheduling for {nextRunString}).");
+                SysUtils.ReportInfoToEventLog($"Hello world, it is now {DateTime.UtcNow.ToString("O")} (re-scheduling for {nextRunString}).");
             }
         );
     }
