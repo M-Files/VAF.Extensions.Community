@@ -22,6 +22,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		: MFiles.VAF.Core.ConfigurableVaultApplicationBase<TSecureConfiguration>, IUsesTaskQueue
 	where TSecureConfiguration : class, new()
 	{
+		private TaskQueueBackgroundOperationManager taskQueueBackgroundOperationManager;
+
 		/// <summary>
 		/// The rebroadcast queue Id.
 		/// Populated during the first call to <see cref="GetRebroadcastQueueId"/>.
@@ -34,10 +36,33 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// </summary>
 		protected AppTaskBatchProcessor ConfigurationRebroadcastTaskProcessor { get; private set; }
 
+		private object _lock = new object();
 		/// <summary>
 		/// The task queue background operation manager for this application.
 		/// </summary>
-		protected TaskQueueBackgroundOperationManager TaskQueueBackgroundOperationManager { get; private set; }
+		protected TaskQueueBackgroundOperationManager TaskQueueBackgroundOperationManager
+		{
+			get
+			{
+				if (null != this.taskQueueBackgroundOperationManager)
+					return this.taskQueueBackgroundOperationManager;
+				lock (this._lock)
+				{
+					try
+					{
+						taskQueueBackgroundOperationManager =
+							taskQueueBackgroundOperationManager ?? new TaskQueueBackgroundOperationManager(this);
+					}
+					catch
+					{
+						// This may except if the vault is not yet started.
+						// Allow it to return null.
+					}
+					return taskQueueBackgroundOperationManager;
+				}
+			}
+			private set => taskQueueBackgroundOperationManager = value;
+		}
 
 		/// <inheritdoc />
 		public override string GetRebroadcastQueueId()
@@ -70,18 +95,6 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		}
 
 		#endregion
-
-		/// <inheritdoc />
-		protected override void StartApplication()
-		{
-			base.StartApplication();
-
-			// Instantiate the background operation manager.
-			this.TaskQueueBackgroundOperationManager = new TaskQueueBackgroundOperationManager
-			(
-				this
-			);
-		}
 
 		/// <inheritdoc />
 		protected override void UninitializeApplication(Vault vault)
