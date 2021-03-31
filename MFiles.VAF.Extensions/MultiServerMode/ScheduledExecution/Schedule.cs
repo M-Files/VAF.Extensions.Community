@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MFiles.VAF.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -12,6 +13,13 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 	public class Schedule
 	{
 		/// <summary>
+		/// Whether the schedule is currently enabled or not.
+		/// </summary>
+		[DataMember]
+		[JsonConfEditor(DefaultValue = true)]
+		public bool Enabled { get; set; } = true;
+
+		/// <summary>
 		/// The rules that should trigger the schedule to run.
 		/// </summary>
 		[DataMember]
@@ -24,6 +32,11 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 		/// <returns>The next execution time.</returns>
 		public DateTime? GetNextExecution(DateTime? after = null)
 		{
+			// If we are not enabled then die.
+			if (false == this.Enabled)
+				return null;
+			
+			// Get the next execution date from the triggers.
 			return this.Triggers?
 				.Select(t => t.GetNextExecution(after))
 				.Where(d => d.HasValue)

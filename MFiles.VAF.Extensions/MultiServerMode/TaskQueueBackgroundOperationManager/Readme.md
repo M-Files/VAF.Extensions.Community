@@ -19,22 +19,15 @@ using MFiles.VAF.MultiserverMode;
 namespace RecurringTask
 {
 	public class VaultApplication
+		// Important - from 1.2 onwards this base class will ensure that "this.TaskQueueBackgroundOperationManager"
+		// is available and populated as appropriate.  If you do not use this base class then you
+		// need to declare your own TaskQueueBackgroundOperationManager and ensure it is instantiated
+		// in StartApplication.
 		: MFiles.VAF.Extensions.MultiServerMode.ConfigurableVaultApplicationBase<Configuration>
 	{
-		/// <summary>
-		/// The task queue background operation manager for this application.
-		/// </summary>
-		protected TaskQueueBackgroundOperationManager TaskQueueBackgroundOperationManager { get; private set; }
-
 		/// <inheritdoc />
 		protected override void StartApplication()
 		{
-			// Instantiate the background operation manager.
-			this.TaskQueueBackgroundOperationManager = new TaskQueueBackgroundOperationManager
-			(
-				this
-			);
-
 			// Create a background operation that runs once every ten seconds.
 			this.TaskQueueBackgroundOperationManager.StartRecurringBackgroundOperation
 			(
@@ -76,13 +69,12 @@ using MFiles.VAF.MultiserverMode;
 namespace RecurringTask
 {
 	public class VaultApplication
+		// Important - from 1.2 onwards this base class will ensure that "this.TaskQueueBackgroundOperationManager"
+		// is available and populated as appropriate.  If you do not use this base class then you
+		// need to declare your own TaskQueueBackgroundOperationManager and ensure it is instantiated
+		// in StartApplication.
 		: MFiles.VAF.Extensions.MultiServerMode.ConfigurableVaultApplicationBase<Configuration>
 	{
-		/// <summary>
-		/// The task queue background operation manager for this application.
-		/// </summary>
-		protected TaskQueueBackgroundOperationManager TaskQueueBackgroundOperationManager { get; private set; }
-
 		/// <summary>
 		/// The background operation that can be run on demand.
 		/// </summary>
@@ -91,12 +83,6 @@ namespace RecurringTask
 		/// <inheritdoc />
 		protected override void StartApplication()
 		{
-			// Instantiate the background operation manager.
-			this.TaskQueueBackgroundOperationManager = new TaskQueueBackgroundOperationManager
-			(
-				this
-			);
-
 			// Create a background operation that can be run on demand.
 			this.MyBackgroundOperation = this.TaskQueueBackgroundOperationManager.CreateBackgroundOperation
 			(
@@ -144,14 +130,12 @@ using MFiles.VAF.MultiserverMode;
 namespace RecurringTask
 {
 	public class VaultApplication
+		// Important - from 1.2 onwards this base class will ensure that "this.TaskQueueBackgroundOperationManager"
+		// is available and populated as appropriate.  If you do not use this base class then you
+		// need to declare your own TaskQueueBackgroundOperationManager and ensure it is instantiated
+		// in StartApplication.
 		: MFiles.VAF.Extensions.MultiServerMode.ConfigurableVaultApplicationBase<Configuration>
 	{
-
-		/// <summary>
-		/// The task queue background operation manager for this application.
-		/// </summary>
-		protected TaskQueueBackgroundOperationManager TaskQueueBackgroundOperationManager { get; private set; }
-
 		/// <summary>
 		/// The background operation that can be run on demand.
 		/// </summary>
@@ -160,13 +144,6 @@ namespace RecurringTask
 		/// <inheritdoc />
 		protected override void StartApplication()
 		{
-			// Instantiate the background operation manager.
-			this.TaskQueueBackgroundOperationManager = new TaskQueueBackgroundOperationManager
-			(
-				this,
-				this.GetType().FullName.Replace(".", "-") + "-BackgroundOperations"
-			);
-
 			// Create a background operation that can be run on demand.
 			this.MyBackgroundOperation
 				= this.TaskQueueBackgroundOperationManager.CreateBackgroundOperation<ObjVerExTaskQueueDirective>
@@ -228,22 +205,15 @@ Multiple triggers can be provided to tailor exactly how the schedule should be c
 
 ```csharp
 public class VaultApplication
+	// Important - from 1.2 onwards this base class will ensure that "this.TaskQueueBackgroundOperationManager"
+	// is available and populated as appropriate.  If you do not use this base class then you
+	// need to declare your own TaskQueueBackgroundOperationManager and ensure it is instantiated
+	// in StartApplication.
     : MFiles.VAF.Extensions.MultiServerMode.ConfigurableVaultApplicationBase<Configuration>
 {
-    /// <summary>
-    /// The task queue background operation manager for this application.
-    /// </summary>
-    protected TaskQueueBackgroundOperationManager TaskQueueBackgroundOperationManager { get; private set; }
-
     /// <inheritdoc />
     protected override void StartApplication()
     {
-        // Instantiate the background operation manager.
-        this.TaskQueueBackgroundOperationManager = new TaskQueueBackgroundOperationManager
-        (
-            this
-        );
-
         // Create the schedule.
         var schedule = new MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution.Schedule();
         schedule.Triggers.Add
@@ -297,7 +267,11 @@ public class Configuration
 ```csharp
 // VaultApplication.cs
 public class VaultApplication
-	: MFiles.VAF.Extensions.Logging.ConfigurableVaultApplicationBase<Configuration>
+	// Important - from 1.2 onwards this base class will ensure that "this.TaskQueueBackgroundOperationManager"
+	// is available and populated as appropriate.  If you do not use this base class then you
+	// need to declare your own TaskQueueBackgroundOperationManager and ensure it is instantiated
+	// in StartApplication.
+	: MFiles.VAF.Extensions.MultiServerMode.ConfigurableVaultApplicationBase<Configuration>
 {
 	/// <summary>
 	/// The background operation that will be executed according to the configured schedule.

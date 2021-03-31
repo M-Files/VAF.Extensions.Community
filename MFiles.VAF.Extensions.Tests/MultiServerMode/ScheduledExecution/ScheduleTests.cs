@@ -13,6 +13,18 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 	public class ScheduleTests
 	{
 		[TestMethod]
+		public void ScheduleIsEnabledByDefault()
+		{
+			Assert.IsTrue(new Schedule().Enabled);
+		}
+
+		[TestMethod]
+		public void ScheduleTriggersAreNotNullByDefault()
+		{
+			Assert.IsNotNull(new Schedule().Triggers);
+		}
+
+		[TestMethod]
 		[DynamicData(nameof(GetNextExecutionData), DynamicDataSourceType.Method)]
 		public void GetNextExecution
 		(
@@ -26,6 +38,33 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 				expected,
 				new Schedule()
 				{
+					Enabled = true,
+					Triggers = triggers
+						.Select(t => new Trigger(t))
+						.Where(t => t != null)
+						.ToList()
+				}.GetNextExecution(after)
+			);
+		}
+
+		[TestMethod]
+		[DynamicData(nameof(GetNextExecutionData), DynamicDataSourceType.Method)]
+		public void GetNextExecution_NotEnabled
+		(
+			IEnumerable<TriggerBase> triggers,
+			DateTime? after,
+			DateTime? expected
+		)
+		{
+			// We use the same data as the GetNextExecution, but
+			// set the schedule to be disabled.
+			// In this case the next execution date should be
+			// overridden to be null in all cases.
+			Assert.IsNull
+			(
+				new Schedule()
+				{
+					Enabled = false,
 					Triggers = triggers
 						.Select(t => new Trigger(t))
 						.Where(t => t != null)
