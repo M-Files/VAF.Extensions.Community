@@ -9,7 +9,7 @@ namespace MFiles.VAF.Extensions.Dashboard
 		public MemberInfo MemberInfo { get; set; }
 		public object ParentObject { get; set; }
 
-		public string CommandId => $"{MemberInfo.ReflectedType?.FullName ?? string.Empty}.{MemberInfo.Name}";
+		public string CommandId => $"{MemberInfo.DeclaringType?.FullName ?? string.Empty}.{MemberInfo.Name}";
 
 		public TaskQueueBackgroundOperation GetValue()
 		{
