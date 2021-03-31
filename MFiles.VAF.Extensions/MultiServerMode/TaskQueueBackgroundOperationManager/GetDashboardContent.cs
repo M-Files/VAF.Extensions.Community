@@ -3,8 +3,10 @@ using MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using MFiles.VAF.Extensions.Dashboard;
 
 namespace MFiles.VAF.Extensions.MultiServerMode
 {
@@ -14,10 +16,21 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// Returns some dashboard content that shows the background operations and their current status.
 		/// </summary>
 		/// <returns>The dashboard content.</returns>
-		public virtual IEnumerable<DashboardListItem> GetDashboardContent()
+		public virtual IEnumerable<DashboardListItem> GetDashboardContent( List<DashboardBackgroundOperationConfiguration> runButtonConfigurations )
 		{
 			if (this.BackgroundOperations.Count > 0)
 			{
+				var configurationsByOperation = new Dictionary<TaskQueueBackgroundOperation, DashboardBackgroundOperationConfiguration>();
+
+				foreach( var c in runButtonConfigurations )
+				{
+					var backgroundOperation = c.GetValue();
+					if( backgroundOperation != null )
+					{
+						configurationsByOperation.Add( backgroundOperation, c );
+					}
+				}
+
 				// Output each background operation as a list item.
 				foreach (var kvp in this.BackgroundOperations)
 				{
@@ -32,7 +45,26 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 					};
 
 					// Output the schedule/interval data.
-					var htmlString = "Runs ";
+					var htmlString = string.Empty;
+
+					var matchingItem = configurationsByOperation.Keys
+						.FirstOrDefault( operation => operation.BackgroundOperationManager == this && operation.Name == kvp.Key );
+
+					if( matchingItem != null )
+					{
+						var config = configurationsByOperation[ matchingItem ];
+						var cmd = new DashboardDomainCommand
+						{
+							DomainCommandID = config.CommandId,
+							Title = config.Attribute.ButtonText,
+							Style = DashboardCommandStyle.Button,
+							Attributes = { { "style", "float:right" } }
+						};
+
+						htmlString += cmd.ToXmlString();
+					}
+
+					htmlString += "Runs ";
 					switch (kvp.Value.BackgroundOperation.RepeatType)
 					{
 						case TaskQueueBackgroundOperationRepeatType.NotRepeating:
