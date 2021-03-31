@@ -28,28 +28,36 @@ namespace RecurringTask
 		/// <inheritdoc />
 		protected override void StartApplication()
 		{
-			// Create a background operation that runs once every ten seconds.
-			this.TaskQueueBackgroundOperationManager.StartRecurringBackgroundOperation
-			(
-				"This is my background operation",
-				TimeSpan.FromSeconds(10),
-				(job) =>
-				{
-					SysUtils.ReportInfoToEventLog("Hello world");
+			try
+			{
+				// Create a background operation that runs once every ten seconds.
+				this.TaskQueueBackgroundOperationManager.StartRecurringBackgroundOperation
+				(
+					"This is my background operation",
+					TimeSpan.FromSeconds(10),
+					(job) =>
+					{
+						SysUtils.ReportInfoToEventLog("Hello world");
 					
-					// If your background job processing takes more than a few seconds then
-					// you should periodically report back its status:
-					this.TaskQueueBackgroundOperationManager.TaskProcessor.UpdateTaskInfo
-					(
-						job,
-						MFTaskState.MFTaskStateInProgress,
-						"The process is ongoing...",
-						false
-					);
+						// If your background job processing takes more than a few seconds then
+						// you should periodically report back its status:
+						this.TaskQueueBackgroundOperationManager.TaskProcessor.UpdateTaskInfo
+						(
+							job,
+							MFTaskState.MFTaskStateInProgress,
+							"The process is ongoing...",
+							false
+						);
 
-					// If you fail to do the above then the system may think that the task has
-					// aborted, and start it running a second time!
-				});
+						// If you fail to do the above then the system may think that the task has
+						// aborted, and start it running a second time!
+					}
+				);
+			}
+			catch(Exception e)
+			{
+				SysUtils.ReportErrorToEventLog("Exception starting background operations", e);
+			}
 		}
 
 	}
@@ -83,28 +91,35 @@ namespace RecurringTask
 		/// <inheritdoc />
 		protected override void StartApplication()
 		{
-			// Create a background operation that can be run on demand.
-			this.MyBackgroundOperation = this.TaskQueueBackgroundOperationManager.CreateBackgroundOperation
-			(
-				"My on-demand background operation",
-				(job) =>
-				{
-					SysUtils.ReportInfoToEventLog("I have been run on demand.");
+			try
+			{
+				// Create a background operation that can be run on demand.
+				this.MyBackgroundOperation = this.TaskQueueBackgroundOperationManager.CreateBackgroundOperation
+				(
+					"My on-demand background operation",
+					(job) =>
+					{
+						SysUtils.ReportInfoToEventLog("I have been run on demand.");
 					
-					// If your background job processing takes more than a few seconds then
-					// you should periodically report back its status:
-					this.TaskQueueBackgroundOperationManager.TaskProcessor.UpdateTaskInfo
-					(
-						job,
-						MFTaskState.MFTaskStateInProgress,
-						"The process is ongoing...",
-						false
-					);
+						// If your background job processing takes more than a few seconds then
+						// you should periodically report back its status:
+						this.TaskQueueBackgroundOperationManager.TaskProcessor.UpdateTaskInfo
+						(
+							job,
+							MFTaskState.MFTaskStateInProgress,
+							"The process is ongoing...",
+							false
+						);
 
-					// If you fail to do the above then the system may think that the task has
-					// aborted, and start it running a second time!
-				}
-			);
+						// If you fail to do the above then the system may think that the task has
+						// aborted, and start it running a second time!
+					}
+				);
+			}
+			catch(Exception e)
+			{
+				SysUtils.ReportErrorToEventLog("Exception starting background operations", e);
+			}
 		}
 
 		[StateAction("MyWorkflowState")]
@@ -144,30 +159,37 @@ namespace RecurringTask
 		/// <inheritdoc />
 		protected override void StartApplication()
 		{
-			// Create a background operation that can be run on demand.
-			this.MyBackgroundOperation
-				= this.TaskQueueBackgroundOperationManager.CreateBackgroundOperation<ObjVerExTaskQueueDirective>
-				(
-					"My on-demand background operation",
-					(job, directive) =>
-					{
-						var objVerEx = ObjVerEx.Parse(job.Vault, directive.ObjVerEx);
-						SysUtils.ReportInfoToEventLog($"I have been run on demand for object {objVerEx.Title}");
+			try
+			{
+				// Create a background operation that can be run on demand.
+				this.MyBackgroundOperation
+					= this.TaskQueueBackgroundOperationManager.CreateBackgroundOperation<ObjVerExTaskQueueDirective>
+					(
+						"My on-demand background operation",
+						(job, directive) =>
+						{
+							var objVerEx = ObjVerEx.Parse(job.Vault, directive.ObjVerEx);
+							SysUtils.ReportInfoToEventLog($"I have been run on demand for object {objVerEx.Title}");
 					
-						// If your background job processing takes more than a few seconds then
-						// you should periodically report back its status:
-						this.TaskQueueBackgroundOperationManager.TaskProcessor.UpdateTaskInfo
-						(
-							job,
-							MFTaskState.MFTaskStateInProgress,
-							"The process is ongoing...",
-							false
-						);
+							// If your background job processing takes more than a few seconds then
+							// you should periodically report back its status:
+							this.TaskQueueBackgroundOperationManager.TaskProcessor.UpdateTaskInfo
+							(
+								job,
+								MFTaskState.MFTaskStateInProgress,
+								"The process is ongoing...",
+								false
+							);
 
-						// If you fail to do the above then the system may think that the task has
-						// aborted, and start it running a second time!
-					}
-				);
+							// If you fail to do the above then the system may think that the task has
+							// aborted, and start it running a second time!
+						}
+					);
+			}
+			catch(Exception e)
+			{
+				SysUtils.ReportErrorToEventLog("Exception starting background operations", e);
+			}
 		}
 
 		[StateAction("MyWorkflowState")]
@@ -214,38 +236,45 @@ public class VaultApplication
     /// <inheritdoc />
     protected override void StartApplication()
     {
-        // Create the schedule.
-        var schedule = new MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution.Schedule();
-        schedule.Triggers.Add
-        (
-            // Run every day at the specified times.
-            new MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution.DailyTrigger()
-            {
-                TriggerTimes = new List<TriggerTime>
-                {
-                    new TimeSpan(09, 00, 00), // 9am
-                    new TimeSpan(14, 00, 00), // 2pm
-                    new TimeSpan(15, 00, 00), // 3pm
-                }
-            }
-        );
+		try
+		{
+			// Create the schedule.
+			var schedule = new MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution.Schedule();
+			schedule.Triggers.Add
+			(
+				// Run every day at the specified times.
+				new MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution.DailyTrigger()
+				{
+					TriggerTimes = new List<TriggerTime>
+					{
+						new TimeSpan(09, 00, 00), // 9am
+						new TimeSpan(14, 00, 00), // 2pm
+						new TimeSpan(15, 00, 00), // 3pm
+					}
+				}
+			);
 
-        // Create a background operation that runs according to the provided schedule.
-        this.TaskQueueBackgroundOperationManager.StartScheduledBackgroundOperation
-        (
-            "This is my scheduled background operation",
-            schedule,
-            (job) =>
-            {
-                var nextRunString = "NO FUTURE EXECUTIONS";
-                {
-                    var nextRun = schedule.GetNextExecution();
-                    if (nextRun.HasValue)
-                        nextRunString = nextRun.Value.ToString("O");
-                }
-                SysUtils.ReportInfoToEventLog($"Hello world, it is now {DateTime.UtcNow.ToString("O")} (re-scheduling for {nextRunString}).");
-            }
-        );
+			// Create a background operation that runs according to the provided schedule.
+			this.TaskQueueBackgroundOperationManager.StartScheduledBackgroundOperation
+			(
+				"This is my scheduled background operation",
+				schedule,
+				(job) =>
+				{
+					var nextRunString = "NO FUTURE EXECUTIONS";
+					{
+						var nextRun = schedule.GetNextExecution();
+						if (nextRun.HasValue)
+							nextRunString = nextRun.Value.ToString("O");
+					}
+					SysUtils.ReportInfoToEventLog($"Hello world, it is now {DateTime.UtcNow.ToString("O")} (re-scheduling for {nextRunString}).");
+				}
+			);
+		}
+		catch(Exception e)
+		{
+			SysUtils.ReportErrorToEventLog("Exception starting background operations", e);
+		}
     }
 }
 ```
@@ -281,31 +310,38 @@ public class VaultApplication
 	/// <inheritdoc />
 	protected override void StartApplication()
 	{
-		// Create a background operation.  This will be scheduled further down.
-		this.ScheduledBackgroundOperation = this.TaskQueueBackgroundOperationManager.CreateBackgroundOperation
-		(
-			"This is my scheduled background operation",
-			(job) =>
-			{
-				// This is the code which is run when the schedule is called.
-
-				// When is it next scheduled for?
-				var nextRun = this.Configuration?.SampleBackgroundOperationSchedule?.GetNextExecution();
-				if(false == nextRun.HasValue)
+		try
+		{
+			// Create a background operation.  This will be scheduled further down.
+			this.ScheduledBackgroundOperation = this.TaskQueueBackgroundOperationManager.CreateBackgroundOperation
+			(
+				"This is my scheduled background operation",
+				(job) =>
 				{
-					// No future executions scheduled.
-					SysUtils.ReportInfoToEventLog($"It is now {DateTime.UtcNow.ToString("O")}.  There are no future executions scheduled.")
-				}
-				else
-				{
-					// Is scheduled for nextRun.Value.
-					SysUtils.ReportInfoToEventLog($"Hello world, it is now {DateTime.UtcNow.ToString("O")} (re-scheduling for {nextRun.Value.ToString("O")}).");
-				}
-			}
-		);
+					// This is the code which is run when the schedule is called.
 
-		// Start the background operation, if there's a schedule.
-		this.ScheduleBackgroundOperation();
+					// When is it next scheduled for?
+					var nextRun = this.Configuration?.SampleBackgroundOperationSchedule?.GetNextExecution();
+					if(false == nextRun.HasValue)
+					{
+						// No future executions scheduled.
+						SysUtils.ReportInfoToEventLog($"It is now {DateTime.UtcNow.ToString("O")}.  There are no future executions scheduled.")
+					}
+					else
+					{
+						// Is scheduled for nextRun.Value.
+						SysUtils.ReportInfoToEventLog($"Hello world, it is now {DateTime.UtcNow.ToString("O")} (re-scheduling for {nextRun.Value.ToString("O")}).");
+					}
+				}
+			);
+
+			// Start the background operation, if there's a schedule.
+			this.ScheduleBackgroundOperation();
+		}
+		catch(Exception e)
+		{
+			SysUtils.ReportErrorToEventLog("Exception starting background operations", e);
+		}
 
 	}
 	
