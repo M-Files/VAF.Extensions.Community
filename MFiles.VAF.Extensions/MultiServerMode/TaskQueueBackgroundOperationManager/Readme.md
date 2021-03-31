@@ -257,7 +257,7 @@ public class VaultApplication
                     new TimeSpan(14, 00, 00), // 2pm
                     new TimeSpan(15, 00, 00), // 3pm
                 }
-            }.ToTrigger()
+            }
         );
 
         // Create a background operation that runs according to the provided schedule.
@@ -277,5 +277,87 @@ public class VaultApplication
             }
         );
     }
+}
+```
+
+### Exposing the schedule via configuration
+
+The `Schedule` object can be exposed via a standard Configuration object, allowing the user to configure the required schedule.
+
+```csharp
+// Configuration.cs
+[DataContract]
+public class Configuration
+{
+	[DataMember]
+	public Schedule SampleBackgroundOperationSchedule { get; set; } = new Schedule();
+}
+```
+
+```csharp
+// VaultApplication.cs
+public class VaultApplication
+	: MFiles.VAF.Extensions.Logging.ConfigurableVaultApplicationBase<Configuration>
+{
+	/// <summary>
+	/// The background operation that will be executed according to the configured schedule.
+	/// </summary>
+	protected TaskQueueBackgroundOperation ScheduledBackgroundOperation { get; private set; }
+
+	/// <inheritdoc />
+	protected override void StartApplication()
+	{
+		// Create a background operation.  This will be scheduled further down.
+		this.ScheduledBackgroundOperation = this.TaskQueueBackgroundOperationManager.CreateBackgroundOperation
+		(
+			"This is my scheduled background operation",
+			(job) =>
+			{
+				// This is the code which is run when the schedule is called.
+
+				// When is it next scheduled for?
+				var nextRun = this.Configuration?.SampleBackgroundOperationSchedule?.GetNextExecution();
+				if(false == nextRun.HasValue)
+				{
+					// No future executions scheduled.
+					SysUtils.ReportInfoToEventLog($"It is now {DateTime.UtcNow.ToString("O")}.  There are no future executions scheduled.")
+				}
+				else
+				{
+					// Is scheduled for nextRun.Value.
+					SysUtils.ReportInfoToEventLog($"Hello world, it is now {DateTime.UtcNow.ToString("O")} (re-scheduling for {nextRun.Value.ToString("O")}).");
+				}
+			}
+		);
+
+		// Start the background operation, if there's a schedule.
+		this.ScheduleBackgroundOperation();
+
+	}
+	
+	/// <inheritdoc />
+	protected override void OnConfigurationUpdated(IConfigurationRequestContext context, ClientOperations clientOps, Configuration oldConfiguration)
+	{
+		// Call any base implementation.,
+		base.OnConfigurationUpdated(context, clientOps, oldConfiguration);
+		
+		// Start the background operation, if there's a schedule.
+		this.ScheduleBackgroundOperation();
+	}
+
+	/// <summary>
+	/// Stops any existing future executions,
+	/// then re-schedules according to the configured schedule
+	/// if appropriate.
+	/// </summary>
+	protected void ScheduleBackgroundOperation()
+	
+		// Stop any scheduled future executions.
+		this.ScheduledBackgroundOperation.CancelFutureExecutions();
+
+		// If we have a schedule then re-schedule.
+		if (null != this.Configuration.SampleBackgroundOperationSchedule)
+			this.ScheduledBackgroundOperation.RunOnSchedule(this.Configuration.SampleBackgroundOperationSchedule);
+	}
 }
 ```

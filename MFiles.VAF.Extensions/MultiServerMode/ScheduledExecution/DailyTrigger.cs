@@ -61,15 +61,15 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 		}
 
 		/// <summary>
-		/// Returns this trigger as a generic trigger for serialisation.
+		/// Automatically converts <paramref name="trigger"/> to a <see cref="Trigger"/>.
 		/// </summary>
-		/// <returns>The trigger.</returns>
-		public virtual Trigger ToTrigger()
+		/// <param name="trigger">The trigger to convert.</param>
+		public static implicit operator Trigger(DailyTrigger triggerConfiguration)
 		{
-			return new Trigger(ScheduleTriggerType.Daily)
-			{
-				DailyTriggerConfiguration = this
-			};
+			// Sanity.
+			if (null == triggerConfiguration)
+				throw new ArgumentNullException(nameof(triggerConfiguration));
+			return new Trigger(triggerConfiguration);
 		}
 
 	}

@@ -160,17 +160,5 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 
 			return $"On the {string.Join(", ", this.TriggerDays)} of the month at the following times: {string.Join(", ", this.TriggerTimes.Select(t => t.ToString()))}.";
 		}
-
-		/// <summary>
-		/// Returns this trigger as a generic trigger for serialisation.
-		/// </summary>
-		/// <returns>The trigger.</returns>
-		public override Trigger ToTrigger()
-		{
-			return new Trigger(ScheduleTriggerType.Monthly)
-			{
-				DayOfMonthTriggerConfiguration = this
-			};
-		}
 	}
 }

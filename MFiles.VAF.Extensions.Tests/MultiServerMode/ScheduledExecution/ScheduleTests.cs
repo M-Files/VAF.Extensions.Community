@@ -27,7 +27,7 @@ namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
 				new Schedule()
 				{
 					Triggers = triggers
-						.Select(t => Trigger.FromTriggerBase(t))
+						.Select(t => new Trigger(t))
 						.Where(t => t != null)
 						.ToList()
 				}.GetNextExecution(after)

@@ -92,27 +92,36 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
 		{
 			this.Type = type;
 		}
-
-		internal static Trigger FromTriggerBase(TriggerBase trigger)
+		public Trigger(TriggerBase triggerBase)
+			: this()
 		{
-			switch (trigger.Type)
+			// Sanity.
+			if (null == triggerBase)
+				throw new ArgumentNullException(nameof(triggerBase));
+
+			// Note the order here is important, as some of the trigger configurations inherit from others.
+			if (triggerBase is DayOfMonthTrigger monthlyTrigger)
 			{
-				case ScheduleTriggerType.Daily:
-					{
-						return ((DailyTrigger)trigger).ToTrigger();
-					}
-				case ScheduleTriggerType.Weekly:
-					{
-						return ((WeeklyTrigger)trigger).ToTrigger();
-					}
-				case ScheduleTriggerType.Monthly:
-					{
-						return ((DayOfMonthTrigger)trigger).ToTrigger();
-					}
-				case ScheduleTriggerType.Unknown:
-				default:
-					return null;
+				this.Type = ScheduleTriggerType.Monthly;
+				this.DayOfMonthTriggerConfiguration = monthlyTrigger;
 			}
+			else if (triggerBase is WeeklyTrigger weeklyTrigger)
+			{
+				this.Type = ScheduleTriggerType.Weekly;
+				this.WeeklyTriggerConfiguration = weeklyTrigger;
+			}
+			else if (triggerBase is DailyTrigger dailyTrigger)
+			{
+				this.Type = ScheduleTriggerType.Daily;
+				this.DailyTriggerConfiguration = dailyTrigger;
+			}
+			else
+				throw new ArgumentException
+				(
+					$"Trigger configuration type {triggerBase.GetType().FullName} was not supported", 
+					nameof(triggerBase)
+				);
+
 		}
 	}
 	public abstract class TriggerBase
