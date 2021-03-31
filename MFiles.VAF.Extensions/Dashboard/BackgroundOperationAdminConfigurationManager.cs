@@ -46,9 +46,8 @@ namespace MFiles.VAF.Extensions.Dashboard
 
 			if( configuration != null )
 			{
-				// TODO: this likely needs work
-				var propertyValue = ( (PropertyInfo) configuration.MemberInfo ).GetValue( this.VaultApplication );
-				if( propertyValue is TaskQueueBackgroundOperation backgroundOperation )
+				var backgroundOperation = configuration.GetValue();
+				if( backgroundOperation != null )
 				{
 					backgroundOperation.RunOnce();
 				}

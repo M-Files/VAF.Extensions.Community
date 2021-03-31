@@ -18,7 +18,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 	public abstract partial class ConfigurableVaultApplicationBase<TSecureConfiguration>
 	{
 		// TODO: remove commented code, just indicating usage example
-		//[BackgroundOperationTriggerableByDashboard( LabelText = "Label", ButtonText = "Run", Name = "Process Stuff" )]
+		//[ShowRunCommandOnDashboardAttribute( LabelText = "Label", ButtonText = "Run", Name = "Process Stuff" )]
 		//protected TaskQueueBackgroundOperation ProcessStuffBackgroundOperation { get; private set; }
 
 		protected override AdminConfigurationManager CreateAdminConfigurationManager()
@@ -45,9 +45,9 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 
 			// Do we have any background operations content?
 			// TODO: clean this up, confusing with the above, this one is for running operations above is for showing schedule...might want to merge them
-			var backgroundOperationsDashboardContent = this.GetBackgroundOperationsDashboardContent();
-			if( null != backgroundOperationsDashboardContent )
-				dashboard.AddContent( backgroundOperationsDashboardContent );
+			//var backgroundOperationsDashboardContent = this.GetBackgroundOperationsDashboardContent();
+			//if( null != backgroundOperationsDashboardContent )
+			//	dashboard.AddContent( backgroundOperationsDashboardContent );
 
 			// Return the dashboard.
 			return dashboard.ToString();
@@ -63,7 +63,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			var list = new DashboardList();
 			foreach (var manager in this.GetTaskQueueBackgroundOperationManagers() ?? new TaskQueueBackgroundOperationManager[0])
 			{
-				var listItems = manager.GetDashboardContent();
+				var listItems = manager.GetDashboardContent( this.GetBackgroundOperationsForDashboard() );
 				if (null == listItems)
 					continue;
 				list.Items.AddRange(listItems);
@@ -151,19 +151,19 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			// TODO: shouldn't be this...and may need bindingAttrs
 			foreach( var propertyInfo in this.GetType().GetProperties( BindingFlags.Instance | BindingFlags.NonPublic ) )
 			{
-				var attr = propertyInfo.GetCustomAttribute<BackgroundOperationTriggerableByDashboardAttribute>();
+				var attr = propertyInfo.GetCustomAttribute<ShowRunCommandOnDashboardAttribute>();
 				if( attr != null )
 				{
-					this.backgroundOperationsForDashboard.Add( new DashboardBackgroundOperationConfiguration { Attribute = attr, MemberInfo = propertyInfo } );
+					this.backgroundOperationsForDashboard.Add( new DashboardBackgroundOperationConfiguration { Attribute = attr, MemberInfo = propertyInfo, ParentObject = this } );
 				}
 			}
 
 			foreach( var fieldInfo in this.GetType().GetFields() )
 			{
-				var attr = fieldInfo.GetCustomAttribute<BackgroundOperationTriggerableByDashboardAttribute>();
+				var attr = fieldInfo.GetCustomAttribute<ShowRunCommandOnDashboardAttribute>();
 				if( attr != null )
 				{
-					this.backgroundOperationsForDashboard.Add( new DashboardBackgroundOperationConfiguration { Attribute = attr, MemberInfo = fieldInfo } );
+					this.backgroundOperationsForDashboard.Add( new DashboardBackgroundOperationConfiguration { Attribute = attr, MemberInfo = fieldInfo, ParentObject = this } );
 				}
 			}
 
