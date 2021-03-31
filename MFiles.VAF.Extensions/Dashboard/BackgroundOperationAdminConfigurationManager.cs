@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using MFiles.VAF.AdminConfigurations;
 using MFiles.VAF.Common;
 using MFiles.VAF.Configuration.AdminConfigurations;
+using MFiles.VAF.Configuration.Domain;
 using MFiles.VAF.Configuration.Interfaces.Domain;
-using MFiles.VAF.Extensions.MultiServerMode;
 using MFilesAPI;
 
 namespace MFiles.VAF.Extensions.Dashboard
@@ -15,7 +13,11 @@ namespace MFiles.VAF.Extensions.Dashboard
 	{
 		private readonly List<DashboardBackgroundOperationConfiguration> configurations;
 
-		public BackgroundOperationAdminConfigurationManager( VaultApplicationBase vaultApplication, List<DashboardBackgroundOperationConfiguration> configurations, string rootNamespace = null, string proxyMethod = "AdminConfigurationRequest" )
+		public BackgroundOperationAdminConfigurationManager(
+			VaultApplicationBase vaultApplication,
+			List<DashboardBackgroundOperationConfiguration> configurations,
+			string rootNamespace = null,
+			string proxyMethod = "AdminConfigurationRequest" )
 			: base( vaultApplication, rootNamespace, proxyMethod )
 		{
 			this.configurations = configurations;
@@ -30,7 +32,7 @@ namespace MFiles.VAF.Extensions.Dashboard
 				this.VaultApplication.AddVaultExtensionMethod(
 					configuration.CommandId,
 					new VaultExtensionMethodInfo(
-						this.GetType().GetMethod( nameof( ProcessCall ) ),
+						this.GetType().GetMethod( nameof(ProcessCall) ),
 						this,
 						MFVaultAccess.MFVaultAccessChangeFullControlRole,
 						false ) );
@@ -39,19 +41,10 @@ namespace MFiles.VAF.Extensions.Dashboard
 
 		public string ProcessCall( EventHandlerEnvironment env )
 		{
-			Trace.TraceInformation( "TempDebugAdminConfigurationManager.ProcessCall + " + env.Input );
-
 			var commandId = env.InputParams[ 0 ];
 			var configuration = this.configurations.FirstOrDefault( c => c.CommandId == commandId );
-
-			if( configuration != null )
-			{
-				var backgroundOperation = configuration.GetValue();
-				if( backgroundOperation != null )
-				{
-					backgroundOperation.RunOnce();
-				}
-			}
+			var backgroundOperation = configuration?.GetValue();
+			backgroundOperation?.RunOnce();
 
 			return string.Empty;
 		}
@@ -62,10 +55,37 @@ namespace MFiles.VAF.Extensions.Dashboard
 
 			foreach( var configuration in this.configurations )
 			{
-				result.Add( this.VaultApplication.CreateConfigurationDomainCommand( configuration.CommandId, configuration.CommandId ) );
+				result.Add( CreateConfigurationDomainCommand( configuration.CommandId, configuration.CommandId ) );
 			}
 
 			return result;
+		}
+
+		public ConfigurationDomainCommand CreateConfigurationDomainCommand(
+			string commandId,
+			string extMethod,
+			params object[] additionalParameters
+		)
+		{
+			var commandParams = new List<object> { extMethod };
+			if( additionalParameters != null && additionalParameters.Length > 0 )
+			{
+				commandParams.AddRange( additionalParameters );
+			}
+
+			var extMethodCall = new VaultExtensionMethodCall
+			{
+				Method = $"{this.VaultApplication.GetType().Namespace}.{nameof(MFEventHandlerType.MFEventHandlerVaultExtensionMethod)}",
+				Params = commandParams.ToArray()
+			};
+			var extMethodSrc = new VaultExtensionMethodSource { Read = extMethodCall };
+			var extMethodSrcDef = new MethodSourceDefinition( extMethodSrc );
+
+			return new ConfigurationDomainCommand
+			{
+				ID = commandId,
+				ExtensionMethod = extMethodSrcDef
+			};
 		}
 	}
 }
