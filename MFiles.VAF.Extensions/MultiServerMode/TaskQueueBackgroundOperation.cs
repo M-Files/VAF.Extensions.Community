@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using MFiles.VAF.Common;
 using MFiles.VAF.Common.ApplicationTaskQueue;
+using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution;
 using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
@@ -112,6 +113,11 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 
 	public class TaskQueueBackgroundOperation
 	{
+		/// <summary>
+		/// The command to run this via the dashboard (null if not set).
+		/// </summary>
+		public CustomDomainCommand RunCommand { get; set; }
+
 		/// <summary>
 		/// The task type for this background operation.
 		/// </summary>

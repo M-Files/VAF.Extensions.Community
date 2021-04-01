@@ -42,7 +42,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		{
 			// Add each manager's data in turn.
 			var list = new DashboardList();
-			foreach (var manager in this.GetTaskQueueBackgroundOperationManagers() ?? new TaskQueueBackgroundOperationManager[0])
+			var taskQueueBackgroundOperationManagers = this.GetType().GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager>(this);
+			foreach (var manager in taskQueueBackgroundOperationManagers)
 			{
 				var listItems = manager.GetDashboardContent();
 				if (null == listItems)
@@ -71,52 +72,6 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 					new DashboardCustomContent($"<em>Time on server: {DateTime.Now.ToLocalTime().ToString("HH:mm:ss")}</em>")
 				}
 			};
-		}
-
-		/// <summary>
-		/// Returns <see cref="TaskQueueBackgroundOperationManager"/> instances declared on properties and fields
-		/// on this instance.
-		/// </summary>
-		/// <returns>A collection of background operation managers.</returns>
-		protected virtual IEnumerable<TaskQueueBackgroundOperationManager> GetTaskQueueBackgroundOperationManagers()
-		{
-			var taskQueueBackgroundOperationManagerType = typeof(TaskQueueBackgroundOperationManager);
-			TaskQueueBackgroundOperationManager value = null;
-
-			// Get all properties.
-			foreach (var p in this.GetType().GetProperties(System.Reflection.BindingFlags.Instance
-				 | System.Reflection.BindingFlags.FlattenHierarchy
-				 | System.Reflection.BindingFlags.Public
-				 | System.Reflection.BindingFlags.NonPublic)
-				.Where(p => p.CanRead && taskQueueBackgroundOperationManagerType.IsAssignableFrom(p.PropertyType)))
-			{
-				value = null;
-				try
-				{
-					value = p.GetValue(this) as TaskQueueBackgroundOperationManager;
-				}
-				catch { }
-				if (null != value)
-					yield return value;
-			}
-
-			// Get all fields.
-			foreach (var f in this.GetType().GetFields(System.Reflection.BindingFlags.Instance
-				 | System.Reflection.BindingFlags.FlattenHierarchy
-				 | System.Reflection.BindingFlags.Public
-				 | System.Reflection.BindingFlags.NonPublic)
-				.Where(f => !f.Name.EndsWith("_BackingField")  // Ignore backing fields for properties otherwise we report twice.
-				&& taskQueueBackgroundOperationManagerType.IsAssignableFrom(f.FieldType)))
-			{
-				value = null;
-				try
-				{
-					value = f.GetValue(this) as TaskQueueBackgroundOperationManager;
-				}
-				catch { }
-				if (null != value)
-					yield return value;
-			}
 		}
 	}
 }
