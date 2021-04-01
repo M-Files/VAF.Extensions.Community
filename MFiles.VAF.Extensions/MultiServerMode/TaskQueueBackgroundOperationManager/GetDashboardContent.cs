@@ -66,7 +66,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 					else
 					{
 						htmlString += !kvp.Value.NextRun.HasValue
-							? "The background operation is not scheduled to run again."
+							? "The background operation is not scheduled to run again.<br />"
 							: $"Next run is {kvp.Value.NextRun.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.NextRun)}.<br />";
 						if (kvp.Value.LastRun.HasValue)
 						{
