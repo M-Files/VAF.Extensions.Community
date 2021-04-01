@@ -53,9 +53,14 @@ namespace MFiles.VAF.Extensions
 					continue;
 
 				// Set up the command.
+				var id =
+				(
+					backgroundOperation.BackgroundOperationManager.QueueId
+					+ backgroundOperation.Name
+				).GetHashCode();
 				var command = new CustomDomainCommand()
 				{
-					ID = $"cmdRunBackgroundOperation-{backgroundOperation.Name.GetHashCode()}",
+					ID = $"cmdRunBackgroundOperation-{id}",
 					DisplayName = attribute.ButtonText,
 					Execute = (c, o) =>
 					{
