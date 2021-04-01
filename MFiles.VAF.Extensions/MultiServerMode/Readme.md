@@ -12,6 +12,7 @@ This base class also adds additional functionality:
 
 * Creates and exposes a `TaskQueueBackgroundOperationManager` for use within your vault application.  This is automatically instantiated when needed, but do not call it before the `StartApplication` method otherwise it may return null.
 * Automatically displays your `TaskQueueBackgroundOperation` instances (created through the above instance) in the [dashboard](https://developer.m-files.com/Frameworks/Vault-Application-Framework/Configuration/Custom-Dashboards/).  If you are rendering your own dashboard then you can create the required panel by calling `base.GetBackgroundOperationDashboardContent` and inserting it as appropriate into your dashboard.
+* If the `ShowRunCommandOnDashboard` attribute [is used](TaskQueueBackgroundOperationManager#allowing-the-user-to-run-the-background-operation-via-the-dashboard), then provides a "Run now" button that the user can use to execute the background operation.
 
 ![An image showing a sample dashboard with a list of background operations and their current status](sample-dashboard.png)
 
