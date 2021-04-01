@@ -19,7 +19,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		public string ButtonText { get; set; }
 		public string Message { get; set; } = "The background operation has been scheduled to run.";
 
-		public ShowRunCommandOnDashboardAttribute(string buttonText = "Run")
+		public ShowRunCommandOnDashboardAttribute(string buttonText = "Run now")
 		{
 			ButtonText = buttonText;
 		}

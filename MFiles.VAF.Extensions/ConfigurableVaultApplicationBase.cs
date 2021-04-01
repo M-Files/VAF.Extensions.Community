@@ -3,6 +3,7 @@ using MFiles.VAF.Common.ApplicationTaskQueue;
 using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Core;
+using MFiles.VAF.Extensions.MultiServerMode;
 using MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods;
 using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
@@ -10,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MFiles.VAF.Extensions.MultiServerMode
+namespace MFiles.VAF.Extensions
 {
 	/// <summary>
 	/// A base class that automatically implements the pattern required for broadcasting

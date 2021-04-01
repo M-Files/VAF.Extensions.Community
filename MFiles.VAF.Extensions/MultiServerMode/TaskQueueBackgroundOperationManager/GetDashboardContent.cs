@@ -29,9 +29,6 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 						}
 					};
 
-					// Output the schedule/interval data.
-					var htmlString = string.Empty;
-
 					// If this background operation has a run command then render it.
 					if (kvp.Value.BackgroundOperation.RunCommand != null)
 					{
@@ -39,14 +36,12 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 						{
 							DomainCommandID = kvp.Value.BackgroundOperation.RunCommand.ID,
 							Title = kvp.Value.BackgroundOperation.RunCommand.DisplayName,
-							Style = DashboardCommandStyle.Button,
-							Attributes = { { "style", "float:right" } }
+							Style = DashboardCommandStyle.Link
 						};
-
-						htmlString += cmd.ToXmlString();
+						listItem.Commands.Add(cmd);
 					}
 
-					htmlString += "Runs ";
+					var htmlString = "Runs ";
 					switch (kvp.Value.BackgroundOperation.RepeatType)
 					{
 						case TaskQueueBackgroundOperationRepeatType.NotRepeating:
