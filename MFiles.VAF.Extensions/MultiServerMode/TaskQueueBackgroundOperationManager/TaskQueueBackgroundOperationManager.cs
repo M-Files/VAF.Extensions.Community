@@ -287,6 +287,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				// Mark the background operation as running.
 				bo.Status = TaskQueueBackgroundOperationStatus.Running;
 				bo.LastRun = DateTime.UtcNow;
+				bo.NextRun = null;
 
 				// Delegate to the background operation.
 				bo.BackgroundOperation.RunJob(job, dir);
