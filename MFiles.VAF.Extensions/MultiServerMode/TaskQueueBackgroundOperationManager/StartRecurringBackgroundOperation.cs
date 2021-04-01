@@ -11,19 +11,22 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="name">The name of the operation.</param>
 		/// <param name="interval">The target interval between method calls. If the method call takes longer than the interval, the method will be invoked immediately after the previous method call returns.</param>
 		/// <param name="method">The method to invoke at given intervals.</param>
+		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <returns>A scheduled background operation.</returns>
 		public TaskQueueBackgroundOperation StartRecurringBackgroundOperation
 		(
 			string name,
 			TimeSpan interval,
-			Action method
+			Action method,
+			BackgroundOperationDashboardDisplayOptions options = null
 		)
 		{
 			return this.StartRecurringBackgroundOperation
 			(
 				name,
 				interval,
-				(j, d) => method()
+				(j, d) => method(),
+				options: options
 			);
 		}
 
@@ -33,19 +36,22 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="name">The name of the operation.</param>
 		/// <param name="interval">The target interval between method calls. If the method call takes longer than the interval, the method will be invoked immediately after the previous method call returns.</param>
 		/// <param name="method">The method to invoke at given intervals.</param>
+		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <returns>A scheduled background operation.</returns>
 		public TaskQueueBackgroundOperation StartRecurringBackgroundOperation
 		(
 			string name,
 			TimeSpan interval,
-			Action<TaskProcessorJob> method
+			Action<TaskProcessorJob> method,
+			BackgroundOperationDashboardDisplayOptions options = null
 		)
 		{
 			return this.StartRecurringBackgroundOperation
 			(
 				name,
 				interval,
-				(j, d) => method(j)
+				(j, d) => method(j),
+				options: options
 			);
 		}
 
@@ -56,13 +62,15 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="interval">The target interval between method calls. If the method call takes longer than the interval, the method will be invoked immediately after the previous method call returns.</param>
 		/// <param name="method">The method to invoke at given intervals.</param>
 		/// <param name="directive">The directive to pass to the job.</param>
+		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <returns>A started background operation.</returns>
 		public TaskQueueBackgroundOperation StartRecurringBackgroundOperation
 		(
 			string name,
 			TimeSpan interval,
 			Action<TaskProcessorJob, TaskQueueDirective> method,
-			TaskQueueDirective directive = null
+			TaskQueueDirective directive = null,
+			BackgroundOperationDashboardDisplayOptions options = null
 		)
 		{
 			return this.StartRecurringBackgroundOperation<TaskQueueDirective>
@@ -70,7 +78,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				name,
 				interval,
 				method,
-				directive
+				directive,
+				options
 			);
 		}
 
@@ -81,13 +90,15 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="interval">The target interval between method calls. If the method call takes longer than the interval, the method will be invoked immediately after the previous method call returns.</param>
 		/// <param name="method">The method to invoke at given intervals.</param>
 		/// <param name="directive">The directive to pass to the job.</param>
+		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <returns>A started background operation.</returns>
 		public TaskQueueBackgroundOperation<TDirective> StartRecurringBackgroundOperation<TDirective>
 		(
 			string name,
 			TimeSpan interval,
 			Action<TaskProcessorJob, TDirective> method,
-			TDirective directive = null
+			TDirective directive = null,
+			BackgroundOperationDashboardDisplayOptions options = null
 		)
 			where TDirective : TaskQueueDirective
 		{
@@ -95,7 +106,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			var backgroundOperation = this.CreateBackgroundOperation
 			(
 				name,
-				method
+				method,
+				options
 			);
 
 			// Start it running.

@@ -34,15 +34,58 @@ namespace MFiles.VAF.Extensions
 		/// <returns></returns>
 		public virtual IEnumerable<CustomDomainCommand> GetTaskQueueBackgroundOperationRunCommands()
 		{
-			// Get the background operation and attributes.
-			var items = this.GetType()
-				.GetPropertiesAndFieldsOfTypeWithAttribute<TaskQueueBackgroundOperation, ShowRunCommandOnDashboardAttribute>
-				(
-				this
-				);
+			// Create a list for our items.
+			var list = new List<Tuple<TaskQueueBackgroundOperation, ShowRunCommandOnDashboardAttribute[]>>();
+
+			// Get the background operations that have been explicitly marked as runnable.
+			var taskQueueBackgroundOperationManagers = this
+				.GetType()
+				.GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager>(this);
+			foreach (var m in taskQueueBackgroundOperationManagers)
+			{
+				foreach (var bo in m.BackgroundOperations)
+				{
+					// If we don't have a background operation, or it's not been marked as runnable then skip.
+					if (null == bo.Value?.BackgroundOperation)
+						continue;
+					if (false == (bo.Value.BackgroundOperation.DashboardDisplayOptions?.ShowRunCommandInDashboard ?? false))
+						continue;
+
+					// Add this background operation to the list.
+					list.Add
+					(
+						new Tuple<TaskQueueBackgroundOperation, ShowRunCommandOnDashboardAttribute[]>
+						(
+							bo.Value.BackgroundOperation,
+							new[]
+							{
+								// Create an attribute for us to use.
+								new ShowRunCommandOnDashboardAttribute()
+								{
+									ButtonText = bo.Value.BackgroundOperation.DashboardDisplayOptions.RunCommandText
+										?? BackgroundOperationDashboardDisplayOptions.DefaultRunCommandText,
+									Message = bo.Value.BackgroundOperation.DashboardDisplayOptions.RunCommandMessageText
+										?? BackgroundOperationDashboardDisplayOptions.DefaultRunCommandMessageText,
+								}
+							}
+						)
+					);
+				}
+			}
+
+			// Get the background operations that have been marked as runnable via an attribute.
+			list.AddRange
+			(
+				this.GetType()
+					.GetPropertiesAndFieldsOfTypeWithAttribute<TaskQueueBackgroundOperation, ShowRunCommandOnDashboardAttribute>
+					(
+					this
+					)
+					.AsEnumerable()
+			);
 
 			// Set up the commands.
-			foreach (var tuple in items)
+			foreach (var tuple in list.DistinctBy(t => t.Item1.ID))
 			{
 				// Load the data and die if not valid.
 				var backgroundOperation = tuple.Item1;
@@ -53,14 +96,9 @@ namespace MFiles.VAF.Extensions
 					continue;
 
 				// Set up the command.
-				var id =
-				(
-					backgroundOperation.BackgroundOperationManager.QueueId
-					+ backgroundOperation.Name
-				).GetHashCode();
 				var command = new CustomDomainCommand()
 				{
-					ID = $"cmdRunBackgroundOperation-{id}",
+					ID = $"cmdRunBackgroundOperation-{backgroundOperation.ID.ToString("N")}",
 					DisplayName = attribute.ButtonText,
 					Execute = (c, o) =>
 					{

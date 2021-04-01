@@ -19,6 +19,10 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				// Output each background operation as a list item.
 				foreach (var kvp in this.BackgroundOperations)
 				{
+					// If we should not show it then skip.
+					if (false == (kvp.Value.BackgroundOperation?.DashboardDisplayOptions?.ShowBackgroundOperationInDashboard ?? false))
+						continue;
+
 					// Create the (basic) list item.
 					var listItem = new DashboardListItem()
 					{

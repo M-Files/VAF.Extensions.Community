@@ -10,17 +10,20 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// </summary>
 		/// <param name="name">The name of the operation.</param>
 		/// <param name="method">The method to invoke at given intervals.</param>
+		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <returns>A new background operation, that is not yet started.</returns>
 		public TaskQueueBackgroundOperation CreateBackgroundOperation
 		(
 			string name,
-			Action method
+			Action method,
+			BackgroundOperationDashboardDisplayOptions options = null
 		)
 		{
 			return this.CreateBackgroundOperation
 			(
 				name,
-				(j, d) => method()
+				(j, d) => method(),
+				options
 			);
 		}
 
@@ -29,17 +32,20 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// </summary>
 		/// <param name="name">The name of the operation.</param>
 		/// <param name="method">The method to invoke at given intervals.</param>
+		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <returns>A new background operation, that is not yet started.</returns>
 		public TaskQueueBackgroundOperation CreateBackgroundOperation
 		(
 			string name,
-			Action<TaskProcessorJob> method
+			Action<TaskProcessorJob> method,
+			BackgroundOperationDashboardDisplayOptions options = null
 		)
 		{
 			return this.CreateBackgroundOperation
 			(
 				name,
-				(j, d) => method(j)
+				(j, d) => method(j),
+				options
 			);
 		}
 
@@ -48,17 +54,20 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// </summary>
 		/// <param name="name">The name of the operation.</param>
 		/// <param name="method">The method to invoke at given intervals.</param>
+		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <returns>A new background operation, that is not yet started.</returns>
 		public TaskQueueBackgroundOperation CreateBackgroundOperation
 		(
 			string name,
-			Action<TaskProcessorJob, TaskQueueDirective> method
+			Action<TaskProcessorJob, TaskQueueDirective> method,
+			BackgroundOperationDashboardDisplayOptions options = null
 		)
 		{
 			return this.CreateBackgroundOperation<TaskQueueDirective>
 			(
 				name,
-				method
+				method,
+				options
 			);
 		}
 
@@ -67,11 +76,13 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// </summary>
 		/// <param name="name">The name of the operation.</param>
 		/// <param name="method">The method to invoke at given intervals.</param>
+		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <returns>A new background operation, that is not yet started.</returns>
 		public TaskQueueBackgroundOperation<TDirective> CreateBackgroundOperation<TDirective>
 		(
 			string name,
-			Action<TaskProcessorJob, TDirective> method
+			Action<TaskProcessorJob, TDirective> method,
+			BackgroundOperationDashboardDisplayOptions options = null
 		)
 			where TDirective : TaskQueueDirective
 		{
@@ -90,7 +101,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 					this,
 					name,
 					method,
-					this.CancellationTokenSource
+					this.CancellationTokenSource,
+					options
 				);
 
 				// Add it to the dictionary.

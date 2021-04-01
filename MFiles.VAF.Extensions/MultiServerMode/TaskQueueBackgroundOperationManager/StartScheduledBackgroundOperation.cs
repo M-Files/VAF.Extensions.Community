@@ -18,14 +18,16 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		(
 			string name,
 			Schedule schedule,
-			Action method
+			Action method,
+			BackgroundOperationDashboardDisplayOptions options = null
 		)
 		{
 			return this.StartScheduledBackgroundOperation
 			(
 				name,
 				schedule,
-				(j, d) => method()
+				(j, d) => method(),
+				options: options
 			);
 		}
 
@@ -41,14 +43,16 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		(
 			string name,
 			Schedule schedule,
-			Action<TaskProcessorJob> method
+			Action<TaskProcessorJob> method,
+			BackgroundOperationDashboardDisplayOptions options = null
 		)
 		{
 			return this.StartScheduledBackgroundOperation
 			(
 				name,
 				schedule,
-				(j, d) => method(j)
+				(j, d) => method(j),
+				options: options
 			);
 		}
 
@@ -66,7 +70,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			string name,
 			Schedule schedule,
 			Action<TaskProcessorJob, TaskQueueDirective> method,
-			TaskQueueDirective directive = null
+			TaskQueueDirective directive = null,
+			BackgroundOperationDashboardDisplayOptions options = null
 		)
 		{
 			return this.StartScheduledBackgroundOperation<TaskQueueDirective>
@@ -74,7 +79,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 				name,
 				schedule,
 				method,
-				directive
+				directive,
+				options
 			);
 		}
 
@@ -92,7 +98,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			string name,
 			Schedule schedule,
 			Action<TaskProcessorJob, TDirective> method,
-			TDirective directive = null
+			TDirective directive = null,
+			BackgroundOperationDashboardDisplayOptions options = null
 		)
 			where TDirective : TaskQueueDirective
 		{
@@ -100,7 +107,8 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			var backgroundOperation = this.CreateBackgroundOperation
 			(
 				name,
-				method
+				method,
+				options
 			);
 
 			// Start it running.

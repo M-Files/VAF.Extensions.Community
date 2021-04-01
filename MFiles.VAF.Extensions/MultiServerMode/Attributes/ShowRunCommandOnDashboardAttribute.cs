@@ -17,9 +17,9 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 	public class ShowRunCommandOnDashboardAttribute : Attribute
 	{
 		public string ButtonText { get; set; }
-		public string Message { get; set; } = "The background operation has been scheduled to run.";
+		public string Message { get; set; } = BackgroundOperationDashboardDisplayOptions.DefaultRunCommandMessageText;
 
-		public ShowRunCommandOnDashboardAttribute(string buttonText = "Run now")
+		public ShowRunCommandOnDashboardAttribute(string buttonText = BackgroundOperationDashboardDisplayOptions.DefaultRunCommandText)
 		{
 			ButtonText = buttonText;
 		}

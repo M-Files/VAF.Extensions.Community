@@ -25,20 +25,23 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <param name="name">The name of the background operation.</param>
 		/// <param name="method">The method to invoke. The background operation will be passed to the method.</param>
 		/// <param name="backgroundOperationManager">The background operation manager that manages this operation.</param>
+		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <param name="cancellationTokenSource">The cancellation token source.</param>
 		public TaskQueueBackgroundOperation
 		(
 			TaskQueueBackgroundOperationManager backgroundOperationManager,
 			string name,
 			Action<TaskProcessorJob, TDirective> method,
-			CancellationTokenSource cancellationTokenSource = default
+			CancellationTokenSource cancellationTokenSource = default,
+			BackgroundOperationDashboardDisplayOptions options = null
 		) : 
 			base
 				(
 				backgroundOperationManager, 
 				name,
 				(j, d) => { }, // Ignore the method (we will set it below).
-				cancellationTokenSource
+				cancellationTokenSource,
+				options
 				)
 		{
 			// Save parameters.
@@ -124,6 +127,11 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		public const string TaskTypeId = "VaultApplication-BackgroundOperation";
 
 		/// <summary>
+		/// The unique ID for this background operation.  Re-created on startup.
+		/// </summary>
+		public Guid ID { get; set; } = Guid.NewGuid();
+
+		/// <summary>
 		/// How the background operation should repeat.
 		/// </summary>
 		public TaskQueueBackgroundOperationRepeatType RepeatType { get; set; }
@@ -181,18 +189,25 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		public Action<TaskProcessorJob, TaskQueueDirective> UserMethod { get; private set; }
 
 		/// <summary>
+		/// How to display the background operation in the dashboard.
+		/// </summary>
+		public BackgroundOperationDashboardDisplayOptions DashboardDisplayOptions { get; private set; }
+
+		/// <summary>
 		/// Creates a new background operation that runs the method in separate task.
 		/// </summary>
 		/// <param name="name">The name of the background operation.</param>
 		/// <param name="method">The method to invoke. The background operation will be passed to the method.</param>
 		/// <param name="backgroundOperationManager">The background operation manager that manages this operation.</param>
+		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <param name="cancellationTokenSource">The cancellation token source.</param>
 		public TaskQueueBackgroundOperation
 		(
 			TaskQueueBackgroundOperationManager backgroundOperationManager,
 			string name,
 			Action<TaskProcessorJob, TaskQueueDirective> method,
-			CancellationTokenSource cancellationTokenSource = default
+			CancellationTokenSource cancellationTokenSource = default,
+			BackgroundOperationDashboardDisplayOptions options = null
 		)
 		{
 			// Sanity.
@@ -208,6 +223,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			// Initialize default values.
 			this.RepeatType = TaskQueueBackgroundOperationRepeatType.NotRepeating;
 			this.Interval = null;
+			this.DashboardDisplayOptions = options ?? new BackgroundOperationDashboardDisplayOptions();
 		}
 
 		/// <summary>
