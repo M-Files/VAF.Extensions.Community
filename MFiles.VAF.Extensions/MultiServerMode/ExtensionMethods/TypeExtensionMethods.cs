@@ -16,15 +16,28 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods
 		/// <typeparam name="TReturnType">The property/field type.  Will also match items that are assignable from this type.</typeparam>
 		/// <param name="input">The type to search.</param>
 		/// <param name="instance">The instance of <paramref name="input"/> that property/field values should be loaded from.</param>
+		/// <param name="bindingFlags">The binding flags to identify the properties and fields to use.</param>
+		/// <param name="includeBackingFields">If <see langword="true"/> then backing fields for properties will be returned.</param>
 		public static IQueryable<TReturnType> GetPropertiesAndFieldsOfType<TReturnType>
 		   (
-			   this Type input,
-			   object instance
+				this Type input,
+				object instance,
+				BindingFlags bindingFlags = BindingFlags.Instance
+					| BindingFlags.FlattenHierarchy
+					| BindingFlags.Public
+					| BindingFlags.NonPublic,
+				bool includeBackingFields = false
 		   )
 			   where TReturnType : class
 		{
 			IQueryable<TReturnType> items;
-			input.GetPropertiesAndFieldsOfType(instance, out items);
+			input.GetPropertiesAndFieldsOfType
+			(
+				instance, 
+				out items,
+				bindingFlags,
+				includeBackingFields
+			);
 			return items;
 		}
 
@@ -36,16 +49,29 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods
 		/// <param name="input">The type to search.</param>
 		/// <param name="instance">The instance of <paramref name="input"/> that property/field values should be loaded from.</param>
 		/// <param name="items">The value of the properties.</param>
+		/// <param name="bindingFlags">The binding flags to identify the properties and fields to use.</param>
+		/// <param name="includeBackingFields">If <see langword="true"/> then backing fields for properties will be returned.</param>
 		public static void GetPropertiesAndFieldsOfType<TReturnType>
 		(
 			this Type input,
 			object instance,
-			out IQueryable<TReturnType> items
+			out IQueryable<TReturnType> items,
+			BindingFlags bindingFlags = BindingFlags.Instance
+				| BindingFlags.FlattenHierarchy
+				| BindingFlags.Public
+				| BindingFlags.NonPublic,
+			bool includeBackingFields = false
 		)
 			where TReturnType : class
 		{
 			// Use GetPropertiesAndFieldsOfType to get the properties and fields.
-			input.GetPropertiesAndFieldsOfType<TReturnType>(out IQueryable<PropertyInfo> p, out IQueryable<FieldInfo> f);
+			input.GetPropertiesAndFieldsOfType<TReturnType>
+			(
+				out IQueryable<PropertyInfo> p, 
+				out IQueryable<FieldInfo> f,
+				bindingFlags,
+				includeBackingFields
+			);
 
 			// Create our list.
 			var list = new List<TReturnType>();
@@ -77,16 +103,29 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods
 		/// <typeparam name="TAttribute">The attribute that should be on the property/field.</typeparam>
 		/// <param name="input">The type to search.</param>
 		/// <param name="instance">The instance of <paramref name="input"/> that property/field values should be loaded from.</param>
+		/// <param name="bindingFlags">The binding flags to identify the properties and fields to use.</param>
+		/// <param name="includeBackingFields">If <see langword="true"/> then backing fields for properties will be returned.</param>
 		public static IQueryable<Tuple<TReturnType, TAttribute[]>> GetPropertiesAndFieldsOfTypeWithAttribute<TReturnType, TAttribute>
 		(
 			this Type input,
-			object instance
+			object instance,
+			BindingFlags bindingFlags = BindingFlags.Instance
+				| BindingFlags.FlattenHierarchy
+				| BindingFlags.Public
+				| BindingFlags.NonPublic,
+			bool includeBackingFields = false
 		)
 			where TReturnType : class
 			where TAttribute : Attribute
 		{
 			IQueryable<Tuple<TReturnType, TAttribute[]>> items;
-			input.GetPropertiesAndFieldsOfTypeWithAttribute(instance, out items);
+			input.GetPropertiesAndFieldsOfTypeWithAttribute
+			(
+				instance, 
+				out items,
+				bindingFlags,
+				includeBackingFields
+			);
 			return items;
 		}
 
@@ -99,17 +138,30 @@ namespace MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods
 		/// <param name="input">The type to search.</param>
 		/// <param name="instance">The instance of <paramref name="input"/> that property/field values should be loaded from.</param>
 		/// <param name="items">The value of the properties and the attribute.</param>
+		/// <param name="bindingFlags">The binding flags to identify the properties and fields to use.</param>
+		/// <param name="includeBackingFields">If <see langword="true"/> then backing fields for properties will be returned.</param>
 		public static void GetPropertiesAndFieldsOfTypeWithAttribute<TReturnType, TAttribute>
 		(
 			this Type input,
 			object instance,
-			out IQueryable<Tuple<TReturnType, TAttribute[]>> items
+			out IQueryable<Tuple<TReturnType, TAttribute[]>> items,
+			BindingFlags bindingFlags = BindingFlags.Instance
+				| BindingFlags.FlattenHierarchy
+				| BindingFlags.Public
+				| BindingFlags.NonPublic,
+			bool includeBackingFields = false
 		)
 			where TReturnType : class
 			where TAttribute : Attribute
 		{
 			// Use GetPropertiesAndFieldsOfType to get the properties and fields.
-			input.GetPropertiesAndFieldsOfType<TReturnType>(out IQueryable<PropertyInfo> p, out IQueryable<FieldInfo> f);
+			input.GetPropertiesAndFieldsOfType<TReturnType>
+			(
+				out IQueryable<PropertyInfo> p,
+				out IQueryable<FieldInfo> f,
+				bindingFlags, 
+				includeBackingFields
+			);
 
 			// Create our list.
 			var list = new List<Tuple<TReturnType, TAttribute[]>>();
