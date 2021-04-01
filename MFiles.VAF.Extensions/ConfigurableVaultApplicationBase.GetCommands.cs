@@ -68,6 +68,9 @@ namespace MFiles.VAF.Extensions
 						o.RefreshDashboard();
 					}
 				};
+
+				// Store a reference to the command on the background operation.
+				// This allows us to then easily output a button for it on the dashboard.
 				backgroundOperation.RunCommand = command;
 				yield return command;
 			}

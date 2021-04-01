@@ -18,8 +18,11 @@ namespace MFiles.VAF.Extensions
 		/// <inheritdoc />
 		public override string GetDashboardContent(IConfigurationRequestContext context)
 		{
-			var dashboard = new StatusDashboard();
-			dashboard.RefreshInterval = 30;
+			// Create a new dashboard that refreshes every 30 seconds.
+			var dashboard = new StatusDashboard()
+			{
+				RefreshInterval = 30
+			};
 
 			// If there's some base content then add that.
 			var baseContent = base.GetDashboardContent(context);
@@ -41,9 +44,14 @@ namespace MFiles.VAF.Extensions
 		/// <returns>The dashboard content.  Can be null if no background operation managers or background operations.</returns>
 		public virtual DashboardPanel GetBackgroundOperationDashboardContent()
 		{
-			// Add each manager's data in turn.
+			// Declare our list which will go into the panel.
 			var list = new DashboardList();
-			var taskQueueBackgroundOperationManagers = this.GetType().GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager>(this);
+
+			// Iterate over all the background operation managers we can find
+			// and add each of their background operations to the list.
+			var taskQueueBackgroundOperationManagers = this
+				.GetType()
+				.GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager>(this);
 			foreach (var manager in taskQueueBackgroundOperationManagers)
 			{
 				var listItems = manager.GetDashboardContent();
@@ -69,8 +77,8 @@ namespace MFiles.VAF.Extensions
 				Title = "Background Operations",
 				InnerContent = new DashboardContentCollection
 				{
-					list,
-					new DashboardCustomContent($"<em>Time on server: {DateTime.Now.ToLocalTime().ToString("HH:mm:ss")}</em>")
+					new DashboardCustomContent($"<em>Time on server: {DateTime.Now.ToLocalTime().ToString("HH:mm:ss")}</em>"),
+					list
 				}
 			};
 		}
