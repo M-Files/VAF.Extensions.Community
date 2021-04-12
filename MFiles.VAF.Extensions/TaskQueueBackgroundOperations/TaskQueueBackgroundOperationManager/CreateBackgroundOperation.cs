@@ -16,15 +16,13 @@ namespace MFiles.VAF.Extensions
 		public TaskQueueBackgroundOperation CreateBackgroundOperation
 		(
 			string name,
-			Action method,
-			BackgroundOperationDashboardOptions options = null
+			Action method
 		)
 		{
 			return this.CreateBackgroundOperation
 			(
 				name,
-				(j, d) => method(),
-				options
+				(j, d) => method()
 			);
 		}
 
@@ -38,15 +36,13 @@ namespace MFiles.VAF.Extensions
 		public TaskQueueBackgroundOperation CreateBackgroundOperation
 		(
 			string name,
-			Action<TaskProcessorJob> method,
-			BackgroundOperationDashboardOptions options = null
+			Action<TaskProcessorJob> method
 		)
 		{
 			return this.CreateBackgroundOperation
 			(
 				name,
-				(j, d) => method(j),
-				options
+				(j, d) => method(j)
 			);
 		}
 
@@ -60,15 +56,13 @@ namespace MFiles.VAF.Extensions
 		public TaskQueueBackgroundOperation CreateBackgroundOperation
 		(
 			string name,
-			Action<TaskProcessorJob, TaskQueueDirective> method,
-			BackgroundOperationDashboardOptions options = null
+			Action<TaskProcessorJob, TaskQueueDirective> method
 		)
 		{
 			return this.CreateBackgroundOperation<TaskQueueDirective>
 			(
 				name,
-				method,
-				options
+				method
 			);
 		}
 
@@ -82,8 +76,7 @@ namespace MFiles.VAF.Extensions
 		public TaskQueueBackgroundOperation<TDirective> CreateBackgroundOperation<TDirective>
 		(
 			string name,
-			Action<TaskProcessorJob, TDirective> method,
-			BackgroundOperationDashboardOptions options = null
+			Action<TaskProcessorJob, TDirective> method
 		)
 			where TDirective : TaskQueueDirective
 		{
@@ -102,8 +95,7 @@ namespace MFiles.VAF.Extensions
 					this,
 					name,
 					method,
-					this.CancellationTokenSource,
-					options
+					this.CancellationTokenSource
 				);
 
 				// Add it to the dictionary.

@@ -19,16 +19,14 @@ namespace MFiles.VAF.Extensions
 		(
 			string name,
 			Schedule schedule,
-			Action method,
-			BackgroundOperationDashboardOptions options = null
+			Action method
 		)
 		{
 			return this.StartScheduledBackgroundOperation
 			(
 				name,
 				schedule,
-				(j, d) => method(),
-				options: options
+				(j, d) => method()
 			);
 		}
 
@@ -44,16 +42,14 @@ namespace MFiles.VAF.Extensions
 		(
 			string name,
 			Schedule schedule,
-			Action<TaskProcessorJob> method,
-			BackgroundOperationDashboardOptions options = null
+			Action<TaskProcessorJob> method
 		)
 		{
 			return this.StartScheduledBackgroundOperation
 			(
 				name,
 				schedule,
-				(j, d) => method(j),
-				options: options
+				(j, d) => method(j)
 			);
 		}
 
@@ -71,8 +67,7 @@ namespace MFiles.VAF.Extensions
 			string name,
 			Schedule schedule,
 			Action<TaskProcessorJob, TaskQueueDirective> method,
-			TaskQueueDirective directive = null,
-			BackgroundOperationDashboardOptions options = null
+			TaskQueueDirective directive = null
 		)
 		{
 			return this.StartScheduledBackgroundOperation<TaskQueueDirective>
@@ -80,8 +75,7 @@ namespace MFiles.VAF.Extensions
 				name,
 				schedule,
 				method,
-				directive,
-				options
+				directive
 			);
 		}
 
@@ -99,8 +93,7 @@ namespace MFiles.VAF.Extensions
 			string name,
 			Schedule schedule,
 			Action<TaskProcessorJob, TDirective> method,
-			TDirective directive = null,
-			BackgroundOperationDashboardOptions options = null
+			TDirective directive = null
 		)
 			where TDirective : TaskQueueDirective
 		{
@@ -108,8 +101,7 @@ namespace MFiles.VAF.Extensions
 			var backgroundOperation = this.CreateBackgroundOperation
 			(
 				name,
-				method,
-				options
+				method
 			);
 
 			// Start it running.

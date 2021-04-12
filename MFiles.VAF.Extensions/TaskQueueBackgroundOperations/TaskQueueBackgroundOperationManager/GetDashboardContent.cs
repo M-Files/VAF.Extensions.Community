@@ -20,7 +20,7 @@ namespace MFiles.VAF.Extensions
 				foreach (var kvp in this.BackgroundOperations)
 				{
 					// If we should not show it then skip.
-					if (false == (kvp.Value.BackgroundOperation?.DashboardOptions?.ShowBackgroundOperationInDashboard ?? false))
+					if (false == (kvp.Value.BackgroundOperation?.ShowBackgroundOperationInDashboard ?? false))
 						continue;
 
 					// Create the (basic) list item.
@@ -34,12 +34,12 @@ namespace MFiles.VAF.Extensions
 					};
 
 					// If this background operation has a run command then render it.
-					if (kvp.Value.BackgroundOperation.DashboardOptions?.ShowRunCommandInDashboard ?? false)
+					if (kvp.Value.BackgroundOperation.ShowRunCommandInDashboard)
 					{
 						var cmd = new DashboardDomainCommand
 						{
-							DomainCommandID = kvp.Value.BackgroundOperation.DashboardOptions.RunCommand.ID,
-							Title = kvp.Value.BackgroundOperation.DashboardOptions.RunCommand.DisplayName,
+							DomainCommandID = kvp.Value.BackgroundOperation.DashboardRunCommand.ID,
+							Title = kvp.Value.BackgroundOperation.DashboardRunCommand.DisplayName,
 							Style = DashboardCommandStyle.Link
 						};
 						listItem.Commands.Add(cmd);

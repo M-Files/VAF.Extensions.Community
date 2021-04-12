@@ -33,16 +33,14 @@ namespace MFiles.VAF.Extensions
 			TaskQueueBackgroundOperationManager backgroundOperationManager,
 			string name,
 			Action<TaskProcessorJob, TDirective> method,
-			CancellationTokenSource cancellationTokenSource = default,
-			BackgroundOperationDashboardOptions options = null
+			CancellationTokenSource cancellationTokenSource = default
 		) : 
 			base
 				(
 				backgroundOperationManager, 
 				name,
 				(j, d) => { }, // Ignore the method (we will set it below).
-				cancellationTokenSource,
-				options
+				cancellationTokenSource
 				)
 		{
 			// Save parameters.
@@ -121,6 +119,32 @@ namespace MFiles.VAF.Extensions
 		/// The task type for this background operation.
 		/// </summary>
 		public const string TaskTypeId = "VaultApplication-BackgroundOperation";
+		public const string DefaultRunCommandDisplayText = "Run now";
+		public const string DefaultRunCommandMessageText = "The background operation has been scheduled to run.";
+
+		/// <summary>
+		/// Whether to show the run command in the dashboard.
+		/// If true, the dashboard will render a "Run now" button that will allow the user
+		/// to force a run of the background operation, even if the schedule does not
+		/// require it to run immediately.
+		/// </summary>
+		public bool ShowRunCommandInDashboard { get; set; } = false;
+
+		/// <summary>
+		/// Whether to show the background operation in the dashboard.
+		/// </summary>
+		public bool ShowBackgroundOperationInDashboard { get; set; } = true;
+
+		/// <summary>
+		/// The run command to be shown in the dashboard.
+		/// </summary>
+		public CustomDomainCommand DashboardRunCommand { get; private set; }
+			= new CustomDomainCommand()
+			{
+				ConfirmMessage = DefaultRunCommandMessageText,
+				DisplayName = DefaultRunCommandDisplayText,
+				Blocking = true
+			};
 
 		/// <summary>
 		/// The unique ID for this background operation.  Re-created on startup.
@@ -185,11 +209,6 @@ namespace MFiles.VAF.Extensions
 		public Action<TaskProcessorJob, TaskQueueDirective> UserMethod { get; private set; }
 
 		/// <summary>
-		/// How to display the background operation in the dashboard.
-		/// </summary>
-		public BackgroundOperationDashboardOptions DashboardOptions { get; private set; }
-
-		/// <summary>
 		/// Creates a new background operation that runs the method in separate task.
 		/// </summary>
 		/// <param name="name">The name of the background operation.</param>
@@ -202,8 +221,7 @@ namespace MFiles.VAF.Extensions
 			TaskQueueBackgroundOperationManager backgroundOperationManager,
 			string name,
 			Action<TaskProcessorJob, TaskQueueDirective> method,
-			CancellationTokenSource cancellationTokenSource = default,
-			BackgroundOperationDashboardOptions options = null
+			CancellationTokenSource cancellationTokenSource = default
 		)
 		{
 			// Sanity.
@@ -219,16 +237,15 @@ namespace MFiles.VAF.Extensions
 			// Initialize default values.
 			this.RepeatType = TaskQueueBackgroundOperationRepeatType.NotRepeating;
 			this.Interval = null;
-			this.DashboardOptions = options ?? new BackgroundOperationDashboardOptions();
-			this.DashboardOptions.RunCommand.ID = $"cmdRunBackgroundOperation-{this.ID.ToString("N")}";
-			this.DashboardOptions.RunCommand.Execute = (c, o) =>
+			this.DashboardRunCommand.ID = $"cmdRunBackgroundOperation-{this.ID.ToString("N")}";
+			this.DashboardRunCommand.Execute = (c, o) =>
 			{
 				// Try and run the background operation.
 				this.RunOnce();
 
 				// Refresh the dashboard.
-				if (false == string.IsNullOrEmpty(this.DashboardOptions.RunCommandMessageText))
-					o.ShowMessage(this.DashboardOptions.RunCommandMessageText);
+				if (false == string.IsNullOrEmpty(this.DashboardRunCommand.ConfirmMessage))
+					o.ShowMessage(this.DashboardRunCommand.ConfirmMessage);
 				o.RefreshDashboard();
 			};
 		}

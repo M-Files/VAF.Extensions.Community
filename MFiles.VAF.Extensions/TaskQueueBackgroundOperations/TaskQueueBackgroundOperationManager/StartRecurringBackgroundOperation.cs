@@ -18,16 +18,14 @@ namespace MFiles.VAF.Extensions
 		(
 			string name,
 			TimeSpan interval,
-			Action method,
-			BackgroundOperationDashboardOptions options = null
+			Action method
 		)
 		{
 			return this.StartRecurringBackgroundOperation
 			(
 				name,
 				interval,
-				(j, d) => method(),
-				options: options
+				(j, d) => method()
 			);
 		}
 
@@ -43,16 +41,14 @@ namespace MFiles.VAF.Extensions
 		(
 			string name,
 			TimeSpan interval,
-			Action<TaskProcessorJob> method,
-			BackgroundOperationDashboardOptions options = null
+			Action<TaskProcessorJob> method
 		)
 		{
 			return this.StartRecurringBackgroundOperation
 			(
 				name,
 				interval,
-				(j, d) => method(j),
-				options: options
+				(j, d) => method(j)
 			);
 		}
 
@@ -70,8 +66,7 @@ namespace MFiles.VAF.Extensions
 			string name,
 			TimeSpan interval,
 			Action<TaskProcessorJob, TaskQueueDirective> method,
-			TaskQueueDirective directive = null,
-			BackgroundOperationDashboardOptions options = null
+			TaskQueueDirective directive = null
 		)
 		{
 			return this.StartRecurringBackgroundOperation<TaskQueueDirective>
@@ -79,8 +74,7 @@ namespace MFiles.VAF.Extensions
 				name,
 				interval,
 				method,
-				directive,
-				options
+				directive
 			);
 		}
 
@@ -98,8 +92,7 @@ namespace MFiles.VAF.Extensions
 			string name,
 			TimeSpan interval,
 			Action<TaskProcessorJob, TDirective> method,
-			TDirective directive = null,
-			BackgroundOperationDashboardOptions options = null
+			TDirective directive = null
 		)
 			where TDirective : TaskQueueDirective
 		{
@@ -107,8 +100,7 @@ namespace MFiles.VAF.Extensions
 			var backgroundOperation = this.CreateBackgroundOperation
 			(
 				name,
-				method,
-				options
+				method
 			);
 
 			// Start it running.
