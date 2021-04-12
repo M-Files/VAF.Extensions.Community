@@ -14,3 +14,12 @@ The following helper library is a community-driven set of functionality that ext
 
 This library is available [via nuget](https://www.nuget.org/packages/MFiles.VAF.Extensions/).  The simplest way to get started with this library is to add the `MFiles.VAF.Extensions` package to your existing [Vault Application Framework](https://developer.m-files.com/Frameworks/Vault-Application-Framework/) project.  This library requires the use of the Vault Application Framework 2.1 or higher.
 
+## Migrating versions
+
+* Major version increments (e.g. 1.x to 2.x) introduce significant breaking changes including new functionality.  Migrating between major versions may require significant code changes depending on your existing code.
+* Minor version increments (e.g. 1.1.x to 1.2.x) are generally additive in nature but may include smaller breaking changes such as the movement of classes between namespaces.  Migrating between minor versions may require small code changes depending on your existing code.
+* Build version increments (e.g. 1.1.5 to 1.1.10) are generally bugfixes and should not include any breaking changes.  **Note that build version increments in pre-release builds may contain significant breaking changes; 1.2.3-alpha may be sigificantly different to 1.2.2-alpha.**
+
+### Migrating from 1.1 to 1.2
+
+VAF Extensions 1.2 has removed the `MFiles.VAF.Extensions.MultiServerMode` namespace that was introduced in 1.1.  This change was made to reinforce that the `ConfigurableVaultApplicationBase<T>` class and the `TaskQueueBackgroundOperation` helpers are designed for all M-Files installations, not just those actively using Multi-Server Mode.  It is recommended that vault applications using the VAF Extensions library inherit from the  `MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<T>` class.
