@@ -442,3 +442,51 @@ public class VaultApplication
 	}
 }
 ```
+
+## Exposing the background operations on the dashboard
+
+If you inherit from `MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<T>` then background operations will automatically be rendered into the standard VAF dashboard.  If you are rendering your own dashboard content then you can retrieve the `DashboardPanel` containing the background operation content by calling `base.GetBackgroundOperationDashboardContent()`.
+
+The rendered list will show the background operations' names, their repeat type ("runs on demand" / "runs every x seconds" / "runs according to a schedule") and details on the interval/schedule, as well as their last-run and next-run times.
+
+![An image showing a sample dashboard with a list of background operations and their current status](../sample-dashboard.png)
+
+### Hiding background operations
+
+To stop a background operation from appearing in the list, set `TaskQueueBackgroundOperation.ShowBackgroundOperationInDashboard` to `false`:
+
+```csharp
+// Create a background operation that is run on demand.
+var bgo = this.TaskQueueBackgroundOperationManager.CreateBackgroundOperation
+(
+	"This is my on-demand background operation",
+	(job) =>
+	{
+		SysUtils.ReportInfoToEventLog("Running on demand");
+	}
+);
+
+// Stop it appearing in the dashboard.
+bgo.ShowBackgroundOperationInDashboard = false;
+```
+
+### Allowing users to run the background operation
+
+If your background operation can be run by the user then you can opt to show a "Run now" button on the dashboard.  Repeating background operations (e.g. one that runs every hour) will be re-scheduled after the user-requested execution.
+
+![An image showing a sample dashboard with a list of background operations and their current status](run-now-dashboard.png)
+
+```csharp
+// Create a background operation that is run on demand.
+var bgo = this.TaskQueueBackgroundOperationManager.CreateBackgroundOperation
+(
+	"This is my on-demand background operation",
+	(job) =>
+	{
+		SysUtils.ReportInfoToEventLog("Running on demand");
+	}
+);
+
+// Render a "run now" button on the dashboard for this background operation.
+bgo.ShowRunCommandInDashboard = true;
+```
