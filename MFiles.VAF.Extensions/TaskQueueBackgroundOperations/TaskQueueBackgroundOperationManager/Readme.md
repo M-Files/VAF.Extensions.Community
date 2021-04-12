@@ -132,77 +132,6 @@ namespace RecurringTask
 }
 ```
 
-### Allowing the user to run the background operation via the dashboard
-
-When the dashboard is rendered it will, by default, include details on the registered background operations.  You can allow the user to manually run a task-based background operation (whether it is on-demand or already scheduled to run somehow) by adding the `[ShowRunCommandOnDashboard]` attribute to a property that references the background operation returned from `CreateBackgroundOperation`, `StartRecurringBackgroundOperation`, or `StartScheduledBackgroundOperation`.
-
-```csharp
-using System;
-using MFiles.VAF.Common;
-using MFiles.VAF.Extensions;
-using MFiles.VAF;
-
-namespace RecurringTask
-{
-	public class VaultApplication
-		// Important - from 1.2 onwards this base class will ensure that "this.TaskQueueBackgroundOperationManager"
-		// is available and populated as appropriate.  If you do not use this base class then you
-		// need to declare your own TaskQueueBackgroundOperationManager and ensure it is instantiated
-		// in StartApplication.
-		: MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<Configuration>
-	{
-		/// <summary>
-		/// The background operation that can be run on demand.
-		/// The ShowRunCommandOnDashboard attribute adds the "Run now" button next to the
-		/// background operation in the list on the dashboard.  No other changes are required.
-		/// </summary>
-		[ShowRunCommandOnDashboard]
-		protected TaskQueueBackgroundOperation MyBackgroundOperation { get; private set; }
-
-		/// <inheritdoc />
-		protected override void StartApplication()
-		{
-			try
-			{
-				// Create a background operation that can be run on demand.
-				this.MyBackgroundOperation = this.TaskQueueBackgroundOperationManager.CreateBackgroundOperation
-				(
-					"My on-demand background operation",
-					(job) =>
-					{
-						SysUtils.ReportInfoToEventLog("I have been run on demand.");
-					
-						// If your background job processing takes more than a few seconds then
-						// you should periodically report back its status:
-						this.TaskQueueBackgroundOperationManager.TaskProcessor.UpdateTaskInfo
-						(
-							job,
-							MFTaskState.MFTaskStateInProgress,
-							"The process is ongoing...",
-							false
-						);
-
-						// If you fail to do the above then the system may think that the task has
-						// aborted, and start it running a second time!
-					}
-				);
-			}
-			catch(Exception e)
-			{
-				SysUtils.ReportErrorToEventLog("Exception starting background operations", e);
-			}
-		}
-
-		[StateAction("MyWorkflowState")]
-		void MyWorkflowStateAction(StateEnvironment env)
-		{
-			this.MyBackgroundOperation.RunOnce();
-		}
-
-	}
-}
-```
-
 ### Passing custom data to the background operation
 
 It is important to note that the server which schedules the background operation may not be the one that executes it.  Therefore you must not attempt to access vault application instance variables from within your background operation method.  You can, however, pass custom data into the background operation call by using a custom directive:
@@ -270,19 +199,6 @@ namespace RecurringTask
 			{
 				ObjVerEx = env.ObjVerEx.ToString()
 			});
-		}
-
-		/// <summary>
-		/// A custom implementation of <see cref="TaskQueueDirective"/>
-		/// that can provide data about an object to the job processing method.
-		/// </summary>
-		public class ObjVerExTaskQueueDirective
-			: TaskQueueDirective
-		{
-			/// <summary>
-			/// Parse-able ObjVerEx string.
-			/// </summary>
-			public string ObjVerEx { get; set; }
 		}
 
 	}
