@@ -1,10 +1,11 @@
-﻿using MFiles.VAF.MultiserverMode;
+﻿using MFiles.VAF;
 using Newtonsoft.Json;
 using System;
 using System.Text;
 using MFiles.VAF.Common;
+using MFiles.VAF.MultiserverMode;
 
-namespace MFiles.VAF.Extensions.MultiServerMode
+namespace MFiles.VAF.Extensions
 {
 	/// <summary>
 	/// A directive that contains information for a background operation.

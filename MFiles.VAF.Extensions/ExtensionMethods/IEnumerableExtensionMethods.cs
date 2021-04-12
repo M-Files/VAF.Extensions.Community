@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods
+namespace MFiles.VAF.Extensions
 {
 	public static class IEnumerableExtensionMethods
 	{

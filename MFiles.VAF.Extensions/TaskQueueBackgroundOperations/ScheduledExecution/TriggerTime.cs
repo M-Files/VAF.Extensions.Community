@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
+namespace MFiles.VAF.Extensions.ScheduledExecution
 {
 	[DataContract]
 	[JsonConfEditor(NameMember = nameof(Time))]

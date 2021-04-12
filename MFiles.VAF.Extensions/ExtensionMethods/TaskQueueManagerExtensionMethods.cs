@@ -1,9 +1,10 @@
 ﻿using MFiles.VAF.Common.ApplicationTaskQueue;
-using MFiles.VAF.MultiserverMode;
+using MFiles.VAF;
 using MFilesAPI;
 using System;
+using MFiles.VAF.MultiserverMode;
 
-namespace MFiles.VAF.Extensions.MultiServerMode
+namespace MFiles.VAF.Extensions
 {
 	/// <summary>
 	/// Contains helper methods for <see cref="TaskQueueManager"/>.

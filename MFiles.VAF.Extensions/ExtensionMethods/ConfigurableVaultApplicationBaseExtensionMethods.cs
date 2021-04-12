@@ -1,11 +1,12 @@
 ﻿using MFiles.VAF.Common.ApplicationTaskQueue;
-using MFiles.VAF.MultiserverMode;
+using MFiles.VAF;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using MFiles.VAF.MultiserverMode;
 
-namespace MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods
+namespace MFiles.VAF.Extensions
 {
 	public static class ConfigurableVaultApplicationBaseExtensionMethods
 	{

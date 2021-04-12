@@ -1,9 +1,10 @@
 ﻿using MFiles.VAF.Common;
-using MFiles.VAF.MultiserverMode;
+using MFiles.VAF;
 using MFilesAPI;
 using System;
+using MFiles.VAF.MultiserverMode;
 
-namespace MFiles.VAF.Extensions.MultiServerMode
+namespace MFiles.VAF.Extensions
 {
 	/// <summary>
 	/// A <see cref="TaskQueueDirective"/> that represents a single <see cref="ObjVerExTaskQueueDirective.ObjVerEx"/>.

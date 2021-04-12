@@ -13,8 +13,8 @@ In the following sample a task queue background operation manager is instantiate
 ```csharp
 using System;
 using MFiles.VAF.Common;
-using MFiles.VAF.Extensions.MultiServerMode;
-using MFiles.VAF.MultiserverMode;
+using MFiles.VAF.Extensions;
+using MFiles.VAF;
 
 namespace RecurringTask
 {
@@ -71,8 +71,8 @@ Note that the name of the background operation **must be unique within each task
 ```csharp
 using System;
 using MFiles.VAF.Common;
-using MFiles.VAF.Extensions.MultiServerMode;
-using MFiles.VAF.MultiserverMode;
+using MFiles.VAF.Extensions;
+using MFiles.VAF;
 
 namespace RecurringTask
 {
@@ -139,8 +139,8 @@ When the dashboard is rendered it will, by default, include details on the regis
 ```csharp
 using System;
 using MFiles.VAF.Common;
-using MFiles.VAF.Extensions.MultiServerMode;
-using MFiles.VAF.MultiserverMode;
+using MFiles.VAF.Extensions;
+using MFiles.VAF;
 
 namespace RecurringTask
 {
@@ -210,8 +210,8 @@ It is important to note that the server which schedules the background operation
 ```csharp
 using System;
 using MFiles.VAF.Common;
-using MFiles.VAF.Extensions.MultiServerMode;
-using MFiles.VAF.MultiserverMode;
+using MFiles.VAF.Extensions;
+using MFiles.VAF;
 
 namespace RecurringTask
 {
@@ -310,11 +310,11 @@ public class VaultApplication
 		try
 		{
 			// Create the schedule.
-			var schedule = new MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution.Schedule();
+			var schedule = new MFiles.VAF.Extensions.ScheduledExecution.Schedule();
 			schedule.Triggers.Add
 			(
 				// Run every day at the specified times.
-				new MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution.DailyTrigger()
+				new MFiles.VAF.Extensions.ScheduledExecution.DailyTrigger()
 				{
 					TriggerTimes = new List<TriggerTime>
 					{

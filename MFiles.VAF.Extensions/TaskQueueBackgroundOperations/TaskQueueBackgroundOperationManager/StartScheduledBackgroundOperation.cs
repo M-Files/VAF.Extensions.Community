@@ -1,8 +1,9 @@
 ﻿using System;
-using MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution;
+using MFiles.VAF.Extensions.ScheduledExecution;
+using MFiles.VAF;
 using MFiles.VAF.MultiserverMode;
 
-namespace MFiles.VAF.Extensions.MultiServerMode
+namespace MFiles.VAF.Extensions
 {
 	public partial class TaskQueueBackgroundOperationManager
 	{

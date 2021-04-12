@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods
+namespace MFiles.VAF.Extensions
 {
 	internal static class TypeExtensionMethods
 	{

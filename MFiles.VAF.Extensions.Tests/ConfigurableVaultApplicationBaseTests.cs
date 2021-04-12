@@ -1,5 +1,5 @@
 ﻿using MFiles.VAF.Core;
-using MFiles.VAF.MultiserverMode;
+using MFiles.VAF;
 using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -17,7 +17,7 @@ namespace MFiles.VAF.Extensions.Tests
 		//{
 		//	Assert.AreEqual
 		//	(
-		//		"MFiles-VAF-Extensions-Tests-MultiServerMode-ConfigurableVaultApplicationBaseProxy-ConfigurationRebroadcastQueue",
+		//		"MFiles-VAF-Extensions-Tests-ConfigurableVaultApplicationBaseProxy-ConfigurationRebroadcastQueue",
 		//		new ConfigurableVaultApplicationBaseProxy()
 		//		{
 		//			PermanentVault = this.GetVaultMock().Object

@@ -1,8 +1,8 @@
-﻿using MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution;
+﻿using MFiles.VAF.Extensions.ScheduledExecution;
 using System;
 using System.Collections.Generic;
 
-namespace MFiles.VAF.Extensions.MultiServerMode
+namespace MFiles.VAF.Extensions
 {
 	internal static class FormattingExtensionMethods
 	{

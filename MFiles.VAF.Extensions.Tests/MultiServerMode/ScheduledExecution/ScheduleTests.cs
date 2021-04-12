@@ -1,5 +1,5 @@
-﻿using MFiles.VAF.Extensions.MultiServerMode;
-using MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution;
+﻿using MFiles.VAF.Extensions;
+using MFiles.VAF.Extensions.ScheduledExecution;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MFiles.VAF.Extensions.Tests.MultiServerMode.ScheduledExecution
+namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 {
 	[TestClass]
 	public class ScheduleTests

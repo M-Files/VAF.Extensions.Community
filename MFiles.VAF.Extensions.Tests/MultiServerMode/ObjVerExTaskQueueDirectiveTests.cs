@@ -1,10 +1,10 @@
 ﻿using MFiles.VAF.Common;
-using MFiles.VAF.Extensions.MultiServerMode;
+using MFiles.VAF.Extensions;
 using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace MFiles.VAF.Extensions.Tests.MultiServerMode
+namespace MFiles.VAF.Extensions.Tests
 {
 	[TestClass]
 	public class ObjVerExTaskQueueDirectiveTests

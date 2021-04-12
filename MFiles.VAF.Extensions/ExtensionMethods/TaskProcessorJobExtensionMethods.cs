@@ -1,6 +1,7 @@
-﻿using MFiles.VAF.MultiserverMode;
+﻿using MFiles.VAF;
+using MFiles.VAF.MultiserverMode;
 
-namespace MFiles.VAF.Extensions.MultiServerMode.ExtensionMethods
+namespace MFiles.VAF.Extensions
 {
 	public static class TaskProcessorJobExtensionMethods
 	{

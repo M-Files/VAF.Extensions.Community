@@ -1,8 +1,9 @@
-﻿using MFiles.VAF.MultiserverMode;
+﻿using MFiles.VAF;
+using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
 using System;
 
-namespace MFiles.VAF.Extensions.MultiServerMode
+namespace MFiles.VAF.Extensions
 {
 	/// <summary>
 	/// Contains helper methods for <see cref="TaskProcessorBase{TSettings}"/>.

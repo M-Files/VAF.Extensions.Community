@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 
-namespace MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution
+namespace MFiles.VAF.Extensions.ScheduledExecution
 {
 	/// <summary>
 	/// Represents a schedule in which a job should be re-run.

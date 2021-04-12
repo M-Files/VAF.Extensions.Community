@@ -1,6 +1,6 @@
 ﻿using MFiles.VAF.Configuration.AdminConfigurations;
 
-namespace MFiles.VAF.Extensions.MultiServerMode
+namespace MFiles.VAF.Extensions
 {
 	/// <summary>
 	/// Options for how to display the background operation in the dashboard.

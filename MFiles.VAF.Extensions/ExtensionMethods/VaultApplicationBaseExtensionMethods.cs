@@ -4,11 +4,12 @@ using System.Linq;
 using System.Threading;
 using MFiles.VAF.Common;
 using MFiles.VAF.Common.ApplicationTaskQueue;
-using MFiles.VAF.MultiserverMode;
+using MFiles.VAF;
 using MFilesAPI;
+using MFiles.VAF.MultiserverMode;
 
 // ReSharper disable once CheckNamespace
-namespace MFiles.VAF.Extensions.MultiServerMode
+namespace MFiles.VAF.Extensions
 {
 	public static class VaultApplicationBaseExtensionMethods
 	{

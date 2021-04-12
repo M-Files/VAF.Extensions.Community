@@ -4,11 +4,12 @@ using System.Threading;
 using MFiles.VAF.Common;
 using MFiles.VAF.Common.ApplicationTaskQueue;
 using MFiles.VAF.Configuration.AdminConfigurations;
-using MFiles.VAF.Extensions.MultiServerMode.ScheduledExecution;
-using MFiles.VAF.MultiserverMode;
+using MFiles.VAF.Extensions.ScheduledExecution;
+using MFiles.VAF;
 using MFilesAPI;
+using MFiles.VAF.MultiserverMode;
 
-namespace MFiles.VAF.Extensions.MultiServerMode
+namespace MFiles.VAF.Extensions
 {
 	public class TaskQueueBackgroundOperation<TDirective>
 		: TaskQueueBackgroundOperation

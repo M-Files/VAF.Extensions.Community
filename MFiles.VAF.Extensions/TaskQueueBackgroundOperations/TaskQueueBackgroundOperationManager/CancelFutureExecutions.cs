@@ -1,11 +1,12 @@
 ﻿using MFiles.VAF.Common;
 using MFiles.VAF.Common.ApplicationTaskQueue;
-using MFiles.VAF.MultiserverMode;
+using MFiles.VAF;
 using MFilesAPI;
 using System;
 using System.Linq;
+using MFiles.VAF.MultiserverMode;
 
-namespace MFiles.VAF.Extensions.MultiServerMode
+namespace MFiles.VAF.Extensions
 {
 	public partial class TaskQueueBackgroundOperationManager
 	{
