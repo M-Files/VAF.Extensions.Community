@@ -33,7 +33,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			string name,
 			Action<TaskProcessorJob, TDirective> method,
 			CancellationTokenSource cancellationTokenSource = default,
-			BackgroundOperationDashboardDisplayOptions options = null
+			BackgroundOperationDashboardOptions options = null
 		) : 
 			base
 				(
@@ -117,11 +117,6 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 	public class TaskQueueBackgroundOperation
 	{
 		/// <summary>
-		/// The command to run this via the dashboard (null if not set).
-		/// </summary>
-		public CustomDomainCommand RunCommand { get; set; }
-
-		/// <summary>
 		/// The task type for this background operation.
 		/// </summary>
 		public const string TaskTypeId = "VaultApplication-BackgroundOperation";
@@ -191,7 +186,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		/// <summary>
 		/// How to display the background operation in the dashboard.
 		/// </summary>
-		public BackgroundOperationDashboardDisplayOptions DashboardDisplayOptions { get; private set; }
+		public BackgroundOperationDashboardOptions DashboardOptions { get; private set; }
 
 		/// <summary>
 		/// Creates a new background operation that runs the method in separate task.
@@ -207,7 +202,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			string name,
 			Action<TaskProcessorJob, TaskQueueDirective> method,
 			CancellationTokenSource cancellationTokenSource = default,
-			BackgroundOperationDashboardDisplayOptions options = null
+			BackgroundOperationDashboardOptions options = null
 		)
 		{
 			// Sanity.
@@ -223,7 +218,18 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			// Initialize default values.
 			this.RepeatType = TaskQueueBackgroundOperationRepeatType.NotRepeating;
 			this.Interval = null;
-			this.DashboardDisplayOptions = options ?? new BackgroundOperationDashboardDisplayOptions();
+			this.DashboardOptions = options ?? new BackgroundOperationDashboardOptions();
+			this.DashboardOptions.RunCommand.ID = $"cmdRunBackgroundOperation-{this.ID.ToString("N")}";
+			this.DashboardOptions.RunCommand.Execute = (c, o) =>
+			{
+				// Try and run the background operation.
+				this.RunOnce();
+
+				// Refresh the dashboard.
+				if (false == string.IsNullOrEmpty(this.DashboardOptions.RunCommandMessageText))
+					o.ShowMessage(this.DashboardOptions.RunCommandMessageText);
+				o.RefreshDashboard();
+			};
 		}
 
 		/// <summary>

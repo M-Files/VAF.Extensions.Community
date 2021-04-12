@@ -19,7 +19,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			string name,
 			Schedule schedule,
 			Action method,
-			BackgroundOperationDashboardDisplayOptions options = null
+			BackgroundOperationDashboardOptions options = null
 		)
 		{
 			return this.StartScheduledBackgroundOperation
@@ -44,7 +44,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			string name,
 			Schedule schedule,
 			Action<TaskProcessorJob> method,
-			BackgroundOperationDashboardDisplayOptions options = null
+			BackgroundOperationDashboardOptions options = null
 		)
 		{
 			return this.StartScheduledBackgroundOperation
@@ -71,7 +71,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			Schedule schedule,
 			Action<TaskProcessorJob, TaskQueueDirective> method,
 			TaskQueueDirective directive = null,
-			BackgroundOperationDashboardDisplayOptions options = null
+			BackgroundOperationDashboardOptions options = null
 		)
 		{
 			return this.StartScheduledBackgroundOperation<TaskQueueDirective>
@@ -99,7 +99,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			Schedule schedule,
 			Action<TaskProcessorJob, TDirective> method,
 			TDirective directive = null,
-			BackgroundOperationDashboardDisplayOptions options = null
+			BackgroundOperationDashboardOptions options = null
 		)
 			where TDirective : TaskQueueDirective
 		{

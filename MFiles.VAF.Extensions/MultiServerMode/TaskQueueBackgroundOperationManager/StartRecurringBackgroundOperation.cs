@@ -18,7 +18,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			string name,
 			TimeSpan interval,
 			Action method,
-			BackgroundOperationDashboardDisplayOptions options = null
+			BackgroundOperationDashboardOptions options = null
 		)
 		{
 			return this.StartRecurringBackgroundOperation
@@ -43,7 +43,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			string name,
 			TimeSpan interval,
 			Action<TaskProcessorJob> method,
-			BackgroundOperationDashboardDisplayOptions options = null
+			BackgroundOperationDashboardOptions options = null
 		)
 		{
 			return this.StartRecurringBackgroundOperation
@@ -70,7 +70,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			TimeSpan interval,
 			Action<TaskProcessorJob, TaskQueueDirective> method,
 			TaskQueueDirective directive = null,
-			BackgroundOperationDashboardDisplayOptions options = null
+			BackgroundOperationDashboardOptions options = null
 		)
 		{
 			return this.StartRecurringBackgroundOperation<TaskQueueDirective>
@@ -98,7 +98,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 			TimeSpan interval,
 			Action<TaskProcessorJob, TDirective> method,
 			TDirective directive = null,
-			BackgroundOperationDashboardDisplayOptions options = null
+			BackgroundOperationDashboardOptions options = null
 		)
 			where TDirective : TaskQueueDirective
 		{

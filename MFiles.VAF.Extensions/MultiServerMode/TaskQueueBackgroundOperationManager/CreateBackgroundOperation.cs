@@ -16,7 +16,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		(
 			string name,
 			Action method,
-			BackgroundOperationDashboardDisplayOptions options = null
+			BackgroundOperationDashboardOptions options = null
 		)
 		{
 			return this.CreateBackgroundOperation
@@ -38,7 +38,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		(
 			string name,
 			Action<TaskProcessorJob> method,
-			BackgroundOperationDashboardDisplayOptions options = null
+			BackgroundOperationDashboardOptions options = null
 		)
 		{
 			return this.CreateBackgroundOperation
@@ -60,7 +60,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		(
 			string name,
 			Action<TaskProcessorJob, TaskQueueDirective> method,
-			BackgroundOperationDashboardDisplayOptions options = null
+			BackgroundOperationDashboardOptions options = null
 		)
 		{
 			return this.CreateBackgroundOperation<TaskQueueDirective>
@@ -82,7 +82,7 @@ namespace MFiles.VAF.Extensions.MultiServerMode
 		(
 			string name,
 			Action<TaskProcessorJob, TDirective> method,
-			BackgroundOperationDashboardDisplayOptions options = null
+			BackgroundOperationDashboardOptions options = null
 		)
 			where TDirective : TaskQueueDirective
 		{
