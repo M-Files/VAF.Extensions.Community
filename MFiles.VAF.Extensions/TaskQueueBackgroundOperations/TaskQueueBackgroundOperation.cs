@@ -120,7 +120,13 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		public const string TaskTypeId = "VaultApplication-BackgroundOperation";
 		public const string DefaultRunCommandDisplayText = "Run now";
-		public const string DefaultRunCommandMessageText = "The background operation has been scheduled to run.";
+		public const string DefaultRunCommandConfirmationText = null;
+		public const string DefaultRunCommandSuccessText = "The background operation has been scheduled to run.";
+
+		/// <summary>
+		/// The text shown to the user as a popup when the background operation has been scheduled.
+		/// </summary>
+		public string RunCommandSuccessText { get; set; } = DefaultRunCommandSuccessText;
 
 		/// <summary>
 		/// Whether to show the run command in the dashboard.
@@ -141,7 +147,7 @@ namespace MFiles.VAF.Extensions
 		public CustomDomainCommand DashboardRunCommand { get; private set; }
 			= new CustomDomainCommand()
 			{
-				ConfirmMessage = DefaultRunCommandMessageText,
+				ConfirmMessage = DefaultRunCommandConfirmationText,
 				DisplayName = DefaultRunCommandDisplayText,
 				Blocking = true
 			};
@@ -235,8 +241,6 @@ namespace MFiles.VAF.Extensions
 			this.Name = name ?? throw new ArgumentNullException( nameof(name) );
 
 			// Initialize default values.
-			this.RepeatType = TaskQueueBackgroundOperationRepeatType.NotRepeating;
-			this.Interval = null;
 			this.DashboardRunCommand.ID = $"cmdRunBackgroundOperation-{this.ID.ToString("N")}";
 			this.DashboardRunCommand.Execute = (c, o) =>
 			{
@@ -244,8 +248,8 @@ namespace MFiles.VAF.Extensions
 				this.RunOnce();
 
 				// Refresh the dashboard.
-				if (false == string.IsNullOrEmpty(this.DashboardRunCommand.ConfirmMessage))
-					o.ShowMessage(this.DashboardRunCommand.ConfirmMessage);
+				if (false == string.IsNullOrEmpty(this.RunCommandSuccessText))
+					o.ShowMessage(this.RunCommandSuccessText);
 				o.RefreshDashboard();
 			};
 		}
