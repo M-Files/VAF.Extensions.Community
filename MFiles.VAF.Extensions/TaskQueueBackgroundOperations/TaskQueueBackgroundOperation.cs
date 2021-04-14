@@ -372,9 +372,11 @@ namespace MFiles.VAF.Extensions
 			finally
 			{
 				// Next run isn't now scheduled.
-				if (this.BackgroundOperationManager.BackgroundOperations.TryGetValue(this.Name, out TaskQueueBackgroundOperationOverview o))
+				if (this.BackgroundOperationManager.BackgroundOperations.TryGetValue(this.Name, out TaskQueueBackgroundOperation o))
 				{
-					o.NextRun = null;
+					var overview = TaskQueueBackgroundOperationOverview.Load(o);
+					overview.NextRun = null;
+					overview.Save();
 				}
 			}
 		}

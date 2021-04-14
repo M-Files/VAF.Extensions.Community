@@ -40,7 +40,7 @@ namespace MFiles.VAF.Extensions
 				.GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager>(this)
 				.SelectMany(tqbom => tqbom.BackgroundOperations)
 				.AsEnumerable()
-				.Select(bo => bo.Value?.BackgroundOperation?.DashboardRunCommand)
+				.Select(bo => bo.Value?.DashboardRunCommand)
 				.Where(c => null != c);
 		}
 	}

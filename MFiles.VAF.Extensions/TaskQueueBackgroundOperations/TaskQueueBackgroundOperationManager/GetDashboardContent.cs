@@ -20,8 +20,11 @@ namespace MFiles.VAF.Extensions
 				foreach (var kvp in this.BackgroundOperations)
 				{
 					// If we should not show it then skip.
-					if (false == (kvp.Value.BackgroundOperation?.ShowBackgroundOperationInDashboard ?? false))
+					if (false == kvp.Value.ShowBackgroundOperationInDashboard)
 						continue;
+
+					// Load the overview.
+					var overview = TaskQueueBackgroundOperationOverview.Load(kvp.Value);
 
 					// Create the (basic) list item.
 					var listItem = new DashboardListItem()
@@ -29,52 +32,52 @@ namespace MFiles.VAF.Extensions
 						Title = kvp.Key,
 						StatusSummary = new Configuration.Domain.DomainStatusSummary()
 						{
-							Label = kvp.Value.Status.ToString()
+							Label = overview.Status.ToString()
 						}
 					};
 
 					// If this background operation has a run command then render it.
-					if (kvp.Value.BackgroundOperation.ShowRunCommandInDashboard)
+					if (kvp.Value.ShowRunCommandInDashboard)
 					{
 						var cmd = new DashboardDomainCommand
 						{
-							DomainCommandID = kvp.Value.BackgroundOperation.DashboardRunCommand.ID,
-							Title = kvp.Value.BackgroundOperation.DashboardRunCommand.DisplayName,
+							DomainCommandID = kvp.Value.DashboardRunCommand.ID,
+							Title = kvp.Value.DashboardRunCommand.DisplayName,
 							Style = DashboardCommandStyle.Link
 						};
 						listItem.Commands.Add(cmd);
 					}
 
 					var htmlString = "Runs ";
-					switch (kvp.Value.BackgroundOperation.RepeatType)
+					switch (kvp.Value.RepeatType)
 					{
 						case TaskQueueBackgroundOperationRepeatType.NotRepeating:
 							htmlString += "on demand (does not repeat).<br />";
 							break;
 						case TaskQueueBackgroundOperationRepeatType.Interval:
-							htmlString += $"{kvp.Value.BackgroundOperation.Interval.ToDisplayString()}.<br />";
+							htmlString += $"{kvp.Value.Interval.ToDisplayString()}.<br />";
 							break;
 						case TaskQueueBackgroundOperationRepeatType.Schedule:
-							htmlString += $"{kvp.Value.BackgroundOperation.Schedule.ToDisplayString()}";
+							htmlString += $"{kvp.Value.Schedule.ToDisplayString()}";
 							break;
 						default:
-							htmlString = "<em>Unhandled: " + kvp.Value.BackgroundOperation.RepeatType + "</em><br />";
+							htmlString = "<em>Unhandled: " + kvp.Value.RepeatType + "</em><br />";
 							break;
 					}
 
 					// Customise the description based on the last/next run values.
-					if (kvp.Value.Status == TaskQueueBackgroundOperationStatus.Running)
+					if (overview.Status == TaskQueueBackgroundOperationStatus.Running)
 					{
 						htmlString += "<em>Currently running.</em>";
 					}
 					else
 					{
-						htmlString += !kvp.Value.NextRun.HasValue
+						htmlString += !overview.NextRun.HasValue
 							? "The background operation is not scheduled to run again.<br />"
-							: $"Next run is {kvp.Value.NextRun.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.NextRun)}.<br />";
-						if (kvp.Value.LastRun.HasValue)
+							: $"Next run is {overview.NextRun.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.NextRun)}.<br />";
+						if (overview.LastRun.HasValue)
 						{
-							htmlString += $"<em>Last run {kvp.Value.LastRun.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.LastRun)}.</em>";
+							htmlString += $"<em>Last run {overview.LastRun.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.LastRun)}.</em>";
 						}
 					}
 					listItem.InnerContent = new DashboardCustomContent(htmlString);

@@ -69,10 +69,12 @@ namespace MFiles.VAF.Extensions
 
 			// Update the status and next run times.
 			{
-				if (this.BackgroundOperations.TryGetValue(backgroundOperationName, out TaskQueueBackgroundOperationOverview bo))
+				if (this.BackgroundOperations.TryGetValue(backgroundOperationName, out TaskQueueBackgroundOperation bo))
 				{
-					bo.Status = TaskQueueBackgroundOperationStatus.Scheduled;
-					bo.NextRun = nextRun;
+					var overview = TaskQueueBackgroundOperationOverview.Load(bo);
+					overview.Status = TaskQueueBackgroundOperationStatus.Scheduled;
+					overview.NextRun = nextRun;
+					overview.Save();
 				}
 			}
 		}

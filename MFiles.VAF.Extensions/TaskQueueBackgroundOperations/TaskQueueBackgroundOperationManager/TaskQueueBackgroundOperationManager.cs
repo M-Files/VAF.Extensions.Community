@@ -3,20 +3,12 @@ using MFiles.VAF;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using MFiles.VAF.Common.ApplicationTaskQueue;
 using MFiles.VAF.MultiserverMode;
 
 namespace MFiles.VAF.Extensions
 {
-	public class TaskQueueBackgroundOperationOverview
-	{
-		public TaskQueueBackgroundOperation BackgroundOperation { get; set; }
-		public TaskQueueBackgroundOperationStatus Status { get; set; }
-		public DateTime? LastRun { get; set; }
-		public DateTime? NextRun { get; set; }
-	}
 	public enum TaskQueueBackgroundOperationStatus
 	{
 		Stopped = 0,
@@ -42,8 +34,8 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// The background operations managed by this instance.
 		/// </summary>
-		internal readonly Dictionary<string, TaskQueueBackgroundOperationOverview> BackgroundOperations
-			= new Dictionary<string, TaskQueueBackgroundOperationOverview>();
+		internal readonly Dictionary<string, TaskQueueBackgroundOperation> BackgroundOperations
+			= new Dictionary<string, TaskQueueBackgroundOperation>();
 
 		/// <summary>
 		/// Ensures that <see cref="CurrentServer"/> is set correctly.
@@ -223,7 +215,7 @@ namespace MFiles.VAF.Extensions
 			}
 
 			// Find the background operation to run.
-			TaskQueueBackgroundOperationOverview bo = null;
+			TaskQueueBackgroundOperation bo = null;
 			lock (_lock)
 			{
 				if (false == this.BackgroundOperations.TryGetValue(backgroundOperationDirective.BackgroundOperationName, out bo))
@@ -239,19 +231,19 @@ namespace MFiles.VAF.Extensions
 
 			// Should we repeat?
 			DateTime? nextRun = null;
-			switch (bo.BackgroundOperation.RepeatType)
+			switch (bo.RepeatType)
 			{
 				case TaskQueueBackgroundOperationRepeatType.Interval:
 					
 					// Add the interval to the current datetime.
-					if (bo.BackgroundOperation.Interval.HasValue)
-						nextRun = DateTime.UtcNow.Add(bo.BackgroundOperation.Interval.Value);
+					if (bo.Interval.HasValue)
+						nextRun = DateTime.UtcNow.Add(bo.Interval.Value);
 					break;
 
 				case TaskQueueBackgroundOperationRepeatType.Schedule:
 
 					// Get the next execution time from the schedule.
-					nextRun = bo.BackgroundOperation.Schedule?.GetNextExecution(DateTime.Now);
+					nextRun = bo.Schedule?.GetNextExecution(DateTime.Now);
 					break;
 			}
 
@@ -268,12 +260,12 @@ namespace MFiles.VAF.Extensions
 						lock (_lock)
 						{
 							// Cancel any future executions (we only want the single one created below).
-							this.CancelFutureExecutions(bo.BackgroundOperation.Name);
+							this.CancelFutureExecutions(bo.Name);
 
 							// Now schedule it to run according to the interval.
 							this.RunOnce
 							(
-								bo.BackgroundOperation.Name,
+								bo.Name,
 								nextRun.Value.ToUniversalTime(),
 								dir
 							);
@@ -285,12 +277,16 @@ namespace MFiles.VAF.Extensions
 			try
 			{
 				// Mark the background operation as running.
-				bo.Status = TaskQueueBackgroundOperationStatus.Running;
-				bo.LastRun = DateTime.UtcNow;
-				bo.NextRun = null;
+				{
+					var overview = TaskQueueBackgroundOperationOverview.Load(bo);
+					overview.Status = TaskQueueBackgroundOperationStatus.Running;
+					overview.LastRun = DateTime.UtcNow;
+					overview.NextRun = null;
+					overview.Save();
+				}
 
 				// Delegate to the background operation.
-				bo.BackgroundOperation.RunJob(job, dir);
+				bo.RunJob(job, dir);
 			}
 			catch (Exception e)
 			{
@@ -307,8 +303,14 @@ namespace MFiles.VAF.Extensions
 			finally
 			{
 				// If the status is running then stop it.
-				if(bo.Status == TaskQueueBackgroundOperationStatus.Running)
-					bo.Status = TaskQueueBackgroundOperationStatus.Stopped;
+				{
+					var overview = TaskQueueBackgroundOperationOverview.Load(bo);
+					if (overview.Status == TaskQueueBackgroundOperationStatus.Running)
+					{
+						overview.Status = TaskQueueBackgroundOperationStatus.Stopped;
+						overview.Save();
+					}
+				}
 			}
 		}
 	}

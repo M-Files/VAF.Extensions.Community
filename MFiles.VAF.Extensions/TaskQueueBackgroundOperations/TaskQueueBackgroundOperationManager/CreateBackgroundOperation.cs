@@ -99,10 +99,7 @@ namespace MFiles.VAF.Extensions
 				);
 
 				// Add it to the dictionary.
-				this.BackgroundOperations.Add(name, new TaskQueueBackgroundOperationOverview()
-				{
-					BackgroundOperation = backgroundOperation
-				});
+				this.BackgroundOperations.Add(name, backgroundOperation);
 			}
 
 			// Return it.
