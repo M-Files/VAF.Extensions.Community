@@ -33,7 +33,7 @@ namespace MFiles.VAF.Extensions
 							htmlString += "on demand (does not repeat).<br />";
 							break;
 						case TaskQueueBackgroundOperationRepeatType.Interval:
-							htmlString += $"{kvp.Value.Interval.ToDisplayString()}.<br />";
+							htmlString += $"{kvp.Value.Interval.ToIntervalDisplayString()}.<br />";
 							break;
 						case TaskQueueBackgroundOperationRepeatType.Schedule:
 							htmlString += $"{kvp.Value.Schedule.ToDisplayString()}";
@@ -104,7 +104,7 @@ namespace MFiles.VAF.Extensions
 							switch (execution.State)
 							{
 								case MFilesAPI.MFTaskState.MFTaskStateWaiting:
-									state = "Awaiting scheduled time";
+									state = "Waiting";
 									break;
 								case MFilesAPI.MFTaskState.MFTaskStateInProgress:
 									state = "Running";
@@ -158,14 +158,14 @@ namespace MFiles.VAF.Extensions
 									)
 								),
 								new DashboardCustomContent(state),
-								new DashboardCustomContent(execution.GetElapsedTime().ToString()),
+								new DashboardCustomContent(execution.GetElapsedTime().ToDisplayString()),
 								statusDetails
 							);
 
 							// Set the cell sizing.
 							for (var i = 0; i < 3; i++)
 							{
-								row.Cells[i].Style.Add("white-space", "no-wrap");
+								row.Cells[i].Style.Add("white-space", "nowrap");
 							}
 							row.Cells[3].Style.Add("min-width", "150px");
 						}

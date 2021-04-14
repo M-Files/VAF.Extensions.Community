@@ -30,7 +30,76 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="timespan">The timespan to convert.</param>
 		/// <returns>A string in English describing the timespan.</returns>
+		internal static string ToDisplayString(this TimeSpan timespan)
+		{
+			return ((TimeSpan?)timespan).ToDisplayString();
+		}
+
+		/// <summary>
+		/// Converts <paramref name="timespan"/> to a string.
+		/// If <paramref name="timespan"/> is null or zero, returns "no timespan specified".
+		/// </summary>
+		/// <param name="timespan">The timespan to convert.</param>
+		/// <returns>A string in English describing the timespan.</returns>
 		internal static string ToDisplayString(this TimeSpan? timespan)
+		{
+			// Sanity.
+			if (false == timespan.HasValue || timespan.Value <= TimeSpan.Zero)
+				return "";
+
+			// Seconds be easy.
+			if (timespan.Value <= TimeSpan.FromSeconds(120))
+				return $"{(int)timespan.Value.TotalSeconds} seconds";
+
+			// Build a text representation
+			var components = new List<string>();
+			if (timespan.Value.Days > 0)
+				components.Add($"{timespan.Value.Days} days");
+			if (timespan.Value.Hours > 0)
+				components.Add($"{timespan.Value.Hours} hours");
+			if (timespan.Value.Minutes > 0)
+				components.Add($"{timespan.Value.Minutes} minutes");
+			if (timespan.Value.Seconds > 0)
+				components.Add($"{timespan.Value.Seconds} seconds");
+
+			// Build a text representation
+			var output = "";
+			for (var i = 0; i < components.Count; i++)
+			{
+				if (i == 0)
+				{
+					output += components[i];
+				}
+				else if (i == components.Count - 1)
+				{
+					output += ", and " + components[i];
+				}
+				else
+				{
+					output += ", ";
+				}
+			}
+			return output;
+		}
+
+		/// <summary>
+		/// Converts <paramref name="timespan"/> to a string.
+		/// If <paramref name="timespan"/> is null or zero, returns "no timespan specified".
+		/// </summary>
+		/// <param name="timespan">The timespan to convert.</param>
+		/// <returns>A string in English describing the timespan.</returns>
+		internal static string ToIntervalDisplayString(this TimeSpan timespan)
+		{
+			return ((TimeSpan?)timespan).ToIntervalDisplayString();
+		}
+
+		/// <summary>
+		/// Converts <paramref name="timespan"/> to a string.
+		/// If <paramref name="timespan"/> is null or zero, returns "no timespan specified".
+		/// </summary>
+		/// <param name="timespan">The timespan to convert.</param>
+		/// <returns>A string in English describing the timespan.</returns>
+		internal static string ToIntervalDisplayString(this TimeSpan? timespan)
 		{
 			// Sanity.
 			if (false == timespan.HasValue || timespan.Value <= TimeSpan.Zero)
