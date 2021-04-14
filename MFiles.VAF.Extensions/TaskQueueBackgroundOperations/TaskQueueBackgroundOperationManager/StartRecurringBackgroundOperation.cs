@@ -41,7 +41,7 @@ namespace MFiles.VAF.Extensions
 		(
 			string name,
 			TimeSpan interval,
-			Action<TaskProcessorJob> method
+			Action<TaskProcessorJobEx> method
 		)
 		{
 			return this.StartRecurringBackgroundOperation
@@ -65,7 +65,7 @@ namespace MFiles.VAF.Extensions
 		(
 			string name,
 			TimeSpan interval,
-			Action<TaskProcessorJob, TaskQueueDirective> method,
+			Action<TaskProcessorJobEx, TaskQueueDirective> method,
 			TaskQueueDirective directive = null
 		)
 		{
@@ -91,7 +91,7 @@ namespace MFiles.VAF.Extensions
 		(
 			string name,
 			TimeSpan interval,
-			Action<TaskProcessorJob, TDirective> method,
+			Action<TaskProcessorJobEx, TDirective> method,
 			TDirective directive = null
 		)
 			where TDirective : TaskQueueDirective

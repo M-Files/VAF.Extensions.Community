@@ -365,7 +365,7 @@ If you inherit from `MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<T>` 
 
 The rendered list will show the background operations' names, their repeat type ("runs on demand" / "runs every x seconds" / "runs according to a schedule") and details on the interval/schedule, as well as their last-run and next-run times.
 
-![An image showing a sample dashboard with a list of background operations and their current status](../sample-dashboard.png)
+![An image showing a sample dashboard with a list of background operations and their current status](../../sample-dashboard.png)
 
 ### Hiding background operations
 

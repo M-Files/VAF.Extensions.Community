@@ -108,8 +108,8 @@ namespace MFiles.VAF.Extensions
 			{
 				// Now!
 				return representation == DateTimeRepresentationOf.LastRun
-					? "now"
-					: "due now";
+					? "Now"
+					: "Due now";
 			}
 			else
 			{
@@ -121,7 +121,7 @@ namespace MFiles.VAF.Extensions
 					if (representation == DateTimeRepresentationOf.NextRun)
 					{
 						// It is the next run but it's in the past.
-						return $"overdue by {(int)diff.TotalSeconds}s";
+						return $"Overdue by {(int)diff.TotalSeconds}s";
 					}
 				}
 
@@ -146,8 +146,8 @@ namespace MFiles.VAF.Extensions
 				{
 					// Default to the specific time.
 					return localTime.Date == DateTime.Now.ToLocalTime().Date
-						? $"at {localTime.ToString("HH:mm:ss")} server-time"
-						: $"at {localTime.ToString("HH:mm:ss")} server-time on {localTime.ToString("yyyy-MM-dd")}";
+						? $"At {localTime.ToString("HH:mm:ss")} server-time"
+						: $"At {localTime.ToString("HH:mm:ss")} server-time on {localTime.ToString("yyyy-MM-dd")}";
 				}
 
 				// Render out ago vs in.
@@ -157,7 +157,7 @@ namespace MFiles.VAF.Extensions
 					if (representation == DateTimeRepresentationOf.NextRun)
 					{
 						// It is the next run but it's in the past.
-						return "overdue (expected " + diffString + " ago)";
+						return "Overdue (expected " + diffString + " ago)";
 					}
 					return diffString + " ago";
 				}
@@ -165,8 +165,8 @@ namespace MFiles.VAF.Extensions
 				{
 					// Future.
 					return localTime.Date == DateTime.Now.ToLocalTime().Date
-						? $"at {localTime.ToString("HH:mm:ss")} server-time (in {diffString})"
-						: $"at {localTime.ToString("HH:mm:ss")} server-time on {localTime.ToString("yyyy-MM-dd")} (in {diffString})";
+						? $"At {localTime.ToString("HH:mm:ss")} server-time (in {diffString})"
+						: $"At {localTime.ToString("HH:mm:ss")} server-time on {localTime.ToString("yyyy-MM-dd")} (in {diffString})";
 				}
 			}
 		}

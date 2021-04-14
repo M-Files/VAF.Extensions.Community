@@ -9,13 +9,6 @@ using MFiles.VAF.MultiserverMode;
 
 namespace MFiles.VAF.Extensions
 {
-	public enum TaskQueueBackgroundOperationStatus
-	{
-		Stopped = 0,
-		Running = 1,
-		Scheduled = 2
-	}
-
 	/// <summary>
 	/// Manages one or more background operations within a single queue.
 	/// </summary>
@@ -276,17 +269,17 @@ namespace MFiles.VAF.Extensions
 			// Perform the action.
 			try
 			{
-				// Mark the background operation as running.
-				{
-					var overview = TaskQueueBackgroundOperationOverview.Load(bo);
-					overview.Status = TaskQueueBackgroundOperationStatus.Running;
-					overview.LastRun = DateTime.UtcNow;
-					overview.NextRun = null;
-					overview.Save();
-				}
-
 				// Delegate to the background operation.
-				bo.RunJob(job, dir);
+				bo.RunJob
+				(
+					// The TaskProcessorJobEx class wraps the job and allows easy updates.
+					new TaskProcessorJobEx()
+					{
+						Job = job,
+						TaskQueueBackgroundOperationManager = this
+					},
+					dir
+				);
 			}
 			catch (Exception e)
 			{
@@ -299,18 +292,6 @@ namespace MFiles.VAF.Extensions
 					false
 				);
 				// TODO: throw?
-			}
-			finally
-			{
-				// If the status is running then stop it.
-				{
-					var overview = TaskQueueBackgroundOperationOverview.Load(bo);
-					if (overview.Status == TaskQueueBackgroundOperationStatus.Running)
-					{
-						overview.Status = TaskQueueBackgroundOperationStatus.Stopped;
-						overview.Save();
-					}
-				}
 			}
 		}
 	}

@@ -36,7 +36,7 @@ namespace MFiles.VAF.Extensions
 		public TaskQueueBackgroundOperation CreateBackgroundOperation
 		(
 			string name,
-			Action<TaskProcessorJob> method
+			Action<TaskProcessorJobEx> method
 		)
 		{
 			return this.CreateBackgroundOperation
@@ -56,7 +56,7 @@ namespace MFiles.VAF.Extensions
 		public TaskQueueBackgroundOperation CreateBackgroundOperation
 		(
 			string name,
-			Action<TaskProcessorJob, TaskQueueDirective> method
+			Action<TaskProcessorJobEx, TaskQueueDirective> method
 		)
 		{
 			return this.CreateBackgroundOperation<TaskQueueDirective>
@@ -76,7 +76,7 @@ namespace MFiles.VAF.Extensions
 		public TaskQueueBackgroundOperation<TDirective> CreateBackgroundOperation<TDirective>
 		(
 			string name,
-			Action<TaskProcessorJob, TDirective> method
+			Action<TaskProcessorJobEx, TDirective> method
 		)
 			where TDirective : TaskQueueDirective
 		{

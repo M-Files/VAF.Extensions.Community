@@ -1,21 +1,8 @@
-﻿# Multi-Server Mode extensions
+﻿# Task queue extensions
 
 ## Extension methods
 
 **View more details here: [ExtensionMethods](ExtensionMethods)**
-
-## ConfigurableVaultApplicationBase<T> (multi-server mode)
-
-This base class should be used for vault applications targeting multi-server mode that do not wish to manually implement the [pattern required for broadcasting configuration changes to other servers](https://developer.m-files.com/Frameworks/Vault-Application-Framework/Multi-Server-Mode/#configuration-changes).
-
-This base class also adds additional functionality:
-
-* Creates and exposes a `TaskQueueBackgroundOperationManager` for use within your vault application.  This is automatically instantiated when needed, but do not call it before the `StartApplication` method otherwise it may return null.
-* Automatically displays your `TaskQueueBackgroundOperation` instances (created through the above instance) in the [dashboard](https://developer.m-files.com/Frameworks/Vault-Application-Framework/Configuration/Custom-Dashboards/).  If you are rendering your own dashboard then you can create the required panel by calling `base.GetBackgroundOperationDashboardContent` and inserting it as appropriate into your dashboard.
-
-![An image showing a sample dashboard with a list of background operations and their current status](sample-dashboard.png)
-
-**View more details here: [TaskQueueBackgroundOperationManager](TaskQueueBackgroundOperationManager)**
 
 ## TaskQueueBackgroundOperationManager
 

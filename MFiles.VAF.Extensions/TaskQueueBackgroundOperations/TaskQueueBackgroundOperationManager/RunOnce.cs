@@ -66,17 +66,6 @@ namespace MFiles.VAF.Extensions
 				nextRun,
 				vault: vault ?? this.VaultApplication?.PermanentVault
 			);
-
-			// Update the status and next run times.
-			{
-				if (this.BackgroundOperations.TryGetValue(backgroundOperationName, out TaskQueueBackgroundOperation bo))
-				{
-					var overview = TaskQueueBackgroundOperationOverview.Load(bo);
-					overview.Status = TaskQueueBackgroundOperationStatus.Scheduled;
-					overview.NextRun = nextRun;
-					overview.Save();
-				}
-			}
 		}
 
 	}
