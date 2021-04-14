@@ -122,6 +122,7 @@ namespace MFiles.VAF.Extensions
 								if (null != taskInfo.PercentageComplete)
 								{
 									var progressBar = new DashboardTable();
+									progressBar.Attributes.Add("title", taskInfo.StatusDetails);
 									var progressRow = progressBar.AddRow();
 									var completeCell = progressRow.AddCell
 									(
