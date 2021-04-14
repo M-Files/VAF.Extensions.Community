@@ -21,7 +21,7 @@ namespace MFiles.VAF.Extensions
 				return TimeSpan.Zero;
 			
 			// If the activation is in the future then no elapsed time yet.
-			var activation = taskInfo.LatestActivityTimestamp.ToDateTime(DateTimeKind.Utc);
+			var activation = taskInfo.ActivationTimestamp.ToDateTime(DateTimeKind.Utc);
 			if (activation > DateTime.UtcNow)
 				return TimeSpan.Zero;
 
