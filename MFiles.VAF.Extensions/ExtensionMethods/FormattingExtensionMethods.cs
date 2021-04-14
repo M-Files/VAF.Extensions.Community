@@ -83,6 +83,21 @@ namespace MFiles.VAF.Extensions
 				?? "never";
 		}
 
+
+
+		/// <summary>
+		/// Converts <paramref name="value"/> to a representation such as "in 20 minutes".
+		/// If <paramref name="value"/> is null then returns a flag stating not scheduled / not run, depending on whether
+		/// <paramref name="representation"/> is expected to be in the past or future.
+		/// </summary>
+		/// <param name="value">The value to represent.</param>
+		/// <param name="representation">Whether the value is supposed to be last-run (past) or next-run (future).</param>
+		/// <returns>A string in English stating when it should run.</returns>
+		internal static string ToTimeOffset(this DateTime value, DateTimeRepresentationOf representation)
+		{
+			return ((DateTime?)value).ToTimeOffset(representation);
+		}
+
 		/// <summary>
 		/// Converts <paramref name="value"/> to a representation such as "in 20 minutes".
 		/// If <paramref name="value"/> is null then returns a flag stating not scheduled / not run, depending on whether

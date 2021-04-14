@@ -25,67 +25,7 @@ namespace MFiles.VAF.Extensions
 					if (false == kvp.Value.ShowBackgroundOperationInDashboard)
 						continue;
 
-					// Get the current/future executions.
-					var executions = kvp.Value.GetAllExecutions().ToList();
-					var isRunning = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateInProgress);
-					var isScheduled = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateWaiting);
-
-					// Create the (basic) list item.
-					var listItem = new DashboardListItemWithNormalWhitespace()
-					{
-						Title = kvp.Key,
-						StatusSummary = new Configuration.Domain.DomainStatusSummary()
-						{
-							Label = isRunning
-							? "Running"
-							: isScheduled ? "Scheduled" : "Stopped"
-						}
-					};
-
-					// If it is already running then just show the overview.
-					var runningTask = executions
-						.Where(e => e.State == MFilesAPI.MFTaskState.MFTaskStateInProgress)
-						.OrderByDescending(e => e.LatestActivityTimestamp.ToDateTime(DateTimeKind.Utc))
-						.FirstOrDefault();
-					if (isRunning)
-					{
-						var status = runningTask?.RetrieveTaskInfo();
-						if (null != status && status.PercentageComplete.HasValue)
-						{
-							// If we have a percentage then render a progress bar.
-							if (string.IsNullOrWhiteSpace(status.StatusDetails))
-							{
-								status.StatusDetails = $"Running; at {status.PercentageComplete}% complete";
-							}
-							listItem.InnerContent = new DashboardCustomContent($"<table title='{status.StatusDetails}' style='height: 16px; width: 100%;'><tr><td style='width: {status.PercentageComplete.Value}%; background-color: green; color: white; font-size: 12px; text-align: right; padding: 0px 3px;'>{status.PercentageComplete.Value}%</td><td style='width: {100 - status.PercentageComplete.Value}%;background-color: lightGray'>&nbsp;</td></tr></table><span style='font-size: 12px;'><em>{status.StatusDetails}</em></span>");
-						}
-						else if (null != status && false == string.IsNullOrWhiteSpace(status.StatusDetails))
-						{
-							// If we have a status then render the status.
-							listItem.InnerContent = new DashboardCustomContent($"<p><em>The operation is currently running:</em> <span style='font-weight: bold'>{status.StatusDetails}</span></p>");
-						}
-						else
-						{
-							// Otherwise, just "running".
-							listItem.InnerContent = new DashboardCustomContent($"<p><em>The operation is currently running.</em></p>");
-						}
-
-						yield return listItem;
-						continue;
-					}
-
-					// If this background operation has a run command then render it.
-					if (kvp.Value.ShowRunCommandInDashboard)
-					{
-						var cmd = new DashboardDomainCommand
-						{
-							DomainCommandID = kvp.Value.DashboardRunCommand.ID,
-							Title = kvp.Value.DashboardRunCommand.DisplayName,
-							Style = DashboardCommandStyle.Link
-						};
-						listItem.Commands.Add(cmd);
-					}
-
+					// Define when it should run.
 					var htmlString = "Runs ";
 					switch (kvp.Value.RepeatType)
 					{
@@ -103,49 +43,216 @@ namespace MFiles.VAF.Extensions
 							break;
 					}
 
-					// If we have any scheduled then render them.
-					if (isScheduled)
+					// Get known executions (prior, running and future).
+					var executions = kvp.Value
+						.GetAllExecutions()
+						.OrderByDescending(e => e.ActivationTimestamp.ToDateTime(DateTimeKind.Utc))
+						.Take(20)
+						.ToList();
+					var isRunning = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateInProgress);
+					var isScheduled = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateWaiting);
+
+					// Create the (basic) list item.
+					var listItem = new DashboardListItemWithNormalWhitespace()
 					{
-						htmlString += "The task is scheduled to run:<ul>";
-						foreach (var scheduledExecution in executions.Where(e => e.State == MFilesAPI.MFTaskState.MFTaskStateWaiting))
+						Title = kvp.Key,
+						StatusSummary = new Configuration.Domain.DomainStatusSummary()
 						{
-							DateTime? activationTime = scheduledExecution.ActivationTimestamp.ToDateTime(DateTimeKind.Utc);
-							htmlString += $"<li>{activationTime.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.NextRun)}</li>";
+							Label = isRunning
+							? "Running"
+							: isScheduled ? "Scheduled" : "Stopped"
 						}
-						htmlString += "</ul>";
-					}
-					else
+					};
+
+					// If this background operation has a run command then render it.
+					if (kvp.Value.ShowRunCommandInDashboard)
 					{
-						htmlString += "The background operation is not scheduled to run again.<br />";
+						var cmd = new DashboardDomainCommand
+						{
+							DomainCommandID = kvp.Value.DashboardRunCommand.ID,
+							Title = kvp.Value.DashboardRunCommand.DisplayName,
+							Style = DashboardCommandStyle.Link
+						};
+						listItem.Commands.Add(cmd);
 					}
 
-					// Output any previous executions
-					var previousExecutions = executions.Where
-					(
-						e => e.State == MFilesAPI.MFTaskState.MFTaskStateCompleted
-							|| e.State == MFilesAPI.MFTaskState.MFTaskStateCanceled
-							|| e.State == MFilesAPI.MFTaskState.MFTaskStateFailed
-					)
-					.OrderByDescending(e => e.LatestActivityTimestamp.ToDateTime(DateTimeKind.Utc))
-					.Take(10)
-					.ToList();
-					if (previousExecutions.Any())
+					// If we know about any executions then output them.
+					DashboardTable table = null;
+					if (executions.Count > 0)
 					{
-						htmlString += "The task has previously run:<ul>";
-						foreach (var previousExecution in previousExecutions)
+
+						// Create the table and header row.
+						table = new DashboardTable();
 						{
-							DateTime? activationTime = previousExecution.ActivationTimestamp.ToDateTime(DateTimeKind.Utc);
-							htmlString += $"<li>{activationTime.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.LastRun)}: {previousExecution.State}</li>";
+							var header = table.AddRow(DashboardTableRowType.Header);
+							header.AddCells
+							(
+								new DashboardCustomContent("Scheduled for"),
+								new DashboardCustomContent("Status"),
+								new DashboardCustomContent("Duration"),
+								new DashboardCustomContent("Details")
+							);
 						}
-						htmlString += "</ul>";
+
+						// Add a row for each execution.
+						foreach (var execution in executions)
+						{
+							var taskInfo = execution.RetrieveTaskInfo();
+							var activation = execution.ActivationTimestamp.ToDateTime(DateTimeKind.Utc);
+
+							string state = "";
+							switch (execution.State)
+							{
+								case MFilesAPI.MFTaskState.MFTaskStateWaiting:
+									state = "Awaiting scheduled time";
+									break;
+								case MFilesAPI.MFTaskState.MFTaskStateInProgress:
+									state = "Running";
+									break;
+								default:
+									state = execution.State.ToString().Substring(11);
+									break;
+							}
+
+							// Render out the status details.
+							IDashboardContent statusDetails = new DashboardCustomContent("");
+							if (null != taskInfo)
+							{
+								// If we have a progress then do a pretty bar chart.
+								if (null != taskInfo.PercentageComplete)
+								{
+									var progressBar = new DashboardTable();
+									var progressRow = progressBar.AddRow();
+									var completeCell = progressRow.AddCell
+									(
+										$"{taskInfo.PercentageComplete.Value}%"
+									);
+									completeCell.Style.Add("width", $"{taskInfo.PercentageComplete.Value}%");
+									completeCell.Style.Add("background-color", "green");
+									completeCell.Style.Add("color", "white");
+									completeCell.Style.Add("text-align", "right");
+									var leftCell = progressRow.AddCell("&nbsp;");
+									leftCell.Style.Add("width", $"{(100 - taskInfo.PercentageComplete.Value)}%");
+									statusDetails = progressBar;
+								}
+								else if (false == string.IsNullOrWhiteSpace(taskInfo.StatusDetails))
+								{
+									// Otherwise just show the text.
+									statusDetails = new DashboardCustomContent(taskInfo?.StatusDetails);
+								}
+							}
+
+							// Add a row for this execution.
+							var row = table.AddRow();
+							row.AddCells
+							(
+								new DashboardCustomContent
+								(
+									activation.ToTimeOffset
+									(
+										// If we are waiting for it to start then highlight that.
+										execution.State == MFilesAPI.MFTaskState.MFTaskStateWaiting
+											? FormattingExtensionMethods.DateTimeRepresentationOf.NextRun
+											: FormattingExtensionMethods.DateTimeRepresentationOf.LastRun
+									)
+								),
+								new DashboardCustomContent(state),
+								new DashboardCustomContent(execution.GetElapsedTime().ToString()),
+								statusDetails
+							);
+
+							// Set the cell sizing.
+							for (var i = 0; i < 3; i++)
+							{
+								row.Cells[i].Style.Add("white-space", "no-wrap");
+							}
+							row.Cells[3].Style.Add("min-width", "150px");
+						}
+
 					}
 
 					// Set the list item content.
 					listItem.InnerContent = new DashboardCustomContent
 					(
-						(listItem.InnerContent?.ToXmlString() ?? "") +
-						$"<p>{htmlString}</p>"
+						$"<p>{htmlString}</p>" +
+							table?.ToXmlString()
 					);
+
+					//// If it is already running then just show the overview.
+					//var runningTask = executions
+					//	.Where(e => e.State == MFilesAPI.MFTaskState.MFTaskStateInProgress)
+					//	.OrderByDescending(e => e.LatestActivityTimestamp.ToDateTime(DateTimeKind.Utc))
+					//	.FirstOrDefault();
+					//if (isRunning)
+					//{
+					//	var status = runningTask?.RetrieveTaskInfo();
+					//	if (null != status && status.PercentageComplete.HasValue)
+					//	{
+					//		// If we have a percentage then render a progress bar.
+					//		if (string.IsNullOrWhiteSpace(status.StatusDetails))
+					//		{
+					//			status.StatusDetails = $"Running; at {status.PercentageComplete}% complete";
+					//		}
+					//		listItem.InnerContent = new DashboardCustomContent($"<table title='{status.StatusDetails}' style='height: 16px; width: 100%;'><tr><td style='width: {status.PercentageComplete.Value}%; background-color: green; color: white; font-size: 12px; text-align: right; padding: 0px 3px;'>{status.PercentageComplete.Value}%</td><td style='width: {100 - status.PercentageComplete.Value}%;background-color: lightGray'>&nbsp;</td></tr></table><span style='font-size: 12px;'><em>{status.StatusDetails}</em></span>");
+					//	}
+					//	else if (null != status && false == string.IsNullOrWhiteSpace(status.StatusDetails))
+					//	{
+					//		// If we have a status then render the status.
+					//		listItem.InnerContent = new DashboardCustomContent($"<p><em>The operation is currently running:</em> <span style='font-weight: bold'>{status.StatusDetails}</span></p>");
+					//	}
+					//	else
+					//	{
+					//		// Otherwise, just "running".
+					//		listItem.InnerContent = new DashboardCustomContent($"<p><em>The operation is currently running.</em></p>");
+					//	}
+
+					//	yield return listItem;
+					//	continue;
+					//}
+
+					//// If we have any scheduled then render them.
+					//if (isScheduled)
+					//{
+					//	htmlString += "The task is scheduled to run:<ul>";
+					//	foreach (var scheduledExecution in executions.Where(e => e.State == MFilesAPI.MFTaskState.MFTaskStateWaiting))
+					//	{
+					//		DateTime? activationTime = scheduledExecution.ActivationTimestamp.ToDateTime(DateTimeKind.Utc);
+					//		htmlString += $"<li>{activationTime.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.NextRun)}</li>";
+					//	}
+					//	htmlString += "</ul>";
+					//}
+					//else
+					//{
+					//	htmlString += "The background operation is not scheduled to run again.<br />";
+					//}
+
+					//// Output any previous executions
+					//var previousExecutions = executions.Where
+					//(
+					//	e => e.State == MFilesAPI.MFTaskState.MFTaskStateCompleted
+					//		|| e.State == MFilesAPI.MFTaskState.MFTaskStateCanceled
+					//		|| e.State == MFilesAPI.MFTaskState.MFTaskStateFailed
+					//)
+					//.OrderByDescending(e => e.LatestActivityTimestamp.ToDateTime(DateTimeKind.Utc))
+					//.Take(10)
+					//.ToList();
+					//if (previousExecutions.Any())
+					//{
+					//	htmlString += "The task has previously run:<ul>";
+					//	foreach (var previousExecution in previousExecutions)
+					//	{
+					//		DateTime? activationTime = previousExecution.ActivationTimestamp.ToDateTime(DateTimeKind.Utc);
+					//		htmlString += $"<li>{activationTime.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.LastRun)}: {previousExecution.State}</li>";
+					//	}
+					//	htmlString += "</ul>";
+					//}
+
+					//// Set the list item content.
+					//listItem.InnerContent = new DashboardCustomContent
+					//(
+					//	(listItem.InnerContent?.ToXmlString() ?? "") +
+					//	$"<p>{htmlString}</p>"
+					//);
 
 					// Add the list item.
 					yield return listItem;

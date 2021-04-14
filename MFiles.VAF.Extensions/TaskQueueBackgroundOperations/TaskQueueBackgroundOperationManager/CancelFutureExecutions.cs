@@ -25,7 +25,7 @@ namespace MFiles.VAF.Extensions
 					this.VaultApplication.PermanentVault,
 					this.QueueId,
 					t => t.Type == TaskQueueBackgroundOperation.TaskTypeId,
-					new[] { MFTaskState.MFTaskStateWaiting, MFTaskState.MFTaskStateInProgress }
+					new[] { MFTaskState.MFTaskStateWaiting }
 				);
 				foreach (var task in tasksToCancel.Cast<ApplicationTaskInfo>())
 				{

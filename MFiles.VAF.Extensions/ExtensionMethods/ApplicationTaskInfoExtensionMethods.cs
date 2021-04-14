@@ -1,12 +1,41 @@
 ﻿using MFiles.VAF.Common.ApplicationTaskQueue;
+using MFiles.VAF.Configuration;
 using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
 using Newtonsoft.Json;
+using System;
 
 namespace MFiles.VAF.Extensions
 {
 	public static class ApplicationTaskInfoExtensionMethods
 	{
+		/// <summary>
+		/// Gets the time elapsed between the latest activity and the activation timestamp.
+		/// </summary>
+		/// <param name="taskInfo">The task in question.</param>
+		/// <returns>The time span, or <see cref="TimeSpan.Zero"/> if null.</returns>
+		public static TimeSpan GetElapsedTime(this ApplicationTaskInfo taskInfo)
+		{
+			// Sanity.
+			if (null == taskInfo)
+				return TimeSpan.Zero;
+			
+			// If the activation is in the future then no elapsed time yet.
+			var activation = taskInfo.LatestActivityTimestamp.ToDateTime(DateTimeKind.Utc);
+			if (activation > DateTime.UtcNow)
+				return TimeSpan.Zero;
+
+			// What's the difference?
+			var delta =
+				taskInfo.LatestActivityTimestamp.ToDateTime(DateTimeKind.Utc)
+				-
+				activation;
+
+			// If it's less than a second then zero.
+			return delta < TimeSpan.FromSeconds(1)
+				? TimeSpan.Zero
+				: delta;
+		}
 		/// <summary>
 		/// Extracts the remarks from the <paramref name="taskInfo"/>'s latest update,
 		/// and attempts to deserialise it into a <typeparamref name="TTaskInformation"/>.
@@ -30,10 +59,14 @@ namespace MFiles.VAF.Extensions
 				true
 			);
 
+			// Sanity.
+			if (string.IsNullOrWhiteSpace(appTaskUpdateInfo?.Remarks))
+				return null;
+
 			// Try and parse the remarks into the expected type.
 			try
 			{
-				return JsonConvert.DeserializeObject<TTaskInformation>(appTaskUpdateInfo?.Remarks);
+				return JsonConvert.DeserializeObject<TTaskInformation>(appTaskUpdateInfo.Remarks);
 			}
 			catch
 			{

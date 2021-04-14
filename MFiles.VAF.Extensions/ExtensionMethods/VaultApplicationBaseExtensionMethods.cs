@@ -279,6 +279,7 @@ namespace MFiles.VAF.Extensions
 			int maxPollingInterval = 10,
 			bool automaticallyRegisterQueues = true,
 			bool automaticallyStartPolling = true,
+			bool enableAutomaticTaskUpdates = true,
 			CancellationTokenSource cancellationTokenSource = default
 		)
 		{
@@ -331,7 +332,7 @@ namespace MFiles.VAF.Extensions
 				MaxConcurrentBatches = maxConcurrentBatches,
 				MaxConcurrentJobs = maxConcurrentJobs,
 				PermanentVault = vaultApplication.PermanentVault,
-				EnableAutomaticTaskUpdates = true,
+				EnableAutomaticTaskUpdates = enableAutomaticTaskUpdates,
 				QueueDef = new TaskQueueDef
 				{
 					TaskType = TaskQueueManager.TaskType.ApplicationTasks,

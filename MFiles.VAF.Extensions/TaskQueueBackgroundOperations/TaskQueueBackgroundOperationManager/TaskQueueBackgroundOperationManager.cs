@@ -127,7 +127,8 @@ namespace MFiles.VAF.Extensions
 					},
 					cancellationTokenSource: cancellationTokenSource == null
 						? new CancellationTokenSource()
-						: CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token)
+						: CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token),
+					enableAutomaticTaskUpdates: false
 				);
 
 			// Ensure we have a current server.
@@ -266,9 +267,22 @@ namespace MFiles.VAF.Extensions
 					};
 			}
 
+			// Bind to the life-cycle events.
+			job.ProcessingCompleted += (sender, op) => CompleteJob(job, MFTaskState.MFTaskStateCompleted);
+			job.CancellationRequested += (sender, op) => CompleteJob(job, MFTaskState.MFTaskStateCanceled);
+			job.ProcessingFailed += (sender, args) => CompleteJob(job, MFTaskState.MFTaskStateFailed, args.Exception);
+
 			// Perform the action.
 			try
 			{
+				// Mark it as started.
+				this.TaskProcessor.UpdateTaskInfo
+				(
+					job.Data?.Value,
+					MFTaskState.MFTaskStateInProgress,
+					"",
+					false
+				);
 				// Delegate to the background operation.
 				bo.RunJob
 				(
@@ -292,6 +306,42 @@ namespace MFiles.VAF.Extensions
 					false
 				);
 				// TODO: throw?
+			}
+		}
+
+		/// <summary>
+		/// Marks the <paramref name="job"/> to have the completed state of <paramref name="targetState"/>.
+		/// </summary>
+		/// <param name="job">The job to update.</param>
+		/// <param name="targetState">The final completed state.</param>
+		/// <param name="exception">The exception, if the state is failed.</param>
+		protected void CompleteJob(TaskProcessorJob job, MFTaskState targetState, Exception exception = null)
+		{
+			var appTask = job?.Data?.Value;
+
+			// Skip nulls.
+			if (appTask == null)
+				return;
+
+			// Update the task.
+			try
+			{
+				this.TaskProcessor.UpdateTaskInfo
+				(
+					appTask,
+					targetState,
+					"",
+					appendRemarks: true
+				);
+				
+				// Update the app task reference on the job.
+				job.Data.Value = this.TaskProcessor.GetLatestTaskInfo(job.AppTaskId);
+			}
+			catch(Exception e)
+			{
+#if DEBUG
+				throw;
+#endif
 			}
 		}
 	}
