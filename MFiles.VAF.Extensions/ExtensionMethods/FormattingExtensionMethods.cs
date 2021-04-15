@@ -204,6 +204,10 @@ namespace MFiles.VAF.Extensions
 					diff = new TimeSpan(diff.Ticks * -1);
 					if (representation == DateTimeRepresentationOf.NextRun)
 					{
+						// If it's <= 15 seconds then we may just be waiting to be notified.
+						if (diff <= TimeSpan.FromSeconds(15))
+							return "Waiting to be run";
+
 						// It is the next run but it's in the past.
 						return $"Overdue by {(int)diff.TotalSeconds}s";
 					}

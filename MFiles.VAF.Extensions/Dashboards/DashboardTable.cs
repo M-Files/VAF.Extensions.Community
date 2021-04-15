@@ -20,7 +20,8 @@ namespace MFiles.VAF.Extensions.Dashboards
 	/// <summary>
 	/// Represents a row in a table.
 	/// </summary>
-	public class DashboardTableRow : IDashboardContent
+	public class DashboardTableRow
+		: DashboardContentBase
 	{
 		/// <summary>
 		/// Commands (links/buttons) to show.
@@ -39,18 +40,6 @@ namespace MFiles.VAF.Extensions.Dashboards
 		/// </summary>
 		public DashboardTableRowType DashboardTableRowType { get; set; }
 			= DashboardTableRowType.Body;
-
-		/// <summary>
-		/// Attributes to be rendered onto the table cell.
-		/// </summary>
-		public Dictionary<string, string> Attributes { get; }
-			= new Dictionary<string, string>();
-
-		/// <summary>
-		/// CSS styles.  Keys are the names (e.g. "font-size"), values are the value (e.g. "12px").
-		/// </summary>
-		public Dictionary<string, string> Styles { get; }
-			= new Dictionary<string, string>();
 
 		/// <summary>
 		/// Adds a cell to <see cref="Cells"/> and returns it.
@@ -114,7 +103,7 @@ namespace MFiles.VAF.Extensions.Dashboards
 		}
 
 		/// <inheritdoc />
-		public XmlDocumentFragment Generate(XmlDocument xml)
+		protected override XmlDocumentFragment GenerateXmlDocumentFragment(XmlDocument xml)
 		{
 			var fragment = DashboardHelper.CreateFragment(xml, "<tr></tr>");
 			var element = fragment.FirstChild;
@@ -122,25 +111,6 @@ namespace MFiles.VAF.Extensions.Dashboards
 			foreach (var cell in this.Cells)
 			{
 				element.AppendChild(cell.Generate(xml));
-			}
-
-			// Add the attributes.
-			foreach (var key in this.Attributes.Keys)
-			{
-				// Can't have style here.
-				if (key == "style")
-					continue;
-				var attr = xml.CreateAttribute(key);
-				attr.Value = this.Attributes[key];
-				element.Attributes.Append(attr);
-			}
-
-			// Add the style.
-			if (this.Styles.Count > 0)
-			{
-				var attr = xml.CreateAttribute("style");
-				attr.Value = string.Join(";", this.Styles.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
-				element.Attributes.Append(attr);
 			}
 
 			return fragment;
@@ -166,7 +136,8 @@ namespace MFiles.VAF.Extensions.Dashboards
 	/// <summary>
 	/// Represents a cell in a table.
 	/// </summary>
-	public class DashboardTableCell : IDashboardContent
+	public class DashboardTableCell
+		: DashboardContentBase
 	{
 		/// <summary>
 		/// The type of cell (header/standard).
@@ -180,18 +151,6 @@ namespace MFiles.VAF.Extensions.Dashboards
 		public IDashboardContent InnerContent { get; set; }
 
 		/// <summary>
-		/// Attributes to be rendered onto the table cell.
-		/// </summary>
-		public Dictionary<string, string> Attributes { get; }
-			= new Dictionary<string, string>();
-
-		/// <summary>
-		/// CSS styles.  Keys are the names (e.g. "font-size"), values are the value (e.g. "12px").
-		/// </summary>
-		public Dictionary<string, string> Styles { get; }
-			= new Dictionary<string, string>();
-
-		/// <summary>
 		/// CSS styles only applied to the header cells.  Keys are the names (e.g. "font-size"), values are the value (e.g. "12px").
 		/// </summary>
 		public Dictionary<string, string> HeaderStyles { get; }
@@ -200,43 +159,30 @@ namespace MFiles.VAF.Extensions.Dashboards
 		public DashboardTableCell()
 		{
 			this.Styles.Add("font-size", "12px");
-			this.Styles.Add("padding", "2px 35x");
+			this.Styles.Add("padding", "2px 3px");
 			this.Styles.Add("text-align", "left");
 			this.HeaderStyles.Add("border-bottom", "1px solid #CCC");
 		}
 
-		/// <inheritdoc />
-		public XmlDocumentFragment Generate(XmlDocument xml)
+		protected override string GetCssStyles()
 		{
-			var elementName = this.DashboardTableCellType == DashboardTableCellType.Header
-				? "th"
-				: "td";
-			var fragment = DashboardHelper.CreateFragment(xml, $"<{elementName}></{elementName}>");
-			var element = fragment.FirstChild;
-
-			// Add the attributes.
-			foreach (var key in this.Attributes.Keys)
-			{
-				// Can't have style here.
-				if (key == "style")
-					continue;
-				var attr = xml.CreateAttribute(key);
-				attr.Value = this.Attributes[key];
-				element.Attributes.Append(attr);
-			}
-
 			// Add the style.
 			var styles = this.Styles.AsEnumerable();
 			if (this.DashboardTableCellType == DashboardTableCellType.Header)
 			{
 				styles = styles.Union(this.HeaderStyles);
 			}
-			if (styles.Any())
-			{
-				var attr = xml.CreateAttribute("style");
-				attr.Value = string.Join(";", styles.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
-				element.Attributes.Append(attr);
-			}
+			return string.Join(";", styles.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+		}
+
+		/// <inheritdoc />
+		protected override XmlDocumentFragment GenerateXmlDocumentFragment(XmlDocument xml)
+		{
+			var elementName = this.DashboardTableCellType == DashboardTableCellType.Header
+				? "th"
+				: "td";
+			var fragment = DashboardHelper.CreateFragment(xml, $"<{elementName}></{elementName}>");
+			var element = fragment.FirstChild;
 
 			// Add the content.
 			element.AppendChild
@@ -247,13 +193,9 @@ namespace MFiles.VAF.Extensions.Dashboards
 			return fragment;
 		}
 	}
-	public class DashboardTable : IDashboardContent
+	public class DashboardTable
+		: DashboardContentBase
 	{
-		/// <summary>
-		/// The id of the table. Optional.
-		/// Will appear in the html output, so the item can be referenced.
-		/// </summary>
-		public string ID { get; set; }
 
 		/// <summary>
 		/// Commands (links/buttons) to show.
@@ -266,18 +208,6 @@ namespace MFiles.VAF.Extensions.Dashboards
 		/// </summary>
 		public List<DashboardTableRow> Rows { get; }
 			= new List<DashboardTableRow>();
-
-		/// <summary>
-		/// Attributes to be rendered onto the table.
-		/// </summary>
-		public Dictionary<string, string> Attributes { get; }
-			= new Dictionary<string, string>();
-
-		/// <summary>
-		/// CSS styles.  Keys are the names (e.g. "font-size"), values are the value (e.g. "12px").
-		/// </summary>
-		public Dictionary<string, string> Styles { get; }
-			= new Dictionary<string, string>();
 
 		public DashboardTable()
 		{
@@ -301,52 +231,20 @@ namespace MFiles.VAF.Extensions.Dashboards
 		}
 
 		/// <inheritdoc />
-		public virtual XmlDocumentFragment Generate(XmlDocument xml)
+		public override XmlDocumentFragment Generate(XmlDocument xml)
 		{
-			// Create the basic structure of the table.
-			XmlDocumentFragment fragment = DashboardHelper.CreateFragment(xml,
-					"<div class='table-wrapper' style='max-height: 200px; overflow-y: auto;'>"
-						+ "<div class='title-bar'>"
-							+ "<span class='command-bar'></span>"
-						+ "</div>"
-						+ "<table>"
-						+ "</table>" 
-					+ "</div>");
-
+			var fragment = this.GenerateXmlDocumentFragment(xml);
 			// Get a handle on the various elements.
 			XmlElement tableWrapper = (XmlElement)fragment.SelectNodes("div[@class=\"table-wrapper\"]")[0];
 			XmlElement table = (XmlElement)fragment.SelectNodes("//table")[0];
 			XmlElement titleBar = (XmlElement)tableWrapper.SelectNodes("*[@class=\"title-bar\"]")[0];
 			XmlElement cmdBar = (XmlElement)titleBar.SelectNodes("*[@class=\"command-bar\"]")[0];
 
-			// Add the id if defined.
-			if (!String.IsNullOrWhiteSpace(this.ID))
-				tableWrapper.SetAttribute("id", this.ID);
-
 			// Append any commands defined for the item.
 			if (this.Commands != null)
 			{
 				foreach (DashboardCommand cmd in this.Commands)
 					cmdBar.AppendChild(cmd.Generate(xml));
-			}
-
-			// Add the attributes.
-			foreach (var key in this.Attributes.Keys)
-			{
-				// Can't have style here.
-				if (key == "style")
-					continue;
-				var attr = xml.CreateAttribute(key);
-				attr.Value = this.Attributes[key];
-				table.Attributes.Append(attr);
-			}
-
-			// Add the style.
-			if (this.Styles.Count > 0)
-			{
-				var attr = xml.CreateAttribute("style");
-				attr.Value = string.Join(";", this.Styles.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
-				table.Attributes.Append(attr);
 			}
 
 			// Add the header rows.
@@ -394,7 +292,43 @@ namespace MFiles.VAF.Extensions.Dashboards
 				table.AppendChild(bodyFragment);
 			}
 
+			// Add the id if defined.
+			if (!String.IsNullOrWhiteSpace(this.ID))
+				table.SetAttribute("id", this.ID);
+
+			// Add the attributes.
+			foreach (var key in this.Attributes.Keys)
+			{
+				// Can't have style here.
+				if (key == "style")
+					continue;
+				var attr = xml.CreateAttribute(key);
+				attr.Value = this.Attributes[key];
+				table.Attributes.Append(attr);
+			}
+
+			// Add the style.
+			{
+				var attr = xml.CreateAttribute("style");
+				attr.Value = $"{this.GetCssStyles() ?? ""} {table.GetAttribute("style") ?? ""}";
+				table.Attributes.Append(attr);
+			}
+
 			return fragment;
+		}
+
+		/// <inheritdoc />
+		protected override XmlDocumentFragment GenerateXmlDocumentFragment(XmlDocument xml)
+		{
+			// Create the basic structure of the table.
+			return  DashboardHelper.CreateFragment(xml,
+					"<div class='table-wrapper' style='max-height: 200px; overflow-y: auto;'>"
+						+ "<div class='title-bar'>"
+							+ "<span class='command-bar'></span>"
+						+ "</div>"
+						+ "<table>"
+						+ "</table>" 
+					+ "</div>");
 		}
 	}
 }

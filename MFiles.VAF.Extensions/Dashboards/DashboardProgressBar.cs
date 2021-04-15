@@ -9,18 +9,13 @@ using System.Xml;
 
 namespace MFiles.VAF.Extensions.Dashboards
 {
-	public class DashboardProgressBar : IDashboardContent
+	public class DashboardProgressBar
+		: DashboardContentBase
 	{
 		/// <summary>
 		/// The current state of the task being represented by this progress bar.
 		/// </summary>
 		public MFTaskState? TaskState { get; set; }
-
-		/// <summary>
-		/// The id of the component . Optional.
-		/// Will appear in the html output, so the item can be referenced.
-		/// </summary>
-		public string ID { get; set; }
 
 		///// <summary>
 		///// Commands (links/buttons) to show.
@@ -39,20 +34,8 @@ namespace MFiles.VAF.Extensions.Dashboards
 		/// </summary>
 		public int? PercentageComplete { get; set; }
 
-		/// <summary>
-		/// Attributes to be rendered onto the table cell.
-		/// </summary>
-		public Dictionary<string, string> Attributes { get; }
-			= new Dictionary<string, string>();
-
-		/// <summary>
-		/// CSS styles.  Keys are the names (e.g. "font-size"), values are the value (e.g. "12px").
-		/// </summary>
-		public Dictionary<string, string> Styles { get; }
-			= new Dictionary<string, string>();
-
 		/// <inheritdoc />
-		public XmlDocumentFragment Generate(XmlDocument xml)
+		protected override XmlDocumentFragment GenerateXmlDocumentFragment(XmlDocument xml)
 		{
 			// What should the colour of the progress bar be?
 			var backgroundColour = "green";
@@ -74,7 +57,7 @@ namespace MFiles.VAF.Extensions.Dashboards
 					  $"<div class='progress-bar' style='min-width: 200px; background-color: white; position: relative; width: 100%; height: 23px; border: 1px solid #CCC; padding: 2px 5px 5px 5px; border-radius: 2px; box-sizing: border-box; overflow: hidden; font-size: 10px;'>"
 						+ $"<div style='position: absolute; top: 0px; left: 0px; bottom: 0px; width: 30px; padding: 2px 5px; text-align: center; background-color: #CCC; color: {numberColour}'>{this.PercentageComplete.Value}%</div>"
 						+ $"<div class='number' style='position: absolute; width: {this.PercentageComplete.Value}%; bottom: 0px; background-color: {backgroundColour}; left: 0px; height: 4px'></div>"
-						+ $"<div class='text' style='position: absolute; top: 0px; bottom: 5px; left: 40px; right: 0px; white-space: nowrap; overflow: hidden; padding: 2px 5px; text-overflow: ellipsis; color: {numberColour}'>}</div>"
+						+ $"<div class='text' style='position: absolute; top: 0px; bottom: 5px; left: 40px; right: 0px; white-space: nowrap; overflow: hidden; padding: 2px 5px; text-overflow: ellipsis; color: {numberColour}'></div>"
 					+ "</div>");
 				XmlElement progressBarElement = (XmlElement)fragment.SelectNodes("div[@class='progress-bar']")[0];
 				progressBarElement.SetAttribute("title", this.Text);
@@ -92,11 +75,6 @@ namespace MFiles.VAF.Extensions.Dashboards
 
 			// Get a handle on the various elements.
 			XmlElement progressBar = (XmlElement)fragment.SelectNodes("div[@class=\"progress-bar\"]")[0];
-			//XmlElement cmdBar = (XmlElement)progressBar.SelectNodes("*[@class=\"command-bar\"]")[0];
-
-			// Add the id if defined.
-			if (!String.IsNullOrWhiteSpace(this.ID))
-				progressBar.SetAttribute("id", this.ID);
 
 			//// Append any commands defined for the item.
 			//if (this.Commands != null)
@@ -104,25 +82,6 @@ namespace MFiles.VAF.Extensions.Dashboards
 			//	foreach (DashboardCommand cmd in this.Commands)
 			//		cmdBar.AppendChild(cmd.Generate(xml));
 			//}
-
-			// Add the attributes.
-			foreach (var key in this.Attributes.Keys)
-			{
-				// Can't have style here.
-				if (key == "style")
-					continue;
-				var attr = xml.CreateAttribute(key);
-				attr.Value = this.Attributes[key];
-				progressBar.Attributes.Append(attr);
-			}
-
-			// Add the style.
-			if (this.Styles.Count > 0)
-			{
-				var attr = xml.CreateAttribute("style");
-				attr.Value = string.Join(";", this.Styles.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
-				progressBar.Attributes.Append(attr);
-			}
 
 			return fragment;
 		}
