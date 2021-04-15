@@ -142,20 +142,4 @@ namespace MFiles.VAF.Extensions
 			return input?.Job;
 		}
 	}
-
-	/// <summary>
-	/// Details about the current job status.
-	/// </summary>
-	public class TaskInformation
-	{
-		/// <summary>
-		/// Details about the current status (e.g. "Processing object 5 of 100").
-		/// </summary>
-		public string StatusDetails { get; set; }
-
-		/// <summary>
-		/// Details on how far through the process the task is.
-		/// </summary>
-		public int? PercentageComplete { get; set; }
-	}
 }
