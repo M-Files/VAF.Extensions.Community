@@ -74,7 +74,7 @@ namespace MFiles.VAF.Extensions.Dashboards
 					  $"<div class='progress-bar' style='min-width: 200px; background-color: white; position: relative; width: 100%; height: 23px; border: 1px solid #CCC; padding: 2px 5px 5px 5px; border-radius: 2px; box-sizing: border-box; overflow: hidden; font-size: 10px;'>"
 						+ $"<div style='position: absolute; top: 0px; left: 0px; bottom: 0px; width: 30px; padding: 2px 5px; text-align: center; background-color: #CCC; color: {numberColour}'>{this.PercentageComplete.Value}%</div>"
 						+ $"<div class='number' style='position: absolute; width: {this.PercentageComplete.Value}%; bottom: 0px; background-color: {backgroundColour}; left: 0px; height: 4px'></div>"
-						+ $"<div class='text' style='position: absolute; top: 0px; bottom: 5px; left: 40px; right: 0px; white-space: nowrap; overflow: hidden; padding: 2px 5px; text-overflow: ellipsis'>{this.Text}</div>"
+						+ $"<div class='text' style='position: absolute; top: 0px; bottom: 5px; left: 40px; right: 0px; white-space: nowrap; overflow: hidden; padding: 2px 5px; text-overflow: ellipsis; color: {numberColour}'>}</div>"
 					+ "</div>");
 				XmlElement progressBarElement = (XmlElement)fragment.SelectNodes("div[@class='progress-bar']")[0];
 				progressBarElement.SetAttribute("title", this.Text);
