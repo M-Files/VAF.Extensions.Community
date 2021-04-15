@@ -141,12 +141,7 @@ namespace MFiles.VAF.Extensions
 								else if (false == string.IsNullOrWhiteSpace(taskInfo.StatusDetails))
 								{
 									// Otherwise just show the text.
-									//statusDetails = new DashboardCustomContent(taskInfo?.StatusDetails);
-									var progressBar = new DashboardProgressBar()
-									{
-										Text = taskInfo.StatusDetails
-									};
-									statusDetails = progressBar;
+									statusDetails = new DashboardCustomContent(taskInfo?.StatusDetails);
 								}
 							}
 

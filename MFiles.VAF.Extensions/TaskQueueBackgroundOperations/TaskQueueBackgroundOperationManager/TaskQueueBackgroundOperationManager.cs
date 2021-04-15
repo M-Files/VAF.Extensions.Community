@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using MFiles.VAF.Common.ApplicationTaskQueue;
 using MFiles.VAF.MultiserverMode;
+using Newtonsoft.Json;
 
 namespace MFiles.VAF.Extensions
 {
@@ -297,15 +298,32 @@ namespace MFiles.VAF.Extensions
 			}
 			catch (Exception e)
 			{
-				// Exception.
-				this.TaskProcessor.UpdateTaskInfo
-				(
-					job.Data?.Value,
-					MFTaskState.MFTaskStateFailed,
-					e.Message,
-					false
-				);
-				// TODO: throw?
+				// Try and get the latest task info.
+				var info = job?.Data?.Value?.ToApplicationTaskInfo()?.RetrieveTaskInfo();
+
+				if (null != info)
+				{
+					// If we have info then use that in the update.
+					info.StatusDetails = e.Message;
+					this.TaskProcessor.UpdateTaskInfo
+					(
+						job.Data?.Value,
+						MFTaskState.MFTaskStateFailed,
+						JsonConvert.SerializeObject(info),
+						false
+					);
+				}
+				else
+				{
+					// Otherwise, just use the exception message.
+					this.TaskProcessor.UpdateTaskInfo
+					(
+						job.Data?.Value,
+						MFTaskState.MFTaskStateFailed,
+						e.Message,
+						false
+					);
+				}
 			}
 		}
 

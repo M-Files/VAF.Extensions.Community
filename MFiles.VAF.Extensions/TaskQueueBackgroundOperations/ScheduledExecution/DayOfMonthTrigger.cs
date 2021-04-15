@@ -158,7 +158,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			if (null == this.TriggerTimes || this.TriggerTimes.Count == 0)
 				return null;
 
-			return $"On the {string.Join(", ", this.TriggerDays)} of the month at the following times: {string.Join(", ", this.TriggerTimes.Select(t => t.ToString()))}.";
+			return $"On the {string.Join(", ", this.TriggerDays.OrderBy(t => t))} of the month at the following times: {string.Join(", ", this.TriggerTimes.OrderBy(t => t.Time).Select(t => t.ToString()))}.";
 		}
 	}
 }
