@@ -66,7 +66,10 @@ namespace MFiles.VAF.Extensions
 			// Try and parse the remarks into the expected type.
 			try
 			{
-				return JsonConvert.DeserializeObject<TTaskInformation>(appTaskUpdateInfo.Remarks);
+				var info = JsonConvert.DeserializeObject<TTaskInformation>(appTaskUpdateInfo.Remarks);
+				if (null != info)
+					info.CurrentTaskState = applicationTask.State;
+				return info;
 			}
 			catch
 			{

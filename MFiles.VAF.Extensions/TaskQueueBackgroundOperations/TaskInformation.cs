@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Extensions.Dashboards;
+using MFilesAPI;
 
 namespace MFiles.VAF.Extensions
 {
@@ -19,6 +20,11 @@ namespace MFiles.VAF.Extensions
 		public int? PercentageComplete { get; set; }
 
 		/// <summary>
+		/// The current task state.
+		/// </summary>
+		public MFTaskState CurrentTaskState { get; internal set; }
+
+		/// <summary>
 		/// Creates either a <see cref="DashboardProgressBar"/> or <see cref="DashboardCustomContent"/>
 		/// to render the current task information on a dashboard.
 		/// </summary>
@@ -32,7 +38,8 @@ namespace MFiles.VAF.Extensions
 				var progressBar = new DashboardProgressBar()
 				{
 					PercentageComplete = this.PercentageComplete.Value,
-					Text = this.StatusDetails
+					Text = this.StatusDetails,
+					TaskState = this.CurrentTaskState
 				};
 				return progressBar;
 			}

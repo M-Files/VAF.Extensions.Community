@@ -90,7 +90,6 @@ namespace MFiles.VAF.Extensions
 					case MFilesAPI.MFTaskState.MFTaskStateFailed:
 					case MFilesAPI.MFTaskState.MFTaskStateCanceled:
 						rowTitle = $"Started at {activation.ToString("yyyy-MM-dd HH:mm:ss")}, server-time (took {execution.GetElapsedTime().ToDisplayString()}).";
-						row.Styles.Add("color", "red");
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateCompleted:
 						rowTitle = $"Started at {activation.ToString("yyyy-MM-dd HH:mm:ss")}, server-time (took {execution.GetElapsedTime().ToDisplayString()}).";

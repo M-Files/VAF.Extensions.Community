@@ -107,21 +107,7 @@ namespace MFiles.VAF.Extensions
 		public TTaskInformation RetrieveTaskInfo<TTaskInformation>()
 			where TTaskInformation : TaskInformation
 		{
-			var appTask = this.TaskProcessor.GetLatestTaskInfo(this.Job.AppTaskId);
-			var updateInfo = AppTaskUpdateInfo.From
-			(
-				TaskQueueBackgroundOperationManager.CurrentServer.ServerID,
-				appTask,
-				true
-			);
-			try
-			{
-				return JsonConvert.DeserializeObject<TTaskInformation>(updateInfo.Remarks);
-			}
-			catch
-			{
-				return default;
-			}
+			return this.Job?.Data?.Value?.ToApplicationTaskInfo()?.RetrieveTaskInfo<TTaskInformation>();
 		}
 
 		/// <summary>
