@@ -1,7 +1,7 @@
 ﻿using MFiles.VAF.Configuration.Domain.Dashboards;
 using System.Xml;
 
-namespace MFiles.VAF.Extensions
+namespace MFiles.VAF.Extensions.Dashboards
 {
 	/// <summary>
 	/// Renders a <see cref="DashboardListItem"/>, but sets the "style" attribute to remove the "white-space: pre-line"

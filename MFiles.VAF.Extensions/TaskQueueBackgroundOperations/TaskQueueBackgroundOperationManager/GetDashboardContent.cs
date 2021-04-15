@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Configuration;
 using MFiles.VAF.Configuration.Domain.Dashboards;
+using MFiles.VAF.Extensions.Dashboards;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -128,12 +129,12 @@ namespace MFiles.VAF.Extensions
 									(
 										$"{taskInfo.PercentageComplete.Value}%"
 									);
-									completeCell.Style.Add("width", $"{taskInfo.PercentageComplete.Value}%");
-									completeCell.Style.Add("background-color", "green");
-									completeCell.Style.Add("color", "white");
-									completeCell.Style.Add("text-align", "right");
+									completeCell.Styles.Add("width", $"{taskInfo.PercentageComplete.Value}%");
+									completeCell.Styles.Add("background-color", "green");
+									completeCell.Styles.Add("color", "white");
+									completeCell.Styles.Add("text-align", "right");
 									var leftCell = progressRow.AddCell("&nbsp;");
-									leftCell.Style.Add("width", $"{(100 - taskInfo.PercentageComplete.Value)}%");
+									leftCell.Styles.Add("width", $"{(100 - taskInfo.PercentageComplete.Value)}%");
 									statusDetails = progressBar;
 								}
 								else if (false == string.IsNullOrWhiteSpace(taskInfo.StatusDetails))
@@ -165,9 +166,9 @@ namespace MFiles.VAF.Extensions
 							// Set the cell sizing.
 							for (var i = 0; i < 3; i++)
 							{
-								row.Cells[i].Style.Add("white-space", "nowrap");
+								row.Cells[i].Styles.Add("white-space", "nowrap");
 							}
-							row.Cells[3].Style.Add("min-width", "150px");
+							row.Cells[3].Styles.Add("min-width", "150px");
 						}
 
 					}

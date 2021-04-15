@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 
-namespace MFiles.VAF.Extensions
+namespace MFiles.VAF.Extensions.Dashboards
 {
 	/// <summary>
 	/// Types of row that a table can support.
@@ -156,12 +156,13 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// CSS styles.  Keys are the names (e.g. "font-size"), values are the value (e.g. "12px").
 		/// </summary>
-		public Dictionary<string, string> Style { get; }
+		public Dictionary<string, string> Styles { get; }
 			= new Dictionary<string, string>();
 
 		public DashboardTableCell()
 		{
-			this.Style.Add("font-size", "12px");
+			this.Styles.Add("font-size", "12px");
+			this.Styles.Add("padding", "0px 3px");
 		}
 
 		/// <inheritdoc />
@@ -185,10 +186,10 @@ namespace MFiles.VAF.Extensions
 			}
 
 			// Add the style.
-			if (this.Style.Count > 0)
+			if (this.Styles.Count > 0)
 			{
 				var attr = xml.CreateAttribute("style");
-				attr.Value = string.Join(";", this.Style.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+				attr.Value = string.Join(";", this.Styles.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
 				element.Attributes.Append(attr);
 			}
 
@@ -230,14 +231,12 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// CSS styles.  Keys are the names (e.g. "font-size"), values are the value (e.g. "12px").
 		/// </summary>
-		public Dictionary<string, string> Style { get; }
+		public Dictionary<string, string> Styles { get; }
 			= new Dictionary<string, string>();
 
 		public DashboardTable()
 		{
-			this.Style.Add("display", "block");
-			this.Style.Add("width", "100%");
-			this.Style.Add("border", "1px solid #CCC");
+			this.Styles.Add("width", "100%");
 		}
 
 		/// <summary>
@@ -294,10 +293,10 @@ namespace MFiles.VAF.Extensions
 			}
 
 			// Add the style.
-			if (this.Style.Count > 0)
+			if (this.Styles.Count > 0)
 			{
 				var attr = xml.CreateAttribute("style");
-				attr.Value = string.Join(";", this.Style.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+				attr.Value = string.Join(";", this.Styles.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
 				table.Attributes.Append(attr);
 			}
 
