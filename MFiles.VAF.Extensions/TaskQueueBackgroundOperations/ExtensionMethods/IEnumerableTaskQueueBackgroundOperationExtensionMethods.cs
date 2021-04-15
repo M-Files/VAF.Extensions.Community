@@ -65,7 +65,6 @@ namespace MFiles.VAF.Extensions
 				var executions = bgo
 					.GetAllExecutions()
 					.OrderByDescending(e => e.ActivationTimestamp.ToDateTime(DateTimeKind.Utc))
-					.Take(20)
 					.ToList();
 				var isRunning = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateInProgress);
 				var isScheduled = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateWaiting);
@@ -98,7 +97,7 @@ namespace MFiles.VAF.Extensions
 				listItem.InnerContent = new DashboardCustomContent
 				(
 					htmlString
-					+ executions?.AsDashboardContent()?.ToXmlString()
+					+ executions?.AsDashboardContent(50)?.ToXmlString()
 				);
 
 				// Add the list item.

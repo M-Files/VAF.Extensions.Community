@@ -18,12 +18,16 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="applicationTasks">The previous executions.</param>
 		/// <returns>The table.</returns>
-		public static IDashboardContent AsDashboardContent(this IEnumerable<ApplicationTaskInfo> applicationTasks)
+		public static IDashboardContent AsDashboardContent
+		(
+			this IEnumerable<ApplicationTaskInfo> applicationTasks,
+			int maximumRowsToShow
+		)
 		{
 			// Sanity.
 			if (null == applicationTasks || false == applicationTasks.Any())
 				return null;
-
+			var list = applicationTasks.ToList();
 
 			// Create the table and header row.
 			DashboardTable table = new DashboardTable();
@@ -37,8 +41,17 @@ namespace MFiles.VAF.Extensions
 				);
 			}
 
-			// Add a row for each execution.
-			foreach (var execution in applicationTasks)
+			List<ApplicationTaskInfo> executionsToShow;
+			if (list.Count <= maximumRowsToShow)
+				executionsToShow = list;
+			else
+			{
+				// TODO: Better logic for which records to show.
+				executionsToShow = new List<ApplicationTaskInfo>(list.Take(maximumRowsToShow));
+			}
+
+			// Add a row for each execution to show.
+			foreach (var execution in executionsToShow)
 			{
 				var taskInfo = execution.RetrieveTaskInfo();
 				var activation = execution.ActivationTimestamp.ToDateTime(DateTimeKind.Utc);
@@ -101,8 +114,25 @@ namespace MFiles.VAF.Extensions
 				row.Cells[2].Styles.Add("width", "100%");
 			}
 
+			// Create an overview of the statuses.
+			var data = list.GroupBy(e => e.State).ToDictionary(e => e.Key, e => e.Count());
+			var overview = new DashboardCustomContentEx
+			(
+				"<span style='float: right; margin: 5px 0px'>"
+					+ "<span>Totals: </span>"
+					+ $"<span title='{(data.ContainsKey(MFTaskState.MFTaskStateWaiting) ? data[MFTaskState.MFTaskStateWaiting] : 0)} awaiting processing' style='display: inline-block; margin: 0px 2px; background-image: url({DashboardHelper.ImageFileToDataUri("Resources/Waiting.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px'>{(data.ContainsKey(MFTaskState.MFTaskStateWaiting) ? data[MFTaskState.MFTaskStateWaiting] : 0)}</span>"
+					+ $"<span title='{(data.ContainsKey(MFTaskState.MFTaskStateInProgress) ? data[MFTaskState.MFTaskStateInProgress] : 0)} running' style='display: inline-block; margin: 0px 2px; background-image: url({DashboardHelper.ImageFileToDataUri("Resources/Running.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px'>{(data.ContainsKey(MFTaskState.MFTaskStateInProgress) ? data[MFTaskState.MFTaskStateInProgress] : 0)}</span>"
+					+ $"<span title='{(data.ContainsKey(MFTaskState.MFTaskStateCompleted) ? data[MFTaskState.MFTaskStateCompleted] : 0)} completed' style='display: inline-block; margin: 0px 2px; background-image: url({DashboardHelper.ImageFileToDataUri("Resources/Completed.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px'>{(data.ContainsKey(MFTaskState.MFTaskStateCompleted) ? data[MFTaskState.MFTaskStateCompleted] : 0)}</span>"
+					+ $"<span title='{(data.ContainsKey(MFTaskState.MFTaskStateFailed) ? data[MFTaskState.MFTaskStateFailed] : 0)} failed' style='display: inline-block; margin: 0px 2px; background-image: url({DashboardHelper.ImageFileToDataUri("Resources/Failed.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px'>{(data.ContainsKey(MFTaskState.MFTaskStateFailed) ? data[MFTaskState.MFTaskStateFailed] : 0)}</span>"
+				+ "</span>"
+			);
+
 			// Return the table.
-			return table;
+			return new DashboardContentCollection()
+			{
+				table,
+				overview
+			};
 		}
 	}
 }
