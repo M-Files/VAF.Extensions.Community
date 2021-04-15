@@ -54,17 +54,23 @@ namespace MFiles.VAF.Extensions.Dashboards
 			{
 				// We have a percentage complete, so render a progress bar.
 				fragment = DashboardHelper.CreateFragment(xml,
-					  $"<div class='progress-bar' title='{this.Text}' style='min-width: 200px; background-color: white; position: relative; width: 100%; height: 23px; border: 1px solid #CCC; padding: 2px 5px 5px 5px; border-radius: 2px; box-sizing: border-box; overflow: hidden; font-size: 10px;'>"
+					  $"<div class='progress-bar'style='min-width: 200px; background-color: white; position: relative; width: 100%; height: 23px; border: 1px solid #CCC; padding: 2px 5px 5px 5px; border-radius: 2px; box-sizing: border-box; overflow: hidden; font-size: 10px;'>"
 						+ $"<div style='position: absolute; top: 0px; left: 0px; bottom: 0px; width: 30px; padding: 2px 5px; text-align: center; background-color: #CCC; color: #666'>{this.PercentageComplete.Value}%</div>"
 						+ $"<div style='position: absolute; width: {this.PercentageComplete.Value}%; bottom: 0px; background-color: green; left: 0px; height: 4px'></div>"
-						+ $"<div style='position: absolute; top: 0px; bottom: 5px; left: 40px; right: 0px; white-space: nowrap; overflow: hidden; padding: 2px 5px; text-overflow: ellipsis'>{this.Text}</div>"
+						+ $"<div class='text' style='position: absolute; top: 0px; bottom: 5px; left: 40px; right: 0px; white-space: nowrap; overflow: hidden; padding: 2px 5px; text-overflow: ellipsis'>{this.Text}</div>"
 					+ "</div>");
+				XmlElement progressBarElement = (XmlElement)fragment.SelectNodes("div[@class='progress-bar']")[0];
+				progressBarElement.SetAttribute("title", this.Text);
+				XmlElement text = (XmlElement)progressBarElement.SelectNodes("*[@class=\"text\"]")[0];
+				text.Value = this.Text;
 			}
 			else
 			{
 				// Render an indeterminate progress bar.
 				fragment = DashboardHelper.CreateFragment(xml,
-					  $"<div title='{this.Text}' style='min-width: 200px; position: relative; width: 100%; height: 20px; border: 1px solid #CCC; padding: 2px 5px; border-radius: 2px; box-sizing: border-box; overflow: hidden; font-size: 10px;  background-color: green;  background-repeat: repeat; background-position: center center; background-size: 40px 40px; background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent); color: white;text-overflow: ellipsis; animation: progress-bar-stripes 1s linear infinite;'>{this.Text}</div>");
+					  $"<div class='progress-bar' style='min-width: 200px; position: relative; width: 100%; height: 20px; border: 1px solid #CCC; padding: 2px 5px; border-radius: 2px; box-sizing: border-box; overflow: hidden; font-size: 10px;  background-color: green;  background-repeat: repeat; background-position: center center; background-size: 40px 40px; background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent); color: white;text-overflow: ellipsis; animation: progress-bar-stripes 1s linear infinite;'></div>");
+				((XmlElement)fragment.FirstChild).SetAttribute("title", this.Text);
+				fragment.FirstChild.Value = this.Text;
 			}
 
 			// Get a handle on the various elements.
