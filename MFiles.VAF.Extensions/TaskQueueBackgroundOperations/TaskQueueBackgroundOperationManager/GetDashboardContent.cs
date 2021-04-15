@@ -26,8 +26,15 @@ namespace MFiles.VAF.Extensions
 					if (false == kvp.Value.ShowBackgroundOperationInDashboard)
 						continue;
 
-					// Define when it should run.
-					var htmlString = "Runs ";
+					// Show the description?
+					var htmlString = "";
+					if (false == string.IsNullOrWhiteSpace(kvp.Value.Description))
+					{
+						htmlString += new DashboardCustomContent($"<p><em>{kvp.Value.Description}</em></p>").ToXmlString();
+					}
+
+					// Show when it should run.
+					htmlString += "<p>Runs ";
 					switch (kvp.Value.RepeatType)
 					{
 						case TaskQueueBackgroundOperationRepeatType.NotRepeating:
@@ -43,6 +50,7 @@ namespace MFiles.VAF.Extensions
 							htmlString = "<em>Unhandled: " + kvp.Value.RepeatType + "</em><br />";
 							break;
 					}
+					htmlString += "</p>";
 
 					// Get known executions (prior, running and future).
 					var executions = kvp.Value
@@ -100,6 +108,7 @@ namespace MFiles.VAF.Extensions
 						{
 							var taskInfo = execution.RetrieveTaskInfo();
 							var activation = execution.ActivationTimestamp.ToDateTime(DateTimeKind.Utc);
+							var lastActivityTime = execution.LatestActivityTimestamp.ToDateTime(DateTimeKind.Utc);
 
 							string state = "";
 							switch (execution.State)
@@ -122,25 +131,22 @@ namespace MFiles.VAF.Extensions
 								// If we have a progress then do a pretty bar chart.
 								if (null != taskInfo.PercentageComplete)
 								{
-									var progressBar = new DashboardTable();
-									progressBar.Attributes.Add("title", taskInfo.StatusDetails);
-									var progressRow = progressBar.AddRow();
-									var completeCell = progressRow.AddCell
-									(
-										$"{taskInfo.PercentageComplete.Value}%"
-									);
-									completeCell.Styles.Add("width", $"{taskInfo.PercentageComplete.Value}%");
-									completeCell.Styles.Add("background-color", "green");
-									completeCell.Styles.Add("color", "white");
-									completeCell.Styles.Add("text-align", "right");
-									var leftCell = progressRow.AddCell("&nbsp;");
-									leftCell.Styles.Add("width", $"{(100 - taskInfo.PercentageComplete.Value)}%");
+									var progressBar = new DashboardProgressBar()
+									{
+										PercentageComplete = taskInfo.PercentageComplete.Value,
+										Text = taskInfo.StatusDetails
+									};
 									statusDetails = progressBar;
 								}
 								else if (false == string.IsNullOrWhiteSpace(taskInfo.StatusDetails))
 								{
 									// Otherwise just show the text.
-									statusDetails = new DashboardCustomContent(taskInfo?.StatusDetails);
+									//statusDetails = new DashboardCustomContent(taskInfo?.StatusDetails);
+									var progressBar = new DashboardProgressBar()
+									{
+										Text = taskInfo.StatusDetails
+									};
+									statusDetails = progressBar;
 								}
 							}
 
@@ -163,12 +169,27 @@ namespace MFiles.VAF.Extensions
 								statusDetails
 							);
 
-							// Set the cell sizing.
-							for (var i = 0; i < 3; i++)
+							// Set the row title.
+							var rowTitle = "";
+							switch (execution.State)
 							{
-								row.Cells[i].Styles.Add("white-space", "nowrap");
+								case MFilesAPI.MFTaskState.MFTaskStateWaiting:
+									break;
+								case MFilesAPI.MFTaskState.MFTaskStateInProgress:
+									rowTitle = $"Started at {activation.ToString("yyyy-MM-dd HH:mm:ss")}, server-time (taken {execution.GetElapsedTime().ToDisplayString()} so far).";
+									break;
+								case MFilesAPI.MFTaskState.MFTaskStateFailed:
+								case MFilesAPI.MFTaskState.MFTaskStateCanceled:
+									rowTitle = $"Started at {activation.ToString("yyyy-MM-dd HH:mm:ss")}, server-time (took {execution.GetElapsedTime().ToDisplayString()}).";
+									row.Styles.Add("color", "red");
+									break;
+								case MFilesAPI.MFTaskState.MFTaskStateCompleted:
+									rowTitle = $"Started at {activation.ToString("yyyy-MM-dd HH:mm:ss")}, server-time (took {execution.GetElapsedTime().ToDisplayString()}).";
+									break;
+								default:
+									break;
 							}
-							row.Cells[3].Styles.Add("min-width", "150px");
+							row.Attributes.Add("title", rowTitle);
 						}
 
 					}
@@ -176,85 +197,8 @@ namespace MFiles.VAF.Extensions
 					// Set the list item content.
 					listItem.InnerContent = new DashboardCustomContent
 					(
-						$"<p>{htmlString}</p>" +
-							table?.ToXmlString()
+						htmlString + table?.ToXmlString()
 					);
-
-					//// If it is already running then just show the overview.
-					//var runningTask = executions
-					//	.Where(e => e.State == MFilesAPI.MFTaskState.MFTaskStateInProgress)
-					//	.OrderByDescending(e => e.LatestActivityTimestamp.ToDateTime(DateTimeKind.Utc))
-					//	.FirstOrDefault();
-					//if (isRunning)
-					//{
-					//	var status = runningTask?.RetrieveTaskInfo();
-					//	if (null != status && status.PercentageComplete.HasValue)
-					//	{
-					//		// If we have a percentage then render a progress bar.
-					//		if (string.IsNullOrWhiteSpace(status.StatusDetails))
-					//		{
-					//			status.StatusDetails = $"Running; at {status.PercentageComplete}% complete";
-					//		}
-					//		listItem.InnerContent = new DashboardCustomContent($"<table title='{status.StatusDetails}' style='height: 16px; width: 100%;'><tr><td style='width: {status.PercentageComplete.Value}%; background-color: green; color: white; font-size: 12px; text-align: right; padding: 0px 3px;'>{status.PercentageComplete.Value}%</td><td style='width: {100 - status.PercentageComplete.Value}%;background-color: lightGray'>&nbsp;</td></tr></table><span style='font-size: 12px;'><em>{status.StatusDetails}</em></span>");
-					//	}
-					//	else if (null != status && false == string.IsNullOrWhiteSpace(status.StatusDetails))
-					//	{
-					//		// If we have a status then render the status.
-					//		listItem.InnerContent = new DashboardCustomContent($"<p><em>The operation is currently running:</em> <span style='font-weight: bold'>{status.StatusDetails}</span></p>");
-					//	}
-					//	else
-					//	{
-					//		// Otherwise, just "running".
-					//		listItem.InnerContent = new DashboardCustomContent($"<p><em>The operation is currently running.</em></p>");
-					//	}
-
-					//	yield return listItem;
-					//	continue;
-					//}
-
-					//// If we have any scheduled then render them.
-					//if (isScheduled)
-					//{
-					//	htmlString += "The task is scheduled to run:<ul>";
-					//	foreach (var scheduledExecution in executions.Where(e => e.State == MFilesAPI.MFTaskState.MFTaskStateWaiting))
-					//	{
-					//		DateTime? activationTime = scheduledExecution.ActivationTimestamp.ToDateTime(DateTimeKind.Utc);
-					//		htmlString += $"<li>{activationTime.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.NextRun)}</li>";
-					//	}
-					//	htmlString += "</ul>";
-					//}
-					//else
-					//{
-					//	htmlString += "The background operation is not scheduled to run again.<br />";
-					//}
-
-					//// Output any previous executions
-					//var previousExecutions = executions.Where
-					//(
-					//	e => e.State == MFilesAPI.MFTaskState.MFTaskStateCompleted
-					//		|| e.State == MFilesAPI.MFTaskState.MFTaskStateCanceled
-					//		|| e.State == MFilesAPI.MFTaskState.MFTaskStateFailed
-					//)
-					//.OrderByDescending(e => e.LatestActivityTimestamp.ToDateTime(DateTimeKind.Utc))
-					//.Take(10)
-					//.ToList();
-					//if (previousExecutions.Any())
-					//{
-					//	htmlString += "The task has previously run:<ul>";
-					//	foreach (var previousExecution in previousExecutions)
-					//	{
-					//		DateTime? activationTime = previousExecution.ActivationTimestamp.ToDateTime(DateTimeKind.Utc);
-					//		htmlString += $"<li>{activationTime.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.LastRun)}: {previousExecution.State}</li>";
-					//	}
-					//	htmlString += "</ul>";
-					//}
-
-					//// Set the list item content.
-					//listItem.InnerContent = new DashboardCustomContent
-					//(
-					//	(listItem.InnerContent?.ToXmlString() ?? "") +
-					//	$"<p>{htmlString}</p>"
-					//);
 
 					// Add the list item.
 					yield return listItem;

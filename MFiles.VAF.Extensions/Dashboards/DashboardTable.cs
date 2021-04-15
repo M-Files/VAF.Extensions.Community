@@ -41,6 +41,18 @@ namespace MFiles.VAF.Extensions.Dashboards
 			= DashboardTableRowType.Body;
 
 		/// <summary>
+		/// Attributes to be rendered onto the table cell.
+		/// </summary>
+		public Dictionary<string, string> Attributes { get; }
+			= new Dictionary<string, string>();
+
+		/// <summary>
+		/// CSS styles.  Keys are the names (e.g. "font-size"), values are the value (e.g. "12px").
+		/// </summary>
+		public Dictionary<string, string> Styles { get; }
+			= new Dictionary<string, string>();
+
+		/// <summary>
 		/// Adds a cell to <see cref="Cells"/> and returns it.
 		/// </summary>
 		/// <returns>The new cell.</returns>
@@ -105,10 +117,30 @@ namespace MFiles.VAF.Extensions.Dashboards
 		public XmlDocumentFragment Generate(XmlDocument xml)
 		{
 			var fragment = DashboardHelper.CreateFragment(xml, "<tr></tr>");
+			var element = fragment.FirstChild;
 
 			foreach (var cell in this.Cells)
 			{
-				fragment.AppendChild(cell.Generate(xml));
+				element.AppendChild(cell.Generate(xml));
+			}
+
+			// Add the attributes.
+			foreach (var key in this.Attributes.Keys)
+			{
+				// Can't have style here.
+				if (key == "style")
+					continue;
+				var attr = xml.CreateAttribute(key);
+				attr.Value = this.Attributes[key];
+				element.Attributes.Append(attr);
+			}
+
+			// Add the style.
+			if (this.Styles.Count > 0)
+			{
+				var attr = xml.CreateAttribute("style");
+				attr.Value = string.Join(";", this.Styles.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+				element.Attributes.Append(attr);
 			}
 
 			return fragment;
@@ -159,10 +191,18 @@ namespace MFiles.VAF.Extensions.Dashboards
 		public Dictionary<string, string> Styles { get; }
 			= new Dictionary<string, string>();
 
+		/// <summary>
+		/// CSS styles only applied to the header cells.  Keys are the names (e.g. "font-size"), values are the value (e.g. "12px").
+		/// </summary>
+		public Dictionary<string, string> HeaderStyles { get; }
+			= new Dictionary<string, string>();
+
 		public DashboardTableCell()
 		{
 			this.Styles.Add("font-size", "12px");
-			this.Styles.Add("padding", "0px 3px");
+			this.Styles.Add("padding", "2px 35x");
+			this.Styles.Add("text-align", "left");
+			this.HeaderStyles.Add("border-bottom", "1px solid #CCC");
 		}
 
 		/// <inheritdoc />
@@ -186,10 +226,15 @@ namespace MFiles.VAF.Extensions.Dashboards
 			}
 
 			// Add the style.
-			if (this.Styles.Count > 0)
+			var styles = this.Styles.AsEnumerable();
+			if (this.DashboardTableCellType == DashboardTableCellType.Header)
+			{
+				styles = styles.Union(this.HeaderStyles);
+			}
+			if (styles.Any())
 			{
 				var attr = xml.CreateAttribute("style");
-				attr.Value = string.Join(";", this.Styles.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+				attr.Value = string.Join(";", styles.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
 				element.Attributes.Append(attr);
 			}
 
@@ -223,7 +268,7 @@ namespace MFiles.VAF.Extensions.Dashboards
 			= new List<DashboardTableRow>();
 
 		/// <summary>
-		/// Attributes to be rendered onto the table cell.
+		/// Attributes to be rendered onto the table.
 		/// </summary>
 		public Dictionary<string, string> Attributes { get; }
 			= new Dictionary<string, string>();
@@ -237,6 +282,10 @@ namespace MFiles.VAF.Extensions.Dashboards
 		public DashboardTable()
 		{
 			this.Styles.Add("width", "100%");
+			this.Styles.Add("background-color", "white");
+			this.Styles.Add("border", "1px solid #CCC");
+			this.Attributes.Add("cellspacing", "0");
+			this.Attributes.Add("cellpadding", "0");
 		}
 
 		/// <summary>

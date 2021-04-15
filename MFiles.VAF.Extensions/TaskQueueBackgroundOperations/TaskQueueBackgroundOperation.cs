@@ -143,6 +143,11 @@ namespace MFiles.VAF.Extensions
 		public bool ShowBackgroundOperationInDashboard { get; set; } = true;
 
 		/// <summary>
+		/// The description of the background operation.
+		/// </summary>
+		public string Description { get; set; } = null;
+
+		/// <summary>
 		/// The run command to be shown in the dashboard.
 		/// </summary>
 		public CustomDomainCommand DashboardRunCommand { get; private set; }
