@@ -38,6 +38,7 @@ namespace MFiles.VAF.Extensions
 				var header = table.AddRow(DashboardTableRowType.Header);
 				header.AddCells
 				(
+					new DashboardCustomContent("Task"),
 					new DashboardCustomContent("Scheduled"),
 					new DashboardCustomContent("Duration"),
 					new DashboardCustomContent("Details")
@@ -61,7 +62,8 @@ namespace MFiles.VAF.Extensions
 				var activation = execution.ActivationTimestamp.ToDateTime(DateTimeKind.Utc);
 
 				// Create the content for the scheduled column (including icon).
-				var scheduled = new DashboardCustomContentEx
+				var taskInfoCell = new DashboardCustomContentEx(execution.TaskID);
+				var scheduledCell = new DashboardCustomContentEx
 					(
 						activation.ToTimeOffset
 						(
@@ -80,20 +82,20 @@ namespace MFiles.VAF.Extensions
 				switch (execution.State)
 				{
 					case MFilesAPI.MFTaskState.MFTaskStateWaiting:
-						scheduled.Icon = "Resources/Waiting.png";
+						taskInfoCell.Icon = "Resources/Waiting.png";
 						rowTitle = $"Waiting.  Will start at approximately {activation.ToString("yyyy-MM-dd HH:mm:ss")}.";
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateInProgress:
 						rowTitle = $"Running. Started at approximately {activation.ToString("yyyy-MM-dd HH:mm:ss")} server-time (taken {execution.GetElapsedTime().ToDisplayString()} so far).";
-						scheduled.Icon = "Resources/Running.png";
+						taskInfoCell.Icon = "Resources/Running.png";
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateFailed:
 						rowTitle = $"Failed. Started at approximately {activation.ToString("yyyy-MM-dd HH:mm:ss")} server-time (took {execution.GetElapsedTime().ToDisplayString()}).";
-						scheduled.Icon = "Resources/Failed.png";
+						taskInfoCell.Icon = "Resources/Failed.png";
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateCompleted:
 						rowTitle = $"Completed. Started at approximately {activation.ToString("yyyy-MM-dd HH:mm:ss")} server-time (took {execution.GetElapsedTime().ToDisplayString()}).";
-						scheduled.Icon = "Resources/Completed.png";
+						taskInfoCell.Icon = "Resources/Completed.png";
 						break;
 					default:
 						break;
@@ -103,19 +105,22 @@ namespace MFiles.VAF.Extensions
 				// Add the cells to the row.
 				row.AddCells
 				(
-					scheduled,
+					taskInfoCell,
+					scheduledCell,
 					new DashboardCustomContent(execution.GetElapsedTime().ToDisplayString()),
 					taskInfo?.AsDashboardContent()
 				);
 
-				// First two cells should be as small as possible.
-				row.Cells[0].Styles.Add("width", "1%");
-				row.Cells[0].Styles.Add("white-space", "nowrap");
-				row.Cells[1].Styles.Add("width", "1%");
-				row.Cells[1].Styles.Add("white-space", "nowrap");
+				// First three cells should be as small as possible.
+				row.Cells[0].Styles.AddOrUpdate("width", "1%");
+				row.Cells[0].Styles.AddOrUpdate("white-space", "nowrap");
+				row.Cells[1].Styles.AddOrUpdate("width", "1%");
+				row.Cells[1].Styles.AddOrUpdate("white-space", "nowrap");
+				row.Cells[2].Styles.AddOrUpdate("width", "1%");
+				row.Cells[2].Styles.AddOrUpdate("white-space", "nowrap");
 
 				// Last cell should have as much space as possible.
-				row.Cells[2].Styles.Add("width", "100%");
+				row.Cells[3].Styles.AddOrUpdate("width", "100%");
 			}
 
 			// Create an overview of the statuses.
@@ -125,7 +130,7 @@ namespace MFiles.VAF.Extensions
 			{
 				// Remove all styles - we only are using this for layout.
 				overview.Styles.Clear();
-				overview.Styles.Add("width", "100%");
+				overview.Styles.AddOrUpdate("width", "100%");
 
 				// Add a single row.
 				var row = overview.AddRow();
