@@ -367,24 +367,49 @@ namespace MFiles.VAF.Extensions
 			// Sanity.
 			taskStates = taskStates ?? new MFTaskState[0];
 
-			// Find all tasks.
-			var scheduledTasks = TaskQueueAdministrator.FindTasks
-			(
-				this.BackgroundOperationManager.VaultApplication.PermanentVault,
-				this.BackgroundOperationManager.QueueId,
-				t => t.Type == TaskQueueBackgroundOperation.TaskTypeId,
-				taskStates
-			).Cast<ApplicationTaskInfo>();
-			return scheduledTasks.Where(t =>
 			{
-				// If this task is not for this background operation then ignore it.
-				var directive = TaskQueueDirective.Parse<BackgroundOperationTaskQueueDirective>(t.ToApplicationTask());
-				if (null == directive)
-					return false;
-				if (directive.BackgroundOperationName != this.Name)
-					return false;
-				return true;
-			});
+				// Build up the task state IDs that we are interested in.
+				var states = new IDs();
+				foreach (var s in taskStates)
+					states.Add(1, (int)s);
+
+				// Retrieve all tasks in our queue with that ID.
+				var taskIds = this.BackgroundOperationManager.VaultApplication.PermanentVault
+					.ApplicationTaskOperations.GetTaskIDsFromQueue(this.BackgroundOperationManager.QueueId, states)
+					.Cast<string>()
+					.ToList();
+
+				// Retrieve each batch of tasks (500 in a batch).
+				{
+					var count = 0;
+					while (count < taskIds.Count)
+					{
+						// Create a batch.
+						var idBatch = new Strings();
+						foreach (var x in taskIds.Skip(count).Take(500))
+							idBatch.Add(1, x);
+
+						// Retrieve one batch and filter just to the ones we want.
+						foreach (var taskInfo in this.BackgroundOperationManager.VaultApplication.PermanentVault.ApplicationTaskOperations.GetTasks(idBatch).Cast<ApplicationTaskInfo>()
+							.Where(t =>
+							{
+								// If this task is not for this background operation then ignore it.
+								var directive = TaskQueueDirective.Parse<BackgroundOperationTaskQueueDirective>(t.ToApplicationTask());
+								if (null == directive)
+									return false;
+								if (directive.BackgroundOperationName != this.Name)
+									return false;
+								return true;
+							}))
+						{
+							yield return taskInfo;
+						}
+
+						// Next batch.
+						count += idBatch.Count;
+					}
+				}
+			}
 		}
 
 		/// <summary>
