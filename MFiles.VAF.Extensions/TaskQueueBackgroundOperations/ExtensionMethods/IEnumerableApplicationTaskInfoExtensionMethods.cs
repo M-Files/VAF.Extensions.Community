@@ -52,7 +52,15 @@ namespace MFiles.VAF.Extensions
 			else
 			{
 				isFiltered = true;
-				executionsToShow = new List<ApplicationTaskInfo>(list.Take(maximumRowsToShow));
+
+				// Show the latest 20 errors, then the rest filled with non-errors.
+				executionsToShow = new List<ApplicationTaskInfo>
+				(
+					list
+						.Where(e => e.State == MFTaskState.MFTaskStateFailed)
+						.Take(20)
+						.Union(list.Where(e => e.State != MFTaskState.MFTaskStateFailed).Take(maximumRowsToShow - 20))
+				);
 			}
 
 			// Add a row for each execution to show.
