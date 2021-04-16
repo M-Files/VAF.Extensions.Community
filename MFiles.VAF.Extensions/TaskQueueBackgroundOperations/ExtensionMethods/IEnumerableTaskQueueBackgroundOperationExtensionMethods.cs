@@ -97,7 +97,7 @@ namespace MFiles.VAF.Extensions
 				listItem.InnerContent = new DashboardCustomContent
 				(
 					htmlString
-					+ executions?.AsDashboardContent(50)?.ToXmlString()
+					+ executions?.AsDashboardContent()?.ToXmlString()
 				);
 
 				// Add the list item.

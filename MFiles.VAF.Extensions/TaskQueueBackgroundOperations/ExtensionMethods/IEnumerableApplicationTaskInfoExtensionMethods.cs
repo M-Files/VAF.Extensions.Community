@@ -1,6 +1,7 @@
 ﻿using MFiles.VAF.Configuration;
 using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Extensions.Dashboards;
+using MFiles.VAF.Extensions.ExtensionMethods;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace MFiles.VAF.Extensions
 		public static IDashboardContent AsDashboardContent
 		(
 			this IEnumerable<ApplicationTaskInfo> applicationTasks,
-			int maximumRowsToShow
+			int maximumRowsToShow = 40
 		)
 		{
 			// Sanity.
@@ -42,10 +43,12 @@ namespace MFiles.VAF.Extensions
 			}
 
 			List<ApplicationTaskInfo> executionsToShow;
+			bool isFiltered = false;
 			if (list.Count <= maximumRowsToShow)
 				executionsToShow = list;
 			else
 			{
+				isFiltered = true;
 				// TODO: Better logic for which records to show.
 				executionsToShow = new List<ApplicationTaskInfo>(list.Take(maximumRowsToShow));
 			}
@@ -116,18 +119,34 @@ namespace MFiles.VAF.Extensions
 
 			// Create an overview of the statuses.
 			var data = list.GroupBy(e => e.State).ToDictionary(e => e.Key, e => e.Count());
-			var overview = new DashboardCustomContentEx
-			(
-				"<span style='float: right; margin: 5px 0px'>"
-					+ "<span>Totals: </span>"
+			
+			var overview = new DashboardTable();
+			{
+				// Remove all styles - we only are using this for layout.
+				overview.Styles.Clear();
+				overview.Styles.Add("width", "100%");
+
+				// Add a single row.
+				var row = overview.AddRow();
+
+				// The first cell contains text if this table is filtered, or is empty otherwise.
+				var cell1 = row.AddCell();
+				if (isFiltered)
+					cell1.InnerContent = new DashboardCustomContentEx($"<p style='font-size: 12px'><em>This table shows only {maximumRowsToShow} of {list.Count} tasks.</em></p>");
+
+				// The second cell contains the totals.
+				var cell2 = row.AddCell(new DashboardCustomContentEx
+				(
+					"<span>Totals: </span>"
 					+ $"<span title='{(data.ContainsKey(MFTaskState.MFTaskStateWaiting) ? data[MFTaskState.MFTaskStateWaiting] : 0)} awaiting processing' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Waiting.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateWaiting) ? data[MFTaskState.MFTaskStateWaiting] : 0)}</span>"
 					+ $"<span title='{(data.ContainsKey(MFTaskState.MFTaskStateInProgress) ? data[MFTaskState.MFTaskStateInProgress] : 0)} running' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Running.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateInProgress) ? data[MFTaskState.MFTaskStateInProgress] : 0)}</span>"
 					+ $"<span title='{(data.ContainsKey(MFTaskState.MFTaskStateCompleted) ? data[MFTaskState.MFTaskStateCompleted] : 0)} completed' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Completed.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateCompleted) ? data[MFTaskState.MFTaskStateCompleted] : 0)}</span>"
 					+ $"<span title='{(data.ContainsKey(MFTaskState.MFTaskStateFailed) ? data[MFTaskState.MFTaskStateFailed] : 0)} failed' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Failed.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateFailed) ? data[MFTaskState.MFTaskStateFailed] : 0)}</span>"
-				+ "</span>"
-			);
+				));
+				cell2.Styles.AddOrUpdate("text-align", "right");
+			}
 
-			// Return the table.
+			// Return the content.
 			return new DashboardContentCollection()
 			{
 				table,
