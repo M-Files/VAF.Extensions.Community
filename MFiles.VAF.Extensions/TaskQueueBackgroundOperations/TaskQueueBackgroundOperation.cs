@@ -120,9 +120,27 @@ namespace MFiles.VAF.Extensions
 		/// The task type for this background operation.
 		/// </summary>
 		public const string TaskTypeId = "VaultApplication-BackgroundOperation";
+
+		/// <summary>
+		/// The default text shown on the "run now" button.
+		/// </summary>
 		public const string DefaultRunCommandDisplayText = "Run now";
+
+		/// <summary>
+		/// The default confirmation text used for the "run now" button, asking the user to confirm they want to do this.
+		/// </summary>
 		public const string DefaultRunCommandConfirmationText = null;
+
+		/// <summary>
+		/// The default text shown after the "run now" button has been clicked.
+		/// </summary>
 		public const string DefaultRunCommandSuccessText = "The background operation has been scheduled to run.";
+
+		/// <summary>
+		/// If multiple managers are used, this value will be used to sort their background operations
+		/// on the dashboard (ascending order).
+		/// </summary>
+		public int DashboardSortOrder { get; set; } = 0;
 
 		/// <summary>
 		/// The text shown to the user as a popup when the background operation has been scheduled.

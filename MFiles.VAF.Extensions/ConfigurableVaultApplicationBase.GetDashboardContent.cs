@@ -51,7 +51,7 @@ namespace MFiles.VAF.Extensions
 			var taskQueueBackgroundOperationManagers = this
 				.GetType()
 				.GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager>(this);
-			foreach (var manager in taskQueueBackgroundOperationManagers)
+			foreach (var manager in taskQueueBackgroundOperationManagers.OrderBy(m => m.DashboardSortOrder))
 			{
 				var listItems = manager.GetDashboardContent();
 				if (null == listItems)

@@ -26,6 +26,12 @@ namespace MFiles.VAF.Extensions
 		internal static VaultServerAttachment CurrentServer { get; private set; }
 
 		/// <summary>
+		/// If multiple managers are used, this value will be used to sort their background operations
+		/// on the dashboard (ascending order).
+		/// </summary>
+		public int DashboardSortOrder { get; set; } = 0;
+
+		/// <summary>
 		/// The background operations managed by this instance.
 		/// </summary>
 		internal readonly Dictionary<string, TaskQueueBackgroundOperation> BackgroundOperations
