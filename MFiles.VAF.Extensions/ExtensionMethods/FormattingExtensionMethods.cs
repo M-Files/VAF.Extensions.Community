@@ -49,7 +49,7 @@ namespace MFiles.VAF.Extensions
 
 			// Seconds be easy.
 			if (timespan.Value < TimeSpan.FromSeconds(1))
-				return $"Under 1 second";
+				return $"{(int)timespan.Value.Milliseconds} millisecond{((int)timespan.Value.Milliseconds == 1 ? "" : "s")}";
 			if (timespan.Value <= TimeSpan.FromSeconds(120))
 				return $"{(int)timespan.Value.TotalSeconds} second{((int)timespan.Value.TotalSeconds == 1 ? "" : "s")}";
 

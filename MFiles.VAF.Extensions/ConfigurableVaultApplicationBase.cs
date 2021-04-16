@@ -96,24 +96,5 @@ namespace MFiles.VAF.Extensions
 		}
 
 		#endregion
-
-		/// <inheritdoc />
-		protected override void UninitializeApplication(Vault vault)
-		{
-			// When the application is uninstalled we should cancel any future executions, to stop any oddities
-			// where a future application with the same name (or a re-install) picks up the old task queue.
-			// This is especially important where the task IDs may change but the queue stays the same,
-			// as this would throw exceptions because the new background operation manager cannot find
-			// a processor for the old task ID.
-			try
-			{
-				this.TaskQueueBackgroundOperationManager?.CancelFutureExecutions(remarks: "Application being uninstalled.");
-			}
-			catch
-			{
-			}
-
-			base.UninitializeApplication(vault);
-		}
 	}
 }
