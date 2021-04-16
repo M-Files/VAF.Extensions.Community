@@ -86,15 +86,21 @@ namespace MFiles.VAF.Extensions
 						rowTitle = $"Waiting.  Will start at approximately {activation.ToString("yyyy-MM-dd HH:mm:ss")}.";
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateInProgress:
-						rowTitle = $"Running. Started at approximately {activation.ToString("yyyy-MM-dd HH:mm:ss")} server-time (taken {execution.GetElapsedTime().ToDisplayString()} so far).";
+						rowTitle = "Running.";
+						if ((taskInfo?.Started.HasValue) ?? false)
+							rowTitle += $" Started at approximately {taskInfo.Started.Value.ToString("yyyy-MM-dd HH:mm:ss")} server-time (taken {taskInfo.GetElapsedTime().ToDisplayString()} so far).";
 						taskInfoCell.Icon = "Resources/Running.png";
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateFailed:
-						rowTitle = $"Failed. Started at approximately {activation.ToString("yyyy-MM-dd HH:mm:ss")} server-time (took {execution.GetElapsedTime().ToDisplayString()}).";
+						rowTitle = "Failed.";
+						if ((taskInfo?.Started.HasValue) ?? false)
+							rowTitle += $" Started at approximately {taskInfo.Started.Value.ToString("yyyy-MM-dd HH:mm:ss")} server-time (took {taskInfo.GetElapsedTime().ToDisplayString()}).";
 						taskInfoCell.Icon = "Resources/Failed.png";
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateCompleted:
-						rowTitle = $"Completed. Started at approximately {activation.ToString("yyyy-MM-dd HH:mm:ss")} server-time (took {execution.GetElapsedTime().ToDisplayString()}).";
+						rowTitle = "Completed.";
+						if ((taskInfo?.Started.HasValue) ?? false)
+							rowTitle += $" Started at approximately {taskInfo.Started.Value.ToString("yyyy-MM-dd HH:mm:ss")} server-time (took {taskInfo.GetElapsedTime().ToDisplayString()}).";
 						taskInfoCell.Icon = "Resources/Completed.png";
 						break;
 					default:
@@ -107,7 +113,7 @@ namespace MFiles.VAF.Extensions
 				(
 					taskInfoCell,
 					scheduledCell,
-					new DashboardCustomContent(execution.GetElapsedTime().ToDisplayString()),
+					new DashboardCustomContent(taskInfo?.GetElapsedTime().ToDisplayString()),
 					taskInfo?.AsDashboardContent()
 				);
 

@@ -1,6 +1,7 @@
 ﻿using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Extensions.Dashboards;
 using MFilesAPI;
+using System;
 
 namespace MFiles.VAF.Extensions
 {
@@ -9,6 +10,21 @@ namespace MFiles.VAF.Extensions
 	/// </summary>
 	public class TaskInformation
 	{
+		/// <summary>
+		/// The datetime that this task was started.
+		/// </summary>
+		public DateTime? Started { get; set; }
+
+		/// <summary>
+		/// The datetime that this task was last updated.
+		/// </summary
+		public DateTime? LastActivity { get; set; }
+
+		/// <summary>
+		/// The datetime that this task was completed.
+		/// </summary>
+		public DateTime? Completed { get; set; }
+
 		/// <summary>
 		/// Details about the current status (e.g. "Processing object 5 of 100").
 		/// </summary>
@@ -51,6 +67,27 @@ namespace MFiles.VAF.Extensions
 
 			// Return nothing.
 			return null;
+		}
+
+		/// <summary>
+		/// Gets the time elapsed between the latest activity and the activation timestamp.
+		/// </summary>
+		/// <param name="taskInfo">The task in question.</param>
+		/// <returns>The time span, or <see cref="TimeSpan.Zero"/> if null.</returns>
+		public TimeSpan GetElapsedTime()
+		{
+			// If we have no start or last activity date then return zero.
+			if (false == this.Started.HasValue
+				|| false == this.LastActivity.HasValue)
+				return TimeSpan.Zero;
+
+			// What's the difference?
+			var delta = this.LastActivity.Value.Subtract(this.Started.Value);
+
+			// If it's less than a second then zero.
+			return delta < TimeSpan.FromSeconds(1)
+				? TimeSpan.Zero
+				: delta;
 		}
 	}
 }

@@ -277,11 +277,19 @@ namespace MFiles.VAF.Extensions
 			try
 			{
 				// Mark it as started.
-				this.TaskProcessor.UpdateTaskInfo
+				job.Data.Value = this.TaskProcessor.UpdateTaskInfo
 				(
 					job.Data?.Value,
 					MFTaskState.MFTaskStateInProgress,
-					"",
+					JsonConvert.SerializeObject
+					(
+						new TaskInformation()
+						{
+							Started = DateTime.Now,
+							LastActivity = DateTime.Now,
+							CurrentTaskState = MFTaskState.MFTaskStateInProgress
+						}
+					),
 					false
 				);
 				// Delegate to the background operation.
@@ -299,31 +307,20 @@ namespace MFiles.VAF.Extensions
 			catch (Exception e)
 			{
 				// Try and get the latest task info.
-				var info = job?.Data?.Value?.ToApplicationTaskInfo()?.RetrieveTaskInfo();
+				var info = job?.Data?.Value?.RetrieveTaskInfo()
+					?? new TaskInformation();
 
-				if (null != info)
-				{
-					// If we have info then use that in the update.
-					info.StatusDetails = e.Message;
-					this.TaskProcessor.UpdateTaskInfo
-					(
-						job.Data?.Value,
-						MFTaskState.MFTaskStateFailed,
-						JsonConvert.SerializeObject(info),
-						false
-					);
-				}
-				else
-				{
-					// Otherwise, just use the exception message.
-					this.TaskProcessor.UpdateTaskInfo
-					(
-						job.Data?.Value,
-						MFTaskState.MFTaskStateFailed,
-						e.Message,
-						false
-					);
-				}
+				// If we have info then use that in the update.
+				info.StatusDetails = e.Message;
+				info.Completed = DateTime.Now;
+				info.LastActivity = DateTime.Now;
+				job.Data.Value = this.TaskProcessor.UpdateTaskInfo
+				(
+					job.Data?.Value,
+					MFTaskState.MFTaskStateFailed,
+					JsonConvert.SerializeObject(info),
+					false
+				);
 			}
 		}
 
@@ -344,16 +341,19 @@ namespace MFiles.VAF.Extensions
 			// Update the task.
 			try
 			{
-				this.TaskProcessor.UpdateTaskInfo
+				var info = job?.Data?.Value?.RetrieveTaskInfo()
+					?? new TaskInformation();
+				info.Completed = DateTime.Now;
+				info.LastActivity = DateTime.Now;
+
+				// Update the task information.
+				job.Data.Value = this.TaskProcessor.UpdateTaskInfo
 				(
 					appTask,
 					targetState,
-					"",
-					appendRemarks: true
+					JsonConvert.SerializeObject(info),
+					appendRemarks: false
 				);
-				
-				// Update the app task reference on the job.
-				job.Data.Value = this.TaskProcessor.GetLatestTaskInfo(job.AppTaskId);
 			}
 			catch(Exception e)
 			{

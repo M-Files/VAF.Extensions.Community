@@ -1,6 +1,7 @@
 ﻿using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
 using Newtonsoft.Json;
+using System;
 using System.Threading;
 
 namespace MFiles.VAF.Extensions
@@ -36,11 +37,14 @@ namespace MFiles.VAF.Extensions
 		/// <param name="appendRemarks">See <see cref="TaskProcessorBase{TSettings}.UpdateTaskInfo(TaskProcessorJob, MFTaskState, string, bool)"/></param>
 		public void UpdateTaskInfo(
 			MFTaskState taskState,
-			string remarks,
-			bool appendRemarks = false
+			string remarks
 		)
 		{
-			this.TaskProcessor.UpdateTaskInfo(this, taskState, remarks, appendRemarks);
+			var info = this.RetrieveTaskInfo() ?? new TaskInformation();
+			info.CurrentTaskState = taskState;
+			info.StatusDetails = remarks;
+			info.LastActivity = DateTime.Now;
+			this.UpdateTaskInfo(info);
 		}
 
 		/// <summary>
@@ -51,11 +55,10 @@ namespace MFiles.VAF.Extensions
 		/// <param name="appendRemarks">See <see cref="TaskProcessorBase{TSettings}.UpdateTaskInfo(TaskProcessorJob, MFTaskState, string, bool)"/></param>
 		public void UpdateTaskInfo
 			(
-			string remarks,
-			bool appendRemarks = false
+			string remarks
 			)
 		{
-			this.UpdateTaskInfo(MFTaskState.MFTaskStateInProgress, remarks, appendRemarks);
+			this.UpdateTaskInfo(MFTaskState.MFTaskStateInProgress, remarks);
 		}
 
 		/// <summary>
@@ -75,11 +78,10 @@ namespace MFiles.VAF.Extensions
 		/// <param name="statusDetails">Any additional details on the task status.</param>
 		public void UpdateTaskInfo(int? percentageComplete, string statusDetails)
 		{
-			this.UpdateTaskInfo(new TaskInformation()
-			{
-				PercentageComplete = percentageComplete,
-				StatusDetails = statusDetails
-			});
+			var info = this.RetrieveTaskInfo() ?? new TaskInformation();
+			info.PercentageComplete = percentageComplete;
+			info.StatusDetails = statusDetails;
+			this.UpdateTaskInfo(info);
 		}
 
 		/// <summary>
@@ -91,11 +93,27 @@ namespace MFiles.VAF.Extensions
 		public void UpdateTaskInfo<TTaskInformation>(TTaskInformation status )
 			where TTaskInformation : TaskInformation
 		{
-			this.UpdateTaskInfo
+			// Copy data from the current info.
+			var info = this.RetrieveTaskInfo();
+			if (null != info && null != status)
+			{
+				status.Started = info.Started;
+				status.Completed = info.Completed;
+			}
+
+			// Ensure the last activity is correct.
+			if (null != status)
+			{
+				status.LastActivity = DateTime.Now;
+			}
+
+			// Update the task information.
+			this.TaskProcessor.UpdateTaskInfo
 			(
+				this.Job,
 				MFTaskState.MFTaskStateInProgress,
 				null == status ? "" : JsonConvert.SerializeObject(status),
-				appendRemarks: false
+				false
 			);
 		}
 
