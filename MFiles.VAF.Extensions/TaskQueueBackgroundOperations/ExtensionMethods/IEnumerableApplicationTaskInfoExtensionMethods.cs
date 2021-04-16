@@ -28,7 +28,9 @@ namespace MFiles.VAF.Extensions
 			// Sanity.
 			if (null == applicationTasks || false == applicationTasks.Any())
 				return null;
-			var list = applicationTasks.ToList();
+			var list = applicationTasks
+				.OrderByDescending(e => e.LatestActivityTimestamp.ToDateTime(DateTimeKind.Utc))
+				.ToList();
 
 			// Create the table and header row.
 			DashboardTable table = new DashboardTable();
@@ -49,7 +51,6 @@ namespace MFiles.VAF.Extensions
 			else
 			{
 				isFiltered = true;
-				// TODO: Better logic for which records to show.
 				executionsToShow = new List<ApplicationTaskInfo>(list.Take(maximumRowsToShow));
 			}
 

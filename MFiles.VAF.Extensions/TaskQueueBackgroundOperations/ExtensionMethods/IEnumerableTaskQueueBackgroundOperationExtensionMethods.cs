@@ -64,7 +64,6 @@ namespace MFiles.VAF.Extensions
 				// Get known executions (prior, running and future).
 				var executions = bgo
 					.GetAllExecutions()
-					.OrderByDescending(e => e.ActivationTimestamp.ToDateTime(DateTimeKind.Utc))
 					.ToList();
 				var isRunning = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateInProgress);
 				var isScheduled = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateWaiting);
