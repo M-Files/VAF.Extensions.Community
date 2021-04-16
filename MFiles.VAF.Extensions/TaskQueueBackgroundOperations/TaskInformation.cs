@@ -82,12 +82,7 @@ namespace MFiles.VAF.Extensions
 				return TimeSpan.Zero;
 
 			// What's the difference?
-			var delta = this.LastActivity.Value.Subtract(this.Started.Value);
-
-			// If it's less than a second then zero.
-			return delta < TimeSpan.FromSeconds(1)
-				? TimeSpan.Zero
-				: delta;
+			return this.LastActivity.Value.Subtract(this.Started.Value);
 		}
 	}
 }

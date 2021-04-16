@@ -44,23 +44,25 @@ namespace MFiles.VAF.Extensions
 		internal static string ToDisplayString(this TimeSpan? timespan)
 		{
 			// Sanity.
-			if (false == timespan.HasValue || timespan.Value <= TimeSpan.Zero)
+			if (false == timespan.HasValue || timespan.Value < TimeSpan.Zero)
 				return "";
 
 			// Seconds be easy.
+			if (timespan.Value < TimeSpan.FromSeconds(1))
+				return $"Under 1 second";
 			if (timespan.Value <= TimeSpan.FromSeconds(120))
-				return $"{(int)timespan.Value.TotalSeconds} seconds";
+				return $"{(int)timespan.Value.TotalSeconds} second{((int)timespan.Value.TotalSeconds == 1 ? "" : "s")}";
 
 			// Build a text representation
 			var components = new List<string>();
 			if (timespan.Value.Days > 0)
-				components.Add($"{timespan.Value.Days} days");
+				components.Add($"{timespan.Value.Days} day{((int)timespan.Value.Days == 1 ? "" : "s")}");
 			if (timespan.Value.Hours > 0)
-				components.Add($"{timespan.Value.Hours} hours");
+				components.Add($"{timespan.Value.Hours} hour{((int)timespan.Value.Hours == 1 ? "" : "s")}");
 			if (timespan.Value.Minutes > 0)
-				components.Add($"{timespan.Value.Minutes} minutes");
+				components.Add($"{timespan.Value.Minutes} minute{((int)timespan.Value.Minutes == 1 ? "" : "s")}");
 			if (timespan.Value.Seconds > 0)
-				components.Add($"{timespan.Value.Seconds} seconds");
+				components.Add($"{timespan.Value.Seconds} second{((int)timespan.Value.Seconds == 1 ? "" : "s")}");
 
 			// Build a text representation
 			var output = "";
