@@ -83,22 +83,11 @@ namespace MFiles.VAF.Extensions.Dashboards
 			// Add item icon, if defined.
 			if (!String.IsNullOrWhiteSpace(this.Icon))
 			{
-				// Include an icon on the list item.
-
-				// Resolve the icon uri. If the icon is a file, convert it to a data-uri,
-				// otherwise assume the specified icon is a path that will resolve on the client
-				// (just wrap in quotes).
-				string iconUri;
-				if (System.IO.File.Exists(this.Icon))
-					iconUri = DashboardHelper.ImageFileToDataUri(this.Icon);
-				else
-					iconUri = String.Format("'{0}'", this.Icon);
-
 				// Add the icon class to include the padding and other background style options.
 				DashboardHelper.AddClass(element, "icon");
 
 				// Set the background image explicitly.
-				DashboardHelper.AddStyle(element, "background-image", String.Format("url({0})", iconUri));
+				DashboardHelper.AddStyle(element, "background-image", String.Format("url({0})", DashboardHelpersEx.ImageFileToDataUri(this.Icon)));
 				DashboardHelper.AddStyle(element, "background-repeat", "no-repeat");
 				DashboardHelper.AddStyle(element, "background-position", "0px center");
 				DashboardHelper.AddStyle(element, "padding-left", "20px");
