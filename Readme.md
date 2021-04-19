@@ -10,6 +10,8 @@ _Please note that this library is provided "as-is" and with no warranty, explici
 
 The following helper library is a community-driven set of functionality that extends the base M-Files Vault Application Framework.  This library is open-source and not directly supported by M-Files.  Contributions are accepted according to our [contribution guide](CONTRIBUTING.md).
 
+**NOTE THAT EXAMPLES IN THIS REPOSITORY SHOULD BE CORRECT FOR THE CURRENT BRANCH; IF YOU ARE IN THE MAIN (UNRELEASED) BRANCH THEN THE SAMPLES MAY NOT WORK ON THE CURRENT PUBLIC RELEASE - MAKE SURE THAT YOU SWITCH TO THE 'RELEASE' BRANCH!**
+
 ## Nuget package
 
 This library is available [via nuget](https://www.nuget.org/packages/MFiles.VAF.Extensions/).  The simplest way to get started with this library is to add the `MFiles.VAF.Extensions` package to your existing [Vault Application Framework](https://developer.m-files.com/Frameworks/Vault-Application-Framework/) project.  This library requires the use of the Vault Application Framework 2.1 or higher.
