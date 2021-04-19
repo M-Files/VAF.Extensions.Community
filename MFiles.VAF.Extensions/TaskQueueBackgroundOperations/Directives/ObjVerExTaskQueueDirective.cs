@@ -18,6 +18,14 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		public string ObjVerEx { get; set; }
 
+		public ObjVerExTaskQueueDirective() { }
+		public ObjVerExTaskQueueDirective(ObjVer objVer, string displayName = null)
+		{
+			this.ObjVerEx = objVer?.ToString(parsable: true)
+				?? throw new ArgumentNullException(nameof(objVer));
+			this.DisplayName = displayName;
+		}
+
 		/// <summary>
 		/// Attempts to get an <see cref="Common.ObjVerEx"/> instance from <see cref="ObjVerEx"/>.
 		/// </summary>
@@ -34,33 +42,55 @@ namespace MFiles.VAF.Extensions
 		/// representing the provided <paramref name="objVer"/>.
 		/// </summary>
 		/// <param name="objVer">The object version to represent.</param>
+		/// <param name="displayName">The name to display for this task.</param>
 		/// <returns>The task queue directive for the supplied object version.</returns>
-		public static ObjVerExTaskQueueDirective FromObjVer(ObjVer objVer)
+		public static ObjVerExTaskQueueDirective FromObjVer
+		(
+			ObjVer objVer,
+			string displayName = null
+		)
 		{
 			// Sanity.
 			if (null == objVer)
 				throw new ArgumentNullException(nameof(objVer));
 
-			return new ObjVerExTaskQueueDirective()
-			{
-				ObjVerEx = objVer.ToString(parsable: true)
-			};
+			return new ObjVerExTaskQueueDirective
+			(
+				objVer,
+				displayName
+			);
 		}
-		
+
 		/// <summary>
 		/// Creates a <see cref="ObjVerExTaskQueueDirective"/>
 		/// representing the provided <paramref name="objVerEx"/>.
 		/// </summary>
 		/// <param name="objVerEx">The object version to represent.</param>
+		/// <param name="displayName">The name to display for this task.</param>
 		/// <returns>The task queue directive for the supplied object version.</returns>
-		public static ObjVerExTaskQueueDirective FromObjVerEx(ObjVerEx objVerEx)
+		public static ObjVerExTaskQueueDirective FromObjVerEx
+		(
+			ObjVerEx objVerEx,
+			string displayName = null
+		)
 		{
 			// Sanity.
 			if (null == objVerEx)
 				throw new ArgumentNullException(nameof(objVerEx));
 
 			// Use the other method.
-			return ObjVerExTaskQueueDirective.FromObjVer(objVerEx.ObjVer);
+			return ObjVerExTaskQueueDirective.FromObjVer(objVerEx.ObjVer, displayName: displayName);
+		}
+
+		/// <summary>
+		/// Converts the <paramref name="input"/> to an <see cref="ObjVerExTaskQueueDirective"/>
+		/// </summary>
+		/// <param name="input">The object version.</param>
+		public static implicit operator ObjVerExTaskQueueDirective(ObjVerEx input)
+		{
+			return null == input
+				? null
+				: ObjVerExTaskQueueDirective.FromObjVerEx(input);
 		}
 	}
 }
