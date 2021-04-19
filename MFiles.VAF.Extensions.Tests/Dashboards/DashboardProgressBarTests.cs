@@ -163,6 +163,7 @@ namespace MFiles.VAF.Extensions.Tests.Dashboards
 		}
 
 		[TestMethod]
+		// Does not support icons.
 		public override void Icon_PathToFile()
 		{
 			var dashboardContent = this.CreateDashboardContent();
@@ -180,6 +181,7 @@ namespace MFiles.VAF.Extensions.Tests.Dashboards
 		}
 
 		[TestMethod]
+		// Does not support icons.
 		public override void Icon_FromResource()
 		{
 			var dashboardContent = this.CreateDashboardContent();

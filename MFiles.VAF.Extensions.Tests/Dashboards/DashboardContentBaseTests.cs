@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Extensions.Dashboards;
+using MFiles.VAF.Extensions.ExtensionMethods;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace MFiles.VAF.Extensions.Tests.Dashboards
@@ -34,10 +35,14 @@ namespace MFiles.VAF.Extensions.Tests.Dashboards
 		public virtual void StyleAdded()
 		{
 			var dashboardContent = this.CreateDashboardContent();
-			dashboardContent.Styles.Add("font-size", "12px");
+			dashboardContent.Styles.AddOrUpdate("font-weight", "bold");
 			var element = dashboardContent.Generate(new System.Xml.XmlDocument())?.FirstChild;
 			Assert.IsNotNull(element);
-			Assert.AreEqual("font-size: 12px", element.Attributes["style"]?.Value);
+			Assert.IsTrue
+			(
+				new StyleComparisonHelper("font-weight: bold")
+				.TestAgainstString(element.Attributes["style"]?.Value)
+			);
 		}
 
 		[TestMethod]
@@ -58,7 +63,11 @@ namespace MFiles.VAF.Extensions.Tests.Dashboards
 			var element = dashboardContent.Generate(new System.Xml.XmlDocument())?.FirstChild;
 			Assert.IsNotNull(element);
 			Assert.AreEqual("icon", element.Attributes["class"]?.Value);
-			Assert.AreEqual("background-image:url('/some/file.png');background-repeat:no-repeat;background-position:0px center;padding-left:20px", element.Attributes["style"]?.Value);
+			Assert.IsTrue
+			(
+				new StyleComparisonHelper("background-image:url('/some/file.png');background-repeat:no-repeat;background-position:0px center;padding-left:20px")
+				.TestAgainstString(element.Attributes["style"]?.Value)
+			);
 		}
 
 		[TestMethod]
@@ -69,7 +78,11 @@ namespace MFiles.VAF.Extensions.Tests.Dashboards
 			var element = dashboardContent.Generate(new System.Xml.XmlDocument())?.FirstChild;
 			Assert.IsNotNull(element);
 			Assert.AreEqual("icon", element.Attributes["class"]?.Value);
-			Assert.AreEqual("background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAGcSURBVHgBlZK/T8JAFMfftVWbaAg4YVzaMKCJonFwMWijMTogooOJiQgkxlE7ulEGJxdYXQryDyA6GAejJg44MbhoYkJ00jgwOFSFnnfHz0hSy3e5d6/3ea9374vgj5y64jQExz5grABGEksiXEIARVz9SRmxi1L7edS+EbPBOJiggZU40IxwPtFRQDxZ0UnHKNgRwmlj+yxGQ57BGdIZkAq2hSaFNS+q5B6veVFflgDxOTuY3z0GhUASvqrfcP/xpAysDqUEDL0qsgGHPQtwPLPH4pfPd7YanEPlEI8muoF371KQfy3Ub4LnODIuicZbnnn2ez6XbAlnn69aH8mYuUbs6u0H36AMl0uHzSKWcF28sD4SIqtEHoXNdHF4CjZkP/RxPXA0vWMJkysUeSHolQmp0P3t20OzyKx73BqmPOBTvhIaLQoIHzSSjSK0gBXMZPKbbIKiHtSIRePQnRJGJK+1rJwJpInRI/ZYM2NEzqM0ak6BJUxI/M/SzjWYqsOEoh6SEGeqGBODoZpHiFdKZOY3InDJcixXbj//Cwo5kyfR+5GMAAAAAElFTkSuQmCC);background-repeat:no-repeat;background-position:0px center;padding-left:20px", element.Attributes["style"]?.Value);
+			Assert.IsTrue
+			(
+				new StyleComparisonHelper("background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAGcSURBVHgBlZK/T8JAFMfftVWbaAg4YVzaMKCJonFwMWijMTogooOJiQgkxlE7ulEGJxdYXQryDyA6GAejJg44MbhoYkJ00jgwOFSFnnfHz0hSy3e5d6/3ea9374vgj5y64jQExz5grABGEksiXEIARVz9SRmxi1L7edS+EbPBOJiggZU40IxwPtFRQDxZ0UnHKNgRwmlj+yxGQ57BGdIZkAq2hSaFNS+q5B6veVFflgDxOTuY3z0GhUASvqrfcP/xpAysDqUEDL0qsgGHPQtwPLPH4pfPd7YanEPlEI8muoF371KQfy3Ub4LnODIuicZbnnn2ez6XbAlnn69aH8mYuUbs6u0H36AMl0uHzSKWcF28sD4SIqtEHoXNdHF4CjZkP/RxPXA0vWMJkysUeSHolQmp0P3t20OzyKx73BqmPOBTvhIaLQoIHzSSjSK0gBXMZPKbbIKiHtSIRePQnRJGJK+1rJwJpInRI/ZYM2NEzqM0ak6BJUxI/M/SzjWYqsOEoh6SEGeqGBODoZpHiFdKZOY3InDJcixXbj//Cwo5kyfR+5GMAAAAAElFTkSuQmCC);background-repeat:no-repeat;background-position:0px center;padding-left:20px")
+				.TestAgainstString(element.Attributes["style"]?.Value)
+			);
 		}
 	}
 }

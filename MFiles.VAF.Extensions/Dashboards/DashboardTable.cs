@@ -97,9 +97,23 @@ namespace MFiles.VAF.Extensions.Dashboards
 			return cells;
 		}
 
+		public List<DashboardTableCell> AddCells(params string[] cellContent)
+		{
+			return this.AddCells
+			(
+				cellContent?
+					.Select(c => new DashboardCustomContentEx(c))
+					.ToArray()
+			);
+		}
+
 		public DashboardTableRow(DashboardTableRowType dashboardTableRowType)
 		{
 			this.DashboardTableRowType = dashboardTableRowType;
+		}
+		public DashboardTableRow()
+			: this(DashboardTableRowType.Body)
+		{
 		}
 
 		/// <inheritdoc />
@@ -164,6 +178,18 @@ namespace MFiles.VAF.Extensions.Dashboards
 			this.HeaderStyles.Add("border-bottom", "1px solid #CCC");
 		}
 
+		public DashboardTableCell(IDashboardContent innerContent)
+			: this()
+		{
+			this.InnerContent = innerContent;
+		}
+
+		public DashboardTableCell(string htmlContent)
+			: this()
+		{
+			this.InnerContent = new DashboardCustomContentEx(htmlContent);
+		}
+
 		protected override string GetCssStyles()
 		{
 			// Add the style.
@@ -196,7 +222,6 @@ namespace MFiles.VAF.Extensions.Dashboards
 	public class DashboardTable
 		: DashboardContentBase
 	{
-
 		/// <summary>
 		/// Commands (links/buttons) to show.
 		/// </summary>
@@ -209,13 +234,25 @@ namespace MFiles.VAF.Extensions.Dashboards
 		public List<DashboardTableRow> Rows { get; }
 			= new List<DashboardTableRow>();
 
+		/// <summary>
+		/// List of styles to apply to the table element.
+		/// </summary>
+		public Dictionary<string, string> TableStyles { get; }
+			= new Dictionary<string, string>();
+
+		/// <summary>
+		/// List of attributes to apply to the table element.
+		/// </summary>
+		public Dictionary<string, string> TableAttributes { get; }
+			= new Dictionary<string, string>();
+
 		public DashboardTable()
 		{
-			this.Styles.Add("width", "100%");
-			this.Styles.Add("background-color", "white");
-			this.Styles.Add("border", "1px solid #CCC");
-			this.Attributes.Add("cellspacing", "0");
-			this.Attributes.Add("cellpadding", "0");
+			this.TableStyles.Add("width", "100%");
+			this.TableStyles.Add("background-color", "white");
+			this.TableStyles.Add("border", "1px solid #CCC");
+			this.TableAttributes.Add("cellspacing", "0");
+			this.TableAttributes.Add("cellpadding", "0");
 		}
 
 		/// <summary>
@@ -228,6 +265,15 @@ namespace MFiles.VAF.Extensions.Dashboards
 			var row = new DashboardTableRow(type);
 			this.Rows.Add(row);
 			return row;
+		}
+
+		/// <summary>
+		/// Returns the CSS styles for the table element.
+		/// </summary>
+		/// <returns></returns>
+		protected virtual string GetTableCssStyles()
+		{
+			return string.Join(";", this.TableStyles.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
 		}
 
 		/// <inheritdoc />
@@ -294,7 +340,7 @@ namespace MFiles.VAF.Extensions.Dashboards
 
 			// Add the id if defined.
 			if (!String.IsNullOrWhiteSpace(this.ID))
-				table.SetAttribute("id", this.ID);
+				tableWrapper.SetAttribute("id", this.ID);
 
 			// Add the attributes.
 			foreach (var key in this.Attributes.Keys)
@@ -304,13 +350,36 @@ namespace MFiles.VAF.Extensions.Dashboards
 					continue;
 				var attr = xml.CreateAttribute(key);
 				attr.Value = this.Attributes[key];
+				tableWrapper.Attributes.Append(attr);
+			}
+
+			// Add the style.
+			{
+				var attr = xml.CreateAttribute("style");
+				attr.Value = $"{this.GetCssStyles() ?? ""};{tableWrapper.GetAttribute("style") ?? ""}".Trim();
+				if (attr.Value?.StartsWith(";") ?? false)
+					attr.Value = attr.Value.Substring(1);
+				if (attr.Value?.EndsWith(";") ?? false)
+					attr.Value = attr.Value.Substring(0, attr.Value.Length - 1);
+				if (attr.Value.Length > 0)
+					tableWrapper.Attributes.Append(attr);
+			}
+
+			// Add the attributes.
+			foreach (var key in this.TableAttributes.Keys)
+			{
+				// Can't have style here.
+				if (key == "style")
+					continue;
+				var attr = xml.CreateAttribute(key);
+				attr.Value = this.TableAttributes[key];
 				table.Attributes.Append(attr);
 			}
 
 			// Add the style.
 			{
 				var attr = xml.CreateAttribute("style");
-				attr.Value = $"{this.GetCssStyles() ?? ""} {table.GetAttribute("style") ?? ""}";
+				attr.Value = $"{this.GetTableCssStyles() ?? ""} {table.GetAttribute("style") ?? ""}";
 				table.Attributes.Append(attr);
 			}
 
