@@ -77,7 +77,7 @@ namespace MFiles.VAF.Extensions
 					try
 					{
 						var directive = TaskQueueDirective.Parse<BackgroundOperationTaskQueueDirective>(execution.TaskData)
-							?.GetParsedInternalDirective() as TaskQueueDirectiveWithDisplayName;
+							?.GetParsedInternalDirective() as ITaskQueueDirectiveWithDisplayName;
 						displayName = string.IsNullOrWhiteSpace(directive?.DisplayName)
 							? displayName
 							: directive.DisplayName;
