@@ -73,24 +73,19 @@ namespace MFiles.VAF.Extensions.Dashboards
 				element.Attributes.Append(attr);
 			}
 
+			// Render the icon.
+			this.RenderIconTo(element);
+
 			// Add the style.
 			{
 				var attr = xml.CreateAttribute("style");
-				attr.Value = $"{this.GetCssStyles() ?? ""} {element.GetAttribute("style") ?? ""}";
-				element.Attributes.Append(attr);
-			}
-
-			// Add item icon, if defined.
-			if (!String.IsNullOrWhiteSpace(this.Icon))
-			{
-				// Add the icon class to include the padding and other background style options.
-				DashboardHelper.AddClass(element, "icon");
-
-				// Set the background image explicitly.
-				DashboardHelper.AddStyle(element, "background-image", String.Format("url({0})", DashboardHelpersEx.ImageFileToDataUri(this.Icon)));
-				DashboardHelper.AddStyle(element, "background-repeat", "no-repeat");
-				DashboardHelper.AddStyle(element, "background-position", "0px center");
-				DashboardHelper.AddStyle(element, "padding-left", "20px");
+				attr.Value = $"{this.GetCssStyles() ?? ""};{element.GetAttribute("style") ?? ""}".Trim();
+				if (attr.Value?.StartsWith(";") ?? false)
+					attr.Value = attr.Value.Substring(1);
+				if (attr.Value?.EndsWith(";") ?? false)
+					attr.Value = attr.Value.Substring(0, attr.Value.Length - 1);
+				if (attr.Value.Length > 0)
+					element.Attributes.Append(attr);
 			}
 
 			return fragment;
@@ -103,5 +98,25 @@ namespace MFiles.VAF.Extensions.Dashboards
 		/// <param name="xml">The document.</param>
 		/// <returns>The XML fragment.</returns>
 		protected abstract XmlDocumentFragment GenerateXmlDocumentFragment(XmlDocument xml);
+
+		/// <summary>
+		/// Renders the icon to the provided <paramref name="element"/>.
+		/// </summary>
+		/// <param name="element">The element to render to.</param>
+		protected virtual void RenderIconTo(XmlElement element)
+		{
+			// Add item icon, if defined.
+			if (!String.IsNullOrWhiteSpace(this.Icon))
+			{
+				// Add the icon class to include the padding and other background style options.
+				DashboardHelper.AddClass(element, "icon");
+
+				// Set the background image explicitly.
+				DashboardHelper.AddStyle(element, "background-image", String.Format("url({0})", DashboardHelpersEx.ImageFileToDataUri(this.Icon)));
+				DashboardHelper.AddStyle(element, "background-repeat", "no-repeat");
+				DashboardHelper.AddStyle(element, "background-position", "0px center");
+				DashboardHelper.AddStyle(element, "padding-left", "20px");
+			}
+		}
 	}
 }
