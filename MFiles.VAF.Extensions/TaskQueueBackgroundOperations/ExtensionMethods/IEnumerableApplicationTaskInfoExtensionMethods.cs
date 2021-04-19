@@ -2,6 +2,7 @@
 using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Extensions.Dashboards;
 using MFiles.VAF.Extensions.ExtensionMethods;
+using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
@@ -69,8 +70,23 @@ namespace MFiles.VAF.Extensions
 				var taskInfo = execution.RetrieveTaskInfo();
 				var activation = execution.ActivationTimestamp.ToDateTime(DateTimeKind.Utc);
 
+				// Try and get the display name from the directive.
+				var displayName = execution.TaskID; // Default to the task ID.
+				if (null != execution.TaskData && execution.TaskData.Length > 0)
+				{
+					try
+					{
+						var directive = TaskQueueDirective.Parse<BackgroundOperationTaskQueueDirective>(execution.TaskData)
+							?.GetParsedInternalDirective() as TaskQueueDirectiveWithDisplayName;
+						displayName = string.IsNullOrWhiteSpace(directive?.DisplayName)
+							? displayName
+							: directive.DisplayName;
+					}
+					catch { }
+				}
+
 				// Create the content for the scheduled column (including icon).
-				var taskInfoCell = new DashboardCustomContentEx(execution.TaskID);
+				var taskInfoCell = new DashboardCustomContentEx(displayName);
 				var scheduledCell = new DashboardCustomContentEx
 					(
 						activation.ToTimeOffset

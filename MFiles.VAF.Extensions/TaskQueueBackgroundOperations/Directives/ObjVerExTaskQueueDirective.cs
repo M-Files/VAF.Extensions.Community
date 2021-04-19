@@ -6,16 +6,28 @@ using MFiles.VAF.MultiserverMode;
 
 namespace MFiles.VAF.Extensions
 {
+
 	/// <summary>
 	/// A <see cref="TaskQueueDirective"/> that represents a single <see cref="ObjVerExTaskQueueDirective.ObjVerEx"/>.
 	/// </summary>
 	public class ObjVerExTaskQueueDirective
-		: TaskQueueDirective
+		: TaskQueueDirectiveWithDisplayName
 	{
 		/// <summary>
 		/// Parse-able ObjVerEx string.
 		/// </summary>
 		public string ObjVerEx { get; set; }
+
+		/// <summary>
+		/// Attempts to get an <see cref="Common.ObjVerEx"/> instance from <see cref="ObjVerEx"/>.
+		/// </summary>
+		/// <param name="vault">The vault to use when creating the ObjVerEx.</param>
+		/// <param name="objVerEx">The ObjVerEx loaded.</param>
+		/// <returns><see langword="true"/>if the ObjVerEx could be extracted.</returns>
+		public bool TryGetObjVerEx(Vault vault, out ObjVerEx objVerEx)
+		{
+			return Common.ObjVerEx.TryParse(vault, this.ObjVerEx, out objVerEx);
+		}
 
 		/// <summary>
 		/// Creates a <see cref="ObjVerExTaskQueueDirective"/>
