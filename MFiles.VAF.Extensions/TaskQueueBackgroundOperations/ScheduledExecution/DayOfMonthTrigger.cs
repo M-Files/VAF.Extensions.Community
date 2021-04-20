@@ -8,7 +8,14 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 {
 	public enum UnrepresentableDateHandling
 	{
+		/// <summary>
+		/// Skips any dates that are unrepresentable.
+		/// </summary>
 		Skip = 0,
+
+		/// <summary>
+		/// Attempts to use the last day of the same month.
+		/// </summary>
 		LastDayOfMonth = 1
 	}
 	/// <summary>
@@ -32,7 +39,8 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 
 		/// <summary>
 		/// The days of the month to trigger the schedule.
-		/// Days outside of a valid range (e.g. 30th February, or 99th October) are ignored.
+		/// Days outside of a valid range (e.g. 30th February, or 99th October) are handled
+		/// as per <see cref="UnrepresentableDateHandling"/>.
 		/// </summary>
 		[DataMember]
 		[JsonConfEditor(Label = "Trigger Days")]
