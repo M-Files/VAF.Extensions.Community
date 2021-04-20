@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MFiles.VAF.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -21,6 +22,11 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// How to handle unrepresentable dates (e.g. 30th February).
 		/// </summary>
 		[DataMember]
+		[JsonConfEditor
+		(
+			Label = "Unrepresentable Date Handling",
+			HelpText = "How to handle dates that cannot be represented (e.g. 29 February)"
+		)]
 		public UnrepresentableDateHandling UnrepresentableDateHandling { get; set; }
 			= UnrepresentableDateHandling.Skip;
 
@@ -29,6 +35,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// Days outside of a valid range (e.g. 30th February, or 99th October) are ignored.
 		/// </summary>
 		[DataMember]
+		[JsonConfEditor(Label = "Trigger Days")]
 		public List<int> TriggerDays { get; set; } = new List<int>();
 
 		/// <summary>

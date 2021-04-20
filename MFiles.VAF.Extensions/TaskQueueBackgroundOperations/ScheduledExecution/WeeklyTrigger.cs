@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MFiles.VAF.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -18,6 +19,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// There must be at least one item in this collection for the trigger to be active.
 		/// </summary>
 		[DataMember]
+		[JsonConfEditor(Label = "Trigger Days")]
 		public List<DayOfWeek> TriggerDays { get; set; } = new List<DayOfWeek>();
 
 		/// <summary>
