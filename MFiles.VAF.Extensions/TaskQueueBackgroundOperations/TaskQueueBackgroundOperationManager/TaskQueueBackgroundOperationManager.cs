@@ -280,54 +280,36 @@ namespace MFiles.VAF.Extensions
 			job.ProcessingFailed += (sender, args) => CompleteJob(job, MFTaskState.MFTaskStateFailed, args.Exception);
 
 			// Perform the action.
-			try
-			{
-				// Mark it as started.
-				job.Data.Value = this.TaskProcessor.UpdateTaskInfo
+			// Mark it as started.
+			job.Data.Value = this.TaskProcessor.UpdateTaskInfo
+			(
+				job.Data?.Value,
+				MFTaskState.MFTaskStateInProgress,
+				JsonConvert.SerializeObject
 				(
-					job.Data?.Value,
-					MFTaskState.MFTaskStateInProgress,
-					JsonConvert.SerializeObject
-					(
-						new TaskInformation()
-						{
-							Started = DateTime.Now,
-							LastActivity = DateTime.Now,
-							CurrentTaskState = MFTaskState.MFTaskStateInProgress
-						}
-					),
-					false
-				);
-				// Delegate to the background operation.
-				bo.RunJob
-				(
-					// The TaskProcessorJobEx class wraps the job and allows easy updates.
-					new TaskProcessorJobEx()
+					new TaskInformation()
 					{
-						Job = job,
-						TaskQueueBackgroundOperationManager = this
-					},
-					dir
-				);
-			}
-			catch (Exception e)
-			{
-				// Try and get the latest task info.
-				var info = job?.Data?.Value?.RetrieveTaskInfo()
-					?? new TaskInformation();
+						Started = DateTime.Now,
+						LastActivity = DateTime.Now,
+						CurrentTaskState = MFTaskState.MFTaskStateInProgress
+					}
+				),
+				false
+			);
 
-				// If we have info then use that in the update.
-				info.StatusDetails = e.Message;
-				info.Completed = DateTime.Now;
-				info.LastActivity = DateTime.Now;
-				job.Data.Value = this.TaskProcessor.UpdateTaskInfo
-				(
-					job.Data?.Value,
-					MFTaskState.MFTaskStateFailed,
-					JsonConvert.SerializeObject(info),
-					false
-				);
-			}
+			// NOTE: this should not have any error handling around it here unless it re-throws the error
+			// Catching the exception here can result in job.ProcessingFailed not being called
+			// Delegate to the background operation.
+			bo.RunJob
+			(
+				// The TaskProcessorJobEx class wraps the job and allows easy updates.
+				new TaskProcessorJobEx()
+				{
+					Job = job,
+					TaskQueueBackgroundOperationManager = this
+				},
+				dir
+			);
 		}
 
 		/// <summary>
@@ -351,6 +333,11 @@ namespace MFiles.VAF.Extensions
 					?? new TaskInformation();
 				info.Completed = DateTime.Now;
 				info.LastActivity = DateTime.Now;
+
+				if( exception != null )
+				{
+					info.StatusDetails = exception.Message;
+				}
 
 				// Update the task information.
 				job.Data.Value = this.TaskProcessor.UpdateTaskInfo
