@@ -19,6 +19,11 @@ namespace MFiles.VAF.Extensions
 		public TaskProcessorJob Job { get; set; }
 
 		/// <summary>
+		/// The vault associated with the job.
+		/// </summary>
+		public Vault Vault { get => this.Job?.Vault; }
+
+		/// <summary>
 		/// The background operation manager that owns this job.
 		/// </summary>
 		public TaskQueueBackgroundOperationManager TaskQueueBackgroundOperationManager { get; set; }
