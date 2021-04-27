@@ -48,7 +48,7 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 				expected,
 				new DayOfMonthTrigger()
 				{
-					TriggerTimes = triggerTimes.Select(t => new TriggerTime() { Time = t }).ToList(),
+					TriggerTimes = triggerTimes.ToList(),
 					TriggerDays = triggerDays.ToList()
 				}.GetNextExecution(after)
 			);

@@ -45,7 +45,7 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 				expected,
 				new WeeklyTrigger()
 				{
-					TriggerTimes = triggerTimes.Select(t => new TriggerTime() { Time = t }).ToList().ToList(),
+					TriggerTimes = triggerTimes.ToList().ToList(),
 					TriggerDays = triggerDays.ToList()
 				}.GetNextExecution(after)
 			);

@@ -84,7 +84,7 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 						TriggerTimes = new List<TimeSpan>()
 						{
 							new TimeSpan(17, 0, 0)
-						}.Select(t => new TriggerTime() { Time = t }).ToList()
+						}.ToList()
 					}
 				},
 				new DateTime(2021, 03, 17, 01, 00, 00), // Wednesday @ 1am
@@ -100,13 +100,13 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 						TriggerTimes = new List<TimeSpan>()
 						{
 							new TimeSpan(17, 0, 0)
-						}.Select(t => new TriggerTime() { Time = t }).ToList()
+						}.ToList()
 					},
 					new DailyTrigger(){
 						TriggerTimes = new List<TimeSpan>()
 						{
 							new TimeSpan(12, 0, 0)
-						}.Select(t => new TriggerTime() { Time = t }).ToList()
+						}.ToList()
 					}
 				},
 				new DateTime(2021, 03, 17, 01, 00, 00), // Wednesday @ 1am
@@ -130,7 +130,7 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 						TriggerTimes = new List<TimeSpan>()
 						{
 							new TimeSpan(17, 0, 0)
-						}.Select(t => new TriggerTime() { Time = t }).ToList()
+						}.ToList()
 					}
 				},
 				new DateTime(2021, 03, 17, 17, 00, 00), // Wednesday @ 1am

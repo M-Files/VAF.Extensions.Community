@@ -26,7 +26,7 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 				expected,
 				new DailyTrigger()
 				{
-					TriggerTimes = triggerTimes.Select(t => new TriggerTime() { Time = t }).ToList()
+					TriggerTimes = triggerTimes.ToList()
 				}.GetNextExecution(after)
 			);
 		}

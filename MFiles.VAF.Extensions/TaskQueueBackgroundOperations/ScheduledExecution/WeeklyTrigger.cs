@@ -89,7 +89,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			if (null == this.TriggerTimes || this.TriggerTimes.Count == 0)
 				return null;
 
-			return $"Every {string.Join(", ", this.TriggerDays.OrderBy(t => t))} at the following times: {string.Join(", ", this.TriggerTimes.OrderBy(t => t.Time).Select(t => t.ToString()))}.";
+			return $"Every {string.Join(", ", this.TriggerDays.OrderBy(t => t))} at the following times: {string.Join(", ", this.TriggerTimes.OrderBy(t => t).Select(t => t.ToString()))}.";
 		}
 	}
 }
