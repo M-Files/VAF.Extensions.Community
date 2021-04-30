@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static MFiles.VAF.Extensions.ExtensionMethods.ObjVerExExtensionMethods.ObjectCopyOptions;
+using static MFiles.VAF.Extensions.ObjVerExExtensionMethods.ObjectCopyOptions;
 
-namespace MFiles.VAF.Extensions.ExtensionMethods
+namespace MFiles.VAF.Extensions
 {
 	public static partial class ObjVerExExtensionMethods
 	{
@@ -112,7 +112,7 @@ namespace MFiles.VAF.Extensions.ExtensionMethods
 							{
 								// Add the provided value onto the end of whatever is there.
 								var index = propertyValues.IndexOf(this.PropertyValue.PropertyDef);
-								if (index > -1)
+								if (index == -1)
 									propertyValues.Add(-1, this.PropertyValue); // Not there; add.
 								else
 								{
@@ -146,7 +146,7 @@ namespace MFiles.VAF.Extensions.ExtensionMethods
 							{
 								// Add or replace the property value.
 								var index = propertyValues.IndexOf(this.PropertyValue.PropertyDef);
-								if (index > -1)
+								if (index == -1)
 									propertyValues.Add(-1, this.PropertyValue); // Not there; add.
 								else
 									propertyValues[index] = this.PropertyValue; // Overwrite
@@ -207,7 +207,7 @@ namespace MFiles.VAF.Extensions.ExtensionMethods
 		public static ObjVerEx CreateCopy
 		(
 			this ObjVerEx source,
-			ObjectCopyOptions objectCopyOptions
+			ObjectCopyOptions objectCopyOptions = null
 		)
 		{
 			// Sanity.
