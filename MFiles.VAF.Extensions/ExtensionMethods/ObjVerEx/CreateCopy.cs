@@ -97,6 +97,7 @@ namespace MFiles.VAF.Extensions
 			{
 				foreach (SourceObjectFile sourceFile in objectCopyOptions.AdditionalFiles)
 				{
+					fileCount++;
 					newObject.Vault.ObjectFileOperations.AddFile
 					(
 						newObject.ObjVer,
