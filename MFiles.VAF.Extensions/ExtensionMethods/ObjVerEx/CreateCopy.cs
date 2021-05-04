@@ -80,7 +80,7 @@ namespace MFiles.VAF.Extensions
 
 			// Copy the source files to the new object.
 			var fileCount = 0;
-			if (objectCopyOptions.CopySourceFiles)
+			if (objectCopyOptions.CopySourceFiles && null != source?.Info?.Files)
 			{
 				foreach (var file in source.Info.Files.Cast<ObjectFile>())
 				{
