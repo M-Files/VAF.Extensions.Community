@@ -27,10 +27,33 @@ namespace MFiles.VAF.Extensions
 			ObjectCopyOptions objectCopyOptions = null
 		)
 		{
+			return source.CreateCopy
+			(
+				objectCopyOptions ?? new ObjectCopyOptions(),
+				new ObjectCopyCreator()
+			);
+		}
+
+		/// <summary>
+		/// Implementation for <see cref="CreateCopy(ObjVerEx, ObjectCopyOptions" />.
+		/// Interaction with the vault is via the <paramref name="objectCopyCreator"/>.
+		/// </summary>
+		/// <param name="source">The source object to copy.</param>
+		/// <param name="objectCopyOptions">Options about how to copy the object.</param>
+		/// <param name="objectCopyCreator">The instance that will actually create the copy.</param>
+		/// <returns></returns>
+		internal static ObjVerEx CreateCopy
+		(
+			this ObjVerEx source,
+			ObjectCopyOptions objectCopyOptions = null,
+			IObjectCopyCreator objectCopyCreator = null
+		)
+		{
 			// Sanity.
 			if (null == source)
 				throw new ArgumentNullException(nameof(source));
 			objectCopyOptions = objectCopyOptions ?? new ObjectCopyOptions();
+			objectCopyCreator = objectCopyCreator ?? new ObjectCopyCreator();
 
 			// Create properties for the new object.
 			// If we should copy the source properties then start there,
@@ -68,14 +91,15 @@ namespace MFiles.VAF.Extensions
 			}
 
 			// Create the object, but do not check it in.
-			var newObject = new ObjVerEx(source.Vault, source.Vault.ObjectOperations.CreateNewObjectEx
+			var newObject = new ObjVerEx(source.Vault, objectCopyCreator.CreateObject
 			(
+				source.Vault,
 				objectCopyOptions.TargetObjectType ?? source.ObjVer.Type, 
-				propertyValues.Values, 
-				SourceFiles: null, // We will add these later.
-				SFD: false, // Always false here, until we know how many files we're copying.
-				CheckIn: false, // Don't check in until the files have been added.
-				AccessControlList: objectCopyOptions.CopySourceACL ? source.ACL : null
+				propertyValues.Values,
+				sourceObjectFiles: null, // We will add these later.
+				singleFileDocument: false, // Always false here, until we know how many files we're copying.
+				checkIn: false, // Don't check in until the files have been added.
+				accessControlList: objectCopyOptions.CopySourceACL ? source.ACL : null
 			));
 
 			// Copy the source files to the new object.
@@ -87,7 +111,7 @@ namespace MFiles.VAF.Extensions
 					fileCount++;
 					using (var fileStream = file.OpenRead(source.Vault))
 					{
-						newObject.AddFile(file.Title, file.Extension, fileStream);
+						objectCopyCreator.AddFile(newObject, file.Title, file.Extension, fileStream);
 					}
 				}
 			}
@@ -98,9 +122,9 @@ namespace MFiles.VAF.Extensions
 				foreach (SourceObjectFile sourceFile in objectCopyOptions.AdditionalFiles)
 				{
 					fileCount++;
-					newObject.Vault.ObjectFileOperations.AddFile
+					objectCopyCreator.AddFile
 					(
-						newObject.ObjVer,
+						newObject,
 						sourceFile.Title,
 						sourceFile.Extension,
 						sourceFile.SourceFilePath
@@ -117,19 +141,16 @@ namespace MFiles.VAF.Extensions
 				// (unless it went from a document to something else, in which case it's always false).
 				if (objectCopyOptions.SetSingleFileDocumentIfAppropriate)
 				{
-					newObject.SaveProperty
-					(
-						(int)MFBuiltInPropertyDef.MFBuiltInPropertyDefSingleFileObject,
-						MFDataType.MFDatatypeBoolean,
-						fileCount == 1 // True if a single file.
-					);
+					// True if a single file.
+					objectCopyCreator.SetSingleFileDocument(newObject, fileCount == 1);
 				}
 			}
 
 			// Check in?
 			if (objectCopyOptions.CheckInObject)
-				newObject.CheckIn
+				objectCopyCreator.CheckIn
 				(
+					newObject, 
 					objectCopyOptions.CheckInComments ?? "",
 					objectCopyOptions.CreatedByUserId ?? -1
 				);
