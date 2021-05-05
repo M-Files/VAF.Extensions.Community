@@ -227,18 +227,15 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			var sourceObject = this.CreateSourceObject();
 
 			// Create the property value instructions.
-			var properties = new List<ObjectCopyOptions.PropertyValueInstruction>();
+			var properties = new List<ObjectCopyOptions.PropertyValueInstruction>
 			{
-				var pv = new ObjectCopyOptions.PropertyValueInstruction()
-				{
-					InstructionType = ObjectCopyOptions.PropertyValueInstructionType.ReplaceOrAddPropertyValue,
-					PropertyValue = new PropertyValue()
-					{
-						PropertyDef = (int)MFBuiltInPropertyDef.MFBuiltInPropertyDefClass
-					}
-				};
-				pv.PropertyValue.TypedValue.SetValue(MFDataType.MFDatatypeLookup, 1234);
-				properties.Add(pv);
+				new ObjectCopyOptions.PropertyValueInstruction
+				(
+					ObjectCopyOptions.PropertyValueInstructionType.ReplaceOrAddPropertyValue,
+					(int)MFBuiltInPropertyDef.MFBuiltInPropertyDefClass,
+					MFDataType.MFDatatypeLookup,
+					1234
+				)
 			};
 
 			// Execute.

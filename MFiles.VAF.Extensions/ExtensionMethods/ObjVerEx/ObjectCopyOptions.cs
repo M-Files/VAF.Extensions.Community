@@ -73,6 +73,24 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		public class PropertyValueInstruction
 		{
+			public PropertyValueInstruction()
+			{
+			}
+			public PropertyValueInstruction
+			(
+				PropertyValueInstructionType instructionType,
+				int propertyDefId,
+				MFDataType dataType,
+				object value
+			)
+			{
+				var pv = new PropertyValue()
+				{
+					PropertyDef = propertyDefId
+				};
+				pv.TypedValue.SetValue(dataType, value);
+				this.PropertyValue = pv;
+			}
 			/// <summary>
 			/// The type of instruction.
 			/// </summary>
