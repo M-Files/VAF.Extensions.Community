@@ -217,5 +217,45 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			Assert.AreEqual(false, copy.Properties[1].TypedValue.Value);
 		}
 
+		[TestMethod]
+		public void PropertyValueInstructionsAreApplied()
+		{
+			// Create our mock objects.
+			var objectCopyCreatorMock = this.GetObjectCopyCreatorMock();
+
+			// Create our source object.
+			var sourceObject = this.CreateSourceObject();
+
+			// Create the property value instructions.
+			var properties = new List<ObjectCopyOptions.PropertyValueInstruction>();
+			{
+				var pv = new ObjectCopyOptions.PropertyValueInstruction()
+				{
+					InstructionType = ObjectCopyOptions.PropertyValueInstructionType.ReplaceOrAddPropertyValue,
+					PropertyValue = new PropertyValue()
+					{
+						PropertyDef = (int)MFBuiltInPropertyDef.MFBuiltInPropertyDefClass
+					}
+				};
+				pv.PropertyValue.TypedValue.SetValue(MFDataType.MFDatatypeLookup, 1234);
+				properties.Add(pv);
+			};
+
+			// Execute.
+			var copy = sourceObject.CreateCopy
+			(
+				objectCopyOptions: new ObjectCopyOptions()
+				{
+					Properties = properties
+				},
+				objectCopyCreator: objectCopyCreatorMock.Object
+			);
+
+			// SFD = false.
+			Assert.AreEqual(1, copy.Properties.Count);
+			Assert.AreEqual((int)MFBuiltInPropertyDef.MFBuiltInPropertyDefClass, copy.Properties[1].PropertyDef);
+			Assert.AreEqual(1234, copy.Properties[1].TypedValue.GetLookupID());
+		}
+
 	}
 }
