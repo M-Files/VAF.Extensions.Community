@@ -192,6 +192,70 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			Assert.AreEqual("hello world", copy.Properties[2].TypedValue.DisplayValue);
 		}
 
+		// When RemoveSystemProperties = true (default), the system properties should be removed.
+		[TestMethod]
+		public void SourcePropertiesCopied_SystemPropertiesRemoved()
+		{
+			// Create our mock objects.
+			var objectCopyCreatorMock = this.GetObjectCopyCreatorMock();
+
+			// Create our source object.
+			var sourceObject = this.CreateSourceObject
+			(
+				new Tuple<int, MFDataType, object>
+				(
+					(int)MFBuiltInPropertyDef.MFBuiltInPropertyDefLastModified,
+					MFDataType.MFDatatypeTimestamp,
+					new Timestamp()
+				)
+			);
+
+			// Execute.
+			var copy = sourceObject.CreateCopy
+			(
+				new ObjectCopyOptions()
+				{
+					RemoveSystemProperties = true
+				},
+				objectCopyCreator: objectCopyCreatorMock.Object
+			);
+
+			// Properties should be correct.
+			Assert.AreEqual(0, copy.Properties.Count);
+		}
+
+		// When RemoveSystemProperties = false, the system properties should not be removed.
+		[TestMethod]
+		public void SourcePropertiesCopied_SystemPropertiesRetained()
+		{
+			// Create our mock objects.
+			var objectCopyCreatorMock = this.GetObjectCopyCreatorMock();
+
+			// Create our source object.
+			var sourceObject = this.CreateSourceObject
+			(
+				new Tuple<int, MFDataType, object>
+				(
+					(int)MFBuiltInPropertyDef.MFBuiltInPropertyDefLastModified,
+					MFDataType.MFDatatypeTimestamp,
+					new Timestamp()
+				)
+			);
+
+			// Execute.
+			var copy = sourceObject.CreateCopy
+			(
+				new ObjectCopyOptions()
+				{
+					RemoveSystemProperties = false
+				},
+				objectCopyCreator: objectCopyCreatorMock.Object
+			);
+
+			// Properties should be correct.
+			Assert.AreEqual(1, copy.Properties.Count);
+		}
+
 		[TestMethod]
 		public void CorrectTargetType()
 		{

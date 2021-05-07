@@ -64,6 +64,10 @@ namespace MFiles.VAF.Extensions
 				objectCopyOptions.CopySourceProperties ? source.Properties.Clone() : new PropertyValues()
 			);
 
+			// Remove system properties if requested.
+			if (objectCopyOptions.RemoveSystemProperties)
+				propertyValues.RemoveSystemProperties();
+
 			// If it's not a document then SFD = false.
 			if ((objectCopyOptions.TargetObjectType ?? source.ObjVer.Type)
 				!= (int)MFBuiltInObjectType.MFBuiltInObjectTypeDocument)

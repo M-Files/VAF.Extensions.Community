@@ -38,21 +38,27 @@ namespace MFiles.VAF.Extensions
 		public bool CheckInObject { get; set; } = true;
 
 		/// <summary>
-		/// Whether to copy the files from the source to the target object.
+		/// Whether to copy the files from the source to the new object.
 		/// </summary>
 		public bool CopySourceFiles { get; set; } = true;
 
 		/// <summary>
-		/// Whether to copy the properties from the source to the target object.
+		/// Whether to copy the properties from the source to the new object.
 		/// If false then <see cref="Properties"/> must contain all properties needed
 		/// to create the new object.
 		/// </summary>
 		public bool CopySourceProperties { get; set; } = true;
 
 		/// <summary>
-		/// If true then any ACL on the source will be copied to the target.
+		/// If true then any ACL on the source will be copied to the new object.
 		/// </summary>
 		public bool CopySourceACL { get; set; } = true;
+
+		/// <summary>
+		/// If true then will remove system properties (see: <see cref="MFPropertyValuesBuilder.RemoveSystemProperties"/>)
+		/// from the new object before creating.
+		/// </summary>
+		public bool RemoveSystemProperties { get; set; } = true;
 
 		/// <summary>
 		/// Instructions used to alter the source object's properties (e.g. to override a value).
@@ -61,7 +67,7 @@ namespace MFiles.VAF.Extensions
 			= new List<PropertyValueInstruction>();
 
 		/// <summary>
-		/// Any additional files to add to the target object.
+		/// Any additional files to add to the new object.
 		/// </summary>
 		/// <remarks>File names must be unique within objects.
 		/// If two files with the same name appear (either within <see cref="AdditionalFiles"/> itself,
