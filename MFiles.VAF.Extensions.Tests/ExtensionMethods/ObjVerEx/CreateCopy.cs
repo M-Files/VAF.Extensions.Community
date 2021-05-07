@@ -193,6 +193,29 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 		}
 
 		[TestMethod]
+		public void CorrectTargetType()
+		{
+			// Create our mock objects.
+			var objectCopyCreatorMock = this.GetObjectCopyCreatorMock();
+
+			// Create our source object.
+			var sourceObject = this.CreateSourceObject();
+
+			// Execute.
+			var copy = sourceObject.CreateCopy
+			(
+				objectCopyOptions: new ObjectCopyOptions()
+				{
+					TargetObjectType = 123 // Not a document.
+				},
+				objectCopyCreator: objectCopyCreatorMock.Object
+			);
+
+			// Source was a document, but we overrode that in the creation.
+			Assert.AreEqual(123, copy.ObjVer.Type);
+		}
+
+		[TestMethod]
 		public void SingleFileDocumentSetToFalseForNonDocumentObjects()
 		{
 			// Create our mock objects.
@@ -252,6 +275,101 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			Assert.AreEqual(1, copy.Properties.Count);
 			Assert.AreEqual((int)MFBuiltInPropertyDef.MFBuiltInPropertyDefClass, copy.Properties[1].PropertyDef);
 			Assert.AreEqual(1234, copy.Properties[1].TypedValue.GetLookupID());
+		}
+
+		[TestMethod]
+		public void CheckIn_IsCalledWhenTrue()
+		{
+			// Create our mock objects.
+			var objectCopyCreatorMock = this.GetObjectCopyCreatorMock();
+			var checkedIn = false;
+			objectCopyCreatorMock
+				.Setup(m => m.CheckIn(It.IsAny<Common.ObjVerEx>(), It.IsAny<string>(), It.IsAny<int>()))
+				.Callback((Common.ObjVerEx objVerEx, string comments, int userId) =>
+				{
+					checkedIn = true;
+				})
+				.Verifiable();
+
+			// Create our source object.
+			var sourceObject = this.CreateSourceObject();
+
+			// Execute.
+			var copy = sourceObject.CreateCopy
+			(
+				objectCopyOptions: new ObjectCopyOptions()
+				{
+					CheckInObject = true
+				},
+				objectCopyCreator: objectCopyCreatorMock.Object
+			);
+
+			// Assert that checkin was called.
+			objectCopyCreatorMock.Verify();
+			Assert.AreEqual(true, checkedIn);
+		}
+
+		[TestMethod]
+		public void CheckIn_CommentsAndUserIdCorrect()
+		{
+			// Create our mock objects.
+			var objectCopyCreatorMock = this.GetObjectCopyCreatorMock();
+			objectCopyCreatorMock
+				.Setup(m => m.CheckIn(It.IsAny<Common.ObjVerEx>(), It.IsAny<string>(), It.IsAny<int>()))
+				.Callback((Common.ObjVerEx objVerEx, string comments, int userId) =>
+				{
+					Assert.AreEqual("hello world", comments);
+					Assert.AreEqual(1234, userId);
+				})
+				.Verifiable();
+
+			// Create our source object.
+			var sourceObject = this.CreateSourceObject();
+
+			// Execute.
+			var copy = sourceObject.CreateCopy
+			(
+				objectCopyOptions: new ObjectCopyOptions()
+				{
+					CheckInObject = true,
+					CheckInComments = "hello world",
+					CreatedByUserId = 1234
+				},
+				objectCopyCreator: objectCopyCreatorMock.Object
+			);
+
+			// Assert that checkin was called.
+			objectCopyCreatorMock.Verify();
+		}
+
+		[TestMethod]
+		public void CheckIn_IsNotCalledWhenFalse()
+		{
+			// Create our mock objects.
+			var objectCopyCreatorMock = this.GetObjectCopyCreatorMock();
+			var checkedIn = false;
+			objectCopyCreatorMock
+				.Setup(m => m.CheckIn(It.IsAny<Common.ObjVerEx>(), It.IsAny<string>(), It.IsAny<int>()))
+				.Callback((Common.ObjVerEx objVerEx, string comments, int userId) =>
+				{
+					checkedIn = true;
+				});
+
+			// Create our source object.
+			var sourceObject = this.CreateSourceObject();
+
+			// Execute.
+			var copy = sourceObject.CreateCopy
+			(
+				objectCopyOptions: new ObjectCopyOptions()
+				{
+					CheckInObject = false
+				},
+				objectCopyCreator: objectCopyCreatorMock.Object
+			);
+
+			// Assert that checkin was not called.
+			Assert.AreEqual(false, checkedIn);
 		}
 
 	}
