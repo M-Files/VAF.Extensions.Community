@@ -84,6 +84,7 @@ namespace MFiles.VAF.Extensions
 				object value
 			)
 			{
+				this.InstructionType = instructionType;
 				var pv = new PropertyValue()
 				{
 					PropertyDef = propertyDefId
