@@ -136,7 +136,7 @@ namespace MFiles.VAF.Extensions
 				}
 				else
 				{
-					output += ", ";
+					output += ", " + components[i];
 				}
 			}
 			return output;
