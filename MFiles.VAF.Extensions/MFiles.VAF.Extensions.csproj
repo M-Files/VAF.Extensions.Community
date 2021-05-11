@@ -3,7 +3,7 @@
     <TargetFrameworks>net45</TargetFrameworks>
     <Copyright>M-Files Corporation 2020 onwards</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.2.8.0</Version>
+    <Version>1.2.9.0</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Company>M-Files Corporation</Company>
     <Authors>M-Files Corporation</Authors>
@@ -58,13 +58,13 @@
   </ItemGroup>
   <Target Name="CleanNugetPackages" BeforeTargets="Build">
     <ItemGroup>
-      <FilesToDelete Include="$(OutputPath)*.nupkg"/>
+      <FilesToDelete Include="$(OutputPath)*.nupkg" />
     </ItemGroup>
     <Delete Files="@(FilesToDelete)" />
   </Target>
   <Target Name="PostBuild" AfterTargets="Pack" Condition=" '$(Configuration)' == 'Release'">
     <CreateItem Include="$(OutputPath)*.nupkg">
-      <Output TaskParameter="Include" ItemName="NugetPackages"/>
+      <Output TaskParameter="Include" ItemName="NugetPackages" />
     </CreateItem>
     <RemoveDir Directories="..\current" />
     <Copy SourceFiles="@(NugetPackages)" DestinationFolder="..\current" />
