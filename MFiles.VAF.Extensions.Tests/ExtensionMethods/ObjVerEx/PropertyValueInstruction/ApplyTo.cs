@@ -112,9 +112,9 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx.PropertyValueIns
 			);
 		}
 
-		// Does ApplyTo add a single value to a MSLU property?
+		// Does ApplyTo add a single value (int[]) to a MSLU property?
 		[TestMethod]
-		public void AddValueToProperty_AddsSingleValue_Null()
+		public void AddValueToProperty_AddsSingleValueAsArray_Null()
 		{
 			const int propertyDef = 1024;
 
@@ -131,6 +131,55 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx.PropertyValueIns
 			(
 				MFDataType.MFDatatypeMultiSelectLookup,
 				new int[] { 4 }
+			);
+
+			// Apply it.
+			var propertyValues = new PropertyValues();
+			{
+				var pv = new PropertyValue()
+				{
+					PropertyDef = propertyDef
+				};
+				// Set the starting value to null (should end up with one item).
+				pv.TypedValue.SetValueToNULL(MFDataType.MFDatatypeMultiSelectLookup);
+				propertyValues.Add(-1, pv);
+			}
+			instruction.ApplyTo(propertyValues);
+
+			// Test the results.
+			Assert.AreEqual(1, propertyValues.Count);
+			Assert.AreEqual(propertyDef, propertyValues[1].PropertyDef);
+			Assert.AreEqual
+			(
+				1,
+				propertyValues[1].TypedValue.GetValueAsLookups().Count
+			);
+			Assert.AreEqual
+			(
+				4, // This is the single ID that was added.
+				propertyValues[1].TypedValue.GetValueAsLookups()[1].Item
+			);
+		}
+
+		// Does ApplyTo add a single value (int) to a MSLU property?
+		[TestMethod]
+		public void AddValueToProperty_AddsSingleValueInt_Null()
+		{
+			const int propertyDef = 1024;
+
+			// Set up the instruction to add/update.
+			var instruction = new ObjectCopyOptions.PropertyValueInstruction()
+			{
+				InstructionType = ObjectCopyOptions.PropertyValueInstructionType.AddValueToProperty,
+				PropertyValue = new PropertyValue()
+				{
+					PropertyDef = propertyDef
+				}
+			};
+			instruction.PropertyValue.TypedValue.SetValue
+			(
+				MFDataType.MFDatatypeMultiSelectLookup,
+				4
 			);
 
 			// Apply it.
