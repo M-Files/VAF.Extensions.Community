@@ -39,7 +39,7 @@ namespace MFiles.VAF.Extensions
 				var htmlString = "";
 				if (false == string.IsNullOrWhiteSpace(bgo.Description))
 				{
-					htmlString += new DashboardCustomContent($"<p><em>{bgo.Description}</em></p>").ToXmlString();
+					htmlString += new DashboardCustomContent($"<p><em>{System.Security.SecurityElement.Escape(bgo.Description)}</em></p>").ToXmlString();
 				}
 
 				// Show when it should run.

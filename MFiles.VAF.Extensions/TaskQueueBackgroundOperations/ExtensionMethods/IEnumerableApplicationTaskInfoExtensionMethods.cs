@@ -86,7 +86,7 @@ namespace MFiles.VAF.Extensions
 				}
 
 				// Create the content for the scheduled column (including icon).
-				var taskInfoCell = new DashboardCustomContentEx(displayName);
+				var taskInfoCell = new DashboardCustomContentEx(System.Security.SecurityElement.Escape(displayName));
 				var scheduledCell = new DashboardCustomContentEx
 					(
 						activation.ToTimeOffset
