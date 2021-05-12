@@ -62,7 +62,7 @@ namespace MFiles.VAF.Extensions
 			else if (false == string.IsNullOrWhiteSpace(this.StatusDetails))
 			{
 				// Otherwise just show the text.
-				return new DashboardCustomContent(this.StatusDetails);
+				return new DashboardCustomContent(System.Security.SecurityElement.Escape(this.StatusDetails));
 			}
 
 			// Return nothing.

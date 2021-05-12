@@ -23,6 +23,19 @@ namespace MFiles.VAF.Extensions.Tests.Dashboards
 		{
 			new DashboardCustomContentEx(htmlContent: null);
 		}
+		[TestMethod]
+		[ExpectedException(typeof(System.Xml.XmlException))]
+		public void UnencodedContentDoesThrow()
+		{
+			var content = new DashboardCustomContentEx(htmlContent: "hello & world ");
+			content.ToXmlString();
+		}
+		[TestMethod]
+		public void EncodedContentDoesNotThrow()
+		{
+			var content = new DashboardCustomContentEx(htmlContent: "hello &amp; world ");
+			content.ToXmlString();
+		}
 
 		[TestMethod]
 		public void InnerContentSetCorrectly()
