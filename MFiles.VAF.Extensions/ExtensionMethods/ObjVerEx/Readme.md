@@ -50,11 +50,44 @@ using (var sourceStream = ...)
 
 *Note: When working with files in event handlers, [GetFilesForModificationInEventHandler](https://www.m-files.com/api/documentation/latest/index.html#MFilesAPI~VaultObjectFileOperations~GetFilesForModificationInEventHandler.html) will need to be called.  Because of this it may be more practical to use the `[objectFile.ReplaceFileContent](https://github.com/M-Files/COMAPI.Extensions.Community/blob/master/MFilesAPI.Extensions/ExtensionMethods/ObjectFileExtensionMethods.cs#L165)` extension method from the M-Files COM API extension library.*
 
+## CreateCopy
+
+Creates a copy of the current ObjVerEx, copying across both the metadata and files to the new object.
+
+```csharp
+
+// Create a copy of objVerEx.
+// Note: myCopy will be checked in as part of this call.
+var myCopy = objVerEx.CreateCopy();
+
+```
+
+Notes:
+
+* Copies both the property values and files by default.
+* This method will call [MFPropertyValuesBuilder.RemoveSystemProperties](https://developer.m-files.com/Frameworks/Vault-Application-Framework/Helpers/MFPropertyValuesBuilder/#removing-system-properties)
+* You can tailor how the copy is created by providing an instance of `ObjectCopyOptions`.
+    * You can alter the properties on the target by providing "PropertyValueInstructions"; these allow you to add, remove, or alter property values as they are copied.
+    * Additional files can be added as needed.
+    * The "created by" user can be set if needed.
+
+```csharp
+
+// Create a copy of objVerEx.
+var myCopy = objVerEx.CreateCopy(new ObjectCopyOptions()
+{
+    CheckInComments = "hello world",
+    CreatedByUserId = env.CurrentUserId, // Will be "M-Files Server" by default
+    TargetObjectType = 123 // Change the object type (e.g. from "Document" to "Published Document")
+});
+
+```
+
 ## ToLookup
 
 The base `ObjVerEx.ToLookup` method returns an M-Files API `Lookup` class instance pointing to that specific version of the object.  This extension method allows you to specify whether you would like the lookup to point to a specific version or always to the latest version:
 
-```
+```csharp
 // This is akin to the core objVerEx.ToLookup method.
 var versionSpecificLookup = objVerEx.ToLookup(false);
 
