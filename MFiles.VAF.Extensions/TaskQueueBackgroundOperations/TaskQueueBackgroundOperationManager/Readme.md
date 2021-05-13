@@ -41,13 +41,7 @@ namespace RecurringTask
 					
 						// If your background job processing takes more than a few seconds then
 						// you should periodically report back its status:
-						this.TaskQueueBackgroundOperationManager.TaskProcessor.UpdateTaskInfo
-						(
-							job,
-							MFTaskState.MFTaskStateInProgress,
-							"The process is ongoing...",
-							false
-						);
+						job.UpdateTaskInfo("The process is ongoing...");
 
 						// If you fail to do the above then the system may think that the task has
 						// aborted, and start it running a second time!
@@ -103,13 +97,7 @@ namespace RecurringTask
 					
 						// If your background job processing takes more than a few seconds then
 						// you should periodically report back its status:
-						this.TaskQueueBackgroundOperationManager.TaskProcessor.UpdateTaskInfo
-						(
-							job,
-							MFTaskState.MFTaskStateInProgress,
-							"The process is ongoing...",
-							false
-						);
+						job.UpdateTaskInfo("The process is ongoing...");
 
 						// If you fail to do the above then the system may think that the task has
 						// aborted, and start it running a second time!
@@ -173,13 +161,7 @@ namespace RecurringTask
 					
 							// If your background job processing takes more than a few seconds then
 							// you should periodically report back its status:
-							this.TaskQueueBackgroundOperationManager.TaskProcessor.UpdateTaskInfo
-							(
-								job,
-								MFTaskState.MFTaskStateInProgress,
-								"The process is ongoing...",
-								false
-							);
+							job.UpdateTaskInfo("The process is ongoing...");
 
 							// If you fail to do the above then the system may think that the task has
 							// aborted, and start it running a second time!
