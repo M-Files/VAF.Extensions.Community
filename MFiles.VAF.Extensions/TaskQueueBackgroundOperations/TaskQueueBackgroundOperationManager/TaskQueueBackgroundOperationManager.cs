@@ -7,13 +7,15 @@ using System.Threading;
 using MFiles.VAF.Common.ApplicationTaskQueue;
 using MFiles.VAF.MultiserverMode;
 using Newtonsoft.Json;
+using MFiles.VAF.Core;
 
 namespace MFiles.VAF.Extensions
 {
 	/// <summary>
 	/// Manages one or more background operations within a single queue.
 	/// </summary>
-	public partial class TaskQueueBackgroundOperationManager
+	public partial class TaskQueueBackgroundOperationManager<TSecureConfiguration>
+		where TSecureConfiguration : class, new()
 	{
 		/// <summary>
 		/// Lock for <see cref="CurrentServer"/>.
@@ -34,25 +36,25 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// The background operations managed by this instance.
 		/// </summary>
-		internal readonly Dictionary<string, TaskQueueBackgroundOperation> BackgroundOperations
-			= new Dictionary<string, TaskQueueBackgroundOperation>();
+		internal readonly Dictionary<string, TaskQueueBackgroundOperation<TSecureConfiguration>> BackgroundOperations
+			= new Dictionary<string, TaskQueueBackgroundOperation<TSecureConfiguration>>();
 
 		/// <summary>
 		/// Ensures that <see cref="CurrentServer"/> is set correctly.
 		/// </summary>
 		/// <param name="vaultApplication">The vault application where this code is running.</param>
-		internal static void SetCurrentServer(VaultApplicationBase vaultApplication)
+		internal static void SetCurrentServer(LegacyConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication)
 		{
 			// Sanity.
 			if (null == vaultApplication)
 				throw new ArgumentNullException(nameof(vaultApplication));
 
 			// Ensure that we have a current server.
-			lock (TaskQueueBackgroundOperationManager._lock)
+			lock (_lock)
 			{
-				if (null == TaskQueueBackgroundOperationManager.CurrentServer)
+				if (null == CurrentServer)
 				{
-					TaskQueueBackgroundOperationManager.CurrentServer
+					CurrentServer
 						= vaultApplication
 							.PermanentVault?
 							.GetVaultServerAttachments()?
@@ -69,7 +71,7 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// The vault application that contains this background operation manager.
 		/// </summary>
-		public VaultApplicationBase VaultApplication { get; private set; }
+		public LegacyConfigurableVaultApplicationBase<TSecureConfiguration> VaultApplication { get; private set; }
 
 		/// <summary>
 		/// The cancellation token source, if cancellation should be supported.
@@ -89,7 +91,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="cancellationTokenSource">The cancellation token source, if cancellation should be supported.</param>
 		public TaskQueueBackgroundOperationManager
 		(
-			VaultApplicationBase vaultApplication,
+			LegacyConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication,
 			CancellationTokenSource cancellationTokenSource = default
 		) : this
 		(
@@ -108,7 +110,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="cancellationTokenSource">The cancellation token source, if cancellation should be supported.</param>
 		public TaskQueueBackgroundOperationManager
 		(
-			VaultApplicationBase vaultApplication,
+			LegacyConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication,
 			string queueId,
 			CancellationTokenSource cancellationTokenSource = default
 		)
@@ -130,7 +132,7 @@ namespace MFiles.VAF.Extensions
 					this.QueueId,
 					new Dictionary<string, TaskProcessorJobHandler>
 					{
-						{ TaskQueueBackgroundOperation.TaskTypeId, this.ProcessJobHandler }
+						{ TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId, this.ProcessJobHandler }
 					},
 					cancellationTokenSource: cancellationTokenSource == null
 						? new CancellationTokenSource()
@@ -139,7 +141,7 @@ namespace MFiles.VAF.Extensions
 				);
 
 			// Ensure we have a current server.
-			TaskQueueBackgroundOperationManager.SetCurrentServer(vaultApplication);
+			SetCurrentServer(vaultApplication);
 
 			// Register the task queues.
 			this.TaskProcessor.RegisterTaskQueues();
@@ -211,12 +213,12 @@ namespace MFiles.VAF.Extensions
 			// If so then ignore.
 			if (dir is BroadcastDirective broadcastDirective)
 			{
-				if (broadcastDirective.GeneratedFromGuid == TaskQueueBackgroundOperationManager.CurrentServer.ServerID)
+				if (broadcastDirective.GeneratedFromGuid == CurrentServer.ServerID)
 					return;
 			}
 
 			// Find the background operation to run.
-			TaskQueueBackgroundOperation bo = null;
+			TaskQueueBackgroundOperation<TSecureConfiguration> bo = null;
 			lock (_lock)
 			{
 				if (false == this.BackgroundOperations.TryGetValue(backgroundOperationDirective.BackgroundOperationName, out bo))
@@ -303,7 +305,7 @@ namespace MFiles.VAF.Extensions
 			bo.RunJob
 			(
 				// The TaskProcessorJobEx class wraps the job and allows easy updates.
-				new TaskProcessorJobEx()
+				new TaskProcessorJobEx<TSecureConfiguration>()
 				{
 					Job = job,
 					TaskQueueBackgroundOperationManager = this
@@ -329,7 +331,7 @@ namespace MFiles.VAF.Extensions
 			// Update the task.
 			try
 			{
-				var info = job?.Data?.Value?.RetrieveTaskInfo()
+				var info = job?.Data?.Value?.RetrieveTaskInfo(CurrentServer.ServerID)
 					?? new TaskInformation();
 				info.Completed = DateTime.Now;
 				info.LastActivity = DateTime.Now;
@@ -348,7 +350,7 @@ namespace MFiles.VAF.Extensions
 					appendRemarks: false
 				);
 			}
-			catch(Exception e)
+			catch
 			{
 #if DEBUG
 				throw;

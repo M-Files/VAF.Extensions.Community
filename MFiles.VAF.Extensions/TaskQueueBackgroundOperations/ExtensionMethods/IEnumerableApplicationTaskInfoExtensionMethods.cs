@@ -23,6 +23,7 @@ namespace MFiles.VAF.Extensions
 		public static IDashboardContent AsDashboardContent
 		(
 			this IEnumerable<ApplicationTaskInfo> applicationTasks,
+			string serverId,
 			int maximumRowsToShow = 40
 		)
 		{
@@ -67,7 +68,7 @@ namespace MFiles.VAF.Extensions
 			// Add a row for each execution to show.
 			foreach (var execution in executionsToShow)
 			{
-				var taskInfo = execution.RetrieveTaskInfo();
+				var taskInfo = execution.RetrieveTaskInfo(serverId);
 				var activation = execution.ActivationTimestamp.ToDateTime(DateTimeKind.Utc);
 
 				// Try and get the display name from the directive.

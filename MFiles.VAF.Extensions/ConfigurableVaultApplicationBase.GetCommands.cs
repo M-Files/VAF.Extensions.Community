@@ -37,7 +37,7 @@ namespace MFiles.VAF.Extensions
 			// Note: this should be all of them.
 			return this
 				.GetType()
-				.GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager>(this)
+				.GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager<TSecureConfiguration>>(this)
 				.SelectMany(tqbom => tqbom.BackgroundOperations)
 				.AsEnumerable()
 				.Select(bo => bo.Value?.DashboardRunCommand)

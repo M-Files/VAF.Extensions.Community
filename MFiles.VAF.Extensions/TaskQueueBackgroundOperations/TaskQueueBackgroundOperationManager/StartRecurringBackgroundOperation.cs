@@ -4,7 +4,7 @@ using MFiles.VAF.MultiserverMode;
 
 namespace MFiles.VAF.Extensions
 {
-	public partial class TaskQueueBackgroundOperationManager
+	public partial class TaskQueueBackgroundOperationManager<TSecureConfiguration>
 	{
 		/// <summary>
 		/// Creates a new background operation and starts it. The background operation runs the given method at given intervals.
@@ -14,7 +14,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="method">The method to invoke at given intervals.</param>
 		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <returns>A scheduled background operation.</returns>
-		public TaskQueueBackgroundOperation StartRecurringBackgroundOperation
+		public TaskQueueBackgroundOperation<TSecureConfiguration> StartRecurringBackgroundOperation
 		(
 			string name,
 			TimeSpan interval,
@@ -37,11 +37,11 @@ namespace MFiles.VAF.Extensions
 		/// <param name="method">The method to invoke at given intervals.</param>
 		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <returns>A scheduled background operation.</returns>
-		public TaskQueueBackgroundOperation StartRecurringBackgroundOperation
+		public TaskQueueBackgroundOperation<TSecureConfiguration> StartRecurringBackgroundOperation
 		(
 			string name,
 			TimeSpan interval,
-			Action<TaskProcessorJobEx> method
+			Action<TaskProcessorJobEx<TSecureConfiguration>> method
 		)
 		{
 			return this.StartRecurringBackgroundOperation
@@ -61,11 +61,11 @@ namespace MFiles.VAF.Extensions
 		/// <param name="directive">The directive to pass to the job.</param>
 		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <returns>A started background operation.</returns>
-		public TaskQueueBackgroundOperation StartRecurringBackgroundOperation
+		public TaskQueueBackgroundOperation<TSecureConfiguration> StartRecurringBackgroundOperation
 		(
 			string name,
 			TimeSpan interval,
-			Action<TaskProcessorJobEx, TaskQueueDirective> method,
+			Action<TaskProcessorJobEx<TSecureConfiguration>, TaskQueueDirective> method,
 			TaskQueueDirective directive = null
 		)
 		{
@@ -87,11 +87,11 @@ namespace MFiles.VAF.Extensions
 		/// <param name="directive">The directive to pass to the job.</param>
 		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <returns>A started background operation.</returns>
-		public TaskQueueBackgroundOperation<TDirective> StartRecurringBackgroundOperation<TDirective>
+		public TaskQueueBackgroundOperation<TDirective, TSecureConfiguration> StartRecurringBackgroundOperation<TDirective>
 		(
 			string name,
 			TimeSpan interval,
-			Action<TaskProcessorJobEx, TDirective> method,
+			Action<TaskProcessorJobEx<TSecureConfiguration>, TDirective> method,
 			TDirective directive = null
 		)
 			where TDirective : TaskQueueDirective

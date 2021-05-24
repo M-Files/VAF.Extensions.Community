@@ -11,7 +11,8 @@ namespace MFiles.VAF.Extensions
 	/// <see cref="TaskProcessorJobEx.TaskQueueBackgroundOperationManager"/> and <see cref="TaskProcessorJobEx.TaskProcessor"/>.
 	/// Also provides helper methods for setting typed task information for rendering onto dashboards.
 	/// </summary>
-	public class TaskProcessorJobEx
+	public class TaskProcessorJobEx<TSecureConfiguration>
+		where TSecureConfiguration : class, new()
 	{
 		/// <summary>
 		/// The task processor job itself.
@@ -26,7 +27,7 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// The background operation manager that owns this job.
 		/// </summary>
-		public TaskQueueBackgroundOperationManager TaskQueueBackgroundOperationManager { get; set; }
+		public TaskQueueBackgroundOperationManager<TSecureConfiguration> TaskQueueBackgroundOperationManager { get; set; }
 
 		/// <summary>
 		/// The task processor processing the job (from <see cref="TaskQueueBackgroundOperationManager.TaskProcessor"/>.
@@ -130,7 +131,8 @@ namespace MFiles.VAF.Extensions
 		public TTaskInformation RetrieveTaskInfo<TTaskInformation>()
 			where TTaskInformation : TaskInformation
 		{
-			return this.Job?.Data?.Value?.ToApplicationTaskInfo()?.RetrieveTaskInfo<TTaskInformation>();
+			return this.Job?.Data?.Value?.ToApplicationTaskInfo()?
+				.RetrieveTaskInfo<TTaskInformation>(TaskQueueBackgroundOperationManager<TSecureConfiguration>.CurrentServer.ServerID);
 		}
 
 		/// <summary>
@@ -146,7 +148,7 @@ namespace MFiles.VAF.Extensions
 		/// Converts the <see cref="TaskProcessorJobEx"/> to a simple <see cref="TaskProcessorJob"/>.
 		/// </summary>
 		/// <param name="input"></param>
-		public static implicit operator TaskProcessorJob(TaskProcessorJobEx input)
+		public static implicit operator TaskProcessorJob(TaskProcessorJobEx<TSecureConfiguration> input)
 		{
 			return input?.Job;
 		}

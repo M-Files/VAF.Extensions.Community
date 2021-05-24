@@ -20,10 +20,10 @@ namespace MFiles.VAF.Extensions
 	/// <typeparam name="TSecureConfiguration">The configuration type.</typeparam>
 	/// <remarks>See https://developer.m-files.com/Frameworks/Vault-Application-Framework/Multi-Server-Mode/#configuration-changes for further details.</remarks>
 	public abstract partial class ConfigurableVaultApplicationBase<TSecureConfiguration>
-		: MFiles.VAF.Core.ConfigurableVaultApplicationBase<TSecureConfiguration>, IUsesTaskQueue
+		: MFiles.VAF.Core.LegacyConfigurableVaultApplicationBase<TSecureConfiguration>, IUsesTaskQueue
 	where TSecureConfiguration : class, new()
 	{
-		private TaskQueueBackgroundOperationManager taskQueueBackgroundOperationManager;
+		private TaskQueueBackgroundOperationManager<TSecureConfiguration> taskQueueBackgroundOperationManager;
 
 		/// <summary>
 		/// The rebroadcast queue Id.
@@ -41,7 +41,7 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// The task queue background operation manager for this application.
 		/// </summary>
-		protected TaskQueueBackgroundOperationManager TaskQueueBackgroundOperationManager
+		protected TaskQueueBackgroundOperationManager<TSecureConfiguration> TaskQueueBackgroundOperationManager
 		{
 			get
 			{
@@ -52,7 +52,7 @@ namespace MFiles.VAF.Extensions
 					try
 					{
 						taskQueueBackgroundOperationManager =
-							taskQueueBackgroundOperationManager ?? new TaskQueueBackgroundOperationManager(this);
+							taskQueueBackgroundOperationManager ?? new TaskQueueBackgroundOperationManager<TSecureConfiguration>(this);
 					}
 					catch
 					{

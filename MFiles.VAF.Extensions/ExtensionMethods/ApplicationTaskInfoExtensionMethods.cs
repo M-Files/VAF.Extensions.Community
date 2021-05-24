@@ -16,13 +16,13 @@ namespace MFiles.VAF.Extensions
 		/// <typeparam name="TTaskInformation">The expected type of data.</typeparam>
 		/// <param name="applicationTask">The task to retrieve data for.</param>
 		/// <returns>the latest update, if available.</returns>
-		public static TTaskInformation RetrieveTaskInfo<TTaskInformation>(this ApplicationTask applicationTask)
+		public static TTaskInformation RetrieveTaskInfo<TTaskInformation>(this ApplicationTask applicationTask, string serverId)
 			where TTaskInformation : TaskInformation
 		{
 			// Attempt to retrieve the app task update info.
 			var appTaskUpdateInfo = AppTaskUpdateInfo.From
 			(
-				TaskQueueBackgroundOperationManager.CurrentServer.ServerID,
+				serverId,
 				applicationTask,
 				true
 			);
@@ -48,9 +48,9 @@ namespace MFiles.VAF.Extensions
 				} as TTaskInformation;
 			}
 		}
-		public static TaskInformation RetrieveTaskInfo(this ApplicationTask applicationTask)
+		public static TaskInformation RetrieveTaskInfo(this ApplicationTask applicationTask, string serverId)
 		{
-			return applicationTask.RetrieveTaskInfo<TaskInformation>();
+			return applicationTask.RetrieveTaskInfo<TaskInformation>(serverId);
 		}
 		/// <summary>
 		/// Extracts the remarks from the <paramref name="taskInfo"/>'s latest update,
@@ -59,14 +59,14 @@ namespace MFiles.VAF.Extensions
 		/// <typeparam name="TTaskInformation">The expected type of data.</typeparam>
 		/// <param name="applicationTaskInfo">The task to retrieve data for.</param>
 		/// <returns>the latest update, if available.</returns>
-		public static TTaskInformation RetrieveTaskInfo<TTaskInformation>(this ApplicationTaskInfo applicationTaskInfo)
+		public static TTaskInformation RetrieveTaskInfo<TTaskInformation>(this ApplicationTaskInfo applicationTaskInfo, string serverId)
 			where TTaskInformation : TaskInformation
 		{
-			return applicationTaskInfo?.ToApplicationTask()?.RetrieveTaskInfo<TTaskInformation>();
+			return applicationTaskInfo?.ToApplicationTask()?.RetrieveTaskInfo<TTaskInformation>(serverId);
 		}
-		public static TaskInformation RetrieveTaskInfo(this ApplicationTaskInfo applicationTaskInfo)
+		public static TaskInformation RetrieveTaskInfo(this ApplicationTaskInfo applicationTaskInfo, string serverId)
 		{
-			return applicationTaskInfo?.ToApplicationTask()?.RetrieveTaskInfo<TaskInformation>();
+			return applicationTaskInfo?.ToApplicationTask()?.RetrieveTaskInfo<TaskInformation>(serverId);
 		}
 	}
 }

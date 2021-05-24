@@ -8,7 +8,7 @@ using MFiles.VAF.MultiserverMode;
 
 namespace MFiles.VAF.Extensions
 {
-	public partial class TaskQueueBackgroundOperationManager
+	public partial class TaskQueueBackgroundOperationManager<TSecureConfiguration>
 	{
 		/// <summary>
 		/// Marks any future executions of this job in this queue as cancelled.
@@ -24,7 +24,7 @@ namespace MFiles.VAF.Extensions
 				(
 					this.VaultApplication.PermanentVault,
 					this.QueueId,
-					t => t.Type == TaskQueueBackgroundOperation.TaskTypeId,
+					t => t.Type == TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId,
 					new[] { MFTaskState.MFTaskStateWaiting }
 				);
 				foreach (var task in tasksToCancel.Cast<ApplicationTaskInfo>())
@@ -55,7 +55,7 @@ namespace MFiles.VAF.Extensions
 					{
 						SysUtils.ReportErrorToEventLog
 						(
-							$"Exception cancelling task {task.TaskID} of type {TaskQueueBackgroundOperation.TaskTypeId} on queue {this.QueueId} to cancel.",
+							$"Exception cancelling task {task.TaskID} of type {TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId} on queue {this.QueueId} to cancel.",
 							e
 						);
 					}
@@ -65,7 +65,7 @@ namespace MFiles.VAF.Extensions
 			{
 				SysUtils.ReportErrorToEventLog
 				(
-					$"Exception retrieving tasks of type {TaskQueueBackgroundOperation.TaskTypeId} on queue {this.QueueId} to cancel.",
+					$"Exception retrieving tasks of type {TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId} on queue {this.QueueId} to cancel.",
 					e
 				);
 			}

@@ -18,7 +18,11 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="backgroundOperations">The background operations.</param>
 		/// <returns>The list items.</returns>
-		public static IEnumerable<DashboardListItem> AsDashboardListItems(this IEnumerable<TaskQueueBackgroundOperation> backgroundOperations)
+		public static IEnumerable<DashboardListItem> AsDashboardListItems<TSecureConfiguration>
+		(
+			this IEnumerable<TaskQueueBackgroundOperation<TSecureConfiguration>> backgroundOperations
+		)
+		where TSecureConfiguration : class, new()
 		{
 			// Sanity.
 			if (null == backgroundOperations || false == backgroundOperations.Any())
@@ -96,7 +100,9 @@ namespace MFiles.VAF.Extensions
 				listItem.InnerContent = new DashboardCustomContent
 				(
 					htmlString
-					+ executions?.AsDashboardContent()?.ToXmlString()
+					+ executions?
+						.AsDashboardContent(TaskQueueBackgroundOperationManager<TSecureConfiguration>.CurrentServer.ServerID)?
+						.ToXmlString()
 				);
 
 				// Add the list item.

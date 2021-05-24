@@ -5,7 +5,7 @@ using MFilesAPI;
 
 namespace MFiles.VAF.Extensions
 {
-	public partial class TaskQueueBackgroundOperationManager
+	public partial class TaskQueueBackgroundOperationManager<TSecureConfiguration>
 	{
 
 		/// <summary>
@@ -61,7 +61,7 @@ namespace MFiles.VAF.Extensions
 			(
 				true,
 				this.QueueId,
-				TaskQueueBackgroundOperation.TaskTypeId,
+				TaskQueueBackgroundOperation<TDirective, TSecureConfiguration>.TaskTypeId,
 				backgroundOperationDirective?.ToBytes(),
 				nextRun,
 				vault: vault ?? this.VaultApplication?.PermanentVault

@@ -12,14 +12,15 @@ using System.Collections.Generic;
 
 namespace MFiles.VAF.Extensions
 {
-	public class TaskQueueBackgroundOperation<TDirective>
-		: TaskQueueBackgroundOperation
+	public class TaskQueueBackgroundOperation<TDirective, TSecureConfiguration>
+		: TaskQueueBackgroundOperation<TSecureConfiguration>
 		where TDirective : TaskQueueDirective
+		where TSecureConfiguration : class, new()
 	{
 		/// <summary>
 		/// The method to run.
 		/// </summary>
-		public new Action<TaskProcessorJobEx, TDirective> UserMethod { get; private set; }
+		public new Action<TaskProcessorJobEx<TSecureConfiguration>, TDirective> UserMethod { get; private set; }
 
 		/// <summary>
 		/// Creates a new background operation that runs the method in separate task.
@@ -31,9 +32,9 @@ namespace MFiles.VAF.Extensions
 		/// <param name="cancellationTokenSource">The cancellation token source.</param>
 		public TaskQueueBackgroundOperation
 		(
-			TaskQueueBackgroundOperationManager backgroundOperationManager,
+			TaskQueueBackgroundOperationManager<TSecureConfiguration> backgroundOperationManager,
 			string name,
-			Action<TaskProcessorJobEx, TDirective> method,
+			Action<TaskProcessorJobEx<TSecureConfiguration>, TDirective> method,
 			CancellationTokenSource cancellationTokenSource = default
 		) : 
 			base
@@ -49,7 +50,7 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <inheritdoc />
-		internal override void RunJob(TaskProcessorJobEx job, TaskQueueDirective directive)
+		internal override void RunJob(TaskProcessorJobEx<TSecureConfiguration> job, TaskQueueDirective directive)
 		{
 			// Execute the callback.
 			this.UserMethod(job, directive as TDirective);
@@ -114,7 +115,8 @@ namespace MFiles.VAF.Extensions
 		Schedule = 2
 	}
 
-	public class TaskQueueBackgroundOperation
+	public class TaskQueueBackgroundOperation<TSecureConfiguration>
+		where TSecureConfiguration : class, new()
 	{
 		/// <summary>
 		/// The task type for this background operation.
@@ -190,7 +192,7 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// The manager that manages this operation.
 		/// </summary>
-		public TaskQueueBackgroundOperationManager BackgroundOperationManager { get; private set; }
+		public TaskQueueBackgroundOperationManager<TSecureConfiguration> BackgroundOperationManager { get; private set; }
 
 		/// <summary>
 		/// The name of the vault running the background operation.
@@ -236,7 +238,7 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// The method to run.
 		/// </summary>
-		public Action<TaskProcessorJobEx, TaskQueueDirective> UserMethod { get; private set; }
+		public Action<TaskProcessorJobEx<TSecureConfiguration>, TaskQueueDirective> UserMethod { get; private set; }
 
 		/// <summary>
 		/// Creates a new background operation that runs the method in separate task.
@@ -248,9 +250,9 @@ namespace MFiles.VAF.Extensions
 		/// <param name="cancellationTokenSource">The cancellation token source.</param>
 		public TaskQueueBackgroundOperation
 		(
-			TaskQueueBackgroundOperationManager backgroundOperationManager,
+			TaskQueueBackgroundOperationManager<TSecureConfiguration> backgroundOperationManager,
 			string name,
-			Action<TaskProcessorJobEx, TaskQueueDirective> method,
+			Action<TaskProcessorJobEx<TSecureConfiguration>, TaskQueueDirective> method,
 			CancellationTokenSource cancellationTokenSource = default
 		)
 		{
@@ -453,7 +455,7 @@ namespace MFiles.VAF.Extensions
 					{
 						SysUtils.ReportErrorToEventLog
 						(
-							$"Exception cancelling task {task.ToApplicationTask().Id} for background operation {this.Name} of type {TaskQueueBackgroundOperation.TaskTypeId} on queue {this.BackgroundOperationManager.QueueId}.",
+							$"Exception cancelling task {task.ToApplicationTask().Id} for background operation {this.Name} of type {TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId} on queue {this.BackgroundOperationManager.QueueId}.",
 							e
 						);
 					}
@@ -463,7 +465,7 @@ namespace MFiles.VAF.Extensions
 			{
 				SysUtils.ReportErrorToEventLog
 				(
-					$"Exception cancelling tasks for background operation {this.Name} of type {TaskQueueBackgroundOperation.TaskTypeId} on queue {this.BackgroundOperationManager.QueueId}.",
+					$"Exception cancelling tasks for background operation {this.Name} of type {TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId} on queue {this.BackgroundOperationManager.QueueId}.",
 					e
 				);
 			}
@@ -496,7 +498,7 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="job">The job to run.</param>
 		/// <param name="directive">The directive, if any, passed in.</param>
-		internal virtual void RunJob(TaskProcessorJobEx job, TaskQueueDirective directive)
+		internal virtual void RunJob(TaskProcessorJobEx<TSecureConfiguration> job, TaskQueueDirective directive)
 		{
 			// Execute the callback.
 			this.UserMethod(job, directive);

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions
 {
-	public partial class TaskQueueBackgroundOperationManager
+	public partial class TaskQueueBackgroundOperationManager<TSecureConfiguration>
 	{
 		/// <summary>
 		/// Returns some dashboard content that shows the background operations and their current status.
