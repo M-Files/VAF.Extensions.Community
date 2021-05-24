@@ -4,7 +4,7 @@ using MFiles.VAF.MultiserverMode;
 
 namespace MFiles.VAF.Extensions
 {
-	public partial class TaskQueueBackgroundOperationManager
+	public partial class TaskQueueBackgroundOperationManager<TSecureConfiguration>
 	{
 		/// <summary>
 		/// Creates a new background operation. The background operations runs the given method at given intervals. Must be separately started.
@@ -13,7 +13,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="method">The method to invoke at given intervals.</param>
 		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <returns>A new background operation, that is not yet started.</returns>
-		public TaskQueueBackgroundOperation CreateBackgroundOperation
+		public TaskQueueBackgroundOperation<TSecureConfiguration> CreateBackgroundOperation
 		(
 			string name,
 			Action method
@@ -33,10 +33,10 @@ namespace MFiles.VAF.Extensions
 		/// <param name="method">The method to invoke at given intervals.</param>
 		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <returns>A new background operation, that is not yet started.</returns>
-		public TaskQueueBackgroundOperation CreateBackgroundOperation
+		public TaskQueueBackgroundOperation<TSecureConfiguration> CreateBackgroundOperation
 		(
 			string name,
-			Action<TaskProcessorJobEx> method
+			Action<TaskProcessorJobEx<TSecureConfiguration>> method
 		)
 		{
 			return this.CreateBackgroundOperation
@@ -53,10 +53,10 @@ namespace MFiles.VAF.Extensions
 		/// <param name="method">The method to invoke at given intervals.</param>
 		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <returns>A new background operation, that is not yet started.</returns>
-		public TaskQueueBackgroundOperation CreateBackgroundOperation
+		public TaskQueueBackgroundOperation<TSecureConfiguration> CreateBackgroundOperation
 		(
 			string name,
-			Action<TaskProcessorJobEx, TaskQueueDirective> method
+			Action<TaskProcessorJobEx<TSecureConfiguration>, TaskQueueDirective> method
 		)
 		{
 			return this.CreateBackgroundOperation<TaskQueueDirective>
@@ -73,16 +73,16 @@ namespace MFiles.VAF.Extensions
 		/// <param name="method">The method to invoke at given intervals.</param>
 		/// <param name="options">The options for the display of the background operation in the dashboard.</param>
 		/// <returns>A new background operation, that is not yet started.</returns>
-		public TaskQueueBackgroundOperation<TDirective> CreateBackgroundOperation<TDirective>
+		public TaskQueueBackgroundOperation<TDirective, TSecureConfiguration> CreateBackgroundOperation<TDirective>
 		(
 			string name,
-			Action<TaskProcessorJobEx, TDirective> method
+			Action<TaskProcessorJobEx<TSecureConfiguration>, TDirective> method
 		)
 			where TDirective : TaskQueueDirective
 		{
-			TaskQueueBackgroundOperation<TDirective> backgroundOperation;
+			TaskQueueBackgroundOperation<TDirective, TSecureConfiguration> backgroundOperation;
 
-			lock (TaskQueueBackgroundOperationManager._lock)
+			lock (TaskQueueBackgroundOperationManager<TSecureConfiguration>._lock)
 			{
 				if (this.BackgroundOperations.ContainsKey(name))
 					throw new ArgumentException(
@@ -90,7 +90,7 @@ namespace MFiles.VAF.Extensions
 						nameof(name));
 
 				// Create the background operation.
-				backgroundOperation = new TaskQueueBackgroundOperation<TDirective>
+				backgroundOperation = new TaskQueueBackgroundOperation<TDirective, TSecureConfiguration>
 				(
 					this,
 					name,

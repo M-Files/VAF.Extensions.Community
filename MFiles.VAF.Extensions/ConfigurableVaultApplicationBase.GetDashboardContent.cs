@@ -50,7 +50,7 @@ namespace MFiles.VAF.Extensions
 			// and add each of their background operations to the list.
 			var taskQueueBackgroundOperationManagers = this
 				.GetType()
-				.GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager>(this);
+				.GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager<TSecureConfiguration>>(this);
 			foreach (var manager in taskQueueBackgroundOperationManagers.OrderBy(m => m.DashboardSortOrder))
 			{
 				var listItems = manager.GetDashboardContent();

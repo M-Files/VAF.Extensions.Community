@@ -35,7 +35,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 		(
 			Vault vault,
 			int objectType = 0,
-			PropertyValues propertyValues = null
+			PropertyValues propertyValues = null,
+			ObjectFiles objectFiles = null
 		)
 		{
 			// Sanity.
@@ -48,6 +49,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			// Create the object version mock.
 			var objectVersionMock = new Mock<ObjectVersion>();
 			objectVersionMock.Setup(m => m.ObjVer).Returns(objVer);
+			objectVersionMock.Setup(m => m.Files).Returns(objectFiles ?? new Mock<ObjectFiles>().Object);
+			objectVersionMock.Setup(m => m.FilesCount).Returns(objectFiles?.Count ?? 0);
 
 			// Create the mock for the object version and properties.
 			var objectVersionAndPropertiesMock = new Mock<ObjectVersionAndProperties>();
@@ -85,7 +88,31 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 					bool singleFileDocument,
 					bool checkIn,
 					AccessControlList accessControlList
-				) => this.CreateObjectVersionAndPropertiesMock(vault, objectType, propertyValues).Object);
+				) =>
+				{
+					var objectFiles = new Mock<ObjectFiles>();
+					objectFiles.Setup(m => m.Count).Returns(sourceObjectFiles?.Count ?? 0);
+					var converted = new List<ObjectFile>();
+					if (null != sourceObjectFiles)
+					{
+						foreach (SourceObjectFile item in sourceObjectFiles)
+						{
+							var file = new Mock<ObjectFile>();
+							file.Setup(m => m.Title).Returns(item.Title);
+							file.Setup(m => m.Extension).Returns(item.Extension);
+							converted.Add(file.Object);
+						}
+					}
+					objectFiles.Setup(m => m.GetEnumerator()).Returns(() => converted.GetEnumerator());
+					objectFiles.Setup(m => m[It.IsAny<int>()]).Returns((int index) => converted[index + 1]);
+					return this.CreateObjectVersionAndPropertiesMock(vault, objectType, propertyValues, objectFiles.Object).Object;
+				});
+			objectCopyCreatorMock
+				.Setup(m => m.SetSingleFileDocument(It.IsAny<Common.ObjVerEx>(), It.IsAny<bool>()))
+				.Callback((Common.ObjVerEx objVerEx, bool sfd) =>
+				{
+					objVerEx.SetProperty((int)MFBuiltInPropertyDef.MFBuiltInPropertyDefSingleFileObject, MFDataType.MFDatatypeBoolean, sfd);
+				});
 			return objectCopyCreatorMock;
 		}
 
@@ -94,8 +121,18 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			params Tuple<int, MFDataType, object>[] propertyValues
 		)
 		{
+			return this.CreateSourceObject(null, propertyValues);
+		}
+
+		protected Common.ObjVerEx CreateSourceObject
+		(
+			SourceObjectFiles sourceObjectFiles,
+			params Tuple<int, MFDataType, object>[] propertyValues
+		)
+		{
 			return this.CreateSourceObjectWithPropertyValues
 			(
+				sourceObjectFiles,
 				(propertyValues ?? new Tuple<int, MFDataType, object>[0])
 					.Select(t =>
 					{
@@ -112,6 +149,15 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			params PropertyValue[] propertyValues
 		)
 		{
+			return this.CreateSourceObjectWithPropertyValues(null, propertyValues);
+		}
+
+		protected Common.ObjVerEx CreateSourceObjectWithPropertyValues
+		(
+			SourceObjectFiles sourceObjectFiles,
+			params PropertyValue[] propertyValues
+		)
+		{
 			// Create our mock objects.
 			var vaultMock = this.GetVaultMock();
 
@@ -122,6 +168,23 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 				pvs.Add(-1, pv);
 			}
 
+			// Set up the object files.
+			var objectFiles = new Mock<ObjectFiles>();
+			objectFiles.Setup(m => m.Count).Returns(sourceObjectFiles?.Count ?? 0);
+			var converted = new List<ObjectFile>();
+			if (null != sourceObjectFiles)
+			{
+				foreach (SourceObjectFile item in sourceObjectFiles)
+				{
+					var file = new Mock<ObjectFile>();
+					file.Setup(m => m.Title).Returns(item.Title);
+					file.Setup(m => m.Extension).Returns(item.Extension);
+					converted.Add(file.Object);
+				}
+			}
+			objectFiles.Setup(m => m.GetEnumerator()).Returns(() => converted.GetEnumerator());
+			objectFiles.Setup(m => m[It.IsAny<int>()]).Returns((int index) => converted[index + 1]);
+
 			// Create the source object itself.
 			return new VAF.Common.ObjVerEx
 			(
@@ -129,7 +192,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 				this.CreateObjectVersionAndPropertiesMock
 				(
 					vaultMock.Object,
-					propertyValues: pvs
+					propertyValues: pvs,
+					objectFiles: objectFiles.Object
 				).Object
 			);
 		}
@@ -182,7 +246,10 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			);
 
 			// Execute.
-			var copy = sourceObject.CreateCopy(objectCopyCreator: objectCopyCreatorMock.Object);
+			var copy = sourceObject.CreateCopy(new ObjectCopyOptions()
+			{
+				SetSingleFileDocumentIfAppropriate = false
+			}, objectCopyCreator: objectCopyCreatorMock.Object);
 
 			// Properties should be correct.
 			Assert.AreEqual(2, copy.Properties.Count);
@@ -190,6 +257,112 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			Assert.AreEqual(123, copy.Properties[1].TypedValue.GetLookupID());
 			Assert.AreEqual((int)MFBuiltInPropertyDef.MFBuiltInPropertyDefNameOrTitle, copy.Properties[2].PropertyDef);
 			Assert.AreEqual("hello world", copy.Properties[2].TypedValue.DisplayValue);
+		}
+
+		[TestMethod]
+		public void SFDRemovedFromSource()
+		{
+			// Create our mock objects.
+			var objectCopyCreatorMock = this.GetObjectCopyCreatorMock();
+
+			// Create our source object.
+			var sourceObject = this.CreateSourceObject
+			(
+				new Tuple<int, MFDataType, object>
+				(
+					(int)MFBuiltInPropertyDef.MFBuiltInPropertyDefSingleFileObject,
+					MFDataType.MFDatatypeBoolean,
+					true
+				)
+			);
+
+			// Execute.
+			var copy = sourceObject.CreateCopy
+			(
+				new ObjectCopyOptions()
+				{
+					SetSingleFileDocumentIfAppropriate = false
+				},
+				objectCopyCreator: objectCopyCreatorMock.Object
+			);
+
+			// Properties should be correct.
+			Assert.AreEqual(0, copy.Properties.Count);
+		}
+
+		[TestMethod]
+		public void SFDAddedToTargetIfAppropriate_False()
+		{
+			// Create our mock objects.
+			var objectCopyCreatorMock = this.GetObjectCopyCreatorMock();
+
+			// Create our source object.
+			var sourceObject = this.CreateSourceObject
+			(
+				new Tuple<int, MFDataType, object>
+				(
+					(int)MFBuiltInPropertyDef.MFBuiltInPropertyDefSingleFileObject,
+					MFDataType.MFDatatypeBoolean,
+					true
+				)
+			);
+
+			// Execute.
+			var copy = sourceObject.CreateCopy
+			(
+				new ObjectCopyOptions()
+				{
+					SetSingleFileDocumentIfAppropriate = true
+				},
+				objectCopyCreator: objectCopyCreatorMock.Object
+			);
+
+			// Properties should be correct.
+			Assert.AreEqual(1, copy.Properties.Count);
+			Assert.AreEqual(false, copy.GetProperty((int)MFBuiltInPropertyDef.MFBuiltInPropertyDefSingleFileObject).Value.Value);
+		}
+
+		[TestMethod]
+		public void SFDAddedToTargetIfAppropriate_True()
+		{
+			// Create our mock objects.
+			var objectCopyCreatorMock = this.GetObjectCopyCreatorMock();
+
+			// Create the source files.
+			var sourceObjectFiles = new SourceObjectFiles();
+			{
+				sourceObjectFiles.Add(1, new SourceObjectFile()
+				{
+					Title = "test file",
+					Extension = ".docx"
+				});
+			}
+
+			// Create our source object.
+			var sourceObject = this.CreateSourceObject
+			(
+				sourceObjectFiles,
+				new Tuple<int, MFDataType, object>
+				(
+					(int)MFBuiltInPropertyDef.MFBuiltInPropertyDefSingleFileObject,
+					MFDataType.MFDatatypeBoolean,
+					true
+				)
+			);
+
+			// Execute.
+			var copy = sourceObject.CreateCopy
+			(
+				new ObjectCopyOptions()
+				{
+					SetSingleFileDocumentIfAppropriate = true
+				},
+				objectCopyCreator: objectCopyCreatorMock.Object
+			);
+
+			// Properties should be correct.
+			Assert.AreEqual(1, copy.Properties.Count);
+			Assert.AreEqual(true, copy.GetProperty((int)MFBuiltInPropertyDef.MFBuiltInPropertyDefSingleFileObject).Value.Value);
 		}
 
 		// When RemoveSystemProperties = true (default), the system properties should be removed.
@@ -215,7 +388,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			(
 				new ObjectCopyOptions()
 				{
-					RemoveSystemProperties = true
+					RemoveSystemProperties = true,
+					SetSingleFileDocumentIfAppropriate = false
 				},
 				objectCopyCreator: objectCopyCreatorMock.Object
 			);
@@ -247,7 +421,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			(
 				new ObjectCopyOptions()
 				{
-					RemoveSystemProperties = false
+					RemoveSystemProperties = false,
+					SetSingleFileDocumentIfAppropriate = false
 				},
 				objectCopyCreator: objectCopyCreatorMock.Object
 			);
@@ -330,7 +505,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			(
 				objectCopyOptions: new ObjectCopyOptions()
 				{
-					Properties = properties
+					Properties = properties,
+					SetSingleFileDocumentIfAppropriate = false
 				},
 				objectCopyCreator: objectCopyCreatorMock.Object
 			);

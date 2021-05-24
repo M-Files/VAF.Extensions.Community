@@ -68,18 +68,15 @@ namespace MFiles.VAF.Extensions
 			if (objectCopyOptions.RemoveSystemProperties)
 				propertyValues.RemoveSystemProperties();
 
-			// If it's not a document then SFD = false.
-			if ((objectCopyOptions.TargetObjectType ?? source.ObjVer.Type)
-				!= (int)MFBuiltInObjectType.MFBuiltInObjectTypeDocument)
+			// Create an instruction to set SFD to false (will be applied in next section).
+			// Will be set accordingly later.
 			{
-				// Create an instruction to set SFD to false (will be applied in next section).
 				var instruction = new PropertyValueInstruction()
 				{
-					InstructionType = PropertyValueInstructionType.ReplaceOrAddPropertyValue
+					InstructionType = PropertyValueInstructionType.RemovePropertyValue
 				};
 				instruction.PropertyValue.PropertyDef =
 					(int)MFBuiltInPropertyDef.MFBuiltInPropertyDefSingleFileObject;
-				instruction.PropertyValue.TypedValue.SetValue(MFDataType.MFDatatypeBoolean, false);
 				objectCopyOptions.Properties.Add(instruction);
 			}
 
@@ -110,7 +107,8 @@ namespace MFiles.VAF.Extensions
 			var fileCount = 0;
 			if (objectCopyOptions.CopySourceFiles && null != source?.Info?.Files)
 			{
-				foreach (var file in source.Info.Files.Cast<ObjectFile>())
+				// Note: using .Cast() here throws out our Moq tests, so let's not use it...
+				foreach (ObjectFile file in source.Info.Files)
 				{
 					fileCount++;
 					using (var fileStream = file.OpenRead(source.Vault))
@@ -136,18 +134,17 @@ namespace MFiles.VAF.Extensions
 				}
 			}
 
-			// Set the single file document property?
-			// Can only be done if the object is a document.
-			if((objectCopyOptions.TargetObjectType ?? source.ObjVer.Type)
-					== (int)MFBuiltInObjectType.MFBuiltInObjectTypeDocument)
+			// If the option is set to false then we'll get whatever the source was
+			// (unless it went from a document to something else, in which case it's always false).
+			if (objectCopyOptions.SetSingleFileDocumentIfAppropriate)
 			{
-				// If the option is set to false then we'll get whatever the source was
-				// (unless it went from a document to something else, in which case it's always false).
-				if (objectCopyOptions.SetSingleFileDocumentIfAppropriate)
-				{
-					// True if a single file.
-					objectCopyCreator.SetSingleFileDocument(newObject, fileCount == 1);
-				}
+				// True if a single file.
+				objectCopyCreator.SetSingleFileDocument
+				(
+					newObject, 
+					newObject.Type == (int)MFBuiltInObjectType.MFBuiltInObjectTypeDocument 
+						&& fileCount == 1
+				);
 			}
 
 			// Check in?

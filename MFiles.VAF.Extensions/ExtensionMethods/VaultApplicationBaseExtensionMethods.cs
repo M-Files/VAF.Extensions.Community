@@ -7,6 +7,7 @@ using MFiles.VAF.Common.ApplicationTaskQueue;
 using MFiles.VAF;
 using MFilesAPI;
 using MFiles.VAF.MultiserverMode;
+using MFiles.VAF.Core;
 
 // ReSharper disable once CheckNamespace
 namespace MFiles.VAF.Extensions
@@ -25,14 +26,14 @@ namespace MFiles.VAF.Extensions
 		/// <param name="automaticallyRegisterQueues">If true, automatically calls <see cref="AppTaskBatchProcessor.RegisterTaskQueues"/>.</param>
 		/// <param name="automaticallyStartPolling">If true, automatically calls <see cref="TaskQueueManager.EnableTaskPolling"/>.</param>
 		/// <returns>The sequential batch processor.</returns>
-		internal static SequentialTaskProcessor CreateSequentialTaskProcessor
+		internal static SequentialTaskProcessor CreateSequentialTaskProcessor<TSecureConfiguration>
 		(
-			this VaultApplicationBase vaultApplication,
+			this LegacyConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication,
 			AppTaskProcessorSettings processorSettings,
 			bool automaticallyRegisterQueues = true,
 			bool automaticallyStartPolling = true,
 			CancellationTokenSource cancellationTokenSource = default
-		)
+		) where TSecureConfiguration : class, new()
 		{
 			// Sanity.
 			if (null == vaultApplication)
@@ -101,9 +102,9 @@ namespace MFiles.VAF.Extensions
 		/// <param name="automaticallyRegisterQueues">If true, automatically calls <see cref="AppTaskBatchProcessor.RegisterTaskQueues"/>.</param>
 		/// <param name="automaticallyStartPolling">If true, automatically calls <see cref="TaskQueueManager.EnableTaskPolling"/>.</param>
 		/// <returns>The sequential batch processor.</returns>
-		public static SequentialTaskProcessor CreateSequentialTaskProcessor
+		public static SequentialTaskProcessor CreateSequentialTaskProcessor<TSecureConfiguration>
 		(
-			this VaultApplicationBase vaultApplication,
+			this LegacyConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication,
 			string queueId,
 			Dictionary<string, TaskProcessorJobHandler> taskHandlers,
 			int maxPollingInterval = 10,
@@ -111,7 +112,7 @@ namespace MFiles.VAF.Extensions
 			bool automaticallyStartPolling = true,
 			string vaultExtensionProxyMethodId = null,
 			CancellationTokenSource cancellationTokenSource = default
-		)
+		) where TSecureConfiguration : class, new()
 		{
 			// Sanity.
 			if (null == vaultApplication)
@@ -182,14 +183,14 @@ namespace MFiles.VAF.Extensions
 		/// <param name="automaticallyRegisterQueues">If true, automatically calls <see cref="AppTaskBatchProcessor.RegisterTaskQueues"/>.</param>
 		/// <param name="automaticallyStartPolling">If true, automatically calls <see cref="TaskQueueManager.EnableTaskPolling"/>.</param>
 		/// <returns>The concurrent batch processor.</returns>
-		internal static AppTaskBatchProcessor CreateConcurrentTaskProcessor
+		internal static AppTaskBatchProcessor CreateConcurrentTaskProcessor<TSecureConfiguration>
 		(
-			this VaultApplicationBase vaultApplication,
+			this LegacyConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication,
 			AppTaskBatchProcessorSettings processorSettings,
 			bool automaticallyRegisterQueues = true,
 			bool automaticallyStartPolling = true,
 			CancellationTokenSource cancellationTokenSource = default
-		)
+		) where TSecureConfiguration : class, new()
 		{
 			// Sanity.
 			if (null == vaultApplication)
@@ -269,9 +270,9 @@ namespace MFiles.VAF.Extensions
 		/// <param name="automaticallyRegisterQueues">If true, automatically calls <see cref="AppTaskBatchProcessor.RegisterTaskQueues"/>.</param>
 		/// <param name="automaticallyStartPolling">If true, automatically calls <see cref="TaskQueueManager.EnableTaskPolling"/>.</param>
 		/// <returns>The concurrent batch processor.</returns>
-		public static AppTaskBatchProcessor CreateConcurrentTaskProcessor
+		public static AppTaskBatchProcessor CreateConcurrentTaskProcessor<TSecureConfiguration>
 		(
-			this VaultApplicationBase vaultApplication,
+			this LegacyConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication,
 			string queueId,
 			Dictionary<string, TaskProcessorJobHandler> taskHandlers,
 			int maxConcurrentBatches = 5,
@@ -281,7 +282,7 @@ namespace MFiles.VAF.Extensions
 			bool automaticallyStartPolling = true,
 			bool enableAutomaticTaskUpdates = true,
 			CancellationTokenSource cancellationTokenSource = default
-		)
+		) where TSecureConfiguration : class, new()
 		{
 			// Sanity.
 			if (null == vaultApplication)
@@ -368,14 +369,14 @@ namespace MFiles.VAF.Extensions
 		/// <param name="automaticallyRegisterQueues">If true, automatically calls <see cref="AppTaskBatchProcessor.RegisterTaskQueues"/>.</param>
 		/// <param name="automaticallyStartPolling">If true, automatically calls <see cref="TaskQueueManager.EnableTaskPolling"/>.</param>
 		/// <returns>The broadcast batch processor.</returns>
-		public static AppTaskBatchProcessor CreateBroadcastTaskProcessor
+		public static AppTaskBatchProcessor CreateBroadcastTaskProcessor<TSecureConfiguration>
 		(
-			this VaultApplicationBase vaultApplication,
+			this LegacyConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication,
 			AppTaskBatchProcessorSettings processorSettings,
 			bool automaticallyRegisterQueues = true,
 			bool automaticallyStartPolling = true,
 			CancellationTokenSource cancellationTokenSource = default
-		)
+		) where TSecureConfiguration : class, new()
 		{
 			// Sanity.
 			if (null == vaultApplication)
@@ -454,9 +455,9 @@ namespace MFiles.VAF.Extensions
 		/// <param name="automaticallyStartPolling">If true, automatically calls <see cref="TaskQueueManager.EnableTaskPolling"/>.</param>
 		/// <param name="vaultExtensionProxyMethodId">The Id of the vault extension method proxy to use for re-broadcasts.</param>
 		/// <returns>The broadcast batch processor.</returns>
-		public static AppTaskBatchProcessor CreateBroadcastTaskProcessor
+		public static AppTaskBatchProcessor CreateBroadcastTaskProcessor<TSecureConfiguration>
 		(
-			this VaultApplicationBase vaultApplication,
+			this LegacyConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication,
 			string queueId,
 			Dictionary<string, TaskProcessorJobHandler> taskHandlers,
 			int maxConcurrentBatches = 5,
@@ -465,7 +466,7 @@ namespace MFiles.VAF.Extensions
 			bool automaticallyRegisterQueues = true,
 			bool automaticallyStartPolling = true,
 			CancellationTokenSource cancellationTokenSource = default
-		)
+		) where TSecureConfiguration : class, new()
 		{
 			// Sanity.
 			if (null == vaultApplication)

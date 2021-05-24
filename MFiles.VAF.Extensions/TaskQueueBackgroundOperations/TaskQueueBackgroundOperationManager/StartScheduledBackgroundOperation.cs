@@ -5,7 +5,7 @@ using MFiles.VAF.MultiserverMode;
 
 namespace MFiles.VAF.Extensions
 {
-	public partial class TaskQueueBackgroundOperationManager
+	public partial class TaskQueueBackgroundOperationManager<TSecureConfiguration>
 	{
 		/// <summary>
 		/// Creates a new background operation and starts it.
@@ -15,7 +15,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="schedule">The schedule that defines when the operation should run.</param>
 		/// <param name="method">The method to invoke at given intervals.</param>
 		/// <returns>A scheduled background operation.</returns>
-		public TaskQueueBackgroundOperation StartScheduledBackgroundOperation
+		public TaskQueueBackgroundOperation<TSecureConfiguration> StartScheduledBackgroundOperation
 		(
 			string name,
 			Schedule schedule,
@@ -38,11 +38,11 @@ namespace MFiles.VAF.Extensions
 		/// <param name="schedule">The schedule that defines when the operation should run.</param>
 		/// <param name="method">The method to invoke at given intervals.</param>
 		/// <returns>A scheduled background operation.</returns>
-		public TaskQueueBackgroundOperation StartScheduledBackgroundOperation
+		public TaskQueueBackgroundOperation<TSecureConfiguration> StartScheduledBackgroundOperation
 		(
 			string name,
 			Schedule schedule,
-			Action<TaskProcessorJobEx> method
+			Action<TaskProcessorJobEx<TSecureConfiguration>> method
 		)
 		{
 			return this.StartScheduledBackgroundOperation
@@ -62,11 +62,11 @@ namespace MFiles.VAF.Extensions
 		/// <param name="method">The method to invoke at given intervals.</param>
 		/// <param name="directive">The directive to pass to the job.</param>
 		/// <returns>A started background operation.</returns>
-		public TaskQueueBackgroundOperation StartScheduledBackgroundOperation
+		public TaskQueueBackgroundOperation<TSecureConfiguration> StartScheduledBackgroundOperation
 		(
 			string name,
 			Schedule schedule,
-			Action<TaskProcessorJobEx, TaskQueueDirective> method,
+			Action<TaskProcessorJobEx<TSecureConfiguration>, TaskQueueDirective> method,
 			TaskQueueDirective directive = null
 		)
 		{
@@ -88,11 +88,11 @@ namespace MFiles.VAF.Extensions
 		/// <param name="method">The method to invoke at given intervals.</param>
 		/// <param name="directive">The directive to pass to the job.</param>
 		/// <returns>A started background operation.</returns>
-		public TaskQueueBackgroundOperation<TDirective> StartScheduledBackgroundOperation<TDirective>
+		public TaskQueueBackgroundOperation<TDirective, TSecureConfiguration> StartScheduledBackgroundOperation<TDirective>
 		(
 			string name,
 			Schedule schedule,
-			Action<TaskProcessorJobEx, TDirective> method,
+			Action<TaskProcessorJobEx<TSecureConfiguration>, TDirective> method,
 			TDirective directive = null
 		)
 			where TDirective : TaskQueueDirective
