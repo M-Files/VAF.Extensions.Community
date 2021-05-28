@@ -66,21 +66,21 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void TryGetPropertyText_ThrowsIfNullObjVerEx()
-			=> _ = nullObjVerEx.TryGetPropertyText(out _, envNameOrTitle.Ident);
+			=> _ = nullObjVerEx.TryGetPropertyText(envNameOrTitle.Ident, out _);
 
 		/// <summary>
 		/// Ensures that not resolved <see cref="MFIdentifier"/> objects return <see cref="true"/>
 		/// </summary>
 		[TestMethod]
 		public void TryGetPropertyText_ResultForNullIdentifier()
-			=> Assert.IsFalse(objVerEx.TryGetPropertyText(out _, envNull.Ident));
+			=> Assert.IsFalse(objVerEx.TryGetPropertyText(envNull.Ident, out _));
 
 		/// <summary>
 		/// Ensures that not resolved <see cref="MFIdentifier"/> objects return <see cref="true"/>
 		/// </summary>
 		[TestMethod]
 		public void TryGetPropertyText_ResultForNotResolved()
-			=> Assert.IsFalse(objVerEx.TryGetPropertyText(out _, envNotResolved.Ident));
+			=> Assert.IsFalse(objVerEx.TryGetPropertyText(envNotResolved.Ident, out _));
 
 		/// <summary>
 		/// Check all return values for all entries
@@ -90,7 +90,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 		{
 			foreach (PropertyDefTestEnvironment env in ListEnvironments)
 			{
-				Assert.AreEqual(env.IsResolved, objVerEx.TryGetPropertyText(out string result, env.Ident));
+				Assert.AreEqual(env.IsResolved, objVerEx.TryGetPropertyText(env.Ident, out string result));
 				Assert.AreEqual(env.Value, result);
 			}
 		}

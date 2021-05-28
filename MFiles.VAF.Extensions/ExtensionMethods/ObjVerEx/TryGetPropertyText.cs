@@ -37,11 +37,11 @@ namespace MFiles.VAF.Extensions
 		/// <param name="objVerEx">
 		/// The <see cref="ObjVerEx"/> object to be used as base for calling <see cref="ObjVerEx.GetPropertyText(MFIdentifier)"/>.
 		/// </param>
-		/// <param name="result">
-		/// The <see cref="string"/> value to be returned as output parameter.
-		/// </param>
 		/// <param name="prop">
 		/// The <see cref="MFIdentifier"/> object for the property which can be <see langword="null"/> or not resolved.
+		/// </param>
+		/// <param name="result">
+		/// The <see cref="string"/> value to be returned as output parameter.
 		/// </param>
 		/// 
 		/// <returns>
@@ -58,8 +58,8 @@ namespace MFiles.VAF.Extensions
 		/// </returns>
 		public static bool TryGetPropertyText(
 			this ObjVerEx objVerEx,
-			out string result,
-			MFIdentifier prop)
+			MFIdentifier prop,
+			out string result)
 		{
 			// Sanity
 			if (null == objVerEx)
