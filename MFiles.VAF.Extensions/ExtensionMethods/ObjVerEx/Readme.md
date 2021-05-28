@@ -157,3 +157,95 @@ var output = objVerEx.ExpandSimpleConcatenation("The customer's country of objec
 ```csharp
 var output = objVerEx.ExpandSimpleConcatenation("The vault GUID is %VAULTGUID%.")
 ```
+
+## TryGetPropertyText
+
+Avoid error handling methods while using ``MFIdentifier`` objects representing a property definition
+taken directly out of the VAF ``Configuration`` object.
+
+If the configuration contains a ``null`` value or an invalid ID/GUID/Alias for a property definition
+in configuration of the vault application it just returns ``false`` and sets the output
+string to ``null`` without throwing any exception as known e.g. from the method:
+```csharp
+public static bool TryParse (string? s, out int? result);
+```
+
+### Parameter "prop" as ``MFIdentifier`` object
+
+This method differs from the other extension methods by using ``MFIdentifier``
+instead of ``int`` for specifying the property in order to use the configuration parameter
+of the vault application as it is to avoid error handling.
+
+If ``int`` would be used as parameter instead then this method would become obsolete and
+could be replaced by standard ``ObjVerEx.GetPropertyText(int prop)`` method.
+
+
+### Example:  
+__Full name of a person to be used in various environments__
+
+Some environments perhaps may only contain only first name and last name. Perhaps the
+values where copied from a test environment using IDs which do not fit here. This would
+cause the following checks for each configuration parameter:
+
+```csharp
+// Get the configuration variable using a sample variable
+// to be replaced by variable to be used in real life
+MFIdentifier prop = Configuration.SubObject.Somewhere.SomeVariable;
+
+// Set the string depending on validity of the configuration variable
+string result = null == prop || !prop.IsResolved
+    ? null
+    : env.ObjVerEx.GetPropertyText(prop);
+```
+
+If this check would be forgotten it perhaps won't cause an exception in the development
+environment but in the target environment with other configuration.
+
+The method ``TryGetPropertyText`` is meant to avoid this especially if the
+vault application should be used in more than one customer system. Then you can use simply
+one line and it would be easier __not__ to forget the checks, like this example shows:
+
+```csharp
+// Try to get all properties which are configured
+_ = env.ObjVerEx.TryGetPropertyText(cfg.NameFields.PropSalutation, out string salutation);
+_ = env.ObjVerEx.TryGetPropertyText(cfg.NameFields.PropAcademicTitle, out string academicTitle);
+_ = env.ObjVerEx.TryGetPropertyText(cfg.NameFields.PropFirstName, out string firstName);
+_ = env.ObjVerEx.TryGetPropertyText(cfg.NameFields.PropMiddleName, out string middleName);
+_ = env.ObjVerEx.TryGetPropertyText(cfg.NameFields.PropLastName, out string lastName);
+
+// Compose real name
+string displayName = "";
+displayName = (displayName + (salutation ?? "")).TrimEnd();
+displayName += 0 < displayName.Length ? " " : "";
+displayName = (displayName + (academicTitle ?? "")).TrimEnd();
+displayName += 0 < displayName.Length ? " " : "";
+displayName = (displayName + (firstName ?? "")).TrimEnd();
+displayName += 0 < displayName.Length ? " " : "";
+displayName = (displayName + (middleName ?? "")).TrimEnd();
+
+// Put last name at the position depending on configuration
+displayName = cfg.Options.PutLastNameFirst && !string.IsNullOrEmpty(lastName)
+    ? lastName + (0 < displayName.Length ? ", " : "") + displayName
+    : displayName + (0 < displayName.Length && !string.IsNullOrEmpty(lastName) ? " " : "") + (lastName ?? "");
+```
+
+Implementing this without the helper method would make the implementation much
+more complex if someone tries to understand what happens.
+
+### Output parameter as string / Return value as bool
+
+The output parameter would be set as additional parameter like quite common
+by other ``TryDoSomething`` methods in the C# universe.
+
+The return value will be ``true`` if it was a ``MFIdentifier`` object
+different from ``null`` which could be resolved as a valid property definition.
+
+In cases where the standard ``GetPropertyText`` method would throw an exception because of
+an identifier object not set or not resolved, the ``TryGetPropertyText`` would just return
+``false`` like common for those methods and set the output parameter to ``null``.
+
+### Possible other extensions
+
+This could be also implemented for all other methods where the identifier may be invalid or
+not set like ``GetPropertyAs<T>``. If someone would implement this or similar functions
+I would probably use it.
