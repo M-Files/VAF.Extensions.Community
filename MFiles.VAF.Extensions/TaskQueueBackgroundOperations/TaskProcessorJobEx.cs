@@ -38,16 +38,16 @@ namespace MFiles.VAF.Extensions
 		/// <param name="taskState">See <see cref="TaskProcessorBase{TSettings}.UpdateTaskInfo(TaskProcessorJob, MFTaskState, string, bool)"/></param>
 		/// <param name="remarks">See <see cref="TaskProcessorBase{TSettings}.UpdateTaskInfo(TaskProcessorJob, MFTaskState, string, bool)"/></param>
 		/// <param name="appendRemarks">See <see cref="TaskProcessorBase{TSettings}.UpdateTaskInfo(TaskProcessorJob, MFTaskState, string, bool)"/></param>
-		public void UpdateTaskInfo(
+		public void Update(
 			MFTaskState taskState,
 			string remarks
 		)
 		{
-			var info = this.RetrieveTaskInfo() ?? new TaskInformation();
+			var info = this.GetTaskInfo() ?? new TaskInformation();
 			info.CurrentTaskState = taskState;
 			info.StatusDetails = remarks;
 			info.LastActivity = DateTime.Now;
-			this.UpdateTaskInfo(info);
+			this.Update(info);
 		}
 
 		/// <summary>
@@ -56,12 +56,12 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="remarks">See <see cref="TaskProcessorBase{TSettings}.UpdateTaskInfo(TaskProcessorJob, MFTaskState, string, bool)"/></param>
 		/// <param name="appendRemarks">See <see cref="TaskProcessorBase{TSettings}.UpdateTaskInfo(TaskProcessorJob, MFTaskState, string, bool)"/></param>
-		public void UpdateTaskInfo
+		public void Update
 			(
 			string remarks
 			)
 		{
-			this.UpdateTaskInfo(MFTaskState.MFTaskStateInProgress, remarks);
+			this.Update(MFTaskState.MFTaskStateInProgress, remarks);
 		}
 
 		/// <summary>
@@ -69,9 +69,9 @@ namespace MFiles.VAF.Extensions
 		/// Serialises <paramref name="status"/> into the "remarks" argument on <see cref="TaskProcessorBase{TSettings}.UpdateTaskInfo(TaskProcessorJob, MFTaskState, string, bool)"/>.
 		/// </summary>
 		/// <param name="status">The latest status.</param>
-		public void UpdateTaskInfo(TaskInformation status)
+		public void Update(TaskInformation status)
 		{
-			this.UpdateTaskInfo<TaskInformation>(status);
+			this.Update<TaskInformation>(status);
 		}
 
 		/// <summary>
@@ -79,12 +79,12 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="percentageComplete">How far complete this job is in processing, if known.</param>
 		/// <param name="statusDetails">Any additional details on the task status.</param>
-		public void UpdateTaskInfo(int? percentageComplete, string statusDetails)
+		public void Update(int? percentageComplete, string statusDetails)
 		{
-			var info = this.RetrieveTaskInfo() ?? new TaskInformation();
+			var info = this.GetTaskInfo() ?? new TaskInformation();
 			info.PercentageComplete = percentageComplete;
 			info.StatusDetails = statusDetails;
-			this.UpdateTaskInfo(info);
+			this.Update(info);
 		}
 
 		/// <summary>
@@ -93,11 +93,11 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <typeparam name="TTaskInformation">The type of the status.</typeparam>
 		/// <param name="status">The latest status.</param>
-		public void UpdateTaskInfo<TTaskInformation>(TTaskInformation status )
+		public void Update<TTaskInformation>(TTaskInformation status )
 			where TTaskInformation : TaskInformation
 		{
 			// Copy data from the current info.
-			var info = this.RetrieveTaskInfo();
+			var info = this.GetTaskInfo();
 			if (null != info && null != status)
 			{
 				status.Started = info.Started;
@@ -119,8 +119,11 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <typeparam name="TTaskInformation">The type of the status.</typeparam>
 		/// <returns>The status, or default if not found.</returns>
-		public TaskInformation RetrieveTaskInfo()
+		public TaskInformation GetTaskInfo()
 		{
+			var status = this.Job?.GetStatus();
+			if (null == status?.Data)
+				return null;
 			return new TaskInformation(this.Job.GetStatus()?.Data);
 		}
 	}
