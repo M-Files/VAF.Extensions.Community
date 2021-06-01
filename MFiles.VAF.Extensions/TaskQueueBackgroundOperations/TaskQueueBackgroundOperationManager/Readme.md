@@ -113,7 +113,7 @@ namespace RecurringTask
 		[StateAction("MyWorkflowState")]
 		void MyWorkflowStateAction(StateEnvironment env)
 		{
-			this.MyBackgroundOperation.RunOnce();
+			this.MyBackgroundOperation.RunOnce(vault: env.Vault);
 		}
 
 	}
@@ -180,7 +180,7 @@ namespace RecurringTask
 			this.MyBackgroundOperation.RunOnce(directive: new ObjVerExTaskQueueDirective()
 			{
 				ObjVerEx = env.ObjVerEx.ToString()
-			});
+			}, vault: env.Vault);
 		}
 
 	}
