@@ -1,7 +1,9 @@
 ﻿using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Extensions.Dashboards;
 using MFilesAPI;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Reflection;
 
 namespace MFiles.VAF.Extensions
 {
@@ -83,6 +85,39 @@ namespace MFiles.VAF.Extensions
 
 			// What's the difference?
 			return this.LastActivity.Value.Subtract(this.Started.Value);
+		}
+
+		/// <summary>
+		/// Converts the current TaskInformation instance into a JObject.
+		/// </summary>
+		/// <returns>The JObject.</returns>
+		public JObject ToJObject()
+		{
+			var obj = new JObject();
+			foreach (var property in this.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+			{
+				if (false == property.CanRead || false == property.CanWrite)
+					continue;
+				var value = property.GetValue(this);
+				if (null == value)
+					continue;
+				obj.Add(new JProperty(property.Name, value));
+			}
+			return obj;
+		}
+
+		public TaskInformation() { }
+		public TaskInformation(JObject input)
+			: this()
+		{
+			if (null == input)
+				return;
+			var type = this.GetType();
+			foreach (var p in input.Properties())
+			{
+				var property = type.GetProperty(p.Name);
+				property.SetValue(this, p.Value?.ToObject(property.PropertyType));
+			}
 		}
 	}
 }

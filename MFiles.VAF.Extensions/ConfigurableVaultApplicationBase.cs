@@ -20,7 +20,7 @@ namespace MFiles.VAF.Extensions
 	/// <typeparam name="TSecureConfiguration">The configuration type.</typeparam>
 	/// <remarks>See https://developer.m-files.com/Frameworks/Vault-Application-Framework/Multi-Server-Mode/#configuration-changes for further details.</remarks>
 	public abstract partial class ConfigurableVaultApplicationBase<TSecureConfiguration>
-		: MFiles.VAF.Core.LegacyConfigurableVaultApplicationBase<TSecureConfiguration>, IUsesTaskQueue
+		: MFiles.VAF.Core.ConfigurableVaultApplicationBase<TSecureConfiguration>
 	where TSecureConfiguration : class, new()
 	{
 		private TaskQueueBackgroundOperationManager<TSecureConfiguration> taskQueueBackgroundOperationManager;
@@ -64,37 +64,5 @@ namespace MFiles.VAF.Extensions
 			}
 			private set => taskQueueBackgroundOperationManager = value;
 		}
-
-		/// <inheritdoc />
-		public override string GetRebroadcastQueueId()
-		{
-			// If we do not have a rebroadcast queue for the configuration data
-			// then create one.
-			if (null == this.ConfigurationRebroadcastTaskProcessor)
-			{
-				// Enable the configuration rebroadcasting.
-				this.EnableConfigurationRebroadcasting
-					(
-					out AppTaskBatchProcessor processor,
-					out string queueId
-					);
-
-				// Populate references to the task processor and queue Id.
-				this.ConfigurationRebroadcastQueueId = queueId;
-				this.ConfigurationRebroadcastTaskProcessor = processor;
-			}
-
-			// Return the broadcast queue Id.
-			return this.ConfigurationRebroadcastQueueId;
-		}
-
-		#region Implementation of IUsesTaskQueue
-
-		/// <inheritdoc />
-		public virtual void RegisterTaskQueues()
-		{
-		}
-
-		#endregion
 	}
 }

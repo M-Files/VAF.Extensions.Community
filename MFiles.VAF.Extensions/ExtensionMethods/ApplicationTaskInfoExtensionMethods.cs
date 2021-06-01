@@ -27,14 +27,17 @@ namespace MFiles.VAF.Extensions
 				true
 			);
 
+			// It will be in remarks for older tasks and progress for newer.
+			var serialisedContent = appTaskUpdateInfo.Remarks ?? applicationTask.Progress;
+
 			// Sanity.
-			if (string.IsNullOrWhiteSpace(appTaskUpdateInfo?.Remarks))
+			if (string.IsNullOrWhiteSpace(serialisedContent))
 				return null;
 
 			// Try and parse the remarks into the expected type.
 			try
 			{
-				var info = JsonConvert.DeserializeObject<TTaskInformation>(appTaskUpdateInfo.Remarks);
+				var info = JsonConvert.DeserializeObject<TTaskInformation>(serialisedContent);
 				if (null != info)
 					info.CurrentTaskState = applicationTask.State;
 				return info;
@@ -44,7 +47,7 @@ namespace MFiles.VAF.Extensions
 				// If we got nothing then return something empty.
 				return new TaskInformation()
 				{
-					StatusDetails = appTaskUpdateInfo?.Remarks
+					StatusDetails = serialisedContent
 				} as TTaskInformation;
 			}
 		}

@@ -1,4 +1,5 @@
-﻿using MFiles.VAF.MultiserverMode;
+﻿using MFiles.VAF.Extensions.ExtensionMethods;
+using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
 using Newtonsoft.Json;
 using System;
@@ -11,13 +12,14 @@ namespace MFiles.VAF.Extensions
 	/// <see cref="TaskProcessorJobEx.TaskQueueBackgroundOperationManager"/> and <see cref="TaskProcessorJobEx.TaskProcessor"/>.
 	/// Also provides helper methods for setting typed task information for rendering onto dashboards.
 	/// </summary>
-	public class TaskProcessorJobEx<TSecureConfiguration>
+	public class TaskProcessorJobEx<TDirective, TSecureConfiguration>
+		where TDirective : AppTasks.TaskDirective
 		where TSecureConfiguration : class, new()
 	{
 		/// <summary>
 		/// The task processor job itself.
 		/// </summary>
-		public TaskProcessorJob Job { get; set; }
+		public AppTasks.ITaskProcessingJob<TDirective> Job { get; set; }
 
 		/// <summary>
 		/// The vault associated with the job.
@@ -28,11 +30,6 @@ namespace MFiles.VAF.Extensions
 		/// The background operation manager that owns this job.
 		/// </summary>
 		public TaskQueueBackgroundOperationManager<TSecureConfiguration> TaskQueueBackgroundOperationManager { get; set; }
-
-		/// <summary>
-		/// The task processor processing the job (from <see cref="TaskQueueBackgroundOperationManager.TaskProcessor"/>.
-		/// </summary>
-		public AppTaskBatchProcessor TaskProcessor { get => this.TaskQueueBackgroundOperationManager?.TaskProcessor; }
 
 		/// <summary>
 		/// Updates the task information for the job.
@@ -113,14 +110,8 @@ namespace MFiles.VAF.Extensions
 				status.LastActivity = DateTime.Now;
 			}
 
-			// Update the task information.
-			this.TaskProcessor.UpdateTaskInfo
-			(
-				this.Job,
-				MFTaskState.MFTaskStateInProgress,
-				null == status ? "" : JsonConvert.SerializeObject(status),
-				false
-			);
+			// Use the other overload.
+			this.Job.Update(status);
 		}
 
 		/// <summary>
@@ -128,29 +119,9 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <typeparam name="TTaskInformation">The type of the status.</typeparam>
 		/// <returns>The status, or default if not found.</returns>
-		public TTaskInformation RetrieveTaskInfo<TTaskInformation>()
-			where TTaskInformation : TaskInformation
-		{
-			return this.Job?.Data?.Value?.ToApplicationTaskInfo()?
-				.RetrieveTaskInfo<TTaskInformation>(TaskQueueBackgroundOperationManager<TSecureConfiguration>.CurrentServer.ServerID);
-		}
-
-		/// <summary>
-		/// Retrieves the latest task information for the job.
-		/// </summary>
-		/// <returns>The status, or default if not found.</returns>
 		public TaskInformation RetrieveTaskInfo()
 		{
-			return this.RetrieveTaskInfo<TaskInformation>();
-		}
-
-		/// <summary>
-		/// Converts the <see cref="TaskProcessorJobEx"/> to a simple <see cref="TaskProcessorJob"/>.
-		/// </summary>
-		/// <param name="input"></param>
-		public static implicit operator TaskProcessorJob(TaskProcessorJobEx<TSecureConfiguration> input)
-		{
-			return input?.Job;
+			return new TaskInformation(this.Job.GetStatus()?.Data);
 		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using MFiles.VAF.Configuration;
+﻿using MFiles.VAF.AppTasks;
+using MFiles.VAF.Configuration;
 using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Extensions.Dashboards;
 using MFiles.VAF.Extensions.ExtensionMethods;
@@ -22,7 +23,7 @@ namespace MFiles.VAF.Extensions
 		/// <returns>The table.</returns>
 		public static IDashboardContent AsDashboardContent
 		(
-			this IEnumerable<ApplicationTaskInfo> applicationTasks,
+			this IEnumerable<TaskInfo<BackgroundOperationTaskDirective>> applicationTasks,
 			string serverId,
 			int maximumRowsToShow = 40
 		)
@@ -31,7 +32,7 @@ namespace MFiles.VAF.Extensions
 			if (null == applicationTasks || false == applicationTasks.Any())
 				return null;
 			var list = applicationTasks
-				.OrderByDescending(e => e.LatestActivityTimestamp.ToDateTime(DateTimeKind.Utc))
+				.OrderByDescending(e => e.LatestActivity)
 				.ToList();
 
 			// Create the table and header row.
@@ -47,7 +48,7 @@ namespace MFiles.VAF.Extensions
 				);
 			}
 
-			List<ApplicationTaskInfo> executionsToShow;
+			List<TaskInfo<BackgroundOperationTaskDirective>> executionsToShow;
 			bool isFiltered = false;
 			if (list.Count <= maximumRowsToShow)
 				executionsToShow = list;
@@ -56,7 +57,7 @@ namespace MFiles.VAF.Extensions
 				isFiltered = true;
 
 				// Show the latest 20 errors, then the rest filled with non-errors.
-				executionsToShow = new List<ApplicationTaskInfo>
+				executionsToShow = new List<TaskInfo<BackgroundOperationTaskDirective>>
 				(
 					list
 						.Where(e => e.State == MFTaskState.MFTaskStateFailed)
@@ -68,23 +69,15 @@ namespace MFiles.VAF.Extensions
 			// Add a row for each execution to show.
 			foreach (var execution in executionsToShow)
 			{
-				var taskInfo = execution.RetrieveTaskInfo(serverId);
-				var activation = execution.ActivationTimestamp.ToDateTime(DateTimeKind.Utc);
-
-				// Try and get the display name from the directive.
-				var displayName = execution.TaskID; // Default to the task ID.
-				if (null != execution.TaskData && execution.TaskData.Length > 0)
-				{
-					try
-					{
-						var directive = TaskQueueDirective.Parse<BackgroundOperationTaskQueueDirective>(execution.TaskData)
-							?.GetParsedInternalDirective() as ITaskQueueDirectiveWithDisplayName;
-						displayName = string.IsNullOrWhiteSpace(directive?.DisplayName)
-							? displayName
-							: directive.DisplayName;
-					}
-					catch { }
-				}
+				var internalDirective = execution.Directive?.GetParsedInternalDirective();
+				var directive = internalDirective as ITaskDirectiveWithDisplayName;
+				var displayName = string.IsNullOrWhiteSpace(directive?.DisplayName)
+					? execution.TaskId
+					: directive.DisplayName;
+				var activation = execution.ActivationTime;
+				TaskInformation taskInfo = null == execution.Status?.Data
+					? new TaskInformation()
+					: new TaskInformation(execution.Status.Data);
 
 				// Create the content for the scheduled column (including icon).
 				var taskInfoCell = new DashboardCustomContentEx(System.Security.SecurityElement.Escape(displayName));

@@ -9,18 +9,19 @@ using MFiles.VAF;
 using MFilesAPI;
 using MFiles.VAF.MultiserverMode;
 using System.Collections.Generic;
+using MFiles.VAF.AppTasks;
 
 namespace MFiles.VAF.Extensions
 {
 	public class TaskQueueBackgroundOperation<TDirective, TSecureConfiguration>
 		: TaskQueueBackgroundOperation<TSecureConfiguration>
-		where TDirective : TaskQueueDirective
+		where TDirective : AppTasks.TaskDirective
 		where TSecureConfiguration : class, new()
 	{
 		/// <summary>
 		/// The method to run.
 		/// </summary>
-		public new Action<TaskProcessorJobEx<TSecureConfiguration>, TDirective> UserMethod { get; private set; }
+		//public new Action<TaskProcessorJobEx<TDirective, TSecureConfiguration>, TDirective> UserMethod { get; private set; }
 
 		/// <summary>
 		/// Creates a new background operation that runs the method in separate task.
@@ -34,26 +35,23 @@ namespace MFiles.VAF.Extensions
 		(
 			TaskQueueBackgroundOperationManager<TSecureConfiguration> backgroundOperationManager,
 			string name,
-			Action<TaskProcessorJobEx<TSecureConfiguration>, TDirective> method,
+			Action<TaskProcessorJobEx<BackgroundOperationTaskDirective, TSecureConfiguration>, TDirective> method,
 			CancellationTokenSource cancellationTokenSource = default
 		) : 
 			base
 				(
 				backgroundOperationManager, 
 				name,
-				(j, d) => { }, // Ignore the method (we will set it below).
+				(j, d) =>
+				{
+					method(j, d as TDirective);
+				},
 				cancellationTokenSource
 				)
 		{
 			// Save parameters.
-			this.UserMethod = method ?? throw new ArgumentNullException( nameof(method) );
-		}
-
-		/// <inheritdoc />
-		internal override void RunJob(TaskProcessorJobEx<TSecureConfiguration> job, TaskQueueDirective directive)
-		{
-			// Execute the callback.
-			this.UserMethod(job, directive as TDirective);
+			if(null == method)
+				throw new ArgumentNullException( nameof(method) );
 		}
 
 		/// <summary>
@@ -238,7 +236,7 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// The method to run.
 		/// </summary>
-		public Action<TaskProcessorJobEx<TSecureConfiguration>, TaskQueueDirective> UserMethod { get; private set; }
+		public Action<TaskProcessorJobEx<BackgroundOperationTaskDirective, TSecureConfiguration>, TaskDirective> UserMethod { get; private set; }
 
 		/// <summary>
 		/// Creates a new background operation that runs the method in separate task.
@@ -252,7 +250,7 @@ namespace MFiles.VAF.Extensions
 		(
 			TaskQueueBackgroundOperationManager<TSecureConfiguration> backgroundOperationManager,
 			string name,
-			Action<TaskProcessorJobEx<TSecureConfiguration>, TaskQueueDirective> method,
+			Action<TaskProcessorJobEx<BackgroundOperationTaskDirective, TSecureConfiguration>, TaskDirective> method,
 			CancellationTokenSource cancellationTokenSource = default
 		)
 		{
@@ -287,7 +285,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="directive">The directive ("data") to pass to the execution.</param>
 		/// <param name="vault">The vault reference to add the task.  Set to a transactional vault to only run the task if the transaction completes.</param>
 		/// <remarks>Does not remove any scheduled executions.  Use <see cref="StopRunningAtIntervals"/>.</remarks>
-		public void RunOnce(DateTime? runAt = null, TaskQueueDirective directive = null, Vault vault = null)
+		public void RunOnce(DateTime? runAt = null, TaskDirective directive = null, Vault vault = null)
 		{
 			// Schedule the next task to execute ASAP.
 			this.BackgroundOperationManager.RunOnce(this.Name, runAt, directive, vault: vault);
@@ -298,7 +296,7 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="interval">The interval between consecutive runs.</param>
 		/// <param name="directive">The directive ("data") to pass to the execution.</param>
-		public void RunAtIntervals(TimeSpan interval, TaskQueueDirective directive = null)
+		public void RunAtIntervals(TimeSpan interval, TaskDirective directive = null)
 		{
 			// Check for validity.
 			if (interval < TimeSpan.Zero)
@@ -324,7 +322,7 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="schedule">The schedule to run on.</param>
 		/// <param name="directive">The directive ("data") to pass to the execution.</param>
-		public void RunOnSchedule(Schedule schedule, TaskQueueDirective directive = null)
+		public void RunOnSchedule(Schedule schedule, TaskDirective directive = null)
 		{
 			// Check for validity.
 			if (null == schedule)
@@ -347,7 +345,7 @@ namespace MFiles.VAF.Extensions
 		/// Returns all pending executions of this background operation.
 		/// </summary>
 		/// <returns>Any pending executions of this background operation.</returns>
-		public IEnumerable<ApplicationTaskInfo> GetPendingExecutions(bool includeCurrentlyExecuting = true)
+		public IEnumerable<TaskInfo<BackgroundOperationTaskDirective>> GetPendingExecutions(bool includeCurrentlyExecuting = true)
 		{
 			// What state should the tasks be in?
 			var taskStates = includeCurrentlyExecuting
@@ -365,7 +363,7 @@ namespace MFiles.VAF.Extensions
 		/// Returns all pending executions of this background operation.
 		/// </summary>
 		/// <returns>Any pending executions of this background operation.</returns>
-		public IEnumerable<ApplicationTaskInfo> GetAllExecutions()
+		public IEnumerable<TaskInfo<BackgroundOperationTaskDirective>> GetAllExecutions()
 		{
 			return this.GetExecutions
 			(
@@ -382,54 +380,16 @@ namespace MFiles.VAF.Extensions
 		/// Returns all pending executions of this background operation.
 		/// </summary>
 		/// <returns>Any pending executions of this background operation.</returns>
-		public IEnumerable<ApplicationTaskInfo> GetExecutions(params MFTaskState[] taskStates)
+		public IEnumerable<TaskInfo<BackgroundOperationTaskDirective>> GetExecutions(params MFTaskState[] taskStates)
 		{
-			// Sanity.
-			taskStates = taskStates ?? new MFTaskState[0];
+			var query = new TaskQuery();
+			query.Queue(this.BackgroundOperationManager.QueueId);
+			query.TaskType(TaskTypeId);
+			query.TaskState(taskStates);
 
-			{
-				// Build up the task state IDs that we are interested in.
-				var states = new IDs();
-				foreach (var s in taskStates)
-					states.Add(1, (int)s);
-
-				// Retrieve all tasks in our queue with that ID.
-				var taskIds = this.BackgroundOperationManager.VaultApplication.PermanentVault
-					.ApplicationTaskOperations.GetTaskIDsFromQueue(this.BackgroundOperationManager.QueueId, states)
-					.Cast<string>()
-					.ToList();
-
-				// Retrieve each batch of tasks (500 in a batch).
-				{
-					var count = 0;
-					while (count < taskIds.Count)
-					{
-						// Create a batch.
-						var idBatch = new Strings();
-						foreach (var x in taskIds.Skip(count).Take(500))
-							idBatch.Add(1, x);
-
-						// Retrieve one batch and filter just to the ones we want.
-						foreach (var taskInfo in this.BackgroundOperationManager.VaultApplication.PermanentVault.ApplicationTaskOperations.GetTasks(idBatch).Cast<ApplicationTaskInfo>()
-							.Where(t =>
-							{
-								// If this task is not for this background operation then ignore it.
-								var directive = TaskQueueDirective.Parse<BackgroundOperationTaskQueueDirective>(t.ToApplicationTask());
-								if (null == directive)
-									return false;
-								if (directive.BackgroundOperationName != this.Name)
-									return false;
-								return true;
-							}))
-						{
-							yield return taskInfo;
-						}
-
-						// Next batch.
-						count += idBatch.Count;
-					}
-				}
-			}
+			return query
+				.FindTasks<BackgroundOperationTaskDirective>(this.BackgroundOperationManager.VaultApplication.TaskManager)
+				.Where(ti => ti.Directive.BackgroundOperationName == this.Name);
 		}
 
 		/// <summary>
@@ -444,18 +404,28 @@ namespace MFiles.VAF.Extensions
 					// Mark each task as superseded.
 					try
 					{
-						this.BackgroundOperationManager.TaskProcessor.UpdateCancelledJobInTaskQueue
-						(
-							task.ToApplicationTask(),
-							string.Empty,
-							remarks
-						);
+						switch (task.State)
+						{
+							case MFTaskState.MFTaskStateInProgress:
+								this.BackgroundOperationManager.VaultApplication.TaskManager.CancelActiveTask
+								(
+									this.BackgroundOperationManager.VaultApplication.PermanentVault,
+									task.TaskId
+								);
+								break;
+							case MFTaskState.MFTaskStateWaiting:
+								this.BackgroundOperationManager.VaultApplication.TaskManager.CancelWaitingTask(task.TaskId);
+								break;
+							default:
+								// Cannot cancel ones in other states.
+								break;
+						}
 					}
 					catch (Exception e)
 					{
 						SysUtils.ReportErrorToEventLog
 						(
-							$"Exception cancelling task {task.ToApplicationTask().Id} for background operation {this.Name} of type {TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId} on queue {this.BackgroundOperationManager.QueueId}.",
+							$"Exception cancelling task {task.TaskId} for background operation {this.Name} of type {TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId} on queue {this.BackgroundOperationManager.QueueId}.",
 							e
 						);
 					}
@@ -498,7 +468,7 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="job">The job to run.</param>
 		/// <param name="directive">The directive, if any, passed in.</param>
-		internal virtual void RunJob(TaskProcessorJobEx<TSecureConfiguration> job, TaskQueueDirective directive)
+		internal virtual void RunJob(TaskProcessorJobEx<BackgroundOperationTaskDirective, TSecureConfiguration> job, TaskDirective directive)
 		{
 			// Execute the callback.
 			this.UserMethod(job, directive);

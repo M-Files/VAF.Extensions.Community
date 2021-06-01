@@ -1,5 +1,6 @@
 ﻿using System;
 using MFiles.VAF;
+using MFiles.VAF.AppTasks;
 using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
 
@@ -20,12 +21,12 @@ namespace MFiles.VAF.Extensions
 		(
 			string backgroundOperationName,
 			DateTime? runAt = null,
-			TaskQueueDirective directive = null,
+			TaskDirective directive = null,
 			Vault vault = null
 		)
 		{
 			// Use the other overload.
-			this.RunOnce<TaskQueueDirective>
+			this.RunOnce<TaskDirective>
 			(
 				backgroundOperationName,
 				runAt,
@@ -49,22 +50,21 @@ namespace MFiles.VAF.Extensions
 			TDirective directive = null,
 			Vault vault = null
 		)
-			where TDirective : TaskQueueDirective
+			where TDirective : TaskDirective
 		{
 			// Create our actual directive.
 			var backgroundOperationDirective =
-				new BackgroundOperationTaskQueueDirective(backgroundOperationName, directive);
+				new BackgroundOperationTaskDirective(backgroundOperationName, directive);
 
 			// Schedule the next task to execute at the correct time.
 			var nextRun = runAt.HasValue ? runAt.Value.ToUniversalTime() : DateTime.UtcNow;
-			this.TaskProcessor.CreateApplicationTaskSafe
-			(
-				true,
+			this.VaultApplication.TaskManager.AddTask
+				(
+				vault ?? this.VaultApplication.PermanentVault,
 				this.QueueId,
 				TaskQueueBackgroundOperation<TDirective, TSecureConfiguration>.TaskTypeId,
-				backgroundOperationDirective?.ToBytes(),
-				nextRun,
-				vault: vault ?? this.VaultApplication?.PermanentVault
+				backgroundOperationDirective,
+				nextRun
 			);
 		}
 
