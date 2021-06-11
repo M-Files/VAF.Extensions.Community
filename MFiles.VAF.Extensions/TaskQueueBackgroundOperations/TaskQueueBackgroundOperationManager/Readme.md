@@ -294,7 +294,7 @@ public class VaultApplication
 					if(false == nextRun.HasValue)
 					{
 						// No future executions scheduled.
-						SysUtils.ReportInfoToEventLog($"It is now {DateTime.UtcNow.ToString("O")}.  There are no future executions scheduled.")
+						SysUtils.ReportInfoToEventLog($"It is now {DateTime.UtcNow.ToString("O")}.  There are no future executions scheduled.");
 					}
 					else
 					{
@@ -330,7 +330,7 @@ public class VaultApplication
 	/// if appropriate.
 	/// </summary>
 	protected void ScheduleBackgroundOperation()
-	
+	{
 		// Stop any scheduled future executions.
 		this.ScheduledBackgroundOperation.CancelFutureExecutions();
 
