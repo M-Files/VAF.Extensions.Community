@@ -414,7 +414,11 @@ namespace MFiles.VAF.Extensions
 								);
 								break;
 							case MFTaskState.MFTaskStateWaiting:
-								this.BackgroundOperationManager.VaultApplication.TaskManager.CancelWaitingTask(task.TaskId);
+								this.BackgroundOperationManager.VaultApplication.TaskManager.CancelWaitingTask
+								(
+									this.BackgroundOperationManager.VaultApplication.PermanentVault, 
+									task.TaskId
+								);
 								break;
 							default:
 								// Cannot cancel ones in other states.
