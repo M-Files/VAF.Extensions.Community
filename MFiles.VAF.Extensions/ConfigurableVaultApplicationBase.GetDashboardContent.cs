@@ -61,7 +61,7 @@ namespace MFiles.VAF.Extensions
 
 			// Get the content from the task queue resolver.
 			{
-				var listItems = this.TaskQueueResolver.GetDashboardContent(this.TaskManager);
+				var listItems = this.TaskManager.GetDashboardContent(this.TaskQueueResolver);
 				if (null != listItems)
 					list.Items.AddRange(listItems);
 			}

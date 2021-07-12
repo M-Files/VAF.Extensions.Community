@@ -31,11 +31,33 @@ namespace MFiles.VAF.Extensions.Dashboards
 	public class ShowOnDashboardAttribute
 		: Attribute
 	{
-		public int DashboardSortOrder { get; set; } = 0;
 		public string Name { get; set; } = null;
 		public string Description { get; set; } = null;
-		public bool ShowRunCommandInDashboard { get; set; } = false;
-		public string DashboardRunCommandTitle { get; set; } = "Run";
+		public bool ShowRunCommand { get; set; } = false;
+
+		/// <summary>
+		/// The default text shown on the "run now" button.
+		/// </summary>
+		public const string DefaultRunCommandDisplayText = "Run now";
+
+		/// <summary>
+		/// The default confirmation text used for the "run now" button, asking the user to confirm they want to do this.
+		/// </summary>
+		public const string DefaultRunCommandConfirmationText = null;
+
+		/// <summary>
+		/// The default text shown after the "run now" button has been clicked.
+		/// </summary>
+		public const string DefaultRunCommandSuccessText = "The background operation has been scheduled to run.";
+
+		/// <summary>
+		/// The text shown to the user as a popup when the background operation has been scheduled.
+		/// </summary>
+		public string RunCommandSuccessText { get; set; } = ShowOnDashboardAttribute.DefaultRunCommandSuccessText;
+
+		public string RunCommandConfirmationText { get; set; } = ShowOnDashboardAttribute.DefaultRunCommandConfirmationText;
+
+		public string RunCommandDisplayText { get; set; } = ShowOnDashboardAttribute.DefaultRunCommandDisplayText;
 
 		public ShowOnDashboardAttribute(string name)
 		{

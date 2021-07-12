@@ -1,5 +1,7 @@
 ﻿using MFiles.VAF.AppTasks;
+using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain.Dashboards;
+using MFiles.VAF.Core;
 using MFiles.VAF.Extensions.Dashboards;
 using MFilesAPI;
 using System;
@@ -10,17 +12,16 @@ using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions
 {
-	public static class TaskQueueResolverExtensionMethods
+	public partial class TaskManagerEx
+		: TaskManager
 	{
 		/// <summary>
 		/// Returns some dashboard content that shows the background operations and their current status.
 		/// </summary>
 		/// <returns>The dashboard content.</returns>
-		public static IEnumerable<DashboardListItem> GetDashboardContent(this TaskQueueResolver taskQueueResolver, TaskManager taskManager)
+		public IEnumerable<DashboardListItem> GetDashboardContent(TaskQueueResolver taskQueueResolver)
 		{
 			if (null == taskQueueResolver)
-				yield break;
-			if (null == taskManager)
 				yield break;
 
 			foreach (var queue in taskQueueResolver.GetQueues())
@@ -56,11 +57,18 @@ namespace MFiles.VAF.Extensions
 					var showOnDashboardAttribute = methodInfo.GetCustomAttributes(typeof(ShowOnDashboardAttribute), true)?
 						.FirstOrDefault() as ShowOnDashboardAttribute;
 
+					// Show the description?
+					var htmlString = "";
+					if (false == string.IsNullOrWhiteSpace(showOnDashboardAttribute?.Description))
+					{
+						htmlString += new DashboardCustomContent($"<p><em>{System.Security.SecurityElement.Escape(showOnDashboardAttribute?.Description)}</em></p>").ToXmlString();
+					}
+
 					// TODO: Replicate IEnumerableTaskQueueBackgroundOperationExtensionMethods.AsDashboardListItems
-					var htmlString = "<p>Runs on demand (does not repeat).<br /></p>";
+					htmlString += "<p>Runs on demand (does not repeat).<br /></p>";
 
 					// Get known executions (prior, running and future).
-					var executions = taskManager
+					var executions = this
 						.GetAllExecutions<TaskDirective>(queue, processor.Type)
 						.ToList();
 					var isRunning = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateInProgress);
@@ -78,12 +86,30 @@ namespace MFiles.VAF.Extensions
 						}
 					};
 
+					// Should we show the run command?
+					{
+						var key = $"{queue}-{processor.Type}";
+						lock (this._lock)
+						{
+							if (this.TaskQueueRunCommands.ContainsKey(key))
+							{
+								var cmd = new DashboardDomainCommand
+								{
+									DomainCommandID = this.TaskQueueRunCommands[key].ID,
+									Title = this.TaskQueueRunCommands[key].DisplayName,
+									Style = DashboardCommandStyle.Link
+								};
+								listItem.Commands.Add(cmd);
+							}
+						}
+					}
+
 					// Set the list item content.
 					listItem.InnerContent = new DashboardCustomContent
 					(
 						htmlString
 						+ executions?
-							.AsDashboardContent(taskManager.ServerId)?
+							.AsDashboardContent(this.ServerId)?
 							.ToXmlString()
 					);
 
@@ -92,7 +118,7 @@ namespace MFiles.VAF.Extensions
 
 				}
 			}
-			
+
 		}
 	}
 }

@@ -6,7 +6,6 @@ using MFiles.VAF.MultiserverMode;
 
 namespace MFiles.VAF.Extensions
 {
-
 	/// <summary>
 	/// A <see cref="TaskDirective"/> that represents a single <see cref="ObjVerExTaskDirective.ObjVerEx"/>.
 	/// </summary>

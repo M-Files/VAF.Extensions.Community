@@ -1,4 +1,8 @@
 ﻿using MFiles.VAF.AppTasks;
+using MFiles.VAF.Configuration.AdminConfigurations;
+using MFiles.VAF.Configuration.Domain.Dashboards;
+using MFiles.VAF.Core;
+using MFiles.VAF.Extensions.Dashboards;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
@@ -8,21 +12,19 @@ using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions
 {
-	public static class TaskManagerExtensionMethods
+	public partial class TaskManagerEx
+		: TaskManager
 	{
-
 		/// <summary>
 		/// Returns executions of items on queue <paramref name="queueId"/>
 		/// with optional type of <paramref name="taskType"/> in state(s) <paramref name="taskStates"/>.
 		/// </summary>
 		/// <param name="queueId">The ID of the queue to query.</param>
-		/// <param name="taskManager">The task manager to use to query.</param>
 		/// <param name="taskType">The type of task to filter by</param>
 		/// <typeparam name="TDirective">The type of directive used.</typeparam>
 		/// <returns>Any matching executions.</returns>
-		public static IEnumerable<TaskInfo<TDirective>> GetPendingExecutions<TDirective>
+		public IEnumerable<TaskInfo<TDirective>> GetPendingExecutions<TDirective>
 		(
-			this TaskManager taskManager, 
 			string queueId,
 			string taskType = null,
 			bool includeCurrentlyExecuting = true
@@ -35,7 +37,7 @@ namespace MFiles.VAF.Extensions
 				: new[] { MFTaskState.MFTaskStateWaiting };
 
 			// Use the other overload.
-			return taskManager.GetExecutions<TDirective>
+			return this.GetExecutions<TDirective>
 			(
 				queueId,
 				taskType,
@@ -48,19 +50,17 @@ namespace MFiles.VAF.Extensions
 		/// with optional type of <paramref name="taskType"/> in state(s) <paramref name="taskStates"/>.
 		/// </summary>
 		/// <param name="queueId">The ID of the queue to query.</param>
-		/// <param name="taskManager">The task manager to use to query.</param>
 		/// <param name="taskType">The type of task to filter by</param>
 		/// <typeparam name="TDirective">The type of directive used.</typeparam>
 		/// <returns>Any matching executions.</returns>
-		public static IEnumerable<TaskInfo<TDirective>> GetAllExecutions<TDirective>
+		public IEnumerable<TaskInfo<TDirective>> GetAllExecutions<TDirective>
 		(
-			this TaskManager taskManager,
 			string queueId,
 			string taskType = null
 		)
 			where TDirective : TaskDirective
 		{
-			return taskManager.GetExecutions<TDirective>
+			return this.GetExecutions<TDirective>
 			(
 				queueId,
 				taskType,
@@ -78,14 +78,12 @@ namespace MFiles.VAF.Extensions
 		/// with optional type of <paramref name="taskType"/> in state(s) <paramref name="taskStates"/>.
 		/// </summary>
 		/// <param name="queueId">The ID of the queue to query.</param>
-		/// <param name="taskManager">The task manager to use to query.</param>
 		/// <param name="taskStates">The states to find tasks in.</param>
 		/// <param name="taskType">The type of task to filter by</param>
 		/// <typeparam name="TDirective">The type of directive used.</typeparam>
 		/// <returns>Any matching executions.</returns>
-		public static IEnumerable<TaskInfo<TDirective>> GetExecutions<TDirective>
+		public IEnumerable<TaskInfo<TDirective>> GetExecutions<TDirective>
 		(
-			this TaskManager taskManager,
 			string queueId,
 			string taskType = null,
 			params MFTaskState[] taskStates
@@ -94,12 +92,12 @@ namespace MFiles.VAF.Extensions
 		{
 			var query = new TaskQuery();
 			query.Queue(queueId);
-			if(false == string.IsNullOrWhiteSpace(taskType))
+			if (false == string.IsNullOrWhiteSpace(taskType))
 				query.TaskType(taskType);
 			query.TaskState(taskStates);
 
 			return query
-				.FindTasks<TDirective>(taskManager);
+				.FindTasks<TDirective>(this);
 		}
 	}
 }
