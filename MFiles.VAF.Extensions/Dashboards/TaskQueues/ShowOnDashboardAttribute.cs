@@ -55,8 +55,14 @@ namespace MFiles.VAF.Extensions.Dashboards
 		/// </summary>
 		public string RunCommandSuccessText { get; set; } = ShowOnDashboardAttribute.DefaultRunCommandSuccessText;
 
+		/// <summary>
+		/// The text shown to the user to confirm the command button click.
+		/// </summary>
 		public string RunCommandConfirmationText { get; set; } = ShowOnDashboardAttribute.DefaultRunCommandConfirmationText;
 
+		/// <summary>
+		/// The text shown on the command button.
+		/// </summary>
 		public string RunCommandDisplayText { get; set; } = ShowOnDashboardAttribute.DefaultRunCommandDisplayText;
 
 		public ShowOnDashboardAttribute(string name)
