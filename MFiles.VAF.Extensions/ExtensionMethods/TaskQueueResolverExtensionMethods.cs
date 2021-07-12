@@ -1,6 +1,7 @@
 ﻿using MFiles.VAF.AppTasks;
 using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Extensions.Dashboards;
+using MFilesAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,11 +16,13 @@ namespace MFiles.VAF.Extensions
 		/// Returns some dashboard content that shows the background operations and their current status.
 		/// </summary>
 		/// <returns>The dashboard content.</returns>
-		public static IEnumerable<DashboardListItem> GetDashboardContent(this TaskQueueResolver taskQueueResolver)
+		public static IEnumerable<DashboardListItem> GetDashboardContent(this TaskQueueResolver taskQueueResolver, TaskManager taskManager)
 		{
 			if (null == taskQueueResolver)
 				yield break;
-			//return this.BackgroundOperations.Values.OrderBy(o => o.DashboardSortOrder).AsDashboardListItems();
+			if (null == taskManager)
+				yield break;
+
 			foreach (var queue in taskQueueResolver.GetQueues())
 			{
 				// Get information about the queues.
@@ -30,7 +33,7 @@ namespace MFiles.VAF.Extensions
 				{
 					var attributes = fieldInfo.GetCustomAttributes(typeof(HideOnDashboardAttribute), true)
 						?? new HideOnDashboardAttribute[0];
-					if (attributes.Length == 0)
+					if (attributes.Length != 0)
 						continue;
 				}
 
@@ -45,7 +48,7 @@ namespace MFiles.VAF.Extensions
 					{
 						var attributes = methodInfo.GetCustomAttributes(typeof(HideOnDashboardAttribute), true)
 							?? new HideOnDashboardAttribute[0];
-						if (attributes.Length == 0)
+						if (attributes.Length != 0)
 							continue;
 					}
 
@@ -54,6 +57,14 @@ namespace MFiles.VAF.Extensions
 						.FirstOrDefault() as ShowOnDashboardAttribute;
 
 					// TODO: Replicate IEnumerableTaskQueueBackgroundOperationExtensionMethods.AsDashboardListItems
+					var htmlString = "<p>Runs on demand (does not repeat).<br /></p>";
+
+					// Get known executions (prior, running and future).
+					var executions = taskManager
+						.GetAllExecutions<TaskDirective>(queue, processor.Type)
+						.ToList();
+					var isRunning = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateInProgress);
+					var isScheduled = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateWaiting);
 
 					// Create the (basic) list item.
 					var listItem = new DashboardListItemWithNormalWhitespace()
@@ -61,11 +72,20 @@ namespace MFiles.VAF.Extensions
 						Title = showOnDashboardAttribute?.Name ?? processor.Type,
 						StatusSummary = new Configuration.Domain.DomainStatusSummary()
 						{
-							Label = false
+							Label = isRunning
 							? "Running"
 							: false ? "Scheduled" : "Stopped"
 						}
 					};
+
+					// Set the list item content.
+					listItem.InnerContent = new DashboardCustomContent
+					(
+						htmlString
+						+ executions?
+							.AsDashboardContent(taskManager.ServerId)?
+							.ToXmlString()
+					);
 
 					// Add the list item.
 					yield return listItem;

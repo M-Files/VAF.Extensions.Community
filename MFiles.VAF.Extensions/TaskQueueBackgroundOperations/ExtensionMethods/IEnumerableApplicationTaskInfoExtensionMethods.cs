@@ -21,12 +21,13 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="applicationTasks">The previous executions.</param>
 		/// <returns>The table.</returns>
-		public static IDashboardContent AsDashboardContent
+		public static IDashboardContent AsDashboardContent<TDirective>
 		(
-			this IEnumerable<TaskInfo<BackgroundOperationTaskDirective>> applicationTasks,
+			this IEnumerable<TaskInfo<TDirective>> applicationTasks,
 			string serverId,
 			int maximumRowsToShow = 40
 		)
+			where TDirective : TaskDirective
 		{
 			// Sanity.
 			if (null == applicationTasks || false == applicationTasks.Any())
@@ -48,7 +49,7 @@ namespace MFiles.VAF.Extensions
 				);
 			}
 
-			List<TaskInfo<BackgroundOperationTaskDirective>> executionsToShow;
+			List<TaskInfo<TDirective>> executionsToShow;
 			bool isFiltered = false;
 			if (list.Count <= maximumRowsToShow)
 				executionsToShow = list;
@@ -57,7 +58,7 @@ namespace MFiles.VAF.Extensions
 				isFiltered = true;
 
 				// Show the latest 20 errors, then the rest filled with non-errors.
-				executionsToShow = new List<TaskInfo<BackgroundOperationTaskDirective>>
+				executionsToShow = new List<TaskInfo<TDirective>>
 				(
 					list
 						.Where(e => e.State == MFTaskState.MFTaskStateFailed)
@@ -69,7 +70,13 @@ namespace MFiles.VAF.Extensions
 			// Add a row for each execution to show.
 			foreach (var execution in executionsToShow)
 			{
-				var internalDirective = execution.Directive?.GetParsedInternalDirective();
+				TaskDirective internalDirective = execution.Directive;
+				{
+					if (internalDirective is BackgroundOperationTaskDirective bgtd)
+					{
+						internalDirective = bgtd.GetParsedInternalDirective();
+					}
+				}
 				var directive = internalDirective as ITaskDirectiveWithDisplayName;
 				var displayName = string.IsNullOrWhiteSpace(directive?.DisplayName)
 					? execution.TaskId
