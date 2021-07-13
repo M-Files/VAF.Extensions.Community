@@ -16,6 +16,103 @@ namespace MFiles.VAF.Extensions
 		: TaskManager
 	{
 		/// <summary>
+		/// Cancels all future exeuctions of a given task type on a given queue.
+		/// </summary>
+		/// <param name="queueId">The queue ID.</param>
+		/// <param name="taskType">The task type ID (null or not provided means all tasks on the queue).</param>
+		/// <param name="includeCurrentlyExecuting">Whether to attempt to cancel executing tasks.</param>
+		/// <param name="vault">The vault reference to use.</param>
+		public void CancelAllFutureExecutions
+		(
+			string queueId,
+			string taskType = null,
+			bool includeCurrentlyExecuting = true,
+			Vault vault = null,
+			string remarks = null
+		)
+		{
+			this.CancelAllFutureExecutions<TaskDirective>(queueId, taskType, includeCurrentlyExecuting, vault, remarks);
+		}
+
+		/// <summary>
+		/// Cancels all future exeuctions of a given task type on a given queue.
+		/// </summary>
+		/// <typeparam name="TDirective">The type of the directive for this task type.</typeparam>
+		/// <param name="queueId">The queue ID.</param>
+		/// <param name="taskType">The task type ID (null or not provided means all tasks on the queue).</param>
+		/// <param name="includeCurrentlyExecuting">Whether to attempt to cancel executing tasks.</param>
+		/// <param name="vault">The vault reference to use.</param>
+		public void CancelAllFutureExecutions<TDirective>
+		(
+			string queueId,
+			string taskType = null,
+			bool includeCurrentlyExecuting = true,
+			Vault vault = null,
+			string remarks = null
+		)
+			where TDirective : TaskDirective
+		{
+			var tasks = this.GetPendingExecutions<TDirective>(queueId, taskType, includeCurrentlyExecuting);
+			foreach (var task in tasks)
+				this.CancelExecution(task, vault, remarks);
+		}
+
+		/// <summary>
+		/// Cancels a specific execution.
+		/// </summary>
+		/// <param name="task">The task to cancel.</param>
+		/// <param name="vault">The vault reference to cancel using.</param>
+		public void CancelExecution
+		(
+			TaskInfo<TaskDirective> task, 
+			Vault vault = null,
+			string remarks = null
+		)
+		{
+			this.CancelExecution<TaskDirective>(task, vault, remarks);
+		}
+
+		/// <summary>
+		/// Cancels a specific execution.
+		/// </summary>
+		/// <typeparam name="TDirective">The type of the directive for this task type.</typeparam>
+		/// <param name="task">The task to cancel.</param>
+		/// <param name="vault">The vault reference to cancel using.</param>
+		public void CancelExecution<TDirective>
+		(
+			TaskInfo<TDirective> task, 
+			Vault vault = null,
+			string remarks = null
+		)
+			where TDirective : TaskDirective
+		{
+			if (null == task)
+				return;
+
+			switch (task.State)
+			{
+				case MFTaskState.MFTaskStateInProgress:
+					this.CancelActiveTask
+					(
+						vault ?? this.Vault,
+						task.TaskId,
+						remarks
+					);
+					break;
+				case MFTaskState.MFTaskStateWaiting:
+					this.CancelWaitingTask
+					(
+						vault ?? this.Vault,
+						task.TaskId
+					);
+					break;
+				default:
+					// Cannot cancel ones in other states.
+					break;
+			}
+		}
+
+		/// <summary>
 		/// Returns executions of items on queue <paramref name="queueId"/>
 		/// with optional type of <paramref name="taskType"/> in state(s) <paramref name="taskStates"/>.
 		/// </summary>

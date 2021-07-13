@@ -12,6 +12,8 @@ using System.Linq;
 using MFiles.VAF.MultiserverMode;
 using MFiles.VAF.AppTasks;
 using MFiles.VAF.Common;
+using System.Reflection;
+using System.Collections;
 
 namespace MFiles.VAF.Extensions
 {
@@ -27,19 +29,8 @@ namespace MFiles.VAF.Extensions
 	{
 		private TaskQueueBackgroundOperationManager<TSecureConfiguration> taskQueueBackgroundOperationManager;
 
-		/// <summary>
-		/// The rebroadcast queue Id.
-		/// Populated during the first call to <see cref="GetRebroadcastQueueId"/>.
-		/// </summary>
-		protected string ConfigurationRebroadcastQueueId { get; private set; }
-
-		/// <summary>
-		/// The rebroadcast queue processor.
-		/// Populated during the first call to <see cref="GetRebroadcastQueueId"/>.
-		/// </summary>
-		protected AppTaskBatchProcessor ConfigurationRebroadcastTaskProcessor { get; private set; }
-
 		private object _lock = new object();
+
 		/// <summary>
 		/// The task queue background operation manager for this application.
 		/// </summary>
@@ -65,42 +56,6 @@ namespace MFiles.VAF.Extensions
 				}
 			}
 			private set => taskQueueBackgroundOperationManager = value;
-		}
-
-
-		/// <summary>
-		/// Task manager.
-		/// </summary>
-		public new TaskManagerEx TaskManager
-		{
-			get => base.TaskManager as TaskManagerEx;
-			protected set => base.TaskManager = value;
-		}
-
-		/// <summary>
-		/// Initializes the newer task manager, and regsiters all queues and processors
-		/// that have been discovered by the <see cref="TaskQueueResolver"/>.
-		/// Should be called after StartOperations(), before StartApplication().
-		/// </summary>
-		protected override void InitializeTaskManager()
-		{
-			// Report an error to the event log if queues were declared, but tasks aren't supported.
-			if (AppTasks.TaskManager.IsSupported(PermanentVault))
-			{
-				// Initialize the new task manager, and register the queues from the resolver.
-				this.TaskManager = new TaskManagerEx(
-						this.GetType().Namespace, this.PermanentVault, GetTransactionRunner());
-				this.TaskQueueResolver?.RegisterAll(this.TaskManager);
-				TaskStatusHelper.Attach(this.TaskManager);
-			}
-			else if (this.TaskQueueResolver != null && this.TaskQueueResolver.GetQueues().Length > 0)
-			{
-				// Report an error if task manager is not supported, but queues have been resolved.
-				// If someone tries to declare queues programmatically, the TaskManager should be null,
-				// and therefore throw its own errors.
-				SysUtils.ReportErrorToEventLog(
-						"The application requires support for tasks. Please upgrade to M-Files 20.4 or later.");
-			}
 		}
 	}
 }

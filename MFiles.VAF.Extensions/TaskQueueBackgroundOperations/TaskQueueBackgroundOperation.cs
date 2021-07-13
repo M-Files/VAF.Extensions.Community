@@ -131,7 +131,7 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// The text shown to the user as a popup when the background operation has been scheduled.
 		/// </summary>
-		public string RunCommandSuccessText { get; set; } = ShowOnDashboardAttribute.DefaultSuccessText;
+		public string RunCommandSuccessText { get; set; } = ShowOnDashboardAttribute.DefaultRunCommandSuccessText;
 
 		/// <summary>
 		/// Whether to show the run command in the dashboard.
@@ -157,8 +157,8 @@ namespace MFiles.VAF.Extensions
 		public CustomDomainCommand DashboardRunCommand { get; private set; }
 			= new CustomDomainCommand()
 			{
-				ConfirmMessage = ShowOnDashboardAttribute.DefaultConfirmationText,
-				DisplayName = ShowOnDashboardAttribute.DefaultDisplayText,
+				ConfirmMessage = ShowOnDashboardAttribute.DefaultRunCommandConfirmationText,
+				DisplayName = ShowOnDashboardAttribute.DefaultRunCommandDisplayText,
 				Blocking = true
 			};
 
@@ -387,38 +387,13 @@ namespace MFiles.VAF.Extensions
 			{
 				foreach (var task in this.GetPendingExecutions())
 				{
-					// Mark each task as superseded.
-					try
-					{
-						switch (task.State)
-						{
-							case MFTaskState.MFTaskStateInProgress:
-								this.BackgroundOperationManager.VaultApplication.TaskManager.CancelActiveTask
-								(
-									this.BackgroundOperationManager.VaultApplication.PermanentVault,
-									task.TaskId
-								);
-								break;
-							case MFTaskState.MFTaskStateWaiting:
-								this.BackgroundOperationManager.VaultApplication.TaskManager.CancelWaitingTask
-								(
-									this.BackgroundOperationManager.VaultApplication.PermanentVault, 
-									task.TaskId
-								);
-								break;
-							default:
-								// Cannot cancel ones in other states.
-								break;
-						}
-					}
-					catch (Exception e)
-					{
-						SysUtils.ReportErrorToEventLog
-						(
-							$"Exception cancelling task {task.TaskId} for background operation {this.Name} of type {TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId} on queue {this.BackgroundOperationManager.QueueId}.",
-							e
-						);
-					}
+					// Use the task manager to cancel it.
+					this.BackgroundOperationManager.VaultApplication.TaskManager.CancelExecution
+					(
+						task,
+						this.BackgroundOperationManager.VaultApplication.PermanentVault,
+						remarks
+					);
 				}
 			}
 			catch (Exception e)
