@@ -12,8 +12,7 @@ using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions
 {
-	public partial class TaskManagerEx
-		: TaskManager
+	public partial class TaskManagerEx<TConfiguration>
 	{
 		/// <summary>
 		/// Cancels all future exeuctions of a given task type on a given queue.

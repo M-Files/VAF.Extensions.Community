@@ -12,8 +12,7 @@ using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions
 {
-	public partial class TaskManagerEx
-		: TaskManager
+	public partial class TaskManagerEx<TConfiguration>
 	{
 		/// <summary>
 		/// Returns some dashboard content that shows the background operations and their current status.

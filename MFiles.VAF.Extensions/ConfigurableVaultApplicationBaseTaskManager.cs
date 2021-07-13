@@ -28,9 +28,9 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// Task manager.
 		/// </summary>
-		public new TaskManagerEx TaskManager
+		public new TaskManagerEx<TSecureConfiguration> TaskManager
 		{
-			get => base.TaskManager as TaskManagerEx;
+			get => base.TaskManager as TaskManagerEx<TSecureConfiguration>;
 			protected set => base.TaskManager = value;
 		}
 
@@ -45,8 +45,13 @@ namespace MFiles.VAF.Extensions
 			if (AppTasks.TaskManager.IsSupported(PermanentVault))
 			{
 				// Initialize the new task manager, and register the queues from the resolver.
-				this.TaskManager = new TaskManagerEx(
-						this.GetType().Namespace, this.PermanentVault, GetTransactionRunner());
+				this.TaskManager = new TaskManagerEx<TSecureConfiguration>
+				(
+					this,
+					this.GetType().Namespace,
+					this.PermanentVault,
+					GetTransactionRunner()
+				);
 				this.TaskQueueResolver?.RegisterAll(this.TaskManager);
 				TaskStatusHelper.Attach(this.TaskManager);
 			}

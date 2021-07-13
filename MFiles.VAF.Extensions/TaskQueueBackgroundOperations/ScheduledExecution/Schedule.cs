@@ -6,11 +6,15 @@ using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions.ScheduledExecution
 {
+	public interface IExecutionDateTimeProvider
+	{
+		DateTime? GetNextExecution(DateTime? after = null);
+	}
 	/// <summary>
 	/// Represents a schedule in which a job should be re-run.
 	/// </summary>
 	[DataContract]
-	public class Schedule
+	public class Schedule : IExecutionDateTimeProvider
 	{
 		/// <summary>
 		/// Whether the schedule is currently enabled or not.
