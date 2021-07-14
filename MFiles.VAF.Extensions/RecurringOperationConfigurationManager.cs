@@ -252,16 +252,36 @@ namespace MFiles.VAF.Extensions
 					continue;
 
 				// If it has the recurring operation configuration then we want it.
-				var recurringOperationConfigurationAttribute = f.GetCustomAttribute(typeof(RecurringOperationConfigurationAttributeBase), false)
-					as RecurringOperationConfigurationAttributeBase;
+				var recurringOperationConfigurationAttribute = f
+					.GetCustomAttributes(false)
+					.FirstOrDefault(a => a is IRecurringOperationConfigurationAttribute)
+					as IRecurringOperationConfigurationAttribute;
 				if (null != recurringOperationConfigurationAttribute)
 				{
-					// Validate the type.
-					if (!typeof(IRecurringOperation).IsAssignableFrom(f.FieldType))
+					// Validate the field type.
+					if (!recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldType.IsAssignableFrom(f.FieldType))
 					{
 						SysUtils.ReportToEventLog
 						(
-							$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not of type IRecurringOperation (actual: {f.FieldType.FullName})",
+							$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not of type {recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldType.FullName} (actual: {f.FieldType.FullName})",
+							System.Diagnostics.EventLogEntryType.Warning
+						);
+						continue;
+					}
+
+					// Get the value and deal with timespans.
+					var value = f.GetValue(input);
+					if (null == value)
+						continue;
+					if (value.GetType() == typeof(TimeSpan))
+						value = new WrappedTimeSpan((TimeSpan)value);
+
+					// Validate that the value is a recurring operation.
+					if (!typeof(IRecurringOperation).IsAssignableFrom(value.GetType()))
+					{
+						SysUtils.ReportToEventLog
+						(
+							$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not of type IRecurringOperation (actual: {value.GetType().FullName})",
 							System.Diagnostics.EventLogEntryType.Warning
 						);
 						continue;
@@ -274,7 +294,7 @@ namespace MFiles.VAF.Extensions
 						new Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>
 						(
 							recurringOperationConfigurationAttribute,
-							f.GetValue(input) as IRecurringOperation
+							value as IRecurringOperation
 						)
 					);
 				}
@@ -296,16 +316,36 @@ namespace MFiles.VAF.Extensions
 					continue;
 
 				// If it has the scheduled operation configuration then we want it.
-				var recurringOperationConfigurationAttribute = p.GetCustomAttribute(typeof(RecurringOperationConfigurationAttributeBase), false)
-					as RecurringOperationConfigurationAttributeBase;
+				var recurringOperationConfigurationAttribute = p
+					.GetCustomAttributes(false)
+					.FirstOrDefault(a => a is IRecurringOperationConfigurationAttribute)
+					as IRecurringOperationConfigurationAttribute;
 				if (null != recurringOperationConfigurationAttribute)
 				{
-					// Validate the type.
-					if (!typeof(IRecurringOperation).IsAssignableFrom(p.PropertyType))
+					// Validate the property type.
+					if (!recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldType.IsAssignableFrom(p.PropertyType))
 					{
 						SysUtils.ReportToEventLog
 						(
-							$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type IRecurringOperation (actual: {p.PropertyType.FullName})",
+							$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type {recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldType.FullName} (actual: {p.PropertyType.FullName})",
+							System.Diagnostics.EventLogEntryType.Warning
+						);
+						continue;
+					}
+
+					// Get the value and deal with timespans.
+					var value = p.GetValue(input);
+					if (null == value)
+						continue;
+					if (value.GetType() == typeof(TimeSpan))
+						value = new WrappedTimeSpan((TimeSpan)value);
+
+					// Validate the type.
+					if (!typeof(IRecurringOperation).IsAssignableFrom(value.GetType()))
+					{
+						SysUtils.ReportToEventLog
+						(
+							$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type IRecurringOperation (actual: {value.GetType().FullName})",
 							System.Diagnostics.EventLogEntryType.Warning
 						);
 						continue;
@@ -317,7 +357,7 @@ namespace MFiles.VAF.Extensions
 						new Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>
 						(
 							recurringOperationConfigurationAttribute,
-							p.GetValue(input) as IRecurringOperation
+							value as IRecurringOperation
 						)
 					);
 				}
@@ -329,6 +369,29 @@ namespace MFiles.VAF.Extensions
 					this.GetTaskProcessorConfiguration(input, p, out a);
 					schedules.AddRange(a);
 				}
+			}
+		}
+		internal class WrappedTimeSpan
+			: IRecurringOperation
+		{
+			public TimeSpan TimeSpan { get; set; }
+			public WrappedTimeSpan(TimeSpan timeSpan)
+			{
+				this.TimeSpan = timeSpan;
+			}
+			public static implicit operator TimeSpan(WrappedTimeSpan input)
+				=> input?.TimeSpan ?? TimeSpan.Zero;
+			public static implicit operator WrappedTimeSpan(TimeSpan input)
+				=> new WrappedTimeSpan(input);
+
+			public DateTime? GetNextExecution(DateTime? after = null)
+			{
+				return (after ?? DateTime.UtcNow).ToUniversalTime().Add(this.TimeSpan);
+			}
+
+			public string ToDashboardDisplayString()
+			{
+				return this.TimeSpan.ToDashboardDisplayString();
 			}
 		}
 	}

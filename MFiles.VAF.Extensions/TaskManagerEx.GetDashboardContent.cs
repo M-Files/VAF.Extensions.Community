@@ -3,6 +3,7 @@ using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Core;
 using MFiles.VAF.Extensions.Dashboards;
+using MFiles.VAF.Extensions.ScheduledExecution;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
@@ -63,8 +64,19 @@ namespace MFiles.VAF.Extensions
 						htmlString += new DashboardCustomContent($"<p><em>{System.Security.SecurityElement.Escape(showOnDashboardAttribute?.Description)}</em></p>").ToXmlString();
 					}
 
-					// TODO: Replicate IEnumerableTaskQueueBackgroundOperationExtensionMethods.AsDashboardListItems
-					htmlString += "<p>Runs on demand (does not repeat).<br /></p>";
+					// Does it have any configuration instructions?
+					IRecurringOperation recurringOperation = null;
+					if (this
+						.VaultApplication?
+						.RecurringOperationConfigurationManager?
+						.TryGetValue(queue, processor.Type, out recurringOperation) ?? false)
+					{
+						htmlString += recurringOperation.ToDashboardDisplayString();
+					}
+					else
+					{
+						htmlString += "<p>Runs on demand (does not repeat).<br /></p>";
+					}
 
 					// Get known executions (prior, running and future).
 					var executions = this

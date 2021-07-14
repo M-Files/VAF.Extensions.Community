@@ -85,31 +85,29 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
-		/// Converts <paramref name="timespan"/> to a string.
-		/// If <paramref name="timespan"/> is null or zero, returns "no timespan specified".
+		/// Converts <paramref name="timespan"/> to a string for display on a dashboard.
 		/// </summary>
 		/// <param name="timespan">The timespan to convert.</param>
 		/// <returns>A string in English describing the timespan.</returns>
-		internal static string ToIntervalDisplayString(this TimeSpan timespan)
+		internal static string ToDashboardDisplayString(this TimeSpan timespan)
 		{
-			return ((TimeSpan?)timespan).ToIntervalDisplayString();
+			return ((TimeSpan?)timespan).ToDashboardDisplayString();
 		}
 
 		/// <summary>
-		/// Converts <paramref name="timespan"/> to a string.
-		/// If <paramref name="timespan"/> is null or zero, returns "no timespan specified".
+		/// Converts <paramref name="timespan"/> to a string for display on a dashboard.
 		/// </summary>
 		/// <param name="timespan">The timespan to convert.</param>
 		/// <returns>A string in English describing the timespan.</returns>
-		internal static string ToIntervalDisplayString(this TimeSpan? timespan)
+		internal static string ToDashboardDisplayString(this TimeSpan? timespan)
 		{
 			// Sanity.
 			if (false == timespan.HasValue || timespan.Value <= TimeSpan.Zero)
-				return "no timespan specified";
+				return "<p>No timespan specified; does not repeat.<br /></p>";
 
 			// Seconds be easy.
 			if (timespan.Value <= TimeSpan.FromSeconds(120))
-				return $"every {(int)timespan.Value.TotalSeconds} seconds";
+				return $"<p>Runs every {(int)timespan.Value.TotalSeconds} seconds.<br /></p>";
 
 			// Build a text representation
 			var components = new List<string>();
@@ -123,7 +121,7 @@ namespace MFiles.VAF.Extensions
 				components.Add($"{timespan.Value.Seconds} second{(timespan.Value.Seconds != 1 ? "s" : "")}");
 
 			// Build a text representation
-			var output = "every ";
+			var output = "<p>Runs every ";
 			for (var i = 0; i < components.Count; i++)
 			{
 				if (i == 0)
@@ -139,21 +137,8 @@ namespace MFiles.VAF.Extensions
 					output += ", " + components[i];
 				}
 			}
-			return output;
+			return output + ".<br /></p>";
 		}
-
-		/// <summary>
-		/// Converts <paramref name="schedule"/> to a string.
-		/// If <paramref name="schedule"/> is null, returns "never", otherwise returns <see cref="Schedule.ToString"/>.
-		/// </summary>
-		/// <param name="schedule">The schedule to convert.</param>
-		/// <returns>A string in English describing the schedule.</returns>
-		internal static string ToDisplayString(this Schedule schedule)
-		{
-			return schedule?.ToString()
-				?? "never";
-		}
-
 
 
 		/// <summary>

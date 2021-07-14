@@ -47,23 +47,21 @@ namespace MFiles.VAF.Extensions
 				}
 
 				// Show when it should run.
-				htmlString += "<p>Runs ";
 				switch (bgo.RepeatType)
 				{
 					case TaskQueueBackgroundOperationRepeatType.NotRepeating:
-						htmlString += "on demand (does not repeat).<br />";
+						htmlString += "<p>Runs on demand (does not repeat).<br /></p>";
 						break;
 					case TaskQueueBackgroundOperationRepeatType.Interval:
-						htmlString += $"{bgo.Interval.ToIntervalDisplayString()}.<br />";
+						htmlString += bgo.Interval?.ToDashboardDisplayString();
 						break;
 					case TaskQueueBackgroundOperationRepeatType.Schedule:
-						htmlString += $"{bgo.Schedule.ToDisplayString()}";
+						htmlString += bgo.Schedule?.ToDashboardDisplayString();
 						break;
 					default:
-						htmlString = "<em>Unhandled: " + bgo.RepeatType + "</em><br />";
+						htmlString = "<p><em>Unhandled repeat type: " + bgo.RepeatType + "</em><br /></p>";
 						break;
 				}
-				htmlString += "</p>";
 
 				// Get known executions (prior, running and future).
 				var executions = bgo

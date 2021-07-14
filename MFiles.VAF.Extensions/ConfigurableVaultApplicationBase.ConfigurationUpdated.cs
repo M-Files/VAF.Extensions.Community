@@ -21,10 +21,10 @@ namespace MFiles.VAF.Extensions
 			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(this.Configuration);
 		}
 
-		public override void Initialize(Vault vaultSrc)
+		public override void StartOperations(Vault vaultPersistent)
 		{
 			// Initialise the application.
-			base.Initialize(vaultSrc);
+			base.StartOperations(vaultPersistent);
 
 			// Ensure that our recurring configuration is updated.
 			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(this.Configuration);

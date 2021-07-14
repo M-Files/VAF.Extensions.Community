@@ -1,15 +1,16 @@
 ﻿// ReSharper disable once CheckNamespace
+using MFiles.VAF.Configuration;
 using System;
 
 namespace MFiles.VAF.Extensions
 {
 	/// <summary>
 	/// Defines that the following property or field controls how a task processor should recur.
-	/// The property or field that follows should be a <see cref="ScheduledExecution.Schedule"/>.
+	/// The property or field that follows should be a <see cref="TimeSpan"/>.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
-	public class ScheduledOperationConfigurationAttribute
-		: Attribute, IRecurringOperationConfigurationAttribute
+	public class RecurringOperationConfigurationAttribute
+		: JsonConfEditorAttribute, IRecurringOperationConfigurationAttribute
 	{
 		/// <inheritdoc />
 		public string QueueID { get; set; }
@@ -20,15 +21,16 @@ namespace MFiles.VAF.Extensions
 		/// <inheritdoc />
 		public Type ExpectedPropertyOrFieldType { get; set; }
 
-		public ScheduledOperationConfigurationAttribute
+		public RecurringOperationConfigurationAttribute
 		(
 			string queueId,
 			string taskType
 		)
 		{
+			this.TypeEditor = "time"; // These should be times.
 			this.QueueID = queueId;
 			this.TaskType = taskType;
-			this.ExpectedPropertyOrFieldType = typeof(ScheduledExecution.Schedule);
+			this.ExpectedPropertyOrFieldType = typeof(TimeSpan);
 		}
 	}
 }
