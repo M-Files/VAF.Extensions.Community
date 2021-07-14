@@ -64,5 +64,33 @@ namespace MFiles.VAF.Extensions
 						"The application requires support for tasks. Please upgrade to M-Files 20.4 or later.");
 			}
 		}
+
+		/// <inheritdoc />
+		protected override void UninitializeApplication(Vault vault)
+		{
+			// For all queues/task-types that are running on a schedule/interval, cancel them now.
+			if (null != this.RecurringOperationConfigurationManager)
+			{
+				foreach (var key in this.RecurringOperationConfigurationManager.Keys)
+				{
+					try
+					{
+						this.TaskManager.CancelAllFutureExecutions(key.QueueID, key.TaskType);
+					}
+					catch (Exception e)
+					{
+						SysUtils.ReportErrorToEventLog
+						(
+							$"Could not cancel future executions of task type {key.TaskType} on queue {key.QueueID}.",
+							e
+						);
+					}
+				}
+				this.RecurringOperationConfigurationManager.Clear();
+			}
+
+			// Call the base implementation.
+			base.UninitializeApplication(vault);
+		}
 	}
 }
