@@ -16,6 +16,9 @@ namespace MFiles.VAF.Extensions
 		: TaskManager
 		where TConfiguration : class, new()
 	{
+		/// <summary>
+		/// The vault application used to create this task manager.
+		/// </summary>
 		protected ConfigurableVaultApplicationBase<TConfiguration> VaultApplication { get; private set; }
 
 		public TaskManagerEx
@@ -41,6 +44,7 @@ namespace MFiles.VAF.Extensions
 			if (null == e.Queues || e.Queues.Count == 0)
 				return;
 
+			// When the job is finished, re-schedule.
 			switch (e.EventType)
 			{
 				case TaskManagerEventType.TaskJobFinished:
@@ -51,10 +55,15 @@ namespace MFiles.VAF.Extensions
 							// Re-schedule.
 							foreach (var t in e.Tasks)
 							{
-								// Can we get a next execution date?
-								var nextExecutionDate = this.VaultApplication.GetNextTaskProcessorExecution(t.QueueID, t.TaskType);
+								// Can we get a next execution date for this task?
+								var nextExecutionDate = this
+									.VaultApplication?
+									.RecurringOperationConfiguration?
+									.GetNextTaskProcessorExecution(t.QueueID, t.TaskType);
 								if (false == nextExecutionDate.HasValue)
 									continue;
+
+								// Schedule.
 								this.AddTask(this.Vault, t.QueueID, t.TaskType, activationTime: nextExecutionDate);
 							}
 							break;

@@ -18,29 +18,6 @@ using MFiles.VAF.Extensions.ScheduledExecution;
 
 namespace MFiles.VAF.Extensions
 {
-	public class TaskProcessingScheduleConfiguration
-		: Dictionary<IScheduledConfiguration, IExecutionDateTimeProvider>
-	{
-		/// <summary>
-		/// Attempts to get the configured provider of how to repeat the task processing.
-		/// </summary>
-		/// <param name="queueId">The queue ID</param>
-		/// <param name="taskType">The task type ID</param>
-		/// <param name="provider">The configured provider, if available.</param>
-		/// <returns><see langword="true"/> if the provider is available, <see langword="false"/> otherwise.</returns>
-		public bool TryGetValue(string queueId, string taskType, out IExecutionDateTimeProvider provider)
-		{
-			var key = this.Keys.FirstOrDefault(c => c.QueueID == queueId && c.TaskType == taskType);
-			if (null == key)
-			{
-				provider = null;
-				return false;
-			}
-			provider = this[key];
-			return true;
-		}
-	}
-
 	/// <summary>
 	/// A base class that automatically implements the pattern required for broadcasting
 	/// configuration changes to other servers.
@@ -55,34 +32,20 @@ namespace MFiles.VAF.Extensions
 		/// Contains information about VAF configuration that
 		/// control when task processing repeats.
 		/// </summary>
-		protected TaskProcessingScheduleConfiguration TaskProcessingScheduleConfiguration { get; }
-			= new TaskProcessingScheduleConfiguration();
-
-		/// <summary>
-		/// Gets the next time that the task processor should run,
-		/// if a repeating configuration is available.
-		/// </summary>
-		/// <param name="queueId">The queue ID</param>
-		/// <param name="taskType">The task type ID</param>
-		/// <returns>The datetime it should run, or null if not available.</returns>
-		public DateTime? GetNextTaskProcessorExecution(string queueId, string taskType, DateTime? after = null)
-		{
-			return this.TaskProcessingScheduleConfiguration.TryGetValue(queueId, taskType, out IExecutionDateTimeProvider provider)
-				? provider.GetNextExecution(after)
-				: null;
-		}
+		public RecurringOperationConfiguration RecurringOperationConfiguration { get; }
+			= new RecurringOperationConfiguration();
 
 		/// <summary>
 		/// Reads <see cref="ConfigurableVaultApplicationBase{TSecureConfiguration}.Configuration"/>
-		/// to populate <see cref="TaskProcessingScheduleConfiguration"/>
+		/// to populate <see cref="RecurringOperationConfiguration"/>
 		/// </summary>
 		protected virtual void PopulateTaskProcessingScheduleConfiguration()
 		{
 			// Remove anything we have configured.
-			this.TaskProcessingScheduleConfiguration.Clear();
+			this.RecurringOperationConfiguration.Clear();
 
 			// Attempt to find any scheduled operation configuration.
-			var schedules = new List<Tuple<IScheduledConfiguration, ScheduledExecution.Schedule>>();
+			var schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, ScheduledExecution.Schedule>>();
 			this.GetTaskProcessorConfiguration(this.Configuration, out schedules);
 
 			// Can weapply a schedule to something?
@@ -138,7 +101,7 @@ namespace MFiles.VAF.Extensions
 						continue;
 
 					// Add it to the dictionary.
-					this.TaskProcessingScheduleConfiguration.Add
+					this.RecurringOperationConfiguration.Add
 					(
 						tuple.Item1,
 						tuple.Item2
@@ -177,11 +140,11 @@ namespace MFiles.VAF.Extensions
 		(
 			object input,
 			FieldInfo fieldInfo,
-			out List<Tuple<IScheduledConfiguration, ScheduledExecution.Schedule>> schedules,
+			out List<Tuple<IRecurringOperationConfigurationAttribute, ScheduledExecution.Schedule>> schedules,
 			bool recurse = true
 		)
 		{
-			schedules = new List<Tuple<IScheduledConfiguration, ScheduledExecution.Schedule>>();
+			schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, ScheduledExecution.Schedule>>();
 			if (null == input)
 				return;
 
@@ -193,7 +156,7 @@ namespace MFiles.VAF.Extensions
 			{
 				foreach (var item in (IEnumerable)value)
 				{
-					var a = new List<Tuple<IScheduledConfiguration, ScheduledExecution.Schedule>>();
+					var a = new List<Tuple<IRecurringOperationConfigurationAttribute, ScheduledExecution.Schedule>>();
 					this.GetTaskProcessorConfiguration(item, out a);
 					schedules.AddRange(a);
 				}
@@ -217,11 +180,11 @@ namespace MFiles.VAF.Extensions
 		(
 			object input,
 			PropertyInfo propertyInfo,
-			out List<Tuple<IScheduledConfiguration, ScheduledExecution.Schedule>> schedules,
+			out List<Tuple<IRecurringOperationConfigurationAttribute, ScheduledExecution.Schedule>> schedules,
 			bool recurse = true
 		)
 		{
-			schedules = new List<Tuple<IScheduledConfiguration, ScheduledExecution.Schedule>>();
+			schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, ScheduledExecution.Schedule>>();
 			if (null == input)
 				return;
 
@@ -233,7 +196,7 @@ namespace MFiles.VAF.Extensions
 			{
 				foreach (var item in (IEnumerable)value)
 				{
-					var a = new List<Tuple<IScheduledConfiguration, ScheduledExecution.Schedule>>();
+					var a = new List<Tuple<IRecurringOperationConfigurationAttribute, ScheduledExecution.Schedule>>();
 					this.GetTaskProcessorConfiguration(item, out a);
 					schedules.AddRange(a);
 				}
@@ -255,11 +218,11 @@ namespace MFiles.VAF.Extensions
 		protected virtual void GetTaskProcessorConfiguration
 		(
 			object input, 
-			out List<Tuple<IScheduledConfiguration, ScheduledExecution.Schedule>> schedules,
+			out List<Tuple<IRecurringOperationConfigurationAttribute, ScheduledExecution.Schedule>> schedules,
 			bool recurse = true
 		)
 		{
-			schedules = new List<Tuple<IScheduledConfiguration, ScheduledExecution.Schedule>>();
+			schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, ScheduledExecution.Schedule>>();
 			if (null == input)
 				return;
 
@@ -290,7 +253,7 @@ namespace MFiles.VAF.Extensions
 					schedules
 					.Add
 					(
-						new Tuple<IScheduledConfiguration, ScheduledExecution.Schedule>
+						new Tuple<IRecurringOperationConfigurationAttribute, ScheduledExecution.Schedule>
 						(
 							scheduledOperationConfigurationAttribute,
 							f.GetValue(input) as ScheduledExecution.Schedule
@@ -303,7 +266,7 @@ namespace MFiles.VAF.Extensions
 				// Can we recurse?
 				if (recurse)
 				{
-					var a = new List<Tuple<IScheduledConfiguration, ScheduledExecution.Schedule>>();
+					var a = new List<Tuple<IRecurringOperationConfigurationAttribute, ScheduledExecution.Schedule>>();
 					this.GetTaskProcessorConfiguration(input, f, out a);
 					schedules.AddRange(a);
 				}
@@ -335,7 +298,7 @@ namespace MFiles.VAF.Extensions
 					// Add the schedule to the collection.
 					schedules.Add
 					(
-						new Tuple<IScheduledConfiguration, ScheduledExecution.Schedule>
+						new Tuple<IRecurringOperationConfigurationAttribute, ScheduledExecution.Schedule>
 						(
 							scheduledOperationConfigurationAttribute,
 							p.GetValue(input) as ScheduledExecution.Schedule
@@ -348,7 +311,7 @@ namespace MFiles.VAF.Extensions
 				// Can we recurse?
 				if (recurse)
 				{
-					var a = new List<Tuple<IScheduledConfiguration, ScheduledExecution.Schedule>>();
+					var a = new List<Tuple<IRecurringOperationConfigurationAttribute, ScheduledExecution.Schedule>>();
 					this.GetTaskProcessorConfiguration(input, p, out a);
 					schedules.AddRange(a);
 				}
