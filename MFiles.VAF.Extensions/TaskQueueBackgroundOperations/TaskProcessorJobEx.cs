@@ -1,4 +1,5 @@
-﻿using MFiles.VAF.MultiserverMode;
+﻿using MFiles.VAF.Extensions.ExtensionMethods;
+using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
 using Newtonsoft.Json;
 using System;
@@ -11,13 +12,14 @@ namespace MFiles.VAF.Extensions
 	/// <see cref="TaskProcessorJobEx.TaskQueueBackgroundOperationManager"/> and <see cref="TaskProcessorJobEx.TaskProcessor"/>.
 	/// Also provides helper methods for setting typed task information for rendering onto dashboards.
 	/// </summary>
-	public class TaskProcessorJobEx<TSecureConfiguration>
+	public class TaskProcessorJobEx<TDirective, TSecureConfiguration>
+		where TDirective : AppTasks.TaskDirective
 		where TSecureConfiguration : class, new()
 	{
 		/// <summary>
 		/// The task processor job itself.
 		/// </summary>
-		public TaskProcessorJob Job { get; set; }
+		public AppTasks.ITaskProcessingJob<TDirective> Job { get; set; }
 
 		/// <summary>
 		/// The vault associated with the job.
@@ -30,27 +32,22 @@ namespace MFiles.VAF.Extensions
 		public TaskQueueBackgroundOperationManager<TSecureConfiguration> TaskQueueBackgroundOperationManager { get; set; }
 
 		/// <summary>
-		/// The task processor processing the job (from <see cref="TaskQueueBackgroundOperationManager.TaskProcessor"/>.
-		/// </summary>
-		public AppTaskBatchProcessor TaskProcessor { get => this.TaskQueueBackgroundOperationManager?.TaskProcessor; }
-
-		/// <summary>
 		/// Updates the task information for the job.
 		/// See <see cref="TaskProcessorBase{TSettings}.UpdateTaskInfo(TaskProcessorJob, MFTaskState, string, bool)"/>.
 		/// </summary>
 		/// <param name="taskState">See <see cref="TaskProcessorBase{TSettings}.UpdateTaskInfo(TaskProcessorJob, MFTaskState, string, bool)"/></param>
 		/// <param name="remarks">See <see cref="TaskProcessorBase{TSettings}.UpdateTaskInfo(TaskProcessorJob, MFTaskState, string, bool)"/></param>
 		/// <param name="appendRemarks">See <see cref="TaskProcessorBase{TSettings}.UpdateTaskInfo(TaskProcessorJob, MFTaskState, string, bool)"/></param>
-		public void UpdateTaskInfo(
+		public void Update(
 			MFTaskState taskState,
 			string remarks
 		)
 		{
-			var info = this.RetrieveTaskInfo() ?? new TaskInformation();
+			var info = this.GetTaskInfo() ?? new TaskInformation();
 			info.CurrentTaskState = taskState;
 			info.StatusDetails = remarks;
 			info.LastActivity = DateTime.Now;
-			this.UpdateTaskInfo(info);
+			this.Update(info);
 		}
 
 		/// <summary>
@@ -59,12 +56,12 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="remarks">See <see cref="TaskProcessorBase{TSettings}.UpdateTaskInfo(TaskProcessorJob, MFTaskState, string, bool)"/></param>
 		/// <param name="appendRemarks">See <see cref="TaskProcessorBase{TSettings}.UpdateTaskInfo(TaskProcessorJob, MFTaskState, string, bool)"/></param>
-		public void UpdateTaskInfo
+		public void Update
 			(
 			string remarks
 			)
 		{
-			this.UpdateTaskInfo(MFTaskState.MFTaskStateInProgress, remarks);
+			this.Update(MFTaskState.MFTaskStateInProgress, remarks);
 		}
 
 		/// <summary>
@@ -72,9 +69,9 @@ namespace MFiles.VAF.Extensions
 		/// Serialises <paramref name="status"/> into the "remarks" argument on <see cref="TaskProcessorBase{TSettings}.UpdateTaskInfo(TaskProcessorJob, MFTaskState, string, bool)"/>.
 		/// </summary>
 		/// <param name="status">The latest status.</param>
-		public void UpdateTaskInfo(TaskInformation status)
+		public void Update(TaskInformation status)
 		{
-			this.UpdateTaskInfo<TaskInformation>(status);
+			this.Update<TaskInformation>(status);
 		}
 
 		/// <summary>
@@ -82,12 +79,12 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="percentageComplete">How far complete this job is in processing, if known.</param>
 		/// <param name="statusDetails">Any additional details on the task status.</param>
-		public void UpdateTaskInfo(int? percentageComplete, string statusDetails)
+		public void Update(int? percentageComplete, string statusDetails)
 		{
-			var info = this.RetrieveTaskInfo() ?? new TaskInformation();
+			var info = this.GetTaskInfo() ?? new TaskInformation();
 			info.PercentageComplete = percentageComplete;
 			info.StatusDetails = statusDetails;
-			this.UpdateTaskInfo(info);
+			this.Update(info);
 		}
 
 		/// <summary>
@@ -96,11 +93,11 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <typeparam name="TTaskInformation">The type of the status.</typeparam>
 		/// <param name="status">The latest status.</param>
-		public void UpdateTaskInfo<TTaskInformation>(TTaskInformation status )
+		public void Update<TTaskInformation>(TTaskInformation status )
 			where TTaskInformation : TaskInformation
 		{
 			// Copy data from the current info.
-			var info = this.RetrieveTaskInfo();
+			var info = this.GetTaskInfo();
 			if (null != info && null != status)
 			{
 				status.Started = info.Started;
@@ -113,14 +110,8 @@ namespace MFiles.VAF.Extensions
 				status.LastActivity = DateTime.Now;
 			}
 
-			// Update the task information.
-			this.TaskProcessor.UpdateTaskInfo
-			(
-				this.Job,
-				MFTaskState.MFTaskStateInProgress,
-				null == status ? "" : JsonConvert.SerializeObject(status),
-				false
-			);
+			// Use the other overload.
+			this.Job.Update(status);
 		}
 
 		/// <summary>
@@ -128,29 +119,12 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <typeparam name="TTaskInformation">The type of the status.</typeparam>
 		/// <returns>The status, or default if not found.</returns>
-		public TTaskInformation RetrieveTaskInfo<TTaskInformation>()
-			where TTaskInformation : TaskInformation
+		public TaskInformation GetTaskInfo()
 		{
-			return this.Job?.Data?.Value?.ToApplicationTaskInfo()?
-				.RetrieveTaskInfo<TTaskInformation>(TaskQueueBackgroundOperationManager<TSecureConfiguration>.CurrentServer.ServerID);
-		}
-
-		/// <summary>
-		/// Retrieves the latest task information for the job.
-		/// </summary>
-		/// <returns>The status, or default if not found.</returns>
-		public TaskInformation RetrieveTaskInfo()
-		{
-			return this.RetrieveTaskInfo<TaskInformation>();
-		}
-
-		/// <summary>
-		/// Converts the <see cref="TaskProcessorJobEx"/> to a simple <see cref="TaskProcessorJob"/>.
-		/// </summary>
-		/// <param name="input"></param>
-		public static implicit operator TaskProcessorJob(TaskProcessorJobEx<TSecureConfiguration> input)
-		{
-			return input?.Job;
+			var status = this.Job?.GetStatus();
+			if (null == status?.Data)
+				return null;
+			return new TaskInformation(this.Job.GetStatus()?.Data);
 		}
 	}
 }

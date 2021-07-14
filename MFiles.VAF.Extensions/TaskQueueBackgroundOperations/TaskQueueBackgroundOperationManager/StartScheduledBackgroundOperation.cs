@@ -2,6 +2,7 @@
 using MFiles.VAF.Extensions.ScheduledExecution;
 using MFiles.VAF;
 using MFiles.VAF.MultiserverMode;
+using MFiles.VAF.AppTasks;
 
 namespace MFiles.VAF.Extensions
 {
@@ -42,7 +43,7 @@ namespace MFiles.VAF.Extensions
 		(
 			string name,
 			Schedule schedule,
-			Action<TaskProcessorJobEx<TSecureConfiguration>> method
+			Action<TaskProcessorJobEx<BackgroundOperationTaskDirective, TSecureConfiguration>> method
 		)
 		{
 			return this.StartScheduledBackgroundOperation
@@ -66,11 +67,11 @@ namespace MFiles.VAF.Extensions
 		(
 			string name,
 			Schedule schedule,
-			Action<TaskProcessorJobEx<TSecureConfiguration>, TaskQueueDirective> method,
-			TaskQueueDirective directive = null
+			Action<TaskProcessorJobEx<BackgroundOperationTaskDirective, TSecureConfiguration>, TaskDirective> method,
+			TaskDirective directive = null
 		)
 		{
-			return this.StartScheduledBackgroundOperation<TaskQueueDirective>
+			return this.StartScheduledBackgroundOperation<TaskDirective>
 			(
 				name,
 				schedule,
@@ -92,10 +93,10 @@ namespace MFiles.VAF.Extensions
 		(
 			string name,
 			Schedule schedule,
-			Action<TaskProcessorJobEx<TSecureConfiguration>, TDirective> method,
+			Action<TaskProcessorJobEx<BackgroundOperationTaskDirective, TSecureConfiguration>, TDirective> method,
 			TDirective directive = null
 		)
-			where TDirective : TaskQueueDirective
+			where TDirective : TaskDirective
 		{
 			// Create the background operation.
 			var backgroundOperation = this.CreateBackgroundOperation

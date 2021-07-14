@@ -8,6 +8,8 @@ using MFiles.VAF.Common.ApplicationTaskQueue;
 using MFiles.VAF.MultiserverMode;
 using Newtonsoft.Json;
 using MFiles.VAF.Core;
+using MFiles.VAF.Extensions.ExtensionMethods;
+using MFiles.VAF.AppTasks;
 
 namespace MFiles.VAF.Extensions
 {
@@ -43,7 +45,7 @@ namespace MFiles.VAF.Extensions
 		/// Ensures that <see cref="CurrentServer"/> is set correctly.
 		/// </summary>
 		/// <param name="vaultApplication">The vault application where this code is running.</param>
-		internal static void SetCurrentServer(LegacyConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication)
+		internal static void SetCurrentServer(ConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication)
 		{
 			// Sanity.
 			if (null == vaultApplication)
@@ -71,7 +73,7 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// The vault application that contains this background operation manager.
 		/// </summary>
-		public LegacyConfigurableVaultApplicationBase<TSecureConfiguration> VaultApplication { get; private set; }
+		public ConfigurableVaultApplicationBase<TSecureConfiguration> VaultApplication { get; private set; }
 
 		/// <summary>
 		/// The cancellation token source, if cancellation should be supported.
@@ -81,7 +83,7 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// The task processor for this queue.
 		/// </summary>
-		public AppTaskBatchProcessor TaskProcessor { get; private set; }
+		public AppTasks.ITaskQueueProcessor TaskQueueProcessor { get; private set; }
 
 		/// <summary>
 		/// Creates a background operation manager for a given queue.
@@ -91,7 +93,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="cancellationTokenSource">The cancellation token source, if cancellation should be supported.</param>
 		public TaskQueueBackgroundOperationManager
 		(
-			LegacyConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication,
+			ConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication,
 			CancellationTokenSource cancellationTokenSource = default
 		) : this
 		(
@@ -110,7 +112,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="cancellationTokenSource">The cancellation token source, if cancellation should be supported.</param>
 		public TaskQueueBackgroundOperationManager
 		(
-			LegacyConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication,
+			ConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication,
 			string queueId,
 			CancellationTokenSource cancellationTokenSource = default
 		)
@@ -124,109 +126,85 @@ namespace MFiles.VAF.Extensions
 			this.VaultApplication = vaultApplication ?? throw new ArgumentNullException(nameof(vaultApplication));
 			this.QueueId = queueId;
 
-			// Set up the task processor
-			this.TaskProcessor = this
+			// Set up the task processor.
+			this.TaskProcessor = new AppTasks.TaskProcessor<BackgroundOperationTaskDirective>
+			(
+				TaskQueueBackgroundOperation<BackgroundOperationTaskDirective, TSecureConfiguration>.TaskTypeId,
+				new AppTasks.TaskProcessor.Handler<BackgroundOperationTaskDirective>(ProcessJobHandler),
+				transactionMode: AppTasks.TransactionMode.Unsafe
+			);
+
+			// Set up the task queue processor.
+			this.TaskQueueProcessor = this
 				.VaultApplication
-				.CreateConcurrentTaskProcessor
+				.TaskManager
+				.RegisterQueue
 				(
 					this.QueueId,
-					new Dictionary<string, TaskProcessorJobHandler>
-					{
-						{ TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId, this.ProcessJobHandler }
-					},
-					cancellationTokenSource: cancellationTokenSource == null
-						? new CancellationTokenSource()
-						: CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token),
-					enableAutomaticTaskUpdates: false
+					new[] { this.TaskProcessor }
 				);
 
 			// Ensure we have a current server.
 			SetCurrentServer(vaultApplication);
-
-			// Register the task queues.
-			this.TaskProcessor.RegisterTaskQueues();
 		}
+
+		protected AppTasks.TaskProcessor TaskProcessor { get; }
 
 		/// <summary>
 		/// Handles when a job from a task requires processing.
 		/// Note that all tasks/jobs in the queue use the same task type ID,
-		/// so the directive <see cref="BackgroundOperationTaskQueueDirective.BackgroundOperationName"/>
+		/// so the directive <see cref="BackgroundOperationTaskDirective.BackgroundOperationName"/>
 		/// is used to identify which tasks should be executed by
 		/// which background operation.
 		/// </summary>
 		/// <param name="job">The job to process.</param>
-		protected virtual void ProcessJobHandler(TaskProcessorJob job)
+		protected virtual void ProcessJobHandler(AppTasks.ITaskProcessingJob<BackgroundOperationTaskDirective> job)
 		{
 			// Sanity.
 			if(null == job)
 				return;
 
 			// Ensure cancellation has not been requested.
-			job.ThrowIfCancellationRequested();
+			job.ThrowIfTaskCancellationRequested();
 
 			// What is the current state?
-			var state = job.AppTaskState;
-
-			// Update the progress of the task in the task queue.
-			try
-			{
-				this.TaskProcessor.UpdateTaskAsAssignedToProcessor(job);
-			}
-			catch
-			{
-				// Could not mark the task as assigned to a processor.
-				SysUtils.ReportToEventLog
-				(
-					$"Could not mark task {job.AppTaskId} as assigned to a processor (queue id: {job.AppTaskQueueId}, state: {state}).",
-					System.Diagnostics.EventLogEntryType.Warning
-				);
-				return;
-			}
+			var state = job.GetStatus();
 
 			// Sanity.
-			if (null == job.Data?.Value)
+			if (null == job.Directive)
 			{
 				// This is an issue.  We have no way to decide what background operation should run it.  Die.
 				SysUtils.ReportErrorToEventLog
 				(
-					$"Job loaded with no application task (queue: {job.AppTaskQueueId}, task id: {job.AppTaskId})."
+					$"Job loaded with no directive (queue: {this.QueueId}, task type: {job.TaskInfo.TaskType}, task id: {job.TaskInfo.TaskID})."
 				);
 				return;
 			}
 
-			// Deserialize the background directive.
-			var backgroundOperationDirective = job.GetTaskQueueDirective<BackgroundOperationTaskQueueDirective>();
-			if (null == backgroundOperationDirective)
+			// Check that we know the job this was associated with.
+			if (string.IsNullOrWhiteSpace(job.Directive.BackgroundOperationName))
 			{
 				// This is an issue.  We have no way to decide what background operation should run it.  Die.
 				SysUtils.ReportErrorToEventLog
 				(
-					$"Job loaded with no background operation name loaded (queue: {job.AppTaskQueueId}, task id: {job.AppTaskId})."
+					$"Job loaded with no background operation name loaded (queue: {this.QueueId}, task type: {job.TaskInfo.TaskType}, task id: {job.TaskInfo.TaskID})."
 				);
 				return;
 			}
 
 			// If we have a directive then extract it.
-			var dir = backgroundOperationDirective.GetParsedInternalDirective();
-
-			// If it is a broadcast directive, then was it generated on the same server?
-			// If so then ignore.
-			if (dir is BroadcastDirective broadcastDirective)
-			{
-				if (broadcastDirective.GeneratedFromGuid == CurrentServer.ServerID)
-					return;
-			}
+			var dir = job.Directive.GetParsedInternalDirective();
 
 			// Find the background operation to run.
 			TaskQueueBackgroundOperation<TSecureConfiguration> bo = null;
 			lock (_lock)
 			{
-				if (false == this.BackgroundOperations.TryGetValue(backgroundOperationDirective.BackgroundOperationName, out bo))
+				if (false == this.BackgroundOperations.TryGetValue(job.Directive.BackgroundOperationName, out bo))
 				{
 					// We have no registered background operation to handle the callback.
 					SysUtils.ReportErrorToEventLog
 					(
-						$"No background operation found with name {backgroundOperationDirective.BackgroundOperationName}(queue: {job.AppTaskQueueId}, task id: {job.AppTaskId})."
+						$"No background operation found with name {job.Directive.BackgroundOperationName} (queue: {this.QueueId}, task type: {job.TaskInfo.TaskType}, task id: {job.TaskInfo.TaskID})."
 					);
 					return;
 				}
@@ -256,7 +234,7 @@ namespace MFiles.VAF.Extensions
 				// Bind to the completed event ( called always ) of the job.
 				// That way even if the job is canceled, fails, or finishes successfully
 				// ...we always schedule the next run.
-				job.ProcessingCompleted += (s, op)
+				job.Completed += (s, op)
 					=>
 					{
 						// Ensure that if two threads both run this at once we don't end up with a race condition.
@@ -277,26 +255,19 @@ namespace MFiles.VAF.Extensions
 			}
 
 			// Bind to the life-cycle events.
-			job.ProcessingCompleted += (sender, op) => CompleteJob(job, MFTaskState.MFTaskStateCompleted);
-			job.CancellationRequested += (sender, op) => CompleteJob(job, MFTaskState.MFTaskStateCanceled);
-			job.ProcessingFailed += (sender, args) => CompleteJob(job, MFTaskState.MFTaskStateFailed, args.Exception);
+			job.Succeeded += (sender, op) => CompleteJob(job, MFTaskState.MFTaskStateCompleted);
+			job.Failed += (sender, args) => CompleteJob(job, MFTaskState.MFTaskStateFailed, args.Exception);
 
 			// Perform the action.
 			// Mark it as started.
-			job.Data.Value = this.TaskProcessor.UpdateTaskInfo
+			job.Update
 			(
-				job.Data?.Value,
-				MFTaskState.MFTaskStateInProgress,
-				JsonConvert.SerializeObject
-				(
-					new TaskInformation()
-					{
-						Started = DateTime.Now,
-						LastActivity = DateTime.Now,
-						CurrentTaskState = MFTaskState.MFTaskStateInProgress
-					}
-				),
-				false
+				new TaskInformation()
+				{
+					Started = DateTime.Now,
+					LastActivity = DateTime.Now,
+					CurrentTaskState = MFTaskState.MFTaskStateInProgress
+				}
 			);
 
 			// NOTE: this should not have any error handling around it here unless it re-throws the error
@@ -305,7 +276,7 @@ namespace MFiles.VAF.Extensions
 			bo.RunJob
 			(
 				// The TaskProcessorJobEx class wraps the job and allows easy updates.
-				new TaskProcessorJobEx<TSecureConfiguration>()
+				new TaskProcessorJobEx<BackgroundOperationTaskDirective, TSecureConfiguration>()
 				{
 					Job = job,
 					TaskQueueBackgroundOperationManager = this
@@ -320,35 +291,32 @@ namespace MFiles.VAF.Extensions
 		/// <param name="job">The job to update.</param>
 		/// <param name="targetState">The final completed state.</param>
 		/// <param name="exception">The exception, if the state is failed.</param>
-		protected void CompleteJob(TaskProcessorJob job, MFTaskState targetState, Exception exception = null)
+		protected void CompleteJob
+		(
+			AppTasks.ITaskProcessingJob<BackgroundOperationTaskDirective> job, 
+			MFTaskState targetState,
+			Exception exception = null
+		)
 		{
-			var appTask = job?.Data?.Value;
-
 			// Skip nulls.
-			if (appTask == null)
+			if (null == job)
 				return;
 
 			// Update the task.
 			try
 			{
-				var info = job?.Data?.Value?.RetrieveTaskInfo(CurrentServer.ServerID)
-					?? new TaskInformation();
-				info.Completed = DateTime.Now;
-				info.LastActivity = DateTime.Now;
-
+				// Build up the task information with new data.
+				var taskInformation = new TaskInformation(job.GetStatus()?.Data);
+				taskInformation.CurrentTaskState = targetState;
+				taskInformation.Completed = DateTime.Now;
+				taskInformation.LastActivity = DateTime.Now;
 				if( exception != null )
 				{
-					info.StatusDetails = exception.Message;
+					taskInformation.StatusDetails = exception.Message;
 				}
 
 				// Update the task information.
-				job.Data.Value = this.TaskProcessor.UpdateTaskInfo
-				(
-					appTask,
-					targetState,
-					JsonConvert.SerializeObject(info),
-					appendRemarks: false
-				);
+				job.Update(taskInformation);
 			}
 			catch
 			{

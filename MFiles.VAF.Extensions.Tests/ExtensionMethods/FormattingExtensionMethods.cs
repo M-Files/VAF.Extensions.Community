@@ -11,13 +11,13 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods
 	public class FormattingExtensionMethods
 	{
 		[TestMethod]
-		public void ToIntervalDisplayString_HoursMinutesSeconds()
+		public void ToDashboardDisplayString_HoursMinutesSeconds()
 		{
 			var interval = new TimeSpan(1, 30, 32);
 			Assert.AreEqual
 			(
-				"every 1 hour, 30 minutes, and 32 seconds", 
-				interval.ToIntervalDisplayString()
+				"<p>Runs every 1 hour, 30 minutes, and 32 seconds.<br /></p>", 
+				interval.ToDashboardDisplayString()
 			);
 		}
 	}

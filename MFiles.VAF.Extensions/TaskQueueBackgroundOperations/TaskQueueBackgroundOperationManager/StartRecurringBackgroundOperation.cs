@@ -1,5 +1,6 @@
 ﻿using System;
 using MFiles.VAF;
+using MFiles.VAF.AppTasks;
 using MFiles.VAF.MultiserverMode;
 
 namespace MFiles.VAF.Extensions
@@ -41,7 +42,7 @@ namespace MFiles.VAF.Extensions
 		(
 			string name,
 			TimeSpan interval,
-			Action<TaskProcessorJobEx<TSecureConfiguration>> method
+			Action<TaskProcessorJobEx<BackgroundOperationTaskDirective, TSecureConfiguration>> method
 		)
 		{
 			return this.StartRecurringBackgroundOperation
@@ -65,11 +66,11 @@ namespace MFiles.VAF.Extensions
 		(
 			string name,
 			TimeSpan interval,
-			Action<TaskProcessorJobEx<TSecureConfiguration>, TaskQueueDirective> method,
-			TaskQueueDirective directive = null
+			Action<TaskProcessorJobEx<BackgroundOperationTaskDirective, TSecureConfiguration>, TaskDirective> method,
+			TaskDirective directive = null
 		)
 		{
-			return this.StartRecurringBackgroundOperation<TaskQueueDirective>
+			return this.StartRecurringBackgroundOperation<TaskDirective>
 			(
 				name,
 				interval,
@@ -91,10 +92,10 @@ namespace MFiles.VAF.Extensions
 		(
 			string name,
 			TimeSpan interval,
-			Action<TaskProcessorJobEx<TSecureConfiguration>, TDirective> method,
+			Action<TaskProcessorJobEx<BackgroundOperationTaskDirective, TSecureConfiguration>, TDirective> method,
 			TDirective directive = null
 		)
-			where TDirective : TaskQueueDirective
+			where TDirective : TaskDirective
 		{
 			// Create the background operation.
 			var backgroundOperation = this.CreateBackgroundOperation

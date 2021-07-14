@@ -34,7 +34,7 @@ namespace MFiles.VAF.Extensions
 					// Skip any that are not for this background operation.
 					if (false == string.IsNullOrWhiteSpace(backgroundOperationName))
 					{
-						var backgroundOperationDirective = TaskQueueDirective.Parse<BackgroundOperationTaskQueueDirective>(applicationTask);
+						var backgroundOperationDirective = TaskQueueDirective.Parse<BackgroundOperationTaskDirective>(applicationTask);
 						if (null == backgroundOperationDirective?.BackgroundOperationName)
 							continue;
 						if (!backgroundOperationDirective.BackgroundOperationName.Equals(backgroundOperationName))
@@ -44,12 +44,26 @@ namespace MFiles.VAF.Extensions
 					try
 					{
 						// Mark each task as superseded.
-						this.TaskProcessor.UpdateCancelledJobInTaskQueue
-						(
-							applicationTask,
-							string.Empty,
-							remarks
-						);
+						switch (task.State)
+						{
+							case MFTaskState.MFTaskStateInProgress:
+								this.VaultApplication.TaskManager.CancelActiveTask
+								(
+									this.VaultApplication.PermanentVault,
+									task.TaskID
+								);
+								break;
+							case MFTaskState.MFTaskStateWaiting:
+								this.VaultApplication.TaskManager.CancelWaitingTask
+								(
+									this.VaultApplication.PermanentVault, 
+									task.TaskID
+								);
+								break;
+							default:
+								// Cannot cancel ones in other states.
+								break;
+						}
 					}
 					catch (Exception e)
 					{

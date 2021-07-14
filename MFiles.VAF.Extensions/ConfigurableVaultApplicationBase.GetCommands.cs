@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MFiles.VAF.AppTasks;
+using MFiles.VAF.Extensions.Dashboards;
 
 namespace MFiles.VAF.Extensions
 {
@@ -22,8 +24,12 @@ namespace MFiles.VAF.Extensions
 			foreach (var c in base.GetCommands(context) ?? new CustomDomainCommand[0])
 				yield return c;
 
-			// Return our commands.
+			// Return the command related to the background operation approach.
 			foreach (var c in this.GetTaskQueueBackgroundOperationRunCommands())
+				yield return c;
+
+			// Return the commands related to the VAF 2.3+ attribute-based approach.
+			foreach (var c in this.TaskManager.GetTaskQueueRunCommands(this.TaskQueueResolver))
 				yield return c;
 		}
 

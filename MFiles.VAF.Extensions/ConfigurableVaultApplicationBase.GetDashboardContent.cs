@@ -59,6 +59,13 @@ namespace MFiles.VAF.Extensions
 				list.Items.AddRange(listItems);
 			}
 
+			// Get the content from the task queue resolver.
+			{
+				var listItems = this.TaskManager.GetDashboardContent(this.TaskQueueResolver);
+				if (null != listItems)
+					list.Items.AddRange(listItems);
+			}
+
 			// Did we get anything?
 			if (0 == list.Items.Count)
 				list.Items.Add(new DashboardListItem()

@@ -1,5 +1,6 @@
 ﻿using System;
 using MFiles.VAF;
+using MFiles.VAF.AppTasks;
 using MFiles.VAF.MultiserverMode;
 
 namespace MFiles.VAF.Extensions
@@ -36,7 +37,7 @@ namespace MFiles.VAF.Extensions
 		public TaskQueueBackgroundOperation<TSecureConfiguration> CreateBackgroundOperation
 		(
 			string name,
-			Action<TaskProcessorJobEx<TSecureConfiguration>> method
+			Action<TaskProcessorJobEx<BackgroundOperationTaskDirective, TSecureConfiguration>> method
 		)
 		{
 			return this.CreateBackgroundOperation
@@ -56,10 +57,10 @@ namespace MFiles.VAF.Extensions
 		public TaskQueueBackgroundOperation<TSecureConfiguration> CreateBackgroundOperation
 		(
 			string name,
-			Action<TaskProcessorJobEx<TSecureConfiguration>, TaskQueueDirective> method
+			Action<TaskProcessorJobEx<BackgroundOperationTaskDirective, TSecureConfiguration>, TaskDirective> method
 		)
 		{
-			return this.CreateBackgroundOperation<TaskQueueDirective>
+			return this.CreateBackgroundOperation<BackgroundOperationTaskDirective>
 			(
 				name,
 				method
@@ -76,9 +77,9 @@ namespace MFiles.VAF.Extensions
 		public TaskQueueBackgroundOperation<TDirective, TSecureConfiguration> CreateBackgroundOperation<TDirective>
 		(
 			string name,
-			Action<TaskProcessorJobEx<TSecureConfiguration>, TDirective> method
+			Action<TaskProcessorJobEx<BackgroundOperationTaskDirective, TSecureConfiguration>, TDirective> method
 		)
-			where TDirective : TaskQueueDirective
+			where TDirective : TaskDirective
 		{
 			TaskQueueBackgroundOperation<TDirective, TSecureConfiguration> backgroundOperation;
 

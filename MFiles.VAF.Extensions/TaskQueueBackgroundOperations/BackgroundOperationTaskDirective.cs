@@ -4,23 +4,24 @@ using System;
 using System.Text;
 using MFiles.VAF.Common;
 using MFiles.VAF.MultiserverMode;
+using MFiles.VAF.AppTasks;
 
 namespace MFiles.VAF.Extensions
 {
 	/// <summary>
 	/// A directive that contains information for a background operation.
 	/// </summary>
-	internal class BackgroundOperationTaskQueueDirective
-		: TaskQueueDirective
+	public class BackgroundOperationTaskDirective
+		: AppTasks.TaskDirective
 	{
 		/// <summary>
 		/// Creates an empty background operation task queue directive.
 		/// This constructor is mainly used for JSON deserialisation.
-		/// Instead use <see cref="BackgroundOperationTaskQueueDirective.BackgroundOperationTaskQueueDirective(string, TaskQueueDirective)"/>.
+		/// Instead use <see cref="BackgroundOperationTaskDirective.BackgroundOperationTaskQueueDirective(string, TaskQueueDirective)"/>.
 		/// If this constructor is used in codethen you must explicitly manually set
 		/// <see cref="BackgroundOperationName"/> and, optionally, <see cref="InternalDirective"/>.
 		/// </summary>
-		public BackgroundOperationTaskQueueDirective()
+		public BackgroundOperationTaskDirective()
 		{
 		}
 
@@ -30,10 +31,10 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="backgroundOperationName">The name of the background operation on which this task is run.</param>
 		/// <param name="internalDirective">The directive - if any - to pass to the job.</param>
-		public BackgroundOperationTaskQueueDirective
+		public BackgroundOperationTaskDirective
 		(
 			string backgroundOperationName,
-			TaskQueueDirective internalDirective
+			TaskDirective internalDirective
 		)
 		{
 			this.BackgroundOperationName = backgroundOperationName;
@@ -59,13 +60,13 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// The internal directive information that is passed to this job execution.
 		/// </summary>
-		private TaskQueueDirective internalDirective = null;
+		private TaskDirective internalDirective = null;
 
 		/// <summary>
 		/// The internal directive information that is passed to this job execution.
 		/// </summary>
 		[JsonIgnore]
-		public TaskQueueDirective InternalDirective
+		public TaskDirective InternalDirective
 		{
 			get => this.internalDirective;
 			set
@@ -80,9 +81,9 @@ namespace MFiles.VAF.Extensions
 		/// Returns <see cref="InternalDirective"/> as a parsed/populated instance.
 		/// </summary>
 		/// <returns>The directive, or null if no directive is found.</returns>
-		public TaskQueueDirective GetParsedInternalDirective()
+		public TaskDirective GetParsedInternalDirective()
 		{
-			return this.GetParsedInternalDirective<TaskQueueDirective>();
+			return this.GetParsedInternalDirective<TaskDirective>();
 		}
 
 		/// <summary>
@@ -91,7 +92,7 @@ namespace MFiles.VAF.Extensions
 		/// <typeparam name="TDirective">The directive type.</typeparam>
 		/// <returns>The directive, or null if no directive is found.</returns>
 		public TDirective GetParsedInternalDirective<TDirective>()
-			where TDirective : TaskQueueDirective
+			where TDirective : TaskDirective
 		{
 			return this.InternalDirectiveForSerialization == null
 				? null

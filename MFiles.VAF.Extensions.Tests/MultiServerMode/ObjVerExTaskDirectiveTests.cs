@@ -7,12 +7,12 @@ using System;
 namespace MFiles.VAF.Extensions.Tests
 {
 	[TestClass]
-	public class ObjVerExTaskQueueDirectiveTests
+	public class ObjVerExTaskDirectiveTests
 	{
 		[TestMethod]
 		public void ObjVerExIsReadWrite()
 		{
-			var type = typeof(ObjVerExTaskQueueDirective);
+			var type = typeof(ObjVerExTaskDirective);
 			var property = type.GetProperty("ObjVerEx");
 			Assert.IsNotNull(property);
 			Assert.IsTrue(property.CanRead);
@@ -23,14 +23,14 @@ namespace MFiles.VAF.Extensions.Tests
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void FromObjVerThrowsIfArgumentNull()
 		{
-			ObjVerExTaskQueueDirective.FromObjVer(null);
+			ObjVerExTaskDirective.FromObjVer(null);
 		}
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void FromObjVerExThrowsIfArgumentNull()
 		{
-			ObjVerExTaskQueueDirective.FromObjVerEx(null);
+			ObjVerExTaskDirective.FromObjVerEx(null);
 		}
 
 		[TestMethod]
@@ -41,7 +41,7 @@ namespace MFiles.VAF.Extensions.Tests
 			Assert.AreEqual
 			(
 				"(0-1-2)",
-				ObjVerExTaskQueueDirective.FromObjVer(objVer).ObjVerEx
+				ObjVerExTaskDirective.FromObjVer(objVer).ObjVerEx
 			);
 		}
 	}

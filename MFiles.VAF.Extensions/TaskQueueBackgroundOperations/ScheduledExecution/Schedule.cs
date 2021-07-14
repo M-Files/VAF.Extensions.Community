@@ -11,6 +11,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 	/// </summary>
 	[DataContract]
 	public class Schedule
+		: IRecurringOperation
 	{
 		/// <summary>
 		/// Whether the schedule is currently enabled or not.
@@ -44,13 +45,14 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				.FirstOrDefault();
 		}
 
+
 		/// <inheritdoc />
-		public override string ToString()
+		public string ToDashboardDisplayString()
 		{
 			if (this.Triggers == null || this.Triggers.Count == 0)
-				return "no schedule triggers specified.<br />";
+				return "<p>No schedule specified; does not repeat.<br /></p>";
 
-			var output = "according to the following schedule:";
+			var output = "<p>Runs according to the following schedule:";
 
 			// Output the triggers as a HTML list.
 			output += "<ul>";
@@ -61,7 +63,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 					continue;
 				output += $"<li>{triggerOutput}</li>";
 			}
-			output += "</ul>";
+			output += "</ul></p>";
 
 			return output;
 		}

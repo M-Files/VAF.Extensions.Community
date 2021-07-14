@@ -1,8 +1,9 @@
-﻿using MFiles.VAF.MultiserverMode;
+﻿using MFiles.VAF.AppTasks;
+using MFiles.VAF.MultiserverMode;
 
 namespace MFiles.VAF.Extensions
 {
-	public interface ITaskQueueDirectiveWithDisplayName
+	public interface ITaskDirectiveWithDisplayName
 	{
 		/// <summary>
 		/// The display name for the action/directive.
@@ -16,8 +17,8 @@ namespace MFiles.VAF.Extensions
 	/// <summary>
 	/// A task queue directive with a display name.
 	/// </summary>
-	public abstract class TaskQueueDirectiveWithDisplayName
-		: TaskQueueDirective, ITaskQueueDirectiveWithDisplayName
+	public abstract class TaskDirectiveWithDisplayName
+		: TaskDirective, ITaskDirectiveWithDisplayName
 	{
 		/// <summary>
 		/// The display name for the action/directive.

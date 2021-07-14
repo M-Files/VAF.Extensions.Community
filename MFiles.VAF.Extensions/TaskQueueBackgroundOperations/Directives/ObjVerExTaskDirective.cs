@@ -6,20 +6,19 @@ using MFiles.VAF.MultiserverMode;
 
 namespace MFiles.VAF.Extensions
 {
-
 	/// <summary>
-	/// A <see cref="TaskQueueDirective"/> that represents a single <see cref="ObjVerExTaskQueueDirective.ObjVerEx"/>.
+	/// A <see cref="TaskDirective"/> that represents a single <see cref="ObjVerExTaskDirective.ObjVerEx"/>.
 	/// </summary>
-	public class ObjVerExTaskQueueDirective
-		: TaskQueueDirectiveWithDisplayName
+	public class ObjVerExTaskDirective
+		: TaskDirectiveWithDisplayName
 	{
 		/// <summary>
 		/// Parse-able ObjVerEx string.
 		/// </summary>
 		public string ObjVerEx { get; set; }
 
-		public ObjVerExTaskQueueDirective() { }
-		public ObjVerExTaskQueueDirective(ObjVer objVer, string displayName = null)
+		public ObjVerExTaskDirective() { }
+		public ObjVerExTaskDirective(ObjVer objVer, string displayName = null)
 		{
 			this.ObjVerEx = objVer?.ToString(parsable: true)
 				?? throw new ArgumentNullException(nameof(objVer));
@@ -44,7 +43,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="objVer">The object version to represent.</param>
 		/// <param name="displayName">The name to display for this task.</param>
 		/// <returns>The task queue directive for the supplied object version.</returns>
-		public static ObjVerExTaskQueueDirective FromObjVer
+		public static ObjVerExTaskDirective FromObjVer
 		(
 			ObjVer objVer,
 			string displayName = null
@@ -54,7 +53,7 @@ namespace MFiles.VAF.Extensions
 			if (null == objVer)
 				throw new ArgumentNullException(nameof(objVer));
 
-			return new ObjVerExTaskQueueDirective
+			return new ObjVerExTaskDirective
 			(
 				objVer,
 				displayName
@@ -68,7 +67,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="objVerEx">The object version to represent.</param>
 		/// <param name="displayName">The name to display for this task.</param>
 		/// <returns>The task queue directive for the supplied object version.</returns>
-		public static ObjVerExTaskQueueDirective FromObjVerEx
+		public static ObjVerExTaskDirective FromObjVerEx
 		(
 			ObjVerEx objVerEx,
 			string displayName = null
@@ -79,18 +78,18 @@ namespace MFiles.VAF.Extensions
 				throw new ArgumentNullException(nameof(objVerEx));
 
 			// Use the other method.
-			return ObjVerExTaskQueueDirective.FromObjVer(objVerEx.ObjVer, displayName: displayName);
+			return ObjVerExTaskDirective.FromObjVer(objVerEx.ObjVer, displayName: displayName);
 		}
 
 		/// <summary>
 		/// Converts the <paramref name="input"/> to an <see cref="ObjVerExTaskQueueDirective"/>
 		/// </summary>
 		/// <param name="input">The object version.</param>
-		public static implicit operator ObjVerExTaskQueueDirective(ObjVerEx input)
+		public static implicit operator ObjVerExTaskDirective(ObjVerEx input)
 		{
 			return null == input
 				? null
-				: ObjVerExTaskQueueDirective.FromObjVerEx(input);
+				: ObjVerExTaskDirective.FromObjVerEx(input);
 		}
 	}
 }
