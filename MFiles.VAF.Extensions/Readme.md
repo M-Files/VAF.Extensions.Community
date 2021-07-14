@@ -18,6 +18,8 @@ The [TaskQueueBackgroundOperationManager](TaskQueueBackgroundOperations/TaskQueu
 
 Standard VAF task queues can also be easily exposed on the above dashboard by adding a `[ShowOnDashboard]` attribute.  This allows administrative users to easily "ad-hoc" schedule a task for processing.
 
+![An image showing a task queue that can be run on demand](runondemand-taskqueue.png)
+
 ```csharp
 namespace sampleApplication
 {
@@ -44,6 +46,8 @@ namespace sampleApplication
 Sometimes task processors should automatically be run, either on an interval (e.g. "every 10 minutes"), or on a more complex schedule (e.g. "every Saturday at 9am").  Configuration of these can be done by decorating configuration items with additional attributes:
 
 ##### On a schedule
+
+![An image showing a task queue executing on a schedule](scheduled-taskqueue.png)
 
 ```csharp
 namespace sampleApplication
@@ -88,6 +92,8 @@ namespace sampleApplication
 ```
 
 ##### After a time interval
+
+![An image showing a task queue executing after an interval](interval-taskqueue.png)
 
 ```csharp
 namespace sampleApplication
