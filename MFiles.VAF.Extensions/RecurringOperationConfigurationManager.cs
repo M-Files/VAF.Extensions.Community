@@ -65,6 +65,12 @@ namespace MFiles.VAF.Extensions
 			// Remove anything we have configured.
 			this.Clear();
 
+			// Sanity.
+			if (null == configuration
+				|| null == this.VaultApplication?.TaskQueueResolver
+				|| null == this.VaultApplication?.TaskManager)
+				return;
+
 			// Attempt to find any scheduled operation configuration.
 			var schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>>();
 			this.GetTaskProcessorConfiguration(configuration, out schedules);
@@ -74,21 +80,21 @@ namespace MFiles.VAF.Extensions
 				return;
 
 			// Load all the processors.
-			var dictionary = this.VaultApplication.TaskQueueResolver
-				.GetQueues()
+			var dictionary = this.VaultApplication.TaskQueueResolver?
+				.GetQueues()?
 				.SelectMany
 				(
-					q => this.VaultApplication.TaskQueueResolver
+					q => this.VaultApplication.TaskQueueResolver?
 						.GetProcessors(q)
 						.Select
 						(
 							p => new KeyValuePair<string, Processor>($"{q}-{p.Type}", p)
 						)
-				).ToDictionary
+				)?.ToDictionary
 				(
 					p => p.Key,
 					p => p.Value
-				);
+				) ?? new Dictionary<string, Processor>();
 
 			// Iterate over each schedule and see whether we can apply it.
 			foreach (var tuple in schedules)

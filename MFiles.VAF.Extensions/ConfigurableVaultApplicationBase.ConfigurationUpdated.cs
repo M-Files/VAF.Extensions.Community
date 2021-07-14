@@ -1,20 +1,4 @@
-﻿// ReSharper disable once CheckNamespace
-using MFiles.VAF.Common.ApplicationTaskQueue;
-using MFiles.VAF.Configuration.AdminConfigurations;
-using MFiles.VAF.Configuration.Domain.Dashboards;
-using MFiles.VAF.Core;
-using MFiles.VAF.Extensions;
-using MFiles.VAF;
-using MFilesAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using MFiles.VAF.MultiserverMode;
-using MFiles.VAF.AppTasks;
-using MFiles.VAF.Common;
-using System.Reflection;
-using System.Collections;
-using MFiles.VAF.Extensions.ScheduledExecution;
+﻿using MFilesAPI;
 
 namespace MFiles.VAF.Extensions
 {
@@ -30,11 +14,20 @@ namespace MFiles.VAF.Extensions
 		/// <inheritdoc />
 		protected override void OnConfigurationUpdated(TSecureConfiguration oldConfiguration, bool updateExternals)
 		{
-			// Populate the task processing schedule configuration.
-			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(this.Configuration);
-
 			// Base implementation is empty, but good practice to call it.
 			base.OnConfigurationUpdated(oldConfiguration, updateExternals);
+
+			// Populate the task processing schedule configuration.
+			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(this.Configuration);
+		}
+
+		public override void Initialize(Vault vaultSrc)
+		{
+			// Initialise the application.
+			base.Initialize(vaultSrc);
+
+			// Ensure that our recurring configuration is updated.
+			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(this.Configuration);
 		}
 	}
 }
