@@ -114,6 +114,17 @@ namespace MFiles.VAF.Extensions
 					continue;
 				}
 
+				// Make sure we have no duplicates.
+				if (this.Keys.Count(k => k.QueueID == tuple.Item1.QueueID && k.TaskType == tuple.Item1.TaskType) > 0)
+				{
+					SysUtils.ReportToEventLog
+					(
+						$"Multiple configuration schedules found for queue {tuple.Item1.QueueID} and type {tuple.Item1.TaskType}.  Only the first loaded will be used.",
+						System.Diagnostics.EventLogEntryType.Error
+					);
+					continue;
+				}
+
 				// Cancel any future executions.
 				this.VaultApplication.TaskManager.CancelAllFutureExecutions
 				(
@@ -252,51 +263,54 @@ namespace MFiles.VAF.Extensions
 					continue;
 
 				// If it has the recurring operation configuration then we want it.
-				var recurringOperationConfigurationAttribute = f
+				var recurringOperationConfigurationAttributes = f
 					.GetCustomAttributes(false)
-					.FirstOrDefault(a => a is IRecurringOperationConfigurationAttribute)
-					as IRecurringOperationConfigurationAttribute;
-				if (null != recurringOperationConfigurationAttribute)
+					.Where(a => a is IRecurringOperationConfigurationAttribute)
+					.Cast<IRecurringOperationConfigurationAttribute>();
+				foreach (var recurringOperationConfigurationAttribute in recurringOperationConfigurationAttributes)
 				{
-					// Validate the field type.
-					if (!recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldType.IsAssignableFrom(f.FieldType))
+					if (null != recurringOperationConfigurationAttribute)
 					{
-						SysUtils.ReportToEventLog
+						// Validate the field type.
+						if (!recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldType.IsAssignableFrom(f.FieldType))
+						{
+							SysUtils.ReportToEventLog
+							(
+								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not of type {recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldType.FullName} (actual: {f.FieldType.FullName})",
+								System.Diagnostics.EventLogEntryType.Warning
+							);
+							continue;
+						}
+
+						// Get the value and deal with timespans.
+						var value = f.GetValue(input);
+						if (null == value)
+							continue;
+						if (value.GetType() == typeof(TimeSpan))
+							value = new WrappedTimeSpan((TimeSpan)value);
+
+						// Validate that the value is a recurring operation.
+						if (!typeof(IRecurringOperation).IsAssignableFrom(value.GetType()))
+						{
+							SysUtils.ReportToEventLog
+							(
+								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not of type IRecurringOperation (actual: {value.GetType().FullName})",
+								System.Diagnostics.EventLogEntryType.Warning
+							);
+							continue;
+						}
+
+						// Add the schedule to the collection.
+						schedules
+						.Add
 						(
-							$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not of type {recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldType.FullName} (actual: {f.FieldType.FullName})",
-							System.Diagnostics.EventLogEntryType.Warning
+							new Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>
+							(
+								recurringOperationConfigurationAttribute,
+								value as IRecurringOperation
+							)
 						);
-						continue;
 					}
-
-					// Get the value and deal with timespans.
-					var value = f.GetValue(input);
-					if (null == value)
-						continue;
-					if (value.GetType() == typeof(TimeSpan))
-						value = new WrappedTimeSpan((TimeSpan)value);
-
-					// Validate that the value is a recurring operation.
-					if (!typeof(IRecurringOperation).IsAssignableFrom(value.GetType()))
-					{
-						SysUtils.ReportToEventLog
-						(
-							$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not of type IRecurringOperation (actual: {value.GetType().FullName})",
-							System.Diagnostics.EventLogEntryType.Warning
-						);
-						continue;
-					}
-
-					// Add the schedule to the collection.
-					schedules
-					.Add
-					(
-						new Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>
-						(
-							recurringOperationConfigurationAttribute,
-							value as IRecurringOperation
-						)
-					);
 				}
 
 				// Can we recurse?
@@ -316,50 +330,53 @@ namespace MFiles.VAF.Extensions
 					continue;
 
 				// If it has the scheduled operation configuration then we want it.
-				var recurringOperationConfigurationAttribute = p
+				var recurringOperationConfigurationAttributes = p
 					.GetCustomAttributes(false)
-					.FirstOrDefault(a => a is IRecurringOperationConfigurationAttribute)
-					as IRecurringOperationConfigurationAttribute;
-				if (null != recurringOperationConfigurationAttribute)
+					.Where(a => a is IRecurringOperationConfigurationAttribute)
+					.Cast<IRecurringOperationConfigurationAttribute>();
+				foreach (var recurringOperationConfigurationAttribute in recurringOperationConfigurationAttributes)
 				{
-					// Validate the property type.
-					if (!recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldType.IsAssignableFrom(p.PropertyType))
+					if (null != recurringOperationConfigurationAttribute)
 					{
-						SysUtils.ReportToEventLog
+						// Validate the property type.
+						if (!recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldType.IsAssignableFrom(p.PropertyType))
+						{
+							SysUtils.ReportToEventLog
+							(
+								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type {recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldType.FullName} (actual: {p.PropertyType.FullName})",
+								System.Diagnostics.EventLogEntryType.Warning
+							);
+							continue;
+						}
+
+						// Get the value and deal with timespans.
+						var value = p.GetValue(input);
+						if (null == value)
+							continue;
+						if (value.GetType() == typeof(TimeSpan))
+							value = new WrappedTimeSpan((TimeSpan)value);
+
+						// Validate the type.
+						if (!typeof(IRecurringOperation).IsAssignableFrom(value.GetType()))
+						{
+							SysUtils.ReportToEventLog
+							(
+								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type IRecurringOperation (actual: {value.GetType().FullName})",
+								System.Diagnostics.EventLogEntryType.Warning
+							);
+							continue;
+						}
+
+						// Add the schedule to the collection.
+						schedules.Add
 						(
-							$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type {recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldType.FullName} (actual: {p.PropertyType.FullName})",
-							System.Diagnostics.EventLogEntryType.Warning
+							new Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>
+							(
+								recurringOperationConfigurationAttribute,
+								value as IRecurringOperation
+							)
 						);
-						continue;
 					}
-
-					// Get the value and deal with timespans.
-					var value = p.GetValue(input);
-					if (null == value)
-						continue;
-					if (value.GetType() == typeof(TimeSpan))
-						value = new WrappedTimeSpan((TimeSpan)value);
-
-					// Validate the type.
-					if (!typeof(IRecurringOperation).IsAssignableFrom(value.GetType()))
-					{
-						SysUtils.ReportToEventLog
-						(
-							$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type IRecurringOperation (actual: {value.GetType().FullName})",
-							System.Diagnostics.EventLogEntryType.Warning
-						);
-						continue;
-					}
-
-					// Add the schedule to the collection.
-					schedules.Add
-					(
-						new Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>
-						(
-							recurringOperationConfigurationAttribute,
-							value as IRecurringOperation
-						)
-					);
 				}
 
 				// Can we recurse?

@@ -8,7 +8,7 @@ namespace MFiles.VAF.Extensions
 	/// Defines that the following property or field controls how a task processor should recur.
 	/// The property or field that follows should be a <see cref="TimeSpan"/>.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true, Inherited = true)]
 	public class RecurringOperationConfigurationAttribute
 		: JsonConfEditorAttribute, IRecurringOperationConfigurationAttribute
 	{
@@ -19,7 +19,7 @@ namespace MFiles.VAF.Extensions
 		public string TaskType { get; set; }
 
 		/// <inheritdoc />
-		public Type ExpectedPropertyOrFieldType { get; set; }
+		public Type ExpectedPropertyOrFieldType { get; private set; }
 
 		public RecurringOperationConfigurationAttribute
 		(

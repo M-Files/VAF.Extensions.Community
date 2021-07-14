@@ -8,6 +8,6 @@ namespace MFiles.VAF.Extensions
 	{
 		string QueueID { get; set; }
 		string TaskType { get; set; }
-		Type ExpectedPropertyOrFieldType { get; set; }
+		Type ExpectedPropertyOrFieldType { get; }
 	}
 }
