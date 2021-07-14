@@ -138,7 +138,7 @@ namespace MFiles.VAF.Extensions
 				(
 					taskInfoCell,
 					scheduledCell,
-					new DashboardCustomContent(taskInfo?.GetElapsedTime().ToDisplayString()),
+					new DashboardCustomContent(execution.State == MFilesAPI.MFTaskState.MFTaskStateWaiting ? "" : taskInfo?.GetElapsedTime().ToDisplayString()),
 					taskInfo?.AsDashboardContent()
 				);
 
