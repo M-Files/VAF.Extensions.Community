@@ -58,7 +58,7 @@ namespace MFiles.VAF.Extensions
 								// Can we get a next execution date for this task?
 								var nextExecutionDate = this
 									.VaultApplication?
-									.RecurringOperationConfiguration?
+									.RecurringOperationConfigurationManager?
 									.GetNextTaskProcessorExecution(t.QueueID, t.TaskType);
 								if (false == nextExecutionDate.HasValue)
 									continue;

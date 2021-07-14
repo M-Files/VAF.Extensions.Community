@@ -27,6 +27,25 @@ namespace MFiles.VAF.Extensions
 		: MFiles.VAF.Core.ConfigurableVaultApplicationBase<TSecureConfiguration>
 	where TSecureConfiguration : class, new()
 	{
+		/// <summary>
+		/// Contains information about VAF configuration that
+		/// control when task processing repeats.
+		/// </summary>
+		public RecurringOperationConfigurationManager<TSecureConfiguration> RecurringOperationConfigurationManager { get; }
+
+		/// <summary>
+		/// Expose the task queue resolver.
+		/// </summary>
+		internal new TaskQueueResolver TaskQueueResolver
+		{
+			get => base.TaskQueueResolver;
+			set => base.TaskQueueResolver = value;
+		}
+
+		public ConfigurableVaultApplicationBase()
+		{
+			this.RecurringOperationConfigurationManager = new RecurringOperationConfigurationManager<TSecureConfiguration>(this);
+		}
 		private TaskQueueBackgroundOperationManager<TSecureConfiguration> taskQueueBackgroundOperationManager;
 
 		private object _lock = new object();
