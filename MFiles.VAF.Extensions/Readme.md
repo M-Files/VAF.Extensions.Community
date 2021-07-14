@@ -112,7 +112,7 @@ namespace sampleApplication
 	{
 		// The import will run every 10 minutes but can be configured via the M-Files Admin software.
 		[DataMember]
-		[ScheduledOperationConfiguration(VaultApplication.QueueId, VaultApplication.ImportDataFromRemoteSystemTaskType)]
+		[RecurringOperationConfiguration(VaultApplication.QueueId, VaultApplication.ImportDataFromRemoteSystemTaskType)]
 		public TimeSpan Interval { get; set; } = new TimeSpan(0, 10, 0);
 	}
 }
