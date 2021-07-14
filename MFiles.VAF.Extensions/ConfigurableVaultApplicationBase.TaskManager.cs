@@ -75,7 +75,7 @@ namespace MFiles.VAF.Extensions
 				{
 					try
 					{
-						this.TaskManager.CancelAllFutureExecutions(key.QueueID, key.TaskType);
+						this.TaskManager?.CancelAllFutureExecutions(key.QueueID, key.TaskType);
 					}
 					catch (Exception e)
 					{
