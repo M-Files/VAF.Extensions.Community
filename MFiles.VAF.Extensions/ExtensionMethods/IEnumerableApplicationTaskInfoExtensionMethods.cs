@@ -99,6 +99,14 @@ namespace MFiles.VAF.Extensions
 						)
 					);
 
+				// Copy data from the execution if needed.
+				taskInfo.Started = taskInfo.Started ?? execution.ActivationTime;
+				taskInfo.LastActivity = taskInfo.LastActivity ?? execution.Status?.EndedAt ?? execution.Status?.LastUpdatedAt ?? DateTime.UtcNow;
+				taskInfo.StatusDetails = taskInfo.StatusDetails ?? execution.Status?.Details;
+				taskInfo.PercentageComplete = taskInfo.PercentageComplete ?? execution.Status?.PercentComplete;
+				if (taskInfo.CurrentTaskState != execution.State)
+					taskInfo.CurrentTaskState = execution.State;
+
 				// Add a row for this execution.
 				var row = table.AddRow();
 

@@ -116,7 +116,8 @@ namespace MFiles.VAF.Extensions
 			foreach (var p in input.Properties())
 			{
 				var property = type.GetProperty(p.Name);
-				property.SetValue(this, p.Value?.ToObject(property.PropertyType));
+				if(null != property)
+					property.SetValue(this, p.Value?.ToObject(property.PropertyType));
 			}
 		}
 	}

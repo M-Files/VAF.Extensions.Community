@@ -47,6 +47,8 @@ namespace MFiles.VAF.Extensions
 			// When the job is finished, re-schedule.
 			switch (e.EventType)
 			{
+				case TaskManagerEventType.TaskJobStarted:
+					break;
 				case TaskManagerEventType.TaskJobFinished:
 					switch (e.JobResult)
 					{
@@ -54,14 +56,17 @@ namespace MFiles.VAF.Extensions
 						case TaskProcessingJobResult.Fatal:
 							// Re-schedule.
 							foreach (var t in e.Tasks)
-							{
+							{	
+								// Cancel any future executions.
+								this.CancelAllFutureExecutions(t.QueueID, t.TaskType);
+
 								// Can we get a next execution date for this task?
 								var nextExecutionDate = this
 									.VaultApplication?
 									.RecurringOperationConfigurationManager?
 									.GetNextTaskProcessorExecution(t.QueueID, t.TaskType);
 								if (false == nextExecutionDate.HasValue)
-									continue;
+									continue;								
 
 								// Schedule.
 								this.AddTask(this.Vault, t.QueueID, t.TaskType, activationTime: nextExecutionDate);
