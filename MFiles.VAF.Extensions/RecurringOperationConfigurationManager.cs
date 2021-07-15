@@ -139,6 +139,10 @@ namespace MFiles.VAF.Extensions
 				if (false == nextExecution.HasValue)
 					continue;
 
+				// If this is an interval-based one then run it now instead of in x minutes.
+				if (schedule is WrappedTimeSpan)
+					nextExecution = DateTime.UtcNow;
+
 				// Add it to the dictionary.
 				this.Add
 				(
