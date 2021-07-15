@@ -66,7 +66,14 @@ namespace MFiles.VAF.Extensions
 								};
 								command.Execute = (c, o) =>
 								{
-									// Make it run now.
+									// Cancel future executions?
+									if (showOnDashboardAttribute.RunNowRecalculationType == RunNowRecalculationType.RecalculateFutureExecutions)
+									{
+										// Cancel any future executions.
+										this.VaultApplication?.TaskManager?.CancelAllFutureExecutions(queue.Id, processor.Type);
+									}
+
+									// Make it run ASAP.
 									this.AddTask(c.Vault, queue.Id, processor.Type);
 
 									// Refresh the dashboard.

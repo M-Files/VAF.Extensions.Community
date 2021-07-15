@@ -56,9 +56,10 @@ namespace MFiles.VAF.Extensions
 						case TaskProcessingJobResult.Fatal:
 							// Re-schedule.
 							foreach (var t in e.Tasks)
-							{	
-								// Cancel any future executions.
-								this.CancelAllFutureExecutions(t.QueueID, t.TaskType);
+							{
+								// Are there any future executions scheduled?
+								if (this.GetPendingExecutions<TaskDirective>(t.QueueID, t.TaskType, includeCurrentlyExecuting: false).Any())
+									continue; // We already have one scheduled; don't re-schedule.
 
 								// Can we get a next execution date for this task?
 								var nextExecutionDate = this
@@ -66,7 +67,7 @@ namespace MFiles.VAF.Extensions
 									.RecurringOperationConfigurationManager?
 									.GetNextTaskProcessorExecution(t.QueueID, t.TaskType);
 								if (false == nextExecutionDate.HasValue)
-									continue;								
+									continue;							
 
 								// Schedule.
 								this.AddTask(this.Vault, t.QueueID, t.TaskType, activationTime: nextExecutionDate);

@@ -7,16 +7,24 @@ using System.Threading.Tasks;
 namespace MFiles.VAF.Extensions.Dashboards
 {
 	/// <summary>
-	/// Used to hide a queue or task processor on the dashboard.
+	/// The type of approach used for recalculating interval-based task processors
+	/// when the task is run manually.
 	/// </summary>
-	/// <remarks>
-	/// If both <see cref="ShowOnDashboardAttribute"/> and <see cref="HideOnDashboardAttribute"/> attributes
-	/// are present then the <see cref="HideOnDashboardAttribute"/> takes effect.
-	/// </remarks>
-	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-	public class HideOnDashboardAttribute
-		: Attribute
+	public enum RunNowRecalculationType
 	{
+		/// <summary>
+		/// Does not cancel/recalculate any existing future executions.
+		/// So if the task is scheduled to run every 30 minutes, and is run manually
+		/// with 15 minutes left, the task still runs again in 15 minutes.
+		/// </summary>
+		LeaveFutureExecutions = 0,
+
+		/// <summary>
+		/// Recalculates any future executions once manual processing is complete.
+		/// So if the task is scheudled to run every 30 minutes, and is run manually
+		/// with 15 minutes left, the task is re-scheduled to run 30 minutes from completion.
+		/// </summary>
+		RecalculateFutureExecutions = 1
 	}
 
 	/// <summary>
@@ -31,9 +39,27 @@ namespace MFiles.VAF.Extensions.Dashboards
 	public class ShowOnDashboardAttribute
 		: Attribute
 	{
+		/// <summary>
+		/// The name to show for the background process.
+		/// </summary>
 		public string Name { get; set; } = null;
+
+		/// <summary>
+		/// The description to show for the background process.
+		/// </summary>
 		public string Description { get; set; } = null;
+
+		/// <summary>
+		/// If true, the "Run now" command will be shown for this background process.
+		/// </summary>
 		public bool ShowRunCommand { get; set; } = false;
+
+		/// <summary>
+		/// How to re-calculate any interval-based scheduled task processing
+		/// in the situation where a user manually runs the task.
+		/// </summary>
+		public RunNowRecalculationType RunNowRecalculationType { get; set; }
+			= RunNowRecalculationType.LeaveFutureExecutions;
 
 		/// <summary>
 		/// The default text shown on the "run now" button.
