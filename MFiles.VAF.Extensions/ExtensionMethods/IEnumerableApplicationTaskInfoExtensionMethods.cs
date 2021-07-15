@@ -106,6 +106,8 @@ namespace MFiles.VAF.Extensions
 				taskInfo.PercentageComplete = taskInfo.PercentageComplete ?? execution.Status?.PercentComplete;
 				if (taskInfo.CurrentTaskState != execution.State)
 					taskInfo.CurrentTaskState = execution.State;
+				if (taskInfo.CurrentTaskState == MFTaskState.MFTaskStateFailed)
+					taskInfo.StatusDetails = execution.Status?.ErrorMessage ?? taskInfo.StatusDetails;
 
 				// Add a row for this execution.
 				var row = table.AddRow();
