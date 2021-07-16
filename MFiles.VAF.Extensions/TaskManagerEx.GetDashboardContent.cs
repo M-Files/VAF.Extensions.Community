@@ -1,4 +1,5 @@
 ﻿using MFiles.VAF.AppTasks;
+using MFiles.VAF.Common;
 using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Core;
@@ -31,8 +32,23 @@ namespace MFiles.VAF.Extensions
 					continue;
 
 				// Get information about the queues.
-				var queueSettings = taskQueueResolver.GetQueueSettings(queue);
-				var fieldInfo = taskQueueResolver.GetQueueFieldInfo(queue);
+				TaskQueueAttribute queueSettings = null;
+				System.Reflection.FieldInfo fieldInfo = null;
+				try
+				{
+					queueSettings = taskQueueResolver.GetQueueSettings(queue);
+					fieldInfo = taskQueueResolver.GetQueueFieldInfo(queue);
+				}
+				catch
+				{
+					// Throws if the queue is incorrect.
+					SysUtils.ReportToEventLog
+					($"Cannot load details for queue {queue}; is there a static field with the [TaskQueue] attribute?",
+						System.Diagnostics.EventLogEntryType.Warning
+					);
+					continue;
+				}
+				
 
 				// Skip anything broken.
 				if (null == queueSettings || null == fieldInfo)
@@ -53,9 +69,25 @@ namespace MFiles.VAF.Extensions
 					if (null == processor)
 						continue;
 
-					// Get information about the processor.
-					var taskProcessorSettings = taskQueueResolver.GetTaskProcessorSettings(queue, processor.Type);
-					var methodInfo = taskQueueResolver.GetTaskProcessorMethodInfo(queue, processor.Type);
+					// Get information about the processor..
+					TaskProcessorAttribute taskProcessorSettings = null;
+					System.Reflection.MethodInfo methodInfo = null;
+					try
+					{
+						taskProcessorSettings = taskQueueResolver.GetTaskProcessorSettings(queue, processor.Type);
+						methodInfo = taskQueueResolver.GetTaskProcessorMethodInfo(queue, processor.Type);
+					}
+					catch
+					{
+						// Throws if the task processor is not found.
+						SysUtils.ReportToEventLog
+						(
+							$"Cannot load processor details for task type {processor.Type} on queue {queue}.",
+							System.Diagnostics.EventLogEntryType.Warning
+						);
+						continue;
+					}
+
 
 					// Skip anything broken.
 					if (null == taskProcessorSettings || null == methodInfo)
