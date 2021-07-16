@@ -16,7 +16,7 @@ The [TaskQueueBackgroundOperationManager](TaskQueueBackgroundOperations/TaskQueu
 
 ### Using VAF 2.3 task processors
 
-Standard VAF task queues can also be easily exposed on the above dashboard by adding a `[ShowOnDashboard]` attribute.  This allows administrative users to easily "ad-hoc" schedule a task for processing.
+Standard VAF task queues are automatically exposed on the above dashboard, but can be customisedby adding a `[ShowOnDashboard]` attribute.  In the example below the `ShowRunCommand` property is set to `true`, adding a button to the dashboard allowing the task to be run ad-hoc.
 
 ![An image showing a task queue that can be run on demand](runondemand-taskqueue.png)
 
@@ -33,6 +33,52 @@ namespace sampleApplication
 
 		[TaskProcessor(QueueId, ImportDataFromRemoteSystemTaskType)]
 		[ShowOnDashboard("Import data from web service", ShowRunCommand = true)]
+		public void ImportDataFromRemoteSystem(ITaskProcessingJob<TaskDirective> job)
+		{
+			// TODO: Connect to the remote system and import data.
+		}
+	}
+}
+```
+
+#### Hiding queues or task processors
+
+If you would like to hide a specific task processor (or an entire queue), then add a `[HideOnDashboard]` attribute:
+
+```csharp
+namespace sampleApplication
+{
+	public class VaultApplication
+		: MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<Configuration>
+	{
+
+		[TaskQueue]
+		[HideOnDashboard] // Hide this queue entirely (all processors).
+		public const string QueueId = "sampleApplication.VaultApplication";
+		public const string ImportDataFromRemoteSystemTaskType = "ImportDataFromRemoteSystem";
+
+		[TaskProcessor(QueueId, ImportDataFromRemoteSystemTaskType)]
+		public void ImportDataFromRemoteSystem(ITaskProcessingJob<TaskDirective> job)
+		{
+			// TODO: Connect to the remote system and import data.
+		}
+	}
+}
+```
+
+```csharp
+namespace sampleApplication
+{
+	public class VaultApplication
+		: MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<Configuration>
+	{
+
+		[TaskQueue]
+		public const string QueueId = "sampleApplication.VaultApplication";
+		public const string ImportDataFromRemoteSystemTaskType = "ImportDataFromRemoteSystem";
+
+		[TaskProcessor(QueueId, ImportDataFromRemoteSystemTaskType)]
+		[HideOnDashboard] // Hide just this processor.
 		public void ImportDataFromRemoteSystem(ITaskProcessingJob<TaskDirective> job)
 		{
 			// TODO: Connect to the remote system and import data.
