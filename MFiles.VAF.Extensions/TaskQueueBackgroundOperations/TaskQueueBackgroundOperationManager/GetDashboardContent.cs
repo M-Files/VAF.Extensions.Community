@@ -17,7 +17,7 @@ namespace MFiles.VAF.Extensions
 		/// <returns>The dashboard content.</returns>
 		public virtual IEnumerable<DashboardListItem> GetDashboardContent()
 		{
-			return this.BackgroundOperations.Values.OrderBy(o => o.DashboardSortOrder).AsDashboardListItems();
+			return this.BackgroundOperations?.Values?.OrderBy(o => o.DashboardSortOrder).AsDashboardListItems();
 		}
 	}
 }

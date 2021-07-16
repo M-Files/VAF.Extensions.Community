@@ -26,9 +26,17 @@ namespace MFiles.VAF.Extensions
 
 			foreach (var queue in taskQueueResolver.GetQueues())
 			{
+				// Sanity.
+				if (string.IsNullOrWhiteSpace(queue))
+					continue;
+
 				// Get information about the queues.
 				var queueSettings = taskQueueResolver.GetQueueSettings(queue);
 				var fieldInfo = taskQueueResolver.GetQueueFieldInfo(queue);
+
+				// Skip anything broken.
+				if (null == queueSettings || null == fieldInfo)
+					continue;
 
 				// If it's marked as hidden then skip.
 				{
@@ -41,9 +49,17 @@ namespace MFiles.VAF.Extensions
 				// Get each task processor.
 				foreach (var processor in taskQueueResolver.GetTaskProcessors(queue))
 				{
+					// Sanity.
+					if (null == processor)
+						continue;
+
 					// Get information about the processor.
 					var taskProcessorSettings = taskQueueResolver.GetTaskProcessorSettings(queue, processor.Type);
 					var methodInfo = taskQueueResolver.GetTaskProcessorMethodInfo(queue, processor.Type);
+
+					// Skip anything broken.
+					if (null == taskProcessorSettings || null == methodInfo)
+						continue;
 
 					// If it's marked as hidden then skip.
 					{

@@ -1,4 +1,5 @@
 ﻿// ReSharper disable once CheckNamespace
+using MFiles.VAF.Configuration;
 using System;
 
 namespace MFiles.VAF.Extensions
@@ -9,7 +10,7 @@ namespace MFiles.VAF.Extensions
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true, Inherited = true)]
 	public class ScheduledOperationConfigurationAttribute
-		: Attribute, IRecurringOperationConfigurationAttribute
+		: JsonConfEditorAttribute, IRecurringOperationConfigurationAttribute
 	{
 		/// <inheritdoc />
 		public string QueueID { get; set; }

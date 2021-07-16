@@ -108,7 +108,7 @@ namespace MFiles.VAF.Extensions
 				{
 					SysUtils.ReportToEventLog
 					(
-						$"Found configuration schedule for queue {tuple.Item1.QueueID} and type {tuple.Item1.TaskType}, but no task processors were registerd with that combination.",
+						$"Found configuration schedule for queue {tuple.Item1.QueueID} and type {tuple.Item1.TaskType}, but no task processors were registered with that combination.",
 						System.Diagnostics.EventLogEntryType.Warning
 					);
 					continue;
