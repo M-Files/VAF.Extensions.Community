@@ -214,7 +214,7 @@ public class VaultApplication
 				// Run every day at the specified times.
 				new MFiles.VAF.Extensions.ScheduledExecution.DailyTrigger()
 				{
-					TriggerTimes = new List<TriggerTime>
+					TriggerTimes = new List<TimeSpan>
 					{
 						new TimeSpan(09, 00, 00), // 9am
 						new TimeSpan(14, 00, 00), // 2pm
