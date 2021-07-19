@@ -223,6 +223,8 @@ namespace MFiles.VAF.Extensions
 
 			// Get the basic value.
 			var value = propertyInfo.GetValue(input);
+			if (value == null)
+				return;
 
 			// If it is enumerable then iterate over the contents and add.
 			if (typeof(IEnumerable).IsAssignableFrom(propertyInfo.PropertyType))
