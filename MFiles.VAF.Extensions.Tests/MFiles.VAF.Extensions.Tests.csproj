@@ -13,7 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MFiles.VAF" Version="2.2.0.10" />
+    <!--
+    using a "greater than or equal to" version number works within
+    VS but if the VAF version is increased then the application will fail to
+    install into M-Files.  Explicitly setting the version number here to stop
+    people accidentally creating broken builds.
+    -->
+    <PackageReference Include="MFiles.VAF" Version="[2.2.0.11]" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="Moq" Version="4.13.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.0.0" />
