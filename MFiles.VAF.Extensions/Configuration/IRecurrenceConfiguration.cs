@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace MFiles.VAF.Extensions.ScheduledExecution
+namespace MFiles.VAF.Extensions
 {
-	public interface IRecurringOperation
+	public interface IRecurrenceConfiguration
 	{
 		string ToDashboardDisplayString();
 		DateTime? GetNextExecution(DateTime? after = null);

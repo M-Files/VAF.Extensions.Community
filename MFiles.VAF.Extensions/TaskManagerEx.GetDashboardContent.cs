@@ -113,13 +113,13 @@ namespace MFiles.VAF.Extensions
 					}
 
 					// Does it have any configuration instructions?
-					IRecurringOperation recurringOperation = null;
+					IRecurrenceConfiguration recurrenceConfiguration = null;
 					if (this
 						.VaultApplication?
 						.RecurringOperationConfigurationManager?
-						.TryGetValue(queue, processor.Type, out recurringOperation) ?? false)
+						.TryGetValue(queue, processor.Type, out recurrenceConfiguration) ?? false)
 					{
-						htmlString += recurringOperation.ToDashboardDisplayString();
+						htmlString += recurrenceConfiguration.ToDashboardDisplayString();
 					}
 					else
 					{

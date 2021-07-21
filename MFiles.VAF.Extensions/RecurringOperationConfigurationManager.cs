@@ -15,7 +15,7 @@ namespace MFiles.VAF.Extensions
 	/// </summary>
 	/// <typeparam name="TSecureConfiguration"></typeparam>
 	public class RecurringOperationConfigurationManager<TSecureConfiguration>
-		: Dictionary<IRecurringOperationConfigurationAttribute, IRecurringOperation>
+		: Dictionary<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>
 		where TSecureConfiguration : class, new()
 	{
 		protected ConfigurableVaultApplicationBase<TSecureConfiguration> VaultApplication { get; private set; }
@@ -31,7 +31,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="taskType">The task type ID</param>
 		/// <param name="recurringOperation">The configured provider, if available.</param>
 		/// <returns><see langword="true"/> if the provider is available, <see langword="false"/> otherwise.</returns>
-		public bool TryGetValue(string queueId, string taskType, out IRecurringOperation recurringOperation)
+		public bool TryGetValue(string queueId, string taskType, out IRecurrenceConfiguration recurringOperation)
 		{
 			var key = this.Keys.FirstOrDefault(c => c.QueueID == queueId && c.TaskType == taskType);
 			if (null == key)
@@ -52,7 +52,7 @@ namespace MFiles.VAF.Extensions
 		/// <returns>The datetime it should run, or null if not available.</returns>
 		public DateTime? GetNextTaskProcessorExecution(string queueId, string taskType, DateTime? after = null)
 		{
-			return this.TryGetValue(queueId, taskType, out IRecurringOperation recurringOperation)
+			return this.TryGetValue(queueId, taskType, out IRecurrenceConfiguration recurringOperation)
 				? recurringOperation.GetNextExecution(after)
 				: null;
 		}
@@ -72,7 +72,7 @@ namespace MFiles.VAF.Extensions
 				return;
 
 			// Attempt to find any scheduled operation configuration.
-			var schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>>();
+			var schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>>();
 			this.GetTaskProcessorConfiguration(configuration, out schedules);
 
 			// If we have nothing to apply to then die.
@@ -173,11 +173,11 @@ namespace MFiles.VAF.Extensions
 		(
 			object input,
 			FieldInfo fieldInfo,
-			out List<Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>> schedules,
+			out List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>> schedules,
 			bool recurse = true
 		)
 		{
-			schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>>();
+			schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>>();
 			if (null == input)
 				return;
 
@@ -189,7 +189,7 @@ namespace MFiles.VAF.Extensions
 			{
 				foreach (var item in (IEnumerable)value)
 				{
-					var a = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>>();
+					var a = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>>();
 					this.GetTaskProcessorConfiguration(item, out a);
 					schedules.AddRange(a);
 				}
@@ -213,11 +213,11 @@ namespace MFiles.VAF.Extensions
 		(
 			object input,
 			PropertyInfo propertyInfo,
-			out List<Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>> schedules,
+			out List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>> schedules,
 			bool recurse = true
 		)
 		{
-			schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>>();
+			schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>>();
 			if (null == input)
 				return;
 
@@ -231,7 +231,7 @@ namespace MFiles.VAF.Extensions
 			{
 				foreach (var item in (IEnumerable)value)
 				{
-					var a = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>>();
+					var a = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>>();
 					this.GetTaskProcessorConfiguration(item, out a);
 					schedules.AddRange(a);
 				}
@@ -253,11 +253,11 @@ namespace MFiles.VAF.Extensions
 		protected virtual void GetTaskProcessorConfiguration
 		(
 			object input,
-			out List<Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>> schedules,
+			out List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>> schedules,
 			bool recurse = true
 		)
 		{
-			schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>>();
+			schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>>();
 			if (null == input)
 				return;
 
@@ -278,11 +278,11 @@ namespace MFiles.VAF.Extensions
 					if (null != recurringOperationConfigurationAttribute)
 					{
 						// Validate the field type.
-						if (!recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldType.IsAssignableFrom(f.FieldType))
+						if (!recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldTypes.Any(t => t.IsAssignableFrom(f.FieldType)))
 						{
 							SysUtils.ReportToEventLog
 							(
-								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not of type {recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldType.FullName} (actual: {f.FieldType.FullName})",
+								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not one of types {(string.Join(", ", recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldTypes.Select(t => t.FullName)))} (actual: {f.FieldType.FullName})",
 								System.Diagnostics.EventLogEntryType.Warning
 							);
 							continue;
@@ -296,7 +296,7 @@ namespace MFiles.VAF.Extensions
 							value = new WrappedTimeSpan((TimeSpan)value);
 
 						// Validate that the value is a recurring operation.
-						if (!typeof(IRecurringOperation).IsAssignableFrom(value.GetType()))
+						if (!typeof(IRecurrenceConfiguration).IsAssignableFrom(value.GetType()))
 						{
 							SysUtils.ReportToEventLog
 							(
@@ -310,10 +310,10 @@ namespace MFiles.VAF.Extensions
 						schedules
 						.Add
 						(
-							new Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>
+							new Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>
 							(
 								recurringOperationConfigurationAttribute,
-								value as IRecurringOperation
+								value as IRecurrenceConfiguration
 							)
 						);
 					}
@@ -322,7 +322,7 @@ namespace MFiles.VAF.Extensions
 				// Can we recurse?
 				if (recurse)
 				{
-					var a = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>>();
+					var a = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>>();
 					this.GetTaskProcessorConfiguration(input, f, out a);
 					schedules.AddRange(a);
 				}
@@ -345,11 +345,11 @@ namespace MFiles.VAF.Extensions
 					if (null != recurringOperationConfigurationAttribute)
 					{
 						// Validate the property type.
-						if (!recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldType.IsAssignableFrom(p.PropertyType))
+						if (!recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldTypes.Any(t => t.IsAssignableFrom(p.PropertyType)))
 						{
 							SysUtils.ReportToEventLog
 							(
-								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type {recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldType.FullName} (actual: {p.PropertyType.FullName})",
+								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type {(string.Join(", ", recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldTypes.Select(t => t.FullName)))} (actual: {p.PropertyType.FullName})",
 								System.Diagnostics.EventLogEntryType.Warning
 							);
 							continue;
@@ -363,7 +363,7 @@ namespace MFiles.VAF.Extensions
 							value = new WrappedTimeSpan((TimeSpan)value);
 
 						// Validate the type.
-						if (!typeof(IRecurringOperation).IsAssignableFrom(value.GetType()))
+						if (!typeof(IRecurrenceConfiguration).IsAssignableFrom(value.GetType()))
 						{
 							SysUtils.ReportToEventLog
 							(
@@ -376,10 +376,10 @@ namespace MFiles.VAF.Extensions
 						// Add the schedule to the collection.
 						schedules.Add
 						(
-							new Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>
+							new Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>
 							(
 								recurringOperationConfigurationAttribute,
-								value as IRecurringOperation
+								value as IRecurrenceConfiguration
 							)
 						);
 					}
@@ -388,14 +388,14 @@ namespace MFiles.VAF.Extensions
 				// Can we recurse?
 				if (recurse)
 				{
-					var a = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurringOperation>>();
+					var a = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>>();
 					this.GetTaskProcessorConfiguration(input, p, out a);
 					schedules.AddRange(a);
 				}
 			}
 		}
 		internal class WrappedTimeSpan
-			: IRecurringOperation
+			: IRecurrenceConfiguration
 		{
 			public TimeSpan TimeSpan { get; set; }
 			public WrappedTimeSpan(TimeSpan timeSpan)

@@ -11,7 +11,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 	/// </summary>
 	[DataContract]
 	public class Schedule
-		: IRecurringOperation
+		: IRecurrenceConfiguration
 	{
 		/// <summary>
 		/// Whether the schedule is currently enabled or not.

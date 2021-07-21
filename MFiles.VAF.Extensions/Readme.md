@@ -118,7 +118,7 @@ namespace sampleApplication
 	{
 		// The import will run daily at 3am but can be configured via the M-Files Admin software.
 		[DataMember]
-		[ScheduledOperationConfiguration(VaultApplication.QueueId, VaultApplication.ImportDataFromRemoteSystemTaskType)]
+		[RecurringOperationConfiguration(VaultApplication.QueueId, VaultApplication.ImportDataFromRemoteSystemTaskType)]
 		public Schedule ImportDataSchedule { get; set; } = new Schedule()
 		{
 			Enabled = true,
@@ -162,10 +162,42 @@ namespace sampleApplication
 	[DataContract]
 	public class Configuration
 	{
-		// The import will run every 10 minutes but can be configured via the M-Files Admin software.
+		// The import will run every 10 minutes but can be changed to another interval via the M-Files Admin software.
 		[DataMember]
 		[RecurringOperationConfiguration(VaultApplication.QueueId, VaultApplication.ImportDataFromRemoteSystemTaskType)]
 		public TimeSpan Interval { get; set; } = new TimeSpan(0, 10, 0);
+	}
+}
+```
+
+##### Allowing the administrator to change between an interval and a schedule
+
+```csharp
+namespace sampleApplication
+{
+	public class VaultApplication
+		: MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<Configuration>
+	{
+
+		[TaskQueue]
+		public const string QueueId = "sampleApplication.VaultApplication";
+		public const string ImportDataFromRemoteSystemTaskType = "ImportDataFromRemoteSystem";
+
+		[TaskProcessor(QueueId, ImportDataFromRemoteSystemTaskType)]
+		[ShowOnDashboard("Import data from web service", ShowRunCommand = true)]
+		public void ImportDataFromRemoteSystem(ITaskProcessingJob<TaskDirective> job)
+		{
+			// TODO: Connect to the remote system and import data.
+		}
+	}
+	[DataContract]
+	public class Configuration
+	{
+		// The import will run every 10 minutes but can be changed to another interval, or another schedule, by the administrator.
+		// For example: the configuration could be altered to instead only run once a day at 4am.
+		[DataMember]
+		[RecurringOperationConfiguration(VaultApplication.QueueId, VaultApplication.ImportDataFromRemoteSystemTaskType)]
+		public CustomizableRecurrence Schedule { get; set; } = new TimeSpan(0, 10, 0);
 	}
 }
 ```

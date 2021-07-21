@@ -19,7 +19,7 @@ namespace MFiles.VAF.Extensions
 		public string TaskType { get; set; }
 
 		/// <inheritdoc />
-		public Type ExpectedPropertyOrFieldType { get; private set; }
+		public Type[] ExpectedPropertyOrFieldTypes { get; private set; }
 
 		public RecurringOperationConfigurationAttribute
 		(
@@ -27,10 +27,14 @@ namespace MFiles.VAF.Extensions
 			string taskType
 		)
 		{
-			this.TypeEditor = "time"; // These should be times.
 			this.QueueID = queueId;
 			this.TaskType = taskType;
-			this.ExpectedPropertyOrFieldType = typeof(TimeSpan);
+			this.ExpectedPropertyOrFieldTypes = new[]
+			{
+				typeof(TimeSpan),
+				typeof(ScheduledExecution.Schedule),
+				typeof(CustomizableRecurrence)
+			};
 		}
 	}
 }
