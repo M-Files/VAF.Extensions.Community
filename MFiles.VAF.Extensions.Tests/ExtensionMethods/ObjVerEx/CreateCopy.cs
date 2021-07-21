@@ -28,6 +28,16 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			.Returns(new Mock<ObjectVersionPermissions>().Object);
 			vaultMock.Setup(m => m.ObjectOperations).Returns(objectOperationsMock.Object);
 
+			var propertyDefOperationsMock = new Mock<VaultPropertyDefOperations>();
+			propertyDefOperationsMock.Setup(m => m.GetPropertyDef(It.IsAny<int>()))
+				.Returns((int id) =>
+				{
+					var mock = new Mock<PropertyDef>();
+					mock.Setup(m => m.ID).Returns(id);
+					return mock.Object;
+				});
+			vaultMock.Setup(m => m.PropertyDefOperations).Returns(propertyDefOperationsMock.Object);
+
 			return vaultMock;
 		}
 
@@ -121,17 +131,34 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			params Tuple<int, MFDataType, object>[] propertyValues
 		)
 		{
-			return this.CreateSourceObject(null, propertyValues);
+			return this.CreateSourceObject((Mock<Vault>)null, propertyValues);
 		}
-
+		protected Common.ObjVerEx CreateSourceObject
+		(
+			Mock<Vault> vaultMock,
+			params Tuple<int, MFDataType, object>[] propertyValues
+		)
+		{
+			return this.CreateSourceObject(vaultMock, null, propertyValues);
+		}
 		protected Common.ObjVerEx CreateSourceObject
 		(
 			SourceObjectFiles sourceObjectFiles,
 			params Tuple<int, MFDataType, object>[] propertyValues
 		)
 		{
+			return this.CreateSourceObject(null, sourceObjectFiles, propertyValues);
+		}
+		protected Common.ObjVerEx CreateSourceObject
+		(
+			Mock<Vault> vaultMock,
+			SourceObjectFiles sourceObjectFiles,
+			params Tuple<int, MFDataType, object>[] propertyValues
+		)
+		{
 			return this.CreateSourceObjectWithPropertyValues
 			(
+				vaultMock,
 				sourceObjectFiles,
 				(propertyValues ?? new Tuple<int, MFDataType, object>[0])
 					.Select(t =>
@@ -149,7 +176,16 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			params PropertyValue[] propertyValues
 		)
 		{
-			return this.CreateSourceObjectWithPropertyValues(null, propertyValues);
+			return this.CreateSourceObjectWithPropertyValues(null, null, propertyValues);
+		}
+
+		protected Common.ObjVerEx CreateSourceObjectWithPropertyValues
+		(
+			Mock<Vault> vaultMock,
+			params PropertyValue[] propertyValues
+		)
+		{
+			return this.CreateSourceObjectWithPropertyValues(vaultMock, null, propertyValues);
 		}
 
 		protected Common.ObjVerEx CreateSourceObjectWithPropertyValues
@@ -158,8 +194,17 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 			params PropertyValue[] propertyValues
 		)
 		{
+			return this.CreateSourceObjectWithPropertyValues(null, sourceObjectFiles, propertyValues);
+		}
+		protected Common.ObjVerEx CreateSourceObjectWithPropertyValues
+		(
+			Mock<Vault> vaultMock,
+			SourceObjectFiles sourceObjectFiles,
+			params PropertyValue[] propertyValues
+		)
+		{
 			// Create our mock objects.
-			var vaultMock = this.GetVaultMock();
+			vaultMock = vaultMock ?? this.GetVaultMock();
 
 			// Create the property values collection.
 			var pvs = new PropertyValues();
@@ -203,6 +248,34 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
 		public void NullObjVerExThrows()
 		{
 			((Common.ObjVerEx)null).CreateCopy(objectCopyOptions: new ObjectCopyOptions());
+		}
+
+		[TestMethod]
+		public void CopyRemovesDeletedProperties()
+		{
+			// Create our mock objects.
+			var objectCopyCreatorMock = this.GetObjectCopyCreatorMock();
+
+			// Set up the vault.
+			var propertyDefOperationsMock = new Mock<VaultPropertyDefOperations>();
+			propertyDefOperationsMock.Setup(m => m.GetPropertyDef(It.IsAny<int>()))
+				.Throws(new InvalidOperationException("This property was deleted"));
+			var vaultMock = this.GetVaultMock();
+			vaultMock.Setup(m => m.PropertyDefOperations).Returns(propertyDefOperationsMock.Object);
+
+			// Create our source object.
+			var sourceObject = this.CreateSourceObject
+			(
+				vaultMock,
+				new Tuple<int, MFDataType, object>(123, MFDataType.MFDatatypeMultiLineText, "hello world")
+			);
+
+			// Execute.
+			var copy = sourceObject.CreateCopy(objectCopyCreator: objectCopyCreatorMock.Object);
+
+			// Property 123 should have been removed.
+			// Note: property 22 is added by the code, so we will always end up with one!
+			Assert.IsFalse(copy.Properties.Cast<PropertyValue>().Any(pv => pv.PropertyDef == 123));
 		}
 
 		[TestMethod]

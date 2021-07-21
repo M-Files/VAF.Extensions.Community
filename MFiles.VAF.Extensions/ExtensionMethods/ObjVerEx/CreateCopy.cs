@@ -1,4 +1,5 @@
 ﻿using MFiles.VAF.Common;
+using MFiles.VAF.Configuration;
 using MFilesAPI;
 using MFilesAPI.Extensions;
 using System;
@@ -88,6 +89,20 @@ namespace MFiles.VAF.Extensions
 					if (null == instruction)
 						continue;
 					instruction.ApplyTo(propertyValues.Values);
+				}
+			}
+
+			// Are there any properties that are deleted?
+			foreach (PropertyValue property in propertyValues.Values.Clone())
+			{
+				try
+				{
+					var loadedProperty = source.Vault.PropertyDefOperations.GetPropertyDef(property.PropertyDef);
+				}
+				catch
+				{
+					// Property cannot be loaded; it has been deleted.
+					propertyValues.Values.RemoveProperty(property.PropertyDef);
 				}
 			}
 

@@ -32,7 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MFiles.VAF" Version="2.3.603-preview" />
-    <PackageReference Include="MFilesAPI.Extensions" Version="1.0.2" />
+    <PackageReference Include="MFilesAPI.Extensions" Version="1.0.3" />
   </ItemGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
