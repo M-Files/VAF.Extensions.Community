@@ -23,14 +23,14 @@ namespace MFiles.VAF.Extensions.Tests
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void FromObjVerThrowsIfArgumentNull()
 		{
-			ObjVerExTaskDirective.FromObjVer(null);
+			((ObjVer)null).ToObjVerExTaskDirective();
 		}
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void FromObjVerExThrowsIfArgumentNull()
 		{
-			ObjVerExTaskDirective.FromObjVerEx(null);
+			((ObjVerEx)null).ToObjVerExTaskDirective();
 		}
 
 		[TestMethod]
@@ -41,7 +41,7 @@ namespace MFiles.VAF.Extensions.Tests
 			Assert.AreEqual
 			(
 				"(0-1-2)",
-				ObjVerExTaskDirective.FromObjVer(objVer).ObjVerEx
+				objVer.ToObjVerExTaskDirective().ObjVerEx
 			);
 		}
 	}
