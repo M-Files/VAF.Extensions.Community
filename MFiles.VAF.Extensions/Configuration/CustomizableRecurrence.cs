@@ -13,8 +13,8 @@ namespace MFiles.VAF.Extensions
 		/// The currently-configured type of recurrance.
 		/// </summary>
 		[DataMember]
-		[JsonConfEditor(DefaultValue = RecurrenceType.Interval)]
-		public RecurrenceType RecurrenceType { get; set; } = RecurrenceType.Interval;
+		[JsonConfEditor(DefaultValue = RecurrenceType.Unknown, Label = "Type")]
+		public RecurrenceType RecurrenceType { get; set; } = RecurrenceType.Unknown;
 
 		[DataMember]
 		[JsonConfEditor
@@ -35,6 +35,7 @@ namespace MFiles.VAF.Extensions
 		)]
 		public Schedule Schedule { get; set; }
 
+		/// <inheritdoc />
 		public DateTime? GetNextExecution(DateTime? after = null)
 		{
 			switch (this.RecurrenceType)
@@ -43,11 +44,14 @@ namespace MFiles.VAF.Extensions
 					return (after ?? DateTime.UtcNow).Add(this.Interval);
 				case RecurrenceType.Schedule:
 					return this.Schedule?.GetNextExecution(after);
+				case RecurrenceType.Unknown:
+					return null;
 				default:
 					throw new InvalidOperationException($"Recurrance type of {this.RecurrenceType} is not supported.");
 			}
 		}
 
+		/// <inheritdoc />
 		public string ToDashboardDisplayString()
 		{
 			switch (this.RecurrenceType)
@@ -56,11 +60,18 @@ namespace MFiles.VAF.Extensions
 					return this.Interval.ToDashboardDisplayString();
 				case RecurrenceType.Schedule:
 					return this.Schedule?.ToDashboardDisplayString();
+				case RecurrenceType.Unknown:
+					return ((TimeSpan?)null).ToDashboardDisplayString();
 				default:
 					throw new InvalidOperationException($"Recurrance type of {this.RecurrenceType} is not supported.");
 			}
 		}
 
+		/// <summary>
+		/// Converts the <paramref name="interval"/> provided to a <see cref="CustomizableRecurrence"/>
+		/// representing the interval.
+		/// </summary>
+		/// <param name="interval">The interval to represent.</param>
 		public static implicit operator CustomizableRecurrence(TimeSpan interval)
 		{
 			return new CustomizableRecurrence()
@@ -70,6 +81,11 @@ namespace MFiles.VAF.Extensions
 			};
 		}
 
+		/// <summary>
+		/// Converts the <paramref name="schedule"/> provided to a <see cref="CustomizableRecurrence"/>
+		/// representing the schedule.
+		/// </summary>
+		/// <param name="schedule">The schedule to represent.</param>
 		public static implicit operator CustomizableRecurrence(Schedule schedule)
 		{
 			return new CustomizableRecurrence()
