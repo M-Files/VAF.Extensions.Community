@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace MFiles.VAF.Extensions
 {
 	[DataContract]
-	public class CustomizableRecurrence
+	public class Frequency
 		: IRecurrenceConfiguration
 	{
 		/// <summary>
@@ -68,13 +68,13 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
-		/// Converts the <paramref name="interval"/> provided to a <see cref="CustomizableRecurrence"/>
+		/// Converts the <paramref name="interval"/> provided to a <see cref="Frequency"/>
 		/// representing the interval.
 		/// </summary>
 		/// <param name="interval">The interval to represent.</param>
-		public static implicit operator CustomizableRecurrence(TimeSpan interval)
+		public static implicit operator Frequency(TimeSpan interval)
 		{
-			return new CustomizableRecurrence()
+			return new Frequency()
 			{
 				RecurrenceType = RecurrenceType.Interval,
 				Interval = interval
@@ -82,13 +82,13 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
-		/// Converts the <paramref name="schedule"/> provided to a <see cref="CustomizableRecurrence"/>
+		/// Converts the <paramref name="schedule"/> provided to a <see cref="Frequency"/>
 		/// representing the schedule.
 		/// </summary>
 		/// <param name="schedule">The schedule to represent.</param>
-		public static implicit operator CustomizableRecurrence(Schedule schedule)
+		public static implicit operator Frequency(Schedule schedule)
 		{
-			return new CustomizableRecurrence()
+			return new Frequency()
 			{
 				RecurrenceType = RecurrenceType.Schedule,
 				Schedule = schedule

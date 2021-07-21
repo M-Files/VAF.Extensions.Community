@@ -197,7 +197,7 @@ namespace sampleApplication
 		// For example: the configuration could be altered to instead only run once a day at 4am.
 		[DataMember]
 		[RecurringOperationConfiguration(VaultApplication.QueueId, VaultApplication.ImportDataFromRemoteSystemTaskType)]
-		public CustomizableRecurrence Schedule { get; set; } = new TimeSpan(0, 10, 0);
+		public Frequency Schedule { get; set; } = new TimeSpan(0, 10, 0);
 	}
 }
 ```

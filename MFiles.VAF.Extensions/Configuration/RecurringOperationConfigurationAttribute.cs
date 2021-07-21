@@ -33,7 +33,7 @@ namespace MFiles.VAF.Extensions
 			{
 				typeof(TimeSpan),
 				typeof(ScheduledExecution.Schedule),
-				typeof(CustomizableRecurrence)
+				typeof(Frequency)
 			};
 		}
 	}
