@@ -1,4 +1,5 @@
-﻿using MFilesAPI;
+﻿using MFiles.VAF.Common;
+using MFilesAPI;
 using System;
 
 namespace MFiles.VAF.Extensions
@@ -47,33 +48,91 @@ namespace MFiles.VAF.Extensions
 		/// <returns><see langword="true"/> if successful.</returns>
 		public bool TryGetObjID(out ObjID objID)
 		{
+			// Set the ObjID instance.
 			objID = new ObjID();
+
+			// If we do not have a valid object type ID then return false.
+			if (0 > this.ObjectTypeID)
+				return false;
+
+			// If we do not have a valid object ID then return false.
+			if (0 == this.ObjectID)
+				return false;
+
+			// We can't guarantee that the object exists, but it seems reasonable.
 			objID.SetIDs(this.ObjectTypeID, this.ObjectID);
 			return true;
 		}
-
+	}
+	public static partial class ObjVerExExtensionMethods
+	{
 		/// <summary>
-		/// Converts <paramref name="input"/> to an <see cref="ObjIDClass"/>.
+		/// Creates a <see cref="ObjIDTaskDirective"/>
+		/// representing the provided <paramref name="objID"/>.
 		/// </summary>
-		/// <param name="input">The item to convert.</param>
-		public static implicit operator ObjIDClass(ObjIDTaskDirective input)
+		/// <param name="objID">The object to represent.</param>
+		/// <param name="displayName">The name to display for this task.</param>
+		/// <returns>The task directive for the supplied object version.</returns>
+		public static ObjIDTaskDirective ToObjIDTaskDirective
+		(
+			this ObjID objID,
+			string displayName = null
+		)
 		{
-			if (null == input)
-				return null;
-			var objID = new ObjIDClass();
-			objID.SetIDs(input.ObjectTypeID, input.ObjectID);
-			return objID;
+			// Sanity.
+			if (null == objID)
+				throw new ArgumentNullException(nameof(objID));
+
+			return new ObjIDTaskDirective
+			(
+				objID,
+				displayName
+			);
 		}
 
 		/// <summary>
-		/// Converts <paramref name="input"/> to an <see cref="ObjIDTaskDirective" />.
+		/// Creates a <see cref="ObjIDTaskDirective"/>
+		/// representing the provided <paramref name="objVer"/>.
 		/// </summary>
-		/// <param name="input">The item to convert.</param>
-		public static implicit operator ObjIDTaskDirective(ObjIDClass input)
+		/// <param name="objVer">The object version to represent.</param>
+		/// <param name="displayName">The name to display for this task.</param>
+		/// <returns>The task directive for the supplied object version.</returns>
+		public static ObjIDTaskDirective ToObjIDTaskDirective
+		(
+			this ObjVer objVer,
+			string displayName = null
+		)
 		{
-			if (null == input)
-				return null;
-			return new ObjIDTaskDirective(input);
+			// Sanity.
+			if (null == objVer)
+				throw new ArgumentNullException(nameof(objVer));
+
+			return new ObjIDTaskDirective
+			(
+				objVer.ObjID,
+				displayName
+			);
+		}
+
+		/// <summary>
+		/// Creates a <see cref="ObjVerExTaskDirective"/>
+		/// representing the provided <paramref name="objVerEx"/>.
+		/// </summary>
+		/// <param name="objVerEx">The object version to represent.</param>
+		/// <param name="displayName">The name to display for this task.</param>
+		/// <returns>The task directive for the supplied object version.</returns>
+		public static ObjIDTaskDirective ToObjIDTaskDirective
+		(
+			this ObjVerEx objVerEx,
+			string displayName = null
+		)
+		{
+			// Sanity.
+			if (null == objVerEx)
+				throw new ArgumentNullException(nameof(objVerEx));
+
+			// Use the other method.
+			return objVerEx.ObjVer.ToObjIDTaskDirective(displayName: displayName);
 		}
 	}
 }

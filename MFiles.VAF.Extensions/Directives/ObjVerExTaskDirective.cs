@@ -18,6 +18,10 @@ namespace MFiles.VAF.Extensions
 		public string ObjVerEx { get; set; }
 
 		public ObjVerExTaskDirective() { }
+		public ObjVerExTaskDirective(ObjVerEx objVerEx, string displayName = null)
+			: this(objVerEx?.ObjVer, displayName)
+		{
+		}
 		public ObjVerExTaskDirective(ObjVer objVer, string displayName = null)
 		{
 			this.ObjVerEx = objVer?.ToString(parsable: true)
@@ -37,15 +41,28 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
-		/// Creates a <see cref="ObjVerExTaskQueueDirective"/>
+		/// Converts the <paramref name="input"/> to an <see cref="ObjVerExTaskQueueDirective"/>
+		/// </summary>
+		/// <param name="input">The object version.</param>
+		public static implicit operator ObjVerExTaskDirective(ObjVerEx input)
+		{
+			return null == input
+				? null
+				: input.ToObjVerExTaskDirective();
+		}
+	}
+	public static partial class ObjVerExExtensionMethods
+	{
+		/// <summary>
+		/// Creates a <see cref="ObjVerExTaskDirective"/>
 		/// representing the provided <paramref name="objVer"/>.
 		/// </summary>
 		/// <param name="objVer">The object version to represent.</param>
 		/// <param name="displayName">The name to display for this task.</param>
-		/// <returns>The task queue directive for the supplied object version.</returns>
-		public static ObjVerExTaskDirective FromObjVer
+		/// <returns>The task directive for the supplied object version.</returns>
+		public static ObjVerExTaskDirective ToObjVerExTaskDirective
 		(
-			ObjVer objVer,
+			this ObjVer objVer,
 			string displayName = null
 		)
 		{
@@ -61,15 +78,15 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
-		/// Creates a <see cref="ObjVerExTaskQueueDirective"/>
+		/// Creates a <see cref="ObjVerExTaskDirective"/>
 		/// representing the provided <paramref name="objVerEx"/>.
 		/// </summary>
 		/// <param name="objVerEx">The object version to represent.</param>
 		/// <param name="displayName">The name to display for this task.</param>
-		/// <returns>The task queue directive for the supplied object version.</returns>
-		public static ObjVerExTaskDirective FromObjVerEx
+		/// <returns>The task directive for the supplied object version.</returns>
+		public static ObjVerExTaskDirective ToObjVerExTaskDirective
 		(
-			ObjVerEx objVerEx,
+			this ObjVerEx objVerEx,
 			string displayName = null
 		)
 		{
@@ -78,18 +95,7 @@ namespace MFiles.VAF.Extensions
 				throw new ArgumentNullException(nameof(objVerEx));
 
 			// Use the other method.
-			return ObjVerExTaskDirective.FromObjVer(objVerEx.ObjVer, displayName: displayName);
-		}
-
-		/// <summary>
-		/// Converts the <paramref name="input"/> to an <see cref="ObjVerExTaskQueueDirective"/>
-		/// </summary>
-		/// <param name="input">The object version.</param>
-		public static implicit operator ObjVerExTaskDirective(ObjVerEx input)
-		{
-			return null == input
-				? null
-				: ObjVerExTaskDirective.FromObjVerEx(input);
+			return objVerEx.ObjVer.ToObjVerExTaskDirective(displayName: displayName);
 		}
 	}
 }
