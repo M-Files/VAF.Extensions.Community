@@ -123,7 +123,7 @@ namespace MFiles.VAF.Extensions
 					}
 					else
 					{
-						htmlString += "<p>Runs on demand (does not repeat).<br /></p>";
+						htmlString += "<p>Does not repeat.<br /></p>";
 					}
 
 					// Get known executions (prior, running and future).

@@ -13,7 +13,7 @@ namespace MFiles.VAF.Extensions
 		/// The currently-configured type of recurrance.
 		/// </summary>
 		[DataMember]
-		[JsonConfEditor(DefaultValue = RecurrenceType.Unknown, Label = "Type")]
+		[JsonConfEditor(Label = "Type")]
 		public RecurrenceType RecurrenceType { get; set; } = RecurrenceType.Unknown;
 
 		[DataMember]
