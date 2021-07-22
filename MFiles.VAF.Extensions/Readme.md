@@ -201,3 +201,8 @@ namespace sampleApplication
 	}
 }
 ```
+
+##### Implementing IRecurrenceConfiguration
+
+```csharp
+```

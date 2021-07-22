@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace MFiles.VAF.Extensions
 {
-	internal static class FormattingExtensionMethods
+	public static class FormattingExtensionMethods
 	{
 		/// <summary>
 		/// A flag to note whether the datetime is in the future or past.
@@ -89,7 +89,7 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="timespan">The timespan to convert.</param>
 		/// <returns>A string in English describing the timespan.</returns>
-		internal static string ToDashboardDisplayString(this TimeSpan timespan)
+		public static string ToDashboardDisplayString(this TimeSpan timespan)
 		{
 			return ((TimeSpan?)timespan).ToDashboardDisplayString();
 		}
@@ -99,7 +99,7 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="timespan">The timespan to convert.</param>
 		/// <returns>A string in English describing the timespan.</returns>
-		internal static string ToDashboardDisplayString(this TimeSpan? timespan)
+		public static string ToDashboardDisplayString(this TimeSpan? timespan)
 		{
 			// Sanity.
 			if (false == timespan.HasValue || timespan.Value <= TimeSpan.Zero)
