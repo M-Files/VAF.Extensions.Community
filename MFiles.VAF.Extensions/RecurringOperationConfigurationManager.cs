@@ -300,7 +300,7 @@ namespace MFiles.VAF.Extensions
 						{
 							SysUtils.ReportToEventLog
 							(
-								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not of type IRecurringOperation (actual: {value.GetType().FullName})",
+								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not of type IRecurrenceConfiguration (actual: {value.GetType().FullName})",
 								System.Diagnostics.EventLogEntryType.Warning
 							);
 							continue;
@@ -367,7 +367,7 @@ namespace MFiles.VAF.Extensions
 						{
 							SysUtils.ReportToEventLog
 							(
-								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type IRecurringOperation (actual: {value.GetType().FullName})",
+								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type IRecurrenceConfiguration (actual: {value.GetType().FullName})",
 								System.Diagnostics.EventLogEntryType.Warning
 							);
 							continue;

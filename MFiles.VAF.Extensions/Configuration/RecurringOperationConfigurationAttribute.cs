@@ -32,8 +32,7 @@ namespace MFiles.VAF.Extensions
 			this.ExpectedPropertyOrFieldTypes = new[]
 			{
 				typeof(TimeSpan),
-				typeof(ScheduledExecution.Schedule),
-				typeof(Frequency)
+				typeof(IRecurrenceConfiguration)
 			};
 		}
 	}

@@ -131,7 +131,7 @@ namespace MFiles.VAF.Extensions
 			(
 				TaskQueueBackgroundOperation<BackgroundOperationTaskDirective, TSecureConfiguration>.TaskTypeId,
 				new AppTasks.TaskProcessor.Handler<BackgroundOperationTaskDirective>(ProcessJobHandler),
-				transactionMode: AppTasks.TransactionMode.Unsafe
+				transactionMode: AppTasks.TransactionMode.Unsafe // We have to be unsafe for backwards compatibility.
 			);
 
 			// Set up the task queue processor.
