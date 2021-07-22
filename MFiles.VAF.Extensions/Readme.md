@@ -204,5 +204,52 @@ namespace sampleApplication
 
 ##### Implementing IRecurrenceConfiguration
 
+The `RecurringOperationConfiguration` attribute can be used with any property or field whose type implements `IRecurrenceConfiguration` (plus `TimeSpan`, but that's a special case).  If you want to create your own logic then you can create a class that implements this interface and use it in your configuration:
+
 ```csharp
+[DataContract]
+public class RandomRecurrenceConfiguration
+	: IRecurrenceConfiguration
+{
+	private static Random rnd = new Random();
+
+	[DataMember]
+	[JsonConfIntegerEditor(Min = 5, Max = 1000)]
+	public int MinimumMinutes { get;set; } = 5;
+	
+	[DataMember]
+	[JsonConfIntegerEditor(Min = 5, Max = 1000)]
+	public int MaximumMinutes { get;set; } = 200;
+	
+
+	/// <inheritdoc />
+	public string ToDashboardDisplayString()
+	{
+		return $"<p>Runs randomly between {this.MinimumMinutes} and {this.MaximumMinutes} after the last run time.</p>";
+	}
+
+	/// <inheritdoc />
+	public DateTime? GetNextExecution(DateTime? after = null)
+	{
+		// Create a random interval.
+		var interval = TimeSpan.FromMinutes(rnd.Next(this.MinimumMinutes, this.MaximumMinutes));
+
+		// Return the next-run time.
+		return (after ?? DateTime.UtcNow).Add(interval);
+	}
+}
+
+// Use the custom logic.
+[DataContract]
+public class Configuration
+{
+	[DataMember]
+	[RecurringOperationConfiguration
+	(
+		VaultApplication.QueueId,
+		VaultApplication.UploadToRemoteSystemTaskType,
+		DefaultValue = "Runs randomly throughout the day"
+	)]
+	public RandomRecurrenceConfiguration TaskOneSchedule { get; set; } = new RandomRecurrenceConfiguration();
+}
 ```
