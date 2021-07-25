@@ -207,11 +207,18 @@ one line and it would be easier __not__ to forget the checks, like this example 
 
 ```csharp
 // Try to get all properties which are configured
-_ = env.ObjVerEx.TryGetPropertyText(cfg.NameFields.PropSalutation, out string salutation);
-_ = env.ObjVerEx.TryGetPropertyText(cfg.NameFields.PropAcademicTitle, out string academicTitle);
-_ = env.ObjVerEx.TryGetPropertyText(cfg.NameFields.PropFirstName, out string firstName);
-_ = env.ObjVerEx.TryGetPropertyText(cfg.NameFields.PropMiddleName, out string middleName);
-_ = env.ObjVerEx.TryGetPropertyText(cfg.NameFields.PropLastName, out string lastName);
+if (!(env.ObjVerEx.TryGetPropertyText(cfg.NameFields.PropSalutation, out string salutation)
+    && env.ObjVerEx.TryGetPropertyText(cfg.NameFields.PropAcademicTitle, out string academicTitle)
+    && env.ObjVerEx.TryGetPropertyText(cfg.NameFields.PropFirstName, out string firstName)
+    && env.ObjVerEx.TryGetPropertyText(cfg.NameFields.PropMiddleName, out string middleName)
+    && env.ObjVerEx.TryGetPropertyText(cfg.NameFields.PropLastName, out string lastName)
+)) {
+    // <see cref="TryGetPropertyText"/> returns <see langword="false"/>
+    // if property definition configuration item is set but cannot be resolved.
+    SysUtils.ReportToEventLog(
+        "Configuration in section NameFields contains unresolved properties",
+        EventLogEntryType.Error);
+}
 
 // Compose real name
 string displayName = "";
