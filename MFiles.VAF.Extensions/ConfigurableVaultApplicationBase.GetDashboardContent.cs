@@ -28,20 +28,20 @@ namespace MFiles.VAF.Extensions
 			if (false == string.IsNullOrWhiteSpace(baseContent))
 				dashboard.AddContent(new DashboardCustomContent(baseContent));
 
-			// Do we have any background operation content?
-			var backgroundOperationContent = this.GetBackgroundOperationDashboardContent();
-			if(null != backgroundOperationContent)
-				dashboard.AddContent(backgroundOperationContent);
+			// Do we have any asynchronous operation content?
+			var asynchronousOperationContent = this.GetAsynchronousOperationDashboardContent();
+			if(null != asynchronousOperationContent)
+				dashboard.AddContent(asynchronousOperationContent);
 
 			// Return the dashboard.
 			return dashboard.ToString();
 		}
 
 		/// <summary>
-		/// Returns the dashboard content showing background operation status.
+		/// Returns the dashboard content showing asynchronous operation status.
 		/// </summary>
-		/// <returns>The dashboard content.  Can be null if no background operation managers or background operations.</returns>
-		public virtual DashboardPanel GetBackgroundOperationDashboardContent()
+		/// <returns>The dashboard content.  Can be null if no background operation managers, background operations or task processors.</returns>
+		public virtual DashboardPanel GetAsynchronousOperationDashboardContent()
 		{
 			// Declare our list which will go into the panel.
 			var list = new DashboardList();
@@ -70,7 +70,7 @@ namespace MFiles.VAF.Extensions
 			if (0 == list.Items.Count)
 				list.Items.Add(new DashboardListItem()
 				{
-					Title = "There are no current background operations.",
+					Title = "There are no current asynchronous operations.",
 					StatusSummary = new Configuration.Domain.DomainStatusSummary()
 					{
 						Status = VAF.Configuration.Domain.DomainStatus.Undefined
@@ -80,7 +80,7 @@ namespace MFiles.VAF.Extensions
 			// Return the panel.
 			return new DashboardPanel()
 			{
-				Title = "Background Operations",
+				Title = "Asynchronous Operations",
 				InnerContent = new DashboardContentCollection
 				{
 					new DashboardCustomContent($"<em>Time on server: {DateTime.Now.ToLocalTime().ToString("HH:mm:ss")}</em>"),
