@@ -4,16 +4,17 @@ using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace MFiles.VAF.Extensions.Tests
+namespace MFiles.VAF.Extensions.Tests.Directives
 {
 	[TestClass]
 	public class ObjVerExTaskDirectiveTests
+		: TaskDirectiveWithDisplayNameTestsBase<ObjVerExTaskDirective>
 	{
 		[TestMethod]
 		public void ObjVerExIsReadWrite()
 		{
 			var type = typeof(ObjVerExTaskDirective);
-			var property = type.GetProperty("ObjVerEx");
+			var property = type.GetProperty(nameof(ObjVerExTaskDirective.ObjVerEx));
 			Assert.IsNotNull(property);
 			Assert.IsTrue(property.CanRead);
 			Assert.IsTrue(property.CanWrite);
