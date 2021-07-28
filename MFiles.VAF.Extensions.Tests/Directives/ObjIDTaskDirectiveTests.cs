@@ -43,5 +43,64 @@ namespace MFiles.VAF.Extensions.Tests.Directives
 			Assert.AreEqual(101, directive.ObjectTypeID);
 			Assert.AreEqual(2, directive.ObjectID);
 		}
+
+		[TestMethod]
+		public void TryGetObjID_InvalidID_Zero()
+		{
+			var directive = new ObjIDTaskDirective()
+			{
+				ObjectTypeID = 101,
+				ObjectID = 0
+			};
+			Assert.IsFalse(directive.TryGetObjID(out _));
+		}
+
+		[TestMethod]
+		public void TryGetObjID_InvalidID_Negative()
+		{
+			var directive = new ObjIDTaskDirective()
+			{
+				ObjectTypeID = 101,
+				ObjectID = -1
+			};
+			Assert.IsFalse(directive.TryGetObjID(out _));
+		}
+
+		[TestMethod]
+		public void TryGetObjID_InvalidType()
+		{
+			var directive = new ObjIDTaskDirective()
+			{
+				ObjectTypeID = -1,
+				ObjectID = 123
+			};
+			Assert.IsFalse(directive.TryGetObjID(out _));
+		}
+
+		[TestMethod]
+		public void TryGetObjID_CorrectData()
+		{
+			var objID = new ObjID();
+			objID.SetIDs(101, 2);
+			var directive = objID.ToObjIDTaskDirective();
+
+			Assert.IsTrue(directive.TryGetObjID(out ObjID o));
+			Assert.AreEqual(objID.ID, o.ID);
+			Assert.AreEqual(objID.Type, o.Type);
+
+		}
+
+		[TestMethod]
+		public void TryGetObjID_CorrectData_ZeroObjectType()
+		{
+			var objID = new ObjID();
+			objID.SetIDs(0, 2);
+			var directive = objID.ToObjIDTaskDirective();
+
+			Assert.IsTrue(directive.TryGetObjID(out ObjID o));
+			Assert.AreEqual(objID.ID, o.ID);
+			Assert.AreEqual(objID.Type, o.Type);
+
+		}
 	}
 }

@@ -56,7 +56,7 @@ namespace MFiles.VAF.Extensions
 				return false;
 
 			// If we do not have a valid object ID then return false.
-			if (0 == this.ObjectID)
+			if (0 >= this.ObjectID)
 				return false;
 
 			// We can't guarantee that the object exists, but it seems reasonable.
