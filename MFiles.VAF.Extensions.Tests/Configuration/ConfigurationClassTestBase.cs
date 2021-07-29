@@ -13,12 +13,20 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		[TestMethod]
 		public void ClassHasDataContractAttribute()
 		{
-			Assert.IsNotNull
+			var found = false;
+			var typeToSearch = typeof(TConfigurationClass);
+			while (found == false && typeToSearch != null && typeToSearch != typeof(object))
+			{
+				if (typeToSearch.GetCustomAttributes(typeof(DataContractAttribute), true).Length > 0)
+				{
+					found = true;
+					continue;
+				}
+				typeToSearch = typeToSearch.BaseType;
+			}
+			Assert.IsTrue
 			(
-				typeof(TConfigurationClass)
-				.GetCustomAttributes(false)
-				.Cast<DataContractAttribute>()
-				.FirstOrDefault(),
+				found,
 				$"{typeof(TConfigurationClass).FullName} does not have a [DataContract] attribute."
 			);;
 		}
@@ -42,7 +50,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 						(
 							classBeingTested
 							.GetProperties()?
-							.Where(p => p.DeclaringType == classBeingTested && p.Name == propertyName)
+							.Where(p => p.Name == propertyName)
 							.FirstOrDefault()?
 							.HasCustomAttribute<DataMemberAttribute>() ?? false,
 							$"{classBeingTested.FullName}.{propertyName} was not found or does not have a [DataMember] attribute."
@@ -67,7 +75,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				var securityAttribute =
 							classBeingTested
 							.GetProperties()?
-							.Where(p => p.DeclaringType == classBeingTested && p.Name == attribute.PropertyName)
+							.Where(p => p.Name == attribute.PropertyName)
 							.FirstOrDefault()?
 							.GetCustomAttribute<SecurityAttribute>();
 				Assert.IsNotNull
@@ -113,7 +121,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				// Ensure the property has the attribute.
 				var jsonConfEditorAttribute = classBeingTested
 							.GetProperties()?
-							.Where(p => p.DeclaringType == classBeingTested && p.Name == attribute.PropertyName)
+							.Where(p => p.Name == attribute.PropertyName)
 							.FirstOrDefault()?
 							.GetCustomAttribute<JsonConfEditorAttribute>();
 				Assert.IsNotNull

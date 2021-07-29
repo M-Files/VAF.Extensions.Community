@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Extensions;
 using MFiles.VAF.Extensions.ScheduledExecution;
+using MFiles.VAF.Extensions.Tests.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,9 @@ using System.Threading.Tasks;
 namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 {
 	[TestClass]
+	[DataMemberRequired(nameof(DailyTrigger.TriggerTimes))]
 	public class DailyTriggerTests
+		: ConfigurationClassTestBase<DailyTrigger>
 	{
 		[TestMethod]
 		[DynamicData(nameof(GetNextExecutionData), DynamicDataSourceType.Method)]

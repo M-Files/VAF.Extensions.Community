@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Extensions;
 using MFiles.VAF.Extensions.ScheduledExecution;
+using MFiles.VAF.Extensions.Tests.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,9 @@ using System.Threading.Tasks;
 namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 {
 	[TestClass]
+	[DataMemberRequired(nameof(DayOfMonthTrigger.TriggerTimes), nameof(DayOfMonthTrigger.UnrepresentableDateHandling))]
 	public class DayOfMonthTriggerTests
+		: ConfigurationClassTestBase<DayOfMonthTrigger>
 	{
 		[TestMethod]
 		[DynamicData(nameof(GetNextDayOfMonthData), DynamicDataSourceType.Method)]
