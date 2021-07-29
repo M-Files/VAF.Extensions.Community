@@ -21,6 +21,7 @@ namespace MFiles.VAF.Extensions
 			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(this.Configuration);
 		}
 
+		/// <inheritdoc />
 		public override void StartOperations(Vault vaultPersistent)
 		{
 			// Initialise the application.

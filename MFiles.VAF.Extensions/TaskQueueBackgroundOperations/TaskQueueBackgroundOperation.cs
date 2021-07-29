@@ -14,16 +14,18 @@ using MFiles.VAF.Extensions.Dashboards;
 
 namespace MFiles.VAF.Extensions
 {
+	/// <summary>
+	/// An operation that is run asynchronously via a task queue.
+	/// The actual operation may be automatically run after a time interval, automatically according
+	/// to a defined schedule, or on demand.
+	/// </summary>
+	/// <typeparam name="TDirective">The type of directive expected by this background operation.</typeparam>
+	/// <typeparam name="TSecureConfiguration">The type of configuration used by the related vualt application.</typeparam>
 	public class TaskQueueBackgroundOperation<TDirective, TSecureConfiguration>
 		: TaskQueueBackgroundOperation<TSecureConfiguration>
 		where TDirective : AppTasks.TaskDirective
 		where TSecureConfiguration : class, new()
 	{
-		/// <summary>
-		/// The method to run.
-		/// </summary>
-		//public new Action<TaskProcessorJobEx<TDirective, TSecureConfiguration>, TDirective> UserMethod { get; private set; }
-
 		/// <summary>
 		/// Creates a new background operation that runs the method in separate task.
 		/// </summary>
@@ -114,6 +116,13 @@ namespace MFiles.VAF.Extensions
 		Schedule = 2
 	}
 
+	/// <summary>
+	/// An operation that is run asynchronously via a task queue.
+	/// The actual operation may be automatically run after a time interval, automatically according
+	/// to a defined schedule, or on demand.
+	/// </summary>
+	/// <typeparam name="TDirective">The type of directive expected by this background operation.</typeparam>
+	/// <typeparam name="TSecureConfiguration">The type of configuration used by the related vualt application.</typeparam>
 	public class TaskQueueBackgroundOperation<TSecureConfiguration>
 		where TSecureConfiguration : class, new()
 	{
