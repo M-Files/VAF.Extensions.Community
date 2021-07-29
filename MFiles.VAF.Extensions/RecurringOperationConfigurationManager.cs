@@ -13,7 +13,7 @@ namespace MFiles.VAF.Extensions
 	/// <summary>
 	/// Manages recurring operations that are configured via standard VAF configuration.
 	/// </summary>
-	/// <typeparam name="TSecureConfiguration"></typeparam>
+	/// <typeparam name="TSecureConfiguration">The type of configuration used by the associated vault application.</typeparam>
 	public class RecurringOperationConfigurationManager<TSecureConfiguration>
 		: Dictionary<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>
 		where TSecureConfiguration : class, new()
@@ -56,6 +56,13 @@ namespace MFiles.VAF.Extensions
 				? recurringOperation.GetNextExecution(after)
 				: null;
 		}
+
+
+		/// <summary>
+		/// Reads <see cref="ConfigurableVaultApplicationBase{TSecureConfiguration}.Configuration"/> to populate <see cref="RecurringOperationConfiguration"/>
+		/// </summary>
+		public virtual void PopulateFromConfiguration()
+			=> this.PopulateFromConfiguration(this.VaultApplication?.Configuration);
 
 		/// <summary>
 		/// Reads <paramref name="configuration"/> to populate <see cref="RecurringOperationConfiguration"/>

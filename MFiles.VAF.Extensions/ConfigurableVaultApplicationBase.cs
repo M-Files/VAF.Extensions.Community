@@ -18,11 +18,11 @@ using System.Collections;
 namespace MFiles.VAF.Extensions
 {
 	/// <summary>
-	/// A base class that automatically implements the pattern required for broadcasting
-	/// configuration changes to other servers.
+	/// A base class providing common functionality for vault applications that use the VAF Extensions library.
+	/// If a vault application uses the library, but does not inherit from this class, then various library functionality
+	/// may not work.
 	/// </summary>
 	/// <typeparam name="TSecureConfiguration">The configuration type.</typeparam>
-	/// <remarks>See https://developer.m-files.com/Frameworks/Vault-Application-Framework/Multi-Server-Mode/#configuration-changes for further details.</remarks>
 	public abstract partial class ConfigurableVaultApplicationBase<TSecureConfiguration>
 		: MFiles.VAF.Core.ConfigurableVaultApplicationBase<TSecureConfiguration>
 	where TSecureConfiguration : class, new()
@@ -34,12 +34,20 @@ namespace MFiles.VAF.Extensions
 		public RecurringOperationConfigurationManager<TSecureConfiguration> RecurringOperationConfigurationManager { get; }
 
 		/// <summary>
-		/// Expose the task queue resolver.
+		/// Expose the task queue resolver (was protected, now internal so that we can use it).
 		/// </summary>
 		internal new TaskQueueResolver TaskQueueResolver
 		{
 			get => base.TaskQueueResolver;
 			set => base.TaskQueueResolver = value;
+		}
+
+		/// <summary>
+		/// Expose the running configuration (was protected, now internal so that we can use it).
+		/// </summary>
+		internal new TSecureConfiguration Configuration
+		{
+			get => base.Configuration;
 		}
 
 		public ConfigurableVaultApplicationBase()

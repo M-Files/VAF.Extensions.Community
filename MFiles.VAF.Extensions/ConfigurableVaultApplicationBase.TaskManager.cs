@@ -15,12 +15,6 @@ using MFiles.VAF.Common;
 
 namespace MFiles.VAF.Extensions
 {
-	/// <summary>
-	/// A base class that automatically implements the pattern required for broadcasting
-	/// configuration changes to other servers.
-	/// </summary>
-	/// <typeparam name="TSecureConfiguration">The configuration type.</typeparam>
-	/// <remarks>See https://developer.m-files.com/Frameworks/Vault-Application-Framework/Multi-Server-Mode/#configuration-changes for further details.</remarks>
 	public abstract partial class ConfigurableVaultApplicationBase<TSecureConfiguration>
 		: MFiles.VAF.Core.ConfigurableVaultApplicationBase<TSecureConfiguration>
 	where TSecureConfiguration : class, new()

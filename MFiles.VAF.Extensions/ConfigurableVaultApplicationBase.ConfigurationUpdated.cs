@@ -18,17 +18,17 @@ namespace MFiles.VAF.Extensions
 			base.OnConfigurationUpdated(oldConfiguration, updateExternals);
 
 			// Populate the task processing schedule configuration.
-			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(this.Configuration);
+			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration();
 		}
 
 		/// <inheritdoc />
 		public override void StartOperations(Vault vaultPersistent)
 		{
-			// Initialise the application.
+			// Initialize the application.
 			base.StartOperations(vaultPersistent);
 
 			// Ensure that our recurring configuration is updated.
-			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(this.Configuration);
+			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration();
 		}
 	}
 }
