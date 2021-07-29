@@ -12,6 +12,7 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 {
 	[TestClass]
 	[DataMemberRequired(nameof(WeeklyTrigger.TriggerTimes), nameof(WeeklyTrigger.TriggerDays))]
+	[JsonConfEditorRequired(nameof(DailyTrigger.TriggerTimes), ChildTypeEditor = "time")]
 	public class WeeklyTriggerTests
 		: ConfigurationClassTestBase<WeeklyTrigger>
 	{

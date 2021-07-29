@@ -12,6 +12,7 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 {
 	[TestClass]
 	[DataMemberRequired(nameof(DayOfMonthTrigger.TriggerTimes), nameof(DayOfMonthTrigger.UnrepresentableDateHandling))]
+	[JsonConfEditorRequired(nameof(DailyTrigger.TriggerTimes), ChildTypeEditor = "time")]
 	public class DayOfMonthTriggerTests
 		: ConfigurationClassTestBase<DayOfMonthTrigger>
 	{

@@ -134,6 +134,15 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				if (null != attribute.DefaultValue)
 					Assert.AreEqual(attribute.DefaultValue, jsonConfEditorAttribute.DefaultValue);
 
+				// If we child type editor then check
+				if (false == string.IsNullOrWhiteSpace(attribute.ChildTypeEditor))
+					Assert.AreEqual
+					(
+						attribute.ChildTypeEditor, 
+						jsonConfEditorAttribute.ChildTypeEditor,
+						$"[JsonConfEditor(ChildTypeEditor=)] was not set properly for {classBeingTested.FullName}.{attribute.PropertyName}"
+					);
+
 				// Hidden / ShowWhen / HideWhen?
 				Assert.AreEqual
 				(

@@ -23,14 +23,16 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		public string ShowWhen { get; set; }
 
 		public string HideWhen { get; set; }
+		public string ChildTypeEditor { get; set; }
 
 		public JsonConfEditorRequiredAttribute
 		(
 			string propertyName,
-			object defaultValue,
+			object defaultValue = null,
 			bool hidden = false,
 			string showWhen = null,
-			string hideWhen = null
+			string hideWhen = null,
+			string childTypeEditor = null
 		)
 		{
 			this.PropertyName = propertyName;
@@ -38,6 +40,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 			this.Hidden = hidden;
 			this.ShowWhen = showWhen;
 			this.HideWhen = hideWhen;
-		}
+			this.ChildTypeEditor = childTypeEditor;
+	}
 	}
 }
