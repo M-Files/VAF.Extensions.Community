@@ -18,7 +18,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="instance">The instance of <paramref name="input"/> that property/field values should be loaded from.</param>
 		/// <param name="bindingFlags">The binding flags to identify the properties and fields to use.</param>
 		/// <param name="includeBackingFields">If <see langword="true"/> then backing fields for properties will be returned.</param>
-		public static IQueryable<TReturnType> GetPropertiesAndFieldsOfType<TReturnType>
+		internal static IQueryable<TReturnType> GetPropertiesAndFieldsOfType<TReturnType>
 		   (
 				this Type input,
 				object instance,
@@ -51,7 +51,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="items">The value of the properties.</param>
 		/// <param name="bindingFlags">The binding flags to identify the properties and fields to use.</param>
 		/// <param name="includeBackingFields">If <see langword="true"/> then backing fields for properties will be returned.</param>
-		public static void GetPropertiesAndFieldsOfType<TReturnType>
+		internal static void GetPropertiesAndFieldsOfType<TReturnType>
 		(
 			this Type input,
 			object instance,
@@ -105,7 +105,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="instance">The instance of <paramref name="input"/> that property/field values should be loaded from.</param>
 		/// <param name="bindingFlags">The binding flags to identify the properties and fields to use.</param>
 		/// <param name="includeBackingFields">If <see langword="true"/> then backing fields for properties will be returned.</param>
-		public static IQueryable<Tuple<TReturnType, TAttribute[]>> GetPropertiesAndFieldsOfTypeWithAttribute<TReturnType, TAttribute>
+		internal static IQueryable<Tuple<TReturnType, TAttribute[]>> GetPropertiesAndFieldsOfTypeWithAttribute<TReturnType, TAttribute>
 		(
 			this Type input,
 			object instance,
@@ -140,7 +140,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="items">The value of the properties and the attribute.</param>
 		/// <param name="bindingFlags">The binding flags to identify the properties and fields to use.</param>
 		/// <param name="includeBackingFields">If <see langword="true"/> then backing fields for properties will be returned.</param>
-		public static void GetPropertiesAndFieldsOfTypeWithAttribute<TReturnType, TAttribute>
+		internal static void GetPropertiesAndFieldsOfTypeWithAttribute<TReturnType, TAttribute>
 		(
 			this Type input,
 			object instance,
@@ -205,7 +205,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="fields">The fields that match the query parameters.</param>
 		/// <param name="bindingFlags">The binding flags to identify the properties and fields to use.</param>
 		/// <param name="includeBackingFields">If <see langword="true"/> then backing fields for properties will be returned.</param>
-		public static void GetPropertiesAndFieldsOfType<TReturnType>
+		internal static void GetPropertiesAndFieldsOfType<TReturnType>
 		(
 			this Type input,
 			out IQueryable<PropertyInfo> properties,

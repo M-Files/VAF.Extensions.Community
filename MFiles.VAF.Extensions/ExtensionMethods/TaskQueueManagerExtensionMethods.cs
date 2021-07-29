@@ -20,6 +20,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="job">The job to update.</param>
 		/// <param name="state">The new job state.</param>
 		/// <param name="progressData">Any progress data to report.</param>
+		[Obsolete("You should migrate to using VAF 2.3+ task queues (in the MFiles.VAF.AppTasks namespace), not VAF 2.2 task queues (in the MFiles.VAF.MultiserverMode namespace)")]
 		public static void UpdateTask
 		(
 			this TaskQueueManager taskQueueManager,
@@ -45,6 +46,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="taskQueueManager">The task manager to update the job using.</param>
 		/// <param name="job">The job to update.</param>
 		/// <param name="exception">The exception that was thrown.</param>
+		[Obsolete("You should migrate to using VAF 2.3+ task queues (in the MFiles.VAF.AppTasks namespace), not VAF 2.2 task queues (in the MFiles.VAF.MultiserverMode namespace)")]
 		public static void UpdateTask
 		(
 			this TaskQueueManager taskQueueManager,

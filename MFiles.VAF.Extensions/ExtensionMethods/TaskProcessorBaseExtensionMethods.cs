@@ -23,6 +23,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="vault">The vault reference to add the task.  Set to a transactional vault to only add the task if the transaction completes.</param>
 		/// <param name="activationTimestamp">The datetime to activate the task (otherwise ASAP).</param>
 		/// <returns>The task id.</returns>
+		[Obsolete("You should migrate to using VAF 2.3+ task queues (in the MFiles.VAF.AppTasks namespace), not VAF 2.2 task queues (in the MFiles.VAF.MultiserverMode namespace)")]
 		public static string AddTask<TSettings, TTaskQueueDirectiveType>
 		(
 			this TaskProcessorBase<TSettings> taskProcessor,
@@ -60,6 +61,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="activationTimestamp">The datetime to activate the task (otherwise ASAP).</param>
 		/// <param name="vault">The vault reference to add the task.  Set to a transactional vault to only add the task if the transaction completes.</param>
 		/// <returns>The task id.</returns>
+		[Obsolete("You should migrate to using VAF 2.3+ task queues (in the MFiles.VAF.AppTasks namespace), not VAF 2.2 task queues (in the MFiles.VAF.MultiserverMode namespace)")]
 		public static string AddTask<TSettings>
 		(
 			this TaskProcessorBase<TSettings> taskProcessor,
