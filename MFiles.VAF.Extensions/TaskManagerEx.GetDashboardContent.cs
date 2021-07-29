@@ -168,7 +168,7 @@ namespace MFiles.VAF.Extensions
 					(
 						htmlString
 						+ executions?
-							.AsDashboardContent(this.ServerId)?
+							.AsDashboardContent()?
 							.ToXmlString()
 					);
 

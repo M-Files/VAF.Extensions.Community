@@ -24,7 +24,6 @@ namespace MFiles.VAF.Extensions
 		public static IDashboardContent AsDashboardContent<TDirective>
 		(
 			this IEnumerable<TaskInfo<TDirective>> applicationTasks,
-			string serverId,
 			int maximumRowsToShow = 40
 		)
 			where TDirective : TaskDirective

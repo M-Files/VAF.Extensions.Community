@@ -99,7 +99,7 @@ namespace MFiles.VAF.Extensions
 				(
 					htmlString
 					+ executions?
-						.AsDashboardContent(TaskQueueBackgroundOperationManager<TSecureConfiguration>.CurrentServer.ServerID)?
+						.AsDashboardContent()?
 						.ToXmlString()
 				);
 
