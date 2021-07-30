@@ -16,7 +16,7 @@ The [TaskQueueBackgroundOperationManager](TaskQueueBackgroundOperations/TaskQueu
 
 ### Using VAF 2.3 task processors
 
-Standard VAF task queues are automatically exposed on the above dashboard, but can be customisedby adding a `[ShowOnDashboard]` attribute.  In the example below the `ShowRunCommand` property is set to `true`, adding a button to the dashboard allowing the task to be run ad-hoc.
+Standard VAF task queues are automatically exposed on the above dashboard, but can be customised by adding a `[ShowOnDashboard]` attribute.  In the example below the `ShowRunCommand` property is set to `true`, adding a button to the dashboard allowing the task to be run ad-hoc.
 
 ![An image showing a task queue that can be run on demand](runondemand-taskqueue.png)
 
@@ -76,10 +76,18 @@ namespace sampleApplication
 		[TaskQueue]
 		public const string QueueId = "sampleApplication.VaultApplication";
 		public const string ImportDataFromRemoteSystemTaskType = "ImportDataFromRemoteSystem";
+		public const string ImportDataFromRemoteSystemTaskType2 = "ImportDataFromRemoteSystem2";
 
 		[TaskProcessor(QueueId, ImportDataFromRemoteSystemTaskType)]
 		[HideOnDashboard] // Hide just this processor.
 		public void ImportDataFromRemoteSystem(ITaskProcessingJob<TaskDirective> job)
+		{
+			// TODO: Connect to the remote system and import data.
+		}
+
+		// This processor would still be shown.
+		[TaskProcessor(QueueId, ImportDataFromRemoteSystemTaskType2)]
+		public void ImportDataFromRemoteSystem2(ITaskProcessingJob<TaskDirective> job)
 		{
 			// TODO: Connect to the remote system and import data.
 		}
@@ -116,7 +124,7 @@ namespace sampleApplication
 	[DataContract]
 	public class Configuration
 	{
-		// The import will run daily at 3am but can be configured via the M-Files Admin software.
+		// The import will run daily at 9am but can be configured via the M-Files Admin software.
 		[DataMember]
 		[RecurringOperationConfiguration(VaultApplication.QueueId, VaultApplication.ImportDataFromRemoteSystemTaskType)]
 		public Schedule ImportDataSchedule { get; set; } = new Schedule()
@@ -128,7 +136,7 @@ namespace sampleApplication
 				{
 					TriggerTimes = new List<TimeSpan>()
 					{
-						new TimeSpan(3, 0, 0) // 3am
+						new TimeSpan(9, 0, 0) // 9am
 					}
 				}
 			}
@@ -225,7 +233,7 @@ public class RandomRecurrenceConfiguration
 	/// <inheritdoc />
 	public string ToDashboardDisplayString()
 	{
-		return $"<p>Runs randomly between {this.MinimumMinutes} and {this.MaximumMinutes} after the last run time.</p>";
+		return $"<p>Runs randomly between {this.MinimumMinutes} and {this.MaximumMinutes} minutes after the last run time.</p>";
 	}
 
 	/// <inheritdoc />
