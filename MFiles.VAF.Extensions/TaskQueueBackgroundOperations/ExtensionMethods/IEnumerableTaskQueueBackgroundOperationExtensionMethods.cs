@@ -1,4 +1,5 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VAF.Configuration.Domain;
 using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Extensions.Dashboards;
 using MFilesAPI;
@@ -74,7 +75,7 @@ namespace MFiles.VAF.Extensions
 				var listItem = new DashboardListItemWithNormalWhitespace()
 				{
 					Title = bgo.Name,
-					StatusSummary = new Configuration.Domain.DomainStatusSummary()
+					StatusSummary = new DomainStatusSummary()
 					{
 						Label = isRunning
 						? "Running"

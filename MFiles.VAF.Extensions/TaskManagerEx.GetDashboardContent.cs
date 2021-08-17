@@ -1,6 +1,7 @@
 ﻿using MFiles.VAF.AppTasks;
 using MFiles.VAF.Common;
 using MFiles.VAF.Configuration.AdminConfigurations;
+using MFiles.VAF.Configuration.Domain;
 using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Core;
 using MFiles.VAF.Extensions.Dashboards;
@@ -137,7 +138,7 @@ namespace MFiles.VAF.Extensions
 					var listItem = new DashboardListItemWithNormalWhitespace()
 					{
 						Title = showOnDashboardAttribute?.Name ?? processor.Type,
-						StatusSummary = new Configuration.Domain.DomainStatusSummary()
+						StatusSummary = new DomainStatusSummary()
 						{
 							Label = isRunning
 							? "Running"

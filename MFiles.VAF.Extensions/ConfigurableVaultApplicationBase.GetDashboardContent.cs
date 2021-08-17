@@ -8,6 +8,7 @@ using MFiles.VAF;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MFiles.VAF.Configuration.Domain;
 
 namespace MFiles.VAF.Extensions
 {
@@ -71,7 +72,7 @@ namespace MFiles.VAF.Extensions
 				list.Items.Add(new DashboardListItem()
 				{
 					Title = "There are no current asynchronous operations.",
-					StatusSummary = new Configuration.Domain.DomainStatusSummary()
+					StatusSummary = new DomainStatusSummary()
 					{
 						Status = VAF.Configuration.Domain.DomainStatus.Undefined
 					}
