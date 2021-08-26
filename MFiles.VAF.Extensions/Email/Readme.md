@@ -2,7 +2,7 @@
 
 *Note: This is a very early version of a potential addition to the above library.  This content is only valid for the versions being provided here and may not be applicable in the future.*
 
-This builds upon the [COM API Extensions](https://github.com/M-Files/COMAPI.Extensions.Community/tree/Email/MFilesAPI.Extensions/Email) functionality, and the readme there should be read before this one.
+This builds upon the [COM API Extensions](https://github.com/M-Files/COMAPI.Extensions.Community/tree/master/MFilesAPI.Extensions/Email) functionality, and the readme there should be read before this one.
 
 ## Configuration
 
