@@ -6,6 +6,31 @@ using System.Runtime.Serialization;
 namespace MFiles.VAF.Extensions
 {
 	[DataContract]
+	public class TimeSpanEx
+	{
+		[DataMember]
+		[JsonConfEditor(TypeEditor = "time")]
+		public TimeSpan Interval { get; set; }
+
+		[DataMember]
+		[JsonConfEditor
+		(
+			Label = "Run on vault start",
+			HelpText = "If true, runs when the vault starts.  If false, the first run is scheduled to be after the interval has elapsed."
+		)]
+		public bool RunOnVaultStartup { get; set; }
+
+		public static implicit operator TimeSpan(TimeSpanEx input)
+		{
+			return input?.Interval ?? TimeSpan.Zero;
+		}
+
+		public static implicit operator TimeSpanEx(TimeSpan input)
+		{
+			return new TimeSpanEx() { Interval = input };
+		}
+	}
+	[DataContract]
 	public class Frequency
 		: IRecurrenceConfiguration
 	{
@@ -16,16 +41,17 @@ namespace MFiles.VAF.Extensions
 		[JsonConfEditor(Label = "Type")]
 		public RecurrenceType RecurrenceType { get; set; } = RecurrenceType.Unknown;
 
+		/// <inheritdoc />
 		[DataMember]
 		[JsonConfEditor
 		(
 			Label = "Configuration",
 			Hidden = true,
-			ShowWhen = ".parent._children{.key == 'RecurrenceType' && .value == 'Interval' }",
-			TypeEditor = "time"
+			ShowWhen = ".parent._children{.key == 'RecurrenceType' && .value == 'Interval' }"
 		)]
-		public TimeSpan Interval { get; set; }
+		public TimeSpanEx Interval { get; set; }
 
+		/// <inheritdoc />
 		[DataMember]
 		[JsonConfEditor
 		(
@@ -34,6 +60,25 @@ namespace MFiles.VAF.Extensions
 			ShowWhen = ".parent._children{.key == 'RecurrenceType' && .value == 'Schedule' }"
 		)]
 		public Schedule Schedule { get; set; }
+
+		/// <inheritdoc />
+		public bool RunOnVaultStartup
+		{
+			get
+			{
+				switch (this.RecurrenceType)
+				{
+					case RecurrenceType.Interval:
+						return this.Interval.RunOnVaultStartup;
+					case RecurrenceType.Schedule:
+						if (false == (this.Schedule?.Enabled ?? false))
+							return false;
+						return this.Schedule.RunOnVaultStartup;
+					default:
+						return false;
+				}
+			}
+		}
 
 		/// <inheritdoc />
 		public DateTime? GetNextExecution(DateTime? after = null)

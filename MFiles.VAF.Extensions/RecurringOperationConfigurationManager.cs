@@ -61,13 +61,16 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// Reads <see cref="ConfigurableVaultApplicationBase{TSecureConfiguration}.Configuration"/> to populate <see cref="RecurringOperationConfiguration"/>
 		/// </summary>
-		public virtual void PopulateFromConfiguration()
-			=> this.PopulateFromConfiguration(this.VaultApplication?.Configuration);
+		/// <param name="isVaultStartup">Whether the vault is starting.</param>
+		public virtual void PopulateFromConfiguration(bool isVaultStartup)
+			=> this.PopulateFromConfiguration(this.VaultApplication?.Configuration, isVaultStartup);
 
 		/// <summary>
 		/// Reads <paramref name="configuration"/> to populate <see cref="RecurringOperationConfiguration"/>
 		/// </summary>
-		public virtual void PopulateFromConfiguration(TSecureConfiguration configuration)
+		/// <param name="configuration">The configuration to read</param>
+		/// <param name="isVaultStartup">Whether the vault is starting.</param>
+		public virtual void PopulateFromConfiguration(TSecureConfiguration configuration, bool isVaultStartup)
 		{
 			// Remove anything we have configured.
 			this.Clear();
@@ -141,14 +144,17 @@ namespace MFiles.VAF.Extensions
 					vault: this.VaultApplication.PermanentVault
 				);
 
+				// Work out the next execution time.
+				DateTime? nextExecution = null;
+
+				// If this should run at vault startup then run it now.
+				if (isVaultStartup && schedule.RunOnVaultStartup)
+					nextExecution = DateTime.UtcNow;
+
 				// If we don't have a schedule then stop.
-				var nextExecution = schedule?.GetNextExecution();
+				nextExecution = nextExecution ?? schedule?.GetNextExecution();
 				if (false == nextExecution.HasValue)
 					continue;
-
-				// If this is an interval-based one then run it now instead of in x minutes.
-				if (schedule is WrappedTimeSpan)
-					nextExecution = DateTime.UtcNow;
 
 				// Add it to the dictionary.
 				this.Add
@@ -405,6 +411,10 @@ namespace MFiles.VAF.Extensions
 			: IRecurrenceConfiguration
 		{
 			public TimeSpan TimeSpan { get; set; }
+
+			/// <inheritdoc/>
+			public bool RunOnVaultStartup => true;
+
 			public WrappedTimeSpan(TimeSpan timeSpan)
 			{
 				this.TimeSpan = timeSpan;
