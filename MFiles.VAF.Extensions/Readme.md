@@ -149,6 +149,8 @@ namespace sampleApplication
 
 ![An image showing a task queue executing after an interval](interval-taskqueue.png)
 
+Note: tasks set to run on an interval will automatically be scheduled to run when the vault starts, then to recur after the set interval.  To change this behaviour see [suppressing an interval-based task from running at vault startup](suppressing-an-interval-based-task-from-running-at-vault-startup).
+
 ```csharp
 namespace sampleApplication
 {
@@ -179,6 +181,43 @@ namespace sampleApplication
 			TypeEditor = "time"
 		)]
 		public TimeSpan Interval { get; set; } = new TimeSpan(0, 10, 0);
+	}
+}
+```
+
+###### Suppressing an interval-based task from running at vault startup
+
+Declaring the property or field type as `TimeSpanEx` will allow the user to confirm whether the task should or should not run when the vault starts.
+
+```csharp
+namespace sampleApplication
+{
+	public class VaultApplication
+		: MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<Configuration>
+	{
+
+		[TaskQueue]
+		public const string QueueId = "sampleApplication.VaultApplication";
+		public const string ImportDataFromRemoteSystemTaskType = "ImportDataFromRemoteSystem";
+
+		[TaskProcessor(QueueId, ImportDataFromRemoteSystemTaskType)]
+		[ShowOnDashboard("Import data from web service", ShowRunCommand = true)]
+		public void ImportDataFromRemoteSystem(ITaskProcessingJob<TaskDirective> job)
+		{
+			// TODO: Connect to the remote system and import data.
+		}
+	}
+	[DataContract]
+	public class Configuration
+	{
+		// The import will run every 10 minutes but can be changed to another interval via the M-Files Admin software.
+		[DataMember]
+		[RecurringOperationConfiguration
+		(
+			VaultApplication.QueueId,
+			VaultApplication.ImportDataFromRemoteSystemTaskType
+		)]
+		public TimeSpanEx Interval { get; set; } = new TimeSpan(0, 10, 0);
 	}
 }
 ```
@@ -234,7 +273,9 @@ public class RandomRecurrenceConfiguration
 	[JsonConfIntegerEditor(Min = 5, Max = 1000)]
 	public int MaximumMinutes { get;set; } = 200;
 	
-
+	[DataMember]
+	public bool RunOnVaultStartup { get; } = false;
+	
 	/// <inheritdoc />
 	public string ToDashboardDisplayString()
 	{
