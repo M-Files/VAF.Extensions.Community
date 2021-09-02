@@ -89,57 +89,6 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="timespan">The timespan to convert.</param>
 		/// <returns>A string in English describing the timespan.</returns>
-		public static string ToDashboardDisplayString(this TimeSpanEx timespan)
-		{
-			// Sanity.
-			if (null == timespan?.Interval || timespan.Interval <= TimeSpan.Zero)
-				return "<p>No timespan specified; does not repeat.<br /></p>";
-
-			var prefix = "<p>Runs";
-			if (timespan.RunOnVaultStartup)
-				prefix += " on vault startup and";
-			var suffix = ".<br /></p>";
-
-			// Seconds be easy.
-			if (timespan.Interval <= TimeSpan.FromSeconds(120))
-				return $"{prefix} every {(int)timespan.Interval.TotalSeconds} seconds{suffix}";
-
-			// Build a text representation
-			var components = new List<string>();
-			if (timespan.Interval.Days > 0)
-				components.Add($"{timespan.Interval.Days} day{(timespan.Interval.Days != 1 ? "s" : "")}");
-			if (timespan.Interval.Hours > 0)
-				components.Add($"{timespan.Interval.Hours} hour{(timespan.Interval.Hours != 1 ? "s" : "")}");
-			if (timespan.Interval.Minutes > 0)
-				components.Add($"{timespan.Interval.Minutes} minute{(timespan.Interval.Minutes != 1 ? "s" : "")}");
-			if (timespan.Interval.Seconds > 0)
-				components.Add($"{timespan.Interval.Seconds} second{(timespan.Interval.Seconds != 1 ? "s" : "")}");
-
-			// Build a text representation
-			var output = prefix + " every ";
-			for (var i = 0; i < components.Count; i++)
-			{
-				if (i == 0)
-				{
-					output += components[i];
-				}
-				else if (i == components.Count - 1)
-				{
-					output += ", and " + components[i];
-				}
-				else
-				{
-					output += ", " + components[i];
-				}
-			}
-			return output + suffix;
-		}
-
-		/// <summary>
-		/// Converts <paramref name="timespan"/> to a string for display on a dashboard.
-		/// </summary>
-		/// <param name="timespan">The timespan to convert.</param>
-		/// <returns>A string in English describing the timespan.</returns>
 		public static string ToDashboardDisplayString(this TimeSpan timespan)
 		{
 			return ((TimeSpanEx)timespan).ToDashboardDisplayString();

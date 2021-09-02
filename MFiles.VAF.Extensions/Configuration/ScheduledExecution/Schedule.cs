@@ -30,7 +30,8 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		[JsonConfEditor
 		(
 			Label = "Run on vault start",
-			HelpText = "If true, runs when the vault starts.  If false, the first run is calculated from the triggers."
+			HelpText = "If true, runs when the vault starts.  If false, the first run is calculated from the triggers.",
+			DefaultValue = false
 		)]
 		public bool RunOnVaultStartup { get; set; }
 

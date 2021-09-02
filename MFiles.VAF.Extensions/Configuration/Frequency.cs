@@ -6,31 +6,6 @@ using System.Runtime.Serialization;
 namespace MFiles.VAF.Extensions
 {
 	[DataContract]
-	public class TimeSpanEx
-	{
-		[DataMember]
-		[JsonConfEditor(TypeEditor = "time")]
-		public TimeSpan Interval { get; set; }
-
-		[DataMember]
-		[JsonConfEditor
-		(
-			Label = "Run on vault start",
-			HelpText = "If true, runs when the vault starts.  If false, the first run is scheduled to be after the interval has elapsed."
-		)]
-		public bool RunOnVaultStartup { get; set; }
-
-		public static implicit operator TimeSpan(TimeSpanEx input)
-		{
-			return input?.Interval ?? TimeSpan.Zero;
-		}
-
-		public static implicit operator TimeSpanEx(TimeSpan input)
-		{
-			return new TimeSpanEx() { Interval = input };
-		}
-	}
-	[DataContract]
 	public class Frequency
 		: IRecurrenceConfiguration
 	{
