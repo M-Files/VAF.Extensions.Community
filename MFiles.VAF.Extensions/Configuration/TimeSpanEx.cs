@@ -1,11 +1,111 @@
 ﻿using MFiles.VAF.Configuration;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions
 {
+	internal class TimeSpanExJsonConverter
+		: JsonConverter
+	{
+		/// <inheritdoc />
+		public override bool CanConvert(Type objectType)
+		{
+			return objectType == typeof(TimeSpanEx);
+		}
+
+		/// <inheritdoc />
+		public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+		{
+			switch (reader.TokenType)
+			{
+				case JsonToken.String:
+					return new TimeSpanEx() { Interval = TimeSpan.Parse(reader.Value?.ToString()) };
+				case JsonToken.StartObject:
+
+					// Set up the output.
+					var output = new TimeSpanEx();
+
+					// Populate the output.
+					var jObject = JToken.ReadFrom(reader);
+					serializer.Populate(jObject.CreateReader(), output);
+
+					// Return the output.
+					return output;
+			}
+			return null;
+		}
+
+		/// <inheritdoc />
+		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+		{
+			if (value == null)
+				return;
+
+			var valueType = value.GetType();
+
+			// Start the object.
+			writer.WriteStartObject();
+
+			// Output any properties.
+			foreach (var p in valueType.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+			{
+				// Skip null values.
+				var memberValue = p.GetValue(value);
+				if (null == memberValue)
+					continue;
+
+				// Only process data members.
+				var dataMemberAttribute = p.GetCustomAttributes(typeof(DataMemberAttribute), true).FirstOrDefault() as DataMemberAttribute;
+				if (null == dataMemberAttribute)
+					continue;
+
+				// What should this be called?
+				var name = string.IsNullOrWhiteSpace(dataMemberAttribute.Name)
+					? p.Name
+					: dataMemberAttribute.Name;
+
+				// Add it to the object.
+				writer.WritePropertyName(name);
+				writer.WriteRawValue(JsonConvert.SerializeObject(memberValue, Formatting.Indented));
+
+			}
+
+			// Output any fields.
+			foreach (var f in valueType.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+			{
+				// Skip null values.
+				var memberValue = f.GetValue(value);
+				if (null == memberValue)
+					continue;
+
+				// Only process data members.
+				var dataMemberAttribute = f.GetCustomAttributes(typeof(DataMemberAttribute), true).FirstOrDefault() as DataMemberAttribute;
+				if (null == dataMemberAttribute)
+					continue;
+
+				// What should this be called?
+				var name = string.IsNullOrWhiteSpace(dataMemberAttribute.Name)
+					? f.Name
+					: dataMemberAttribute.Name;
+
+				// Add it to the object.
+				writer.WritePropertyName(name);
+				writer.WriteRawValue(JsonConvert.SerializeObject(memberValue, Formatting.Indented));
+
+			}
+
+			// End the object.
+			writer.WriteEndObject();
+
+		}
+	}
+
 	[DataContract]
+	[JsonConverter(typeof(TimeSpanExJsonConverter))]
 	public class TimeSpanEx
 		: IRecurrenceConfiguration
 	{
