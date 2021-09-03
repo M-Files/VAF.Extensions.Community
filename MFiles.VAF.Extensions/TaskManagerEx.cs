@@ -39,6 +39,86 @@ namespace MFiles.VAF.Extensions
 			this.TaskEvent += TaskManagerEx_TaskEvent;
 		}
 
+		/// <summary>
+		/// Cancels any future executions of tasks of type <paramref name="taskType"/> on queue <paramref name="queueId"/>.
+		/// If <paramref name="scheduleFor"/> has a value then a new execution of the task is scheduled for this date/time.
+		/// </summary>
+		/// <param name="queueId">The queue that the task should be rescheduled on.</param>
+		/// <param name="taskType">The task type to be rescheduled.</param>
+		/// <param name="innerDirective">The inner directive to be passed to the rescheduled task.</param>
+		/// <param name="vault">The vault reference to use for the operation.</param>
+		/// <param name="scheduleFor">The date/time to schedule a new execution for.  If <see langword="null"/>, does not schedule a future execution.</param>
+		/// <remarks>Adds an item to the scheduling queue, so that only one server performs this operation.</remarks>
+		public virtual void RescheduleTask(string queueId, string taskType, TaskDirective innerDirective = null, Vault vault = null, DateTime? scheduleFor = null)
+			=> this.AddTask
+			(
+				vault ?? this.VaultApplication.PermanentVault,
+				this.VaultApplication.GetSchedulerQueueID(),
+				this.VaultApplication.GetRescheduleTaskType(),
+				new RescheduleProcessorTaskDirective()
+				{
+					QueueID = queueId,
+					TaskType = taskType,
+					NextExecution = scheduleFor,
+					InnerDirective = innerDirective
+				}
+			);
+
+		/// <summary>
+		/// Registers/opens a queue with ID provided by <see cref="ConfigurableVaultApplicationBase{TSecureConfiguration}.GetSchedulerQueueID"/>
+		/// and registers a process to handle tasks of type <see cref="ConfigurableVaultApplicationBase{TSecureConfiguration}.GetRescheduleTaskType"/>.
+		/// </summary>
+		/// <remarks>
+		/// This is a sequential queue, and the <see cref="HandleReschedule(ITaskProcessingJob{RescheduleProcessorTaskDirective})"/>
+		/// method processes the rescheduling tasks.
+		/// </remarks>
+		public virtual void RegisterSchedulingQueue()
+		{
+			// Register the scheduler queue.
+			this.RegisterQueue
+			(
+				this.VaultApplication.GetSchedulerQueueID(),
+				new[]
+				{
+						new TaskProcessor<RescheduleProcessorTaskDirective>
+						(
+							this.VaultApplication.GetRescheduleTaskType(),
+							this.HandleReschedule
+						)
+				},
+				MFTaskQueueProcessingBehavior.MFProcessingBehaviorSequential
+			);
+		}
+
+		/// <summary>
+		/// Cancels future executions of a task with a given queue ID and task type (read from the <paramref name="job"/>'s directive).
+		/// If the directive also contains a next-execution date then reschedules an execution of the task at that time.
+		/// </summary>
+		/// <param name="job"></param>
+		protected virtual void HandleReschedule(ITaskProcessingJob<RescheduleProcessorTaskDirective> job)
+		{
+			// Cancel any future executions.
+			this.CancelAllFutureExecutions
+			(
+				job.Directive.QueueID,
+				job.Directive.TaskType,
+				includeCurrentlyExecuting: false,
+				vault: job.Vault
+			);
+
+			// Re-schedule?
+			if (job.Directive.NextExecution.HasValue)
+				// Schedule the next run.
+				this.AddTask
+				(
+					job.Vault,
+					job.Directive.QueueID,
+					job.Directive.TaskType,
+					directive: job.Directive.InnerDirective,
+					activationTime: job.Directive.NextExecution.Value
+				);
+		}
+
 		private void TaskManagerEx_TaskEvent(object sender, TaskManagerEventArgs e)
 		{
 			if (null == e.Queues || e.Queues.Count == 0)
@@ -70,12 +150,20 @@ namespace MFiles.VAF.Extensions
 									continue;							
 
 								// Schedule.
-								this.AddTask(this.Vault, t.QueueID, t.TaskType, activationTime: nextExecutionDate);
+								this.RescheduleTask(t.QueueID, t.TaskType, vault: this.Vault, scheduleFor: nextExecutionDate);
 							}
 							break;
 					}
 					break;
 			}
 		}
+	}
+	public class RescheduleProcessorTaskDirective
+		: TaskDirective
+	{
+		public string QueueID { get; set; }
+		public string TaskType { get; set; }
+		public DateTime? NextExecution { get; set; }
+		public TaskDirective InnerDirective { get; set; }
 	}
 }
