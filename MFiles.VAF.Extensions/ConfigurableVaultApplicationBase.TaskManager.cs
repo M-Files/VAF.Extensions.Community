@@ -28,6 +28,21 @@ namespace MFiles.VAF.Extensions
 			protected set => base.TaskManager = value;
 		}
 
+		public virtual string GetSchedulerQueueID()
+			=> $"{this.TaskManager.Id}.extensions.scheduler";
+
+		public virtual string GetRescheduleTaskType()
+			=> $"reschedule";
+
+		protected virtual TaskManagerEx<TSecureConfiguration> GetTaskManager()
+			=> new TaskManagerEx<TSecureConfiguration>
+				(
+					this,
+					this.GetType().Namespace,
+					this.PermanentVault,
+					GetTransactionRunner()
+				);
+
 		/// <summary>
 		/// Initializes the newer task manager, and regsiters all queues and processors
 		/// that have been discovered by the <see cref="TaskQueueResolver"/>.
@@ -39,15 +54,12 @@ namespace MFiles.VAF.Extensions
 			if (AppTasks.TaskManager.IsSupported(PermanentVault))
 			{
 				// Initialize the new task manager, and register the queues from the resolver.
-				this.TaskManager = new TaskManagerEx<TSecureConfiguration>
-				(
-					this,
-					this.GetType().Namespace,
-					this.PermanentVault,
-					GetTransactionRunner()
-				);
+				this.TaskManager = this.GetTaskManager();
 				this.TaskQueueResolver?.RegisterAll(this.TaskManager);
 				TaskStatusHelper.Attach(this.TaskManager);
+
+				// Register the scheduling queue.
+				this.TaskManager?.RegisterSchedulingQueue();
 			}
 			else if (this.TaskQueueResolver != null && this.TaskQueueResolver.GetQueues().Length > 0)
 			{

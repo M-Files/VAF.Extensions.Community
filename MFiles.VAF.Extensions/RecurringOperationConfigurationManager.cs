@@ -132,13 +132,11 @@ namespace MFiles.VAF.Extensions
 					continue;
 				}
 
-				// Cancel any future executions.
-				this.VaultApplication.TaskManager.CancelAllFutureExecutions
+				// Add it to the dictionary.
+				this.Add
 				(
-					tuple.Item1.QueueID,
-					tuple.Item1.TaskType,
-					includeCurrentlyExecuting: false,
-					vault: this.VaultApplication.PermanentVault
+					tuple.Item1,
+					tuple.Item2
 				);
 
 				// If we don't have a schedule then stop.
@@ -150,21 +148,15 @@ namespace MFiles.VAF.Extensions
 				if (schedule is WrappedTimeSpan)
 					nextExecution = DateTime.UtcNow;
 
-				// Add it to the dictionary.
-				this.Add
-				(
-					tuple.Item1,
-					tuple.Item2
-				);
-
-				// Schedule the next run.
-				this.VaultApplication.TaskManager.AddTask
-				(
-					this.VaultApplication.PermanentVault,
-					tuple.Item1.QueueID,
-					tuple.Item1.TaskType,
-					activationTime: nextExecution.Value
-				);
+				// Schedule the next-run?
+				if (nextExecution.HasValue)
+					this.VaultApplication.TaskManager.RescheduleTask
+					(
+						tuple.Item1.QueueID,
+						tuple.Item1.TaskType,
+						vault: this.VaultApplication.PermanentVault,
+						scheduleFor: nextExecution
+					);
 			}
 		}
 
