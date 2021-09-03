@@ -39,7 +39,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		{
 			var output = JsonConvert.DeserializeObject<Wrapper>(@"{ ""TimeSpanEx"" : { ""Interval"" : ""01:02:03"", ""RunOnVaultStartup"" : true } }");
 			Assert.IsNotNull(output?.TimeSpanEx);
-			Assert.IsTrue(output.TimeSpanEx.RunOnVaultStartup);
+			Assert.IsTrue(output.TimeSpanEx.RunOnVaultStartup.HasValue);
+			Assert.IsTrue(output.TimeSpanEx.RunOnVaultStartup.Value);
 		}
 
 		[TestMethod]
@@ -47,13 +48,29 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		{
 			var output = JsonConvert.DeserializeObject<Wrapper>(@"{ ""TimeSpanEx"" : { ""Interval"" : ""01:02:03"", ""RunOnVaultStartup"" : false } }");
 			Assert.IsNotNull(output?.TimeSpanEx);
-			Assert.IsFalse(output.TimeSpanEx.RunOnVaultStartup);
+			Assert.IsTrue(output.TimeSpanEx.RunOnVaultStartup.HasValue);
+			Assert.IsFalse(output.TimeSpanEx.RunOnVaultStartup.Value);
 		}
 
 		[TestMethod]
 		public void SerializesCorrectly()
 		{
 			var input = new TimeSpanEx() { Interval = new TimeSpan(1, 2, 3) };
+			// Note: we force RunOnVaultStartup to true for TimeSpanEx/TimeSpan, for legacy compatibility.
+			Assert.AreEqual(@"{""Interval"":""01:02:03"",""RunOnVaultStartup"":true}", JsonConvert.SerializeObject(input));
+		}
+
+		[TestMethod]
+		public void SerializesCorrectlyWithRunOnVaultStartup_Null()
+		{
+			var input = new TimeSpanEx() { Interval = new TimeSpan(1, 2, 3), RunOnVaultStartup = null };
+			Assert.AreEqual(@"{""Interval"":""01:02:03""}", JsonConvert.SerializeObject(input));
+		}
+
+		[TestMethod]
+		public void SerializesCorrectlyWithRunOnVaultStartup_True()
+		{
+			var input = new TimeSpanEx() { Interval = new TimeSpan(1, 2, 3), RunOnVaultStartup = true };
 			Assert.AreEqual(@"{""Interval"":""01:02:03"",""RunOnVaultStartup"":true}", JsonConvert.SerializeObject(input));
 		}
 

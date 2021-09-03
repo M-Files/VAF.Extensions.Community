@@ -24,7 +24,7 @@ namespace MFiles.VAF.Extensions
 			HelpText = "If true, runs when the vault starts.  If false, the first run is scheduled to be after the interval has elapsed.",
 			DefaultValue = true
 		)]
-		public bool RunOnVaultStartup { get; set; } = true;
+		public bool? RunOnVaultStartup { get; set; } = true;
 
 		public DateTime? GetNextExecution(DateTime? after = null)
 		{
@@ -38,7 +38,7 @@ namespace MFiles.VAF.Extensions
 				return "<p>No timespan specified; does not repeat.<br /></p>";
 
 			var prefix = "<p>Runs";
-			if (this.RunOnVaultStartup)
+			if (this.RunOnVaultStartup.HasValue && this.RunOnVaultStartup.Value)
 				prefix += " on vault startup and";
 			var suffix = ".<br /></p>";
 

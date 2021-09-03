@@ -21,6 +21,6 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// Whether the processor should run on vault startup (in addition to any other schedule or interval).
 		/// </summary>
-		bool RunOnVaultStartup { get; }
+		bool? RunOnVaultStartup { get; }
 	}
 }

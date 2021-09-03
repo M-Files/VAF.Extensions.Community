@@ -148,7 +148,7 @@ namespace MFiles.VAF.Extensions
 				DateTime? nextExecution = null;
 
 				// If this should run at vault startup then run it now.
-				if (isVaultStartup && schedule.RunOnVaultStartup)
+				if (isVaultStartup && schedule.RunOnVaultStartup.HasValue && schedule.RunOnVaultStartup.Value)
 					nextExecution = DateTime.UtcNow;
 
 				// If we don't have a schedule then stop.
@@ -413,7 +413,7 @@ namespace MFiles.VAF.Extensions
 			public TimeSpan TimeSpan { get; set; }
 
 			/// <inheritdoc/>
-			public bool RunOnVaultStartup => true;
+			public bool? RunOnVaultStartup => true;
 
 			public WrappedTimeSpan(TimeSpan timeSpan)
 			{

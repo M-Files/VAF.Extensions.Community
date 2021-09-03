@@ -37,7 +37,7 @@ namespace MFiles.VAF.Extensions
 		public Schedule Schedule { get; set; }
 
 		/// <inheritdoc />
-		public bool RunOnVaultStartup
+		public bool? RunOnVaultStartup
 		{
 			get
 			{
