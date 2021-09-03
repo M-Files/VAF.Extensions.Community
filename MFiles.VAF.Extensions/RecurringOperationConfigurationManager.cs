@@ -156,6 +156,12 @@ namespace MFiles.VAF.Extensions
 					vault: this.VaultApplication.PermanentVault,
 					scheduleFor: nextExecution
 				);
+				(
+					this.VaultApplication.PermanentVault,
+					tuple.Item1.QueueID,
+					tuple.Item1.TaskType,
+					activationTime: nextExecution.Value
+				);
 			}
 		}
 
