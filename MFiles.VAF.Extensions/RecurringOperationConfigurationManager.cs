@@ -306,7 +306,7 @@ namespace MFiles.VAF.Extensions
 						if (null == value)
 							continue;
 						if (value.GetType() == typeof(TimeSpan))
-							value = new WrappedTimeSpan((TimeSpan)value);
+							value = (TimeSpanEx)value;
 
 						// Validate that the value is a recurring operation.
 						if (!typeof(IRecurrenceConfiguration).IsAssignableFrom(value.GetType()))
@@ -373,7 +373,7 @@ namespace MFiles.VAF.Extensions
 						if (null == value)
 							continue;
 						if (value.GetType() == typeof(TimeSpan))
-							value = new WrappedTimeSpan((TimeSpan)value);
+							value = (TimeSpanEx)value;
 
 						// Validate the type.
 						if (!typeof(IRecurrenceConfiguration).IsAssignableFrom(value.GetType()))
@@ -405,33 +405,6 @@ namespace MFiles.VAF.Extensions
 					this.GetTaskProcessorConfiguration(input, p, out a);
 					schedules.AddRange(a);
 				}
-			}
-		}
-		internal class WrappedTimeSpan
-			: IRecurrenceConfiguration
-		{
-			public TimeSpan TimeSpan { get; set; }
-
-			/// <inheritdoc/>
-			public bool? RunOnVaultStartup => true;
-
-			public WrappedTimeSpan(TimeSpan timeSpan)
-			{
-				this.TimeSpan = timeSpan;
-			}
-			public static implicit operator TimeSpan(WrappedTimeSpan input)
-				=> input?.TimeSpan ?? TimeSpan.Zero;
-			public static implicit operator WrappedTimeSpan(TimeSpan input)
-				=> new WrappedTimeSpan(input);
-
-			public DateTime? GetNextExecution(DateTime? after = null)
-			{
-				return (after ?? DateTime.UtcNow).ToUniversalTime().Add(this.TimeSpan);
-			}
-
-			public string ToDashboardDisplayString()
-			{
-				return this.TimeSpan.ToDashboardDisplayString();
 			}
 		}
 	}

@@ -187,7 +187,7 @@ namespace sampleApplication
 
 ###### Suppressing an interval-based task from running at vault startup
 
-Declaring the property or field type as `TimeSpanEx` will allow the user to confirm whether the task should or should not run when the vault starts.
+Declaring the property or field type as `TimeSpanEx` will allow the user to confirm whether the task should or should not run when the vault starts.  By default this value is true (run at vault startup, then after a time period).
 
 ```csharp
 namespace sampleApplication
@@ -217,7 +217,12 @@ namespace sampleApplication
 			VaultApplication.QueueId,
 			VaultApplication.ImportDataFromRemoteSystemTaskType
 		)]
-		public TimeSpanEx Interval { get; set; } = new TimeSpan(0, 10, 0);
+		public TimeSpanEx Interval { get; set; } = new TimeSpanEx()
+		{
+			Interval = new TimeSpan(0, 10, 0),
+			// This one does not run at startup, although the user can change this in the admin configuration.
+			RunOnVaultStartup = false
+		};
 	}
 }
 ```
