@@ -26,6 +26,15 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		[DataMember]
 		public List<Trigger> Triggers { get; set; } = new List<Trigger>();
 
+		[DataMember]
+		[JsonConfEditor
+		(
+			Label = "Run on vault start",
+			HelpText = "If true, runs when the vault starts.  If false, the first run is calculated from the triggers.",
+			DefaultValue = false
+		)]
+		public bool? RunOnVaultStartup { get; set; }
+
 		/// <summary>
 		/// Gets the next execution datetime for this trigger.
 		/// </summary>
@@ -50,9 +59,13 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		public string ToDashboardDisplayString()
 		{
 			if (this.Triggers == null || this.Triggers.Count == 0)
-				return "<p>No schedule specified; does not repeat.<br /></p>";
+				return this.RunOnVaultStartup.HasValue && this.RunOnVaultStartup.Value
+					? "<p>Runs when the vault starts, but does not repeat.<br /></p>"
+					: "<p>No schedule specified; does not repeat.<br /></p>";
 
-			var output = "<p>Runs according to the following schedule:";
+			var output = this.RunOnVaultStartup.HasValue && this.RunOnVaultStartup.Value
+				? "<p>Runs when the vault starts and according to the following schedule:"
+				: "<p>Runs according to the following schedule:";
 
 			// Output the triggers as a HTML list.
 			output += "<ul>";

@@ -91,7 +91,7 @@ namespace MFiles.VAF.Extensions
 		/// <returns>A string in English describing the timespan.</returns>
 		public static string ToDashboardDisplayString(this TimeSpan timespan)
 		{
-			return ((TimeSpan?)timespan).ToDashboardDisplayString();
+			return ((TimeSpanEx)timespan).ToDashboardDisplayString();
 		}
 
 		/// <summary>
@@ -105,39 +105,7 @@ namespace MFiles.VAF.Extensions
 			if (false == timespan.HasValue || timespan.Value <= TimeSpan.Zero)
 				return "<p>No timespan specified; does not repeat.<br /></p>";
 
-			// Seconds be easy.
-			if (timespan.Value <= TimeSpan.FromSeconds(120))
-				return $"<p>Runs every {(int)timespan.Value.TotalSeconds} seconds.<br /></p>";
-
-			// Build a text representation
-			var components = new List<string>();
-			if (timespan.Value.Days > 0)
-				components.Add($"{timespan.Value.Days} day{(timespan.Value.Days != 1 ? "s" : "")}");
-			if (timespan.Value.Hours > 0)
-				components.Add($"{timespan.Value.Hours} hour{(timespan.Value.Hours != 1 ? "s" : "")}");
-			if (timespan.Value.Minutes > 0)
-				components.Add($"{timespan.Value.Minutes} minute{(timespan.Value.Minutes != 1 ? "s" : "")}");
-			if (timespan.Value.Seconds > 0)
-				components.Add($"{timespan.Value.Seconds} second{(timespan.Value.Seconds != 1 ? "s" : "")}");
-
-			// Build a text representation
-			var output = "<p>Runs every ";
-			for (var i = 0; i < components.Count; i++)
-			{
-				if (i == 0)
-				{
-					output += components[i];
-				}
-				else if (i == components.Count - 1)
-				{
-					output += ", and " + components[i];
-				}
-				else
-				{
-					output += ", " + components[i];
-				}
-			}
-			return output + ".<br /></p>";
+			return ((TimeSpanEx)timespan.Value).ToDashboardDisplayString();
 		}
 
 

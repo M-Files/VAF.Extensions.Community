@@ -16,7 +16,37 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods
 			var interval = new TimeSpan(1, 30, 32);
 			Assert.AreEqual
 			(
-				"<p>Runs every 1 hour, 30 minutes, and 32 seconds.<br /></p>", 
+				"<p>Runs on vault startup and every 1 hour, 30 minutes, and 32 seconds.<br /></p>",
+				interval.ToDashboardDisplayString()
+			);
+		}
+
+		[TestMethod]
+		public void ToDashboardDisplayString_RunOnStartup_False()
+		{
+			var interval = new TimeSpanEx()
+			{
+				Interval = new TimeSpan(1, 30, 32),
+				RunOnVaultStartup = false
+			};
+			Assert.AreEqual
+			(
+				"<p>Runs every 1 hour, 30 minutes, and 32 seconds.<br /></p>",
+				interval.ToDashboardDisplayString()
+			);
+		}
+
+		[TestMethod]
+		public void ToDashboardDisplayString_RunOnStartup_True()
+		{
+			var interval = new TimeSpanEx()
+			{
+				Interval = new TimeSpan(1, 30, 32),
+				RunOnVaultStartup = true
+			};
+			Assert.AreEqual
+			(
+				"<p>Runs on vault startup and every 1 hour, 30 minutes, and 32 seconds.<br /></p>",
 				interval.ToDashboardDisplayString()
 			);
 		}

@@ -16,16 +16,17 @@ namespace MFiles.VAF.Extensions
 		[JsonConfEditor(Label = "Type")]
 		public RecurrenceType RecurrenceType { get; set; } = RecurrenceType.Unknown;
 
+		/// <inheritdoc />
 		[DataMember]
 		[JsonConfEditor
 		(
 			Label = "Configuration",
 			Hidden = true,
-			ShowWhen = ".parent._children{.key == 'RecurrenceType' && .value == 'Interval' }",
-			TypeEditor = "time"
+			ShowWhen = ".parent._children{.key == 'RecurrenceType' && .value == 'Interval' }"
 		)]
-		public TimeSpan Interval { get; set; }
+		public TimeSpanEx Interval { get; set; }
 
+		/// <inheritdoc />
 		[DataMember]
 		[JsonConfEditor
 		(
@@ -34,6 +35,25 @@ namespace MFiles.VAF.Extensions
 			ShowWhen = ".parent._children{.key == 'RecurrenceType' && .value == 'Schedule' }"
 		)]
 		public Schedule Schedule { get; set; }
+
+		/// <inheritdoc />
+		public bool? RunOnVaultStartup
+		{
+			get
+			{
+				switch (this.RecurrenceType)
+				{
+					case RecurrenceType.Interval:
+						return this.Interval.RunOnVaultStartup;
+					case RecurrenceType.Schedule:
+						if (false == (this.Schedule?.Enabled ?? false))
+							return false;
+						return this.Schedule.RunOnVaultStartup;
+					default:
+						return false;
+				}
+			}
+		}
 
 		/// <inheritdoc />
 		public DateTime? GetNextExecution(DateTime? after = null)

@@ -137,5 +137,47 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 				new DateTime(2021, 03, 18, 17, 00, 00)
 			};
 		}
+
+		[TestMethod]
+		public void DailyTriggerToDashboardDisplayString_RunOnStartup_False()
+		{
+			var schedule = new Schedule()
+			{
+				Triggers = new List<Trigger>()
+				{
+					new DailyTrigger()
+					{
+							TriggerTimes = new List<TimeSpan>(){ new TimeSpan(1, 30, 32) }
+					}
+				},
+				RunOnVaultStartup = false
+			};
+			Assert.AreEqual
+			(
+				"<p>Runs according to the following schedule:<ul><li>Daily at the following times: 01:30:32.</li></ul></p>",
+				schedule.ToDashboardDisplayString()
+			);
+		}
+
+		[TestMethod]
+		public void DailyTriggerToDashboardDisplayString_RunOnStartup_True()
+		{
+			var schedule = new Schedule()
+			{
+				Triggers = new List<Trigger>()
+				{
+					new DailyTrigger()
+					{
+							TriggerTimes = new List<TimeSpan>(){ new TimeSpan(1, 30, 32) }
+					}
+				},
+				RunOnVaultStartup = true
+			};
+			Assert.AreEqual
+			(
+				"<p>Runs when the vault starts and according to the following schedule:<ul><li>Daily at the following times: 01:30:32.</li></ul></p>",
+				schedule.ToDashboardDisplayString()
+			);
+		}
 	}
 }

@@ -61,13 +61,16 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// Reads <see cref="ConfigurableVaultApplicationBase{TSecureConfiguration}.Configuration"/> to populate <see cref="RecurringOperationConfiguration"/>
 		/// </summary>
-		public virtual void PopulateFromConfiguration()
-			=> this.PopulateFromConfiguration(this.VaultApplication?.Configuration);
+		/// <param name="isVaultStartup">Whether the vault is starting.</param>
+		public virtual void PopulateFromConfiguration(bool isVaultStartup)
+			=> this.PopulateFromConfiguration(this.VaultApplication?.Configuration, isVaultStartup);
 
 		/// <summary>
 		/// Reads <paramref name="configuration"/> to populate <see cref="RecurringOperationConfiguration"/>
 		/// </summary>
-		public virtual void PopulateFromConfiguration(TSecureConfiguration configuration)
+		/// <param name="configuration">The configuration to read</param>
+		/// <param name="isVaultStartup">Whether the vault is starting.</param>
+		public virtual void PopulateFromConfiguration(TSecureConfiguration configuration, bool isVaultStartup)
 		{
 			// Remove anything we have configured.
 			this.Clear();
@@ -141,14 +144,17 @@ namespace MFiles.VAF.Extensions
 					vault: this.VaultApplication.PermanentVault
 				);
 
+				// Work out the next execution time.
+				DateTime? nextExecution = null;
+
+				// If this should run at vault startup then run it now.
+				if (isVaultStartup && schedule.RunOnVaultStartup.HasValue && schedule.RunOnVaultStartup.Value)
+					nextExecution = DateTime.UtcNow;
+
 				// If we don't have a schedule then stop.
-				var nextExecution = schedule?.GetNextExecution();
+				nextExecution = nextExecution ?? schedule?.GetNextExecution();
 				if (false == nextExecution.HasValue)
 					continue;
-
-				// If this is an interval-based one then run it now instead of in x minutes.
-				if (schedule is WrappedTimeSpan)
-					nextExecution = DateTime.UtcNow;
 
 				// Add it to the dictionary.
 				this.Add
@@ -300,7 +306,7 @@ namespace MFiles.VAF.Extensions
 						if (null == value)
 							continue;
 						if (value.GetType() == typeof(TimeSpan))
-							value = new WrappedTimeSpan((TimeSpan)value);
+							value = (TimeSpanEx)value;
 
 						// Validate that the value is a recurring operation.
 						if (!typeof(IRecurrenceConfiguration).IsAssignableFrom(value.GetType()))
@@ -367,7 +373,7 @@ namespace MFiles.VAF.Extensions
 						if (null == value)
 							continue;
 						if (value.GetType() == typeof(TimeSpan))
-							value = new WrappedTimeSpan((TimeSpan)value);
+							value = (TimeSpanEx)value;
 
 						// Validate the type.
 						if (!typeof(IRecurrenceConfiguration).IsAssignableFrom(value.GetType()))
@@ -399,29 +405,6 @@ namespace MFiles.VAF.Extensions
 					this.GetTaskProcessorConfiguration(input, p, out a);
 					schedules.AddRange(a);
 				}
-			}
-		}
-		internal class WrappedTimeSpan
-			: IRecurrenceConfiguration
-		{
-			public TimeSpan TimeSpan { get; set; }
-			public WrappedTimeSpan(TimeSpan timeSpan)
-			{
-				this.TimeSpan = timeSpan;
-			}
-			public static implicit operator TimeSpan(WrappedTimeSpan input)
-				=> input?.TimeSpan ?? TimeSpan.Zero;
-			public static implicit operator WrappedTimeSpan(TimeSpan input)
-				=> new WrappedTimeSpan(input);
-
-			public DateTime? GetNextExecution(DateTime? after = null)
-			{
-				return (after ?? DateTime.UtcNow).ToUniversalTime().Add(this.TimeSpan);
-			}
-
-			public string ToDashboardDisplayString()
-			{
-				return this.TimeSpan.ToDashboardDisplayString();
 			}
 		}
 	}
