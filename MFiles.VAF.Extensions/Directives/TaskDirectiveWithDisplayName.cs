@@ -18,7 +18,7 @@ namespace MFiles.VAF.Extensions
 	/// <summary>
 	/// A task queue directive with a display name.
 	/// </summary>
-	[DataContact]
+	[DataContract]
 	public abstract class TaskDirectiveWithDisplayName
 		: TaskDirective, ITaskDirectiveWithDisplayName
 	{
