@@ -24,6 +24,9 @@ namespace MFiles.VAF.Extensions
 						$"No background operation with the name {name} in queue {this.QueueId} exists.",
 						nameof(name));
 
+				// Cancel all Future Executions
+				this.BackgroundOperations[name].CancelFutureExecutions();
+
 				// Remove it from the dictionary.
 				return this.BackgroundOperations.Remove(name);
 			}
