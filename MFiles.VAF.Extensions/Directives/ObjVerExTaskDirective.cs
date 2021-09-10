@@ -3,18 +3,21 @@ using MFiles.VAF;
 using MFilesAPI;
 using System;
 using MFiles.VAF.MultiserverMode;
+using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions
 {
 	/// <summary>
 	/// A <see cref="TaskDirective"/> that represents a single <see cref="ObjVerExTaskDirective.ObjVerEx"/>.
 	/// </summary>
+	[DataContract]
 	public class ObjVerExTaskDirective
 		: TaskDirectiveWithDisplayName
 	{
 		/// <summary>
 		/// Parse-able ObjVerEx string.
 		/// </summary>
+		[DataMember]
 		public string ObjVerEx { get; set; }
 
 		public ObjVerExTaskDirective() { }

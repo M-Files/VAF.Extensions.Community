@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.AppTasks;
 using MFiles.VAF.MultiserverMode;
+using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions
 {
@@ -17,6 +18,7 @@ namespace MFiles.VAF.Extensions
 	/// <summary>
 	/// A task queue directive with a display name.
 	/// </summary>
+	[DataContact]
 	public abstract class TaskDirectiveWithDisplayName
 		: TaskDirective, ITaskDirectiveWithDisplayName
 	{
@@ -26,6 +28,7 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <example>"Convert Document 123 to PDF"</example>
 		/// <example>"Import AAABBBCCC.pdf"</example>
+		[DataMember]
 		public string DisplayName { get; set; }
 	}
 }

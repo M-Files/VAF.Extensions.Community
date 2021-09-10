@@ -1,23 +1,27 @@
 ﻿using MFiles.VAF.Common;
 using MFilesAPI;
 using System;
+using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions
 {
 	/// <summary>
 	/// A <see cref="TaskDirectiveWithDisplayName"/> that represents a single <see cref="ObjID"/>.
 	/// </summary>
+	[DataContract]
 	public class ObjIDTaskDirective
 		: TaskDirectiveWithDisplayName
 	{
 		/// <summary>
 		/// The internal ID of the object (unique within one object type).
 		/// </summary>
+		[DataMember]
 		public int ObjectID { get; set; }
 
 		/// <summary>
 		/// The ID of the object type.
 		/// </summary>
+		[DataMember]
 		public int ObjectTypeID { get; set; }
 
 		/// <summary>
