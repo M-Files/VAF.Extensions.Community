@@ -42,6 +42,32 @@ namespace MFiles.VAF.Extensions
 			= new Dictionary<string, TaskQueueBackgroundOperation<TSecureConfiguration>>();
 
 		/// <summary>
+		/// Return all background operation names
+		/// </summary>
+		/// <returns>Background operation names.</returns>
+		public IEnumerable<string> GetTaskQueueBackgroundOperationNames()
+		{
+			// Return all background operation names
+			return this.BackgroundOperations.Keys;
+		}
+
+		/// <summary>
+		/// Returns the background operation by the name.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		public TaskQueueBackgroundOperation GetTaskQueueBackgroundOperationByName(string name)
+		{
+			if (this.BackgroundOperations.ContainsKey(name) == false)
+				throw new ArgumentException(
+					$"No background operation with the name {name} in queue {this.QueueId} exists.",
+					nameof(name));
+
+			// Return the background operation by name
+			return this.BackgroundOperations[name];
+		}
+
+		/// <summary>
 		/// Ensures that <see cref="CurrentServer"/> is set correctly.
 		/// </summary>
 		/// <param name="vaultApplication">The vault application where this code is running.</param>
@@ -215,7 +241,7 @@ namespace MFiles.VAF.Extensions
 			switch (bo.RepeatType)
 			{
 				case TaskQueueBackgroundOperationRepeatType.Interval:
-					
+
 					// Add the interval to the current datetime.
 					if (bo.Interval.HasValue)
 						nextRun = DateTime.UtcNow.Add(bo.Interval.Value);

@@ -71,5 +71,20 @@ namespace MFiles.VAF.Extensions
 		{
 			return applicationTaskInfo?.ToApplicationTask()?.RetrieveTaskInfo<TaskInformation>(serverId);
 		}
+		/// <summary>
+		/// Returns the directive of the <paramref name="taskInfo"/> a parsed/populated instance.
+		/// </summary>
+		/// <typeparam name="TDirective">The type of the directive.</typeparam>
+		/// <param name="applicationTaskInfo">The task to retrieve data for.</param>
+		/// <returns>The directive, or null if no directive is found.</returns>
+		public static TDirective GetDirective<TDirective>(this ApplicationTaskInfo applicationTaskInfo)
+			where TDirective : TaskQueueDirective
+		{
+			return TaskQueueDirective.Parse<BackgroundOperationTaskQueueDirective>(applicationTaskInfo.TaskData)?.GetParsedInternalDirective<TDirective>();
+		}
+		public static TaskQueueDirective GetDirective(this ApplicationTaskInfo applicationTaskInfo)
+		{
+			return TaskQueueDirective.Parse<BackgroundOperationTaskQueueDirective>(applicationTaskInfo.TaskData)?.GetParsedInternalDirective();
+		}
 	}
 }
