@@ -56,7 +56,7 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public TaskQueueBackgroundOperation GetTaskQueueBackgroundOperationByName(string name)
+		public TaskQueueBackgroundOperation<TSecureConfiguration> GetTaskQueueBackgroundOperationByName(string name)
 		{
 			if (this.BackgroundOperations.ContainsKey(name) == false)
 				throw new ArgumentException(

@@ -31,7 +31,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MFiles.VAF" Version="2.3.612-preview" />
+    <PackageReference Include="MFiles.VAF" Version="2.3.619-preview" />
     <PackageReference Include="MFilesAPI.Extensions" Version="1.0.3" />
   </ItemGroup>
   <ItemGroup>
