@@ -142,7 +142,7 @@ namespace MFiles.VAF.Extensions
 						{
 							Label = isRunning
 							? "Running"
-							: false ? "Scheduled" : "Stopped"
+							: isScheduled ? "Scheduled" : "Stopped"
 						}
 					};
 
