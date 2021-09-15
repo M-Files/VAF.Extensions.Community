@@ -84,7 +84,7 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <inheritdoc />
-		protected override void UninitializeApplication(Vault vault)
+		public override void Uninstall(Vault vaultSrc)
 		{
 			// For all queues/task-types that are running on a schedule/interval, cancel them now.
 			if (null != this.RecurringOperationConfigurationManager)
@@ -93,12 +93,13 @@ namespace MFiles.VAF.Extensions
 				{
 					try
 					{
-						this.TaskManager?.CancelAllFutureExecutions(key.QueueID, key.TaskType);
+						this.TaskManager?.CancelAllFutureExecutions(key.QueueID, key.TaskType, vault: vaultSrc);
 					}
 					catch (Exception e)
 					{
 						SysUtils.ReportErrorToEventLog
 						(
+							SysUtils.DefaultEventSourceIdentifier,
 							$"Could not cancel future executions of task type {key.TaskType} on queue {key.QueueID}.",
 							e
 						);
@@ -108,7 +109,7 @@ namespace MFiles.VAF.Extensions
 			}
 
 			// Call the base implementation.
-			base.UninitializeApplication(vault);
+			base.UninitializeApplication(vaultSrc);
 		}
 	}
 }
