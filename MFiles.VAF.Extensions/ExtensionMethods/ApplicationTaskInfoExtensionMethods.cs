@@ -1,4 +1,5 @@
-﻿using MFiles.VAF.Common.ApplicationTaskQueue;
+﻿using MFiles.VAF.AppTasks;
+using MFiles.VAF.Common.ApplicationTaskQueue;
 using MFiles.VAF.Configuration;
 using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
@@ -71,6 +72,7 @@ namespace MFiles.VAF.Extensions
 		{
 			return applicationTaskInfo?.ToApplicationTask()?.RetrieveTaskInfo<TaskInformation>(serverId);
 		}
+
 		/// <summary>
 		/// Returns the directive of the <paramref name="taskInfo"/> a parsed/populated instance.
 		/// </summary>
@@ -78,13 +80,19 @@ namespace MFiles.VAF.Extensions
 		/// <param name="applicationTaskInfo">The task to retrieve data for.</param>
 		/// <returns>The directive, or null if no directive is found.</returns>
 		public static TDirective GetDirective<TDirective>(this ApplicationTaskInfo applicationTaskInfo)
-			where TDirective : TaskQueueDirective
+			where TDirective : TaskDirective
 		{
-			return TaskQueueDirective.Parse<BackgroundOperationTaskQueueDirective>(applicationTaskInfo.TaskData)?.GetParsedInternalDirective<TDirective>();
+			return TaskDirective.Parse<BackgroundOperationTaskDirective>(applicationTaskInfo.TaskData)?.GetParsedInternalDirective<TDirective>();
 		}
-		public static TaskQueueDirective GetDirective(this ApplicationTaskInfo applicationTaskInfo)
+
+		/// <summary>
+		/// Returns the directive of the <paramref name="taskInfo"/> a parsed/populated instance.
+		/// </summary>
+		/// <param name="applicationTaskInfo">The task to retrieve data for.</param>
+		/// <returns>The directive, or null if no directive is found.</returns>
+		public static TaskDirective GetDirective(this ApplicationTaskInfo applicationTaskInfo)
 		{
-			return TaskQueueDirective.Parse<BackgroundOperationTaskQueueDirective>(applicationTaskInfo.TaskData)?.GetParsedInternalDirective();
+			return TaskDirective.Parse<BackgroundOperationTaskDirective>(applicationTaskInfo.TaskData)?.GetParsedInternalDirective();
 		}
 	}
 }

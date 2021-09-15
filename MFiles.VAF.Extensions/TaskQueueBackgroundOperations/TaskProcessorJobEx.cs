@@ -27,11 +27,6 @@ namespace MFiles.VAF.Extensions
 		public Vault Vault { get => this.Job?.Vault; }
 
 		/// <summary>
-		/// The associated BackgroundOperation Name.
-		/// </summary>
-		public string TaskQueueBackgroundOperationName { get => this.Job?.GetTaskQueueDirective<BackgroundOperationTaskQueueDirective>()?.BackgroundOperationName; }
-
-		/// <summary>
 		/// The background operation manager that owns this job.
 		/// </summary>
 		public TaskQueueBackgroundOperationManager<TSecureConfiguration> TaskQueueBackgroundOperationManager { get; set; }

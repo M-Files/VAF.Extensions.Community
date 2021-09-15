@@ -4,9 +4,8 @@ using MFiles.VAF.MultiserverMode;
 
 namespace MFiles.VAF.Extensions
 {
-	public partial class TaskQueueBackgroundOperationManager
+	public partial class TaskQueueBackgroundOperationManager<TSecureConfiguration>
 	{
-
 		/// <summary>
 		/// Removes a background operation by the name.
 		/// </summary>
@@ -17,7 +16,7 @@ namespace MFiles.VAF.Extensions
 			string name
 		)
 		{
-			lock (TaskQueueBackgroundOperationManager._lock)
+			lock (TaskQueueBackgroundOperationManager<TSecureConfiguration>._lock)
 			{
 				if (this.BackgroundOperations.ContainsKey(name) == false)
 					throw new ArgumentException(
