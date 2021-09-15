@@ -7,6 +7,7 @@ using MFilesAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -158,12 +159,18 @@ namespace MFiles.VAF.Extensions
 			}
 		}
 	}
+
+	[DataContract]
 	public class RescheduleProcessorTaskDirective
 		: TaskDirective
 	{
+		[DataMember]
 		public string QueueID { get; set; }
+		[DataMember]
 		public string TaskType { get; set; }
+		[DataMember]
 		public DateTime? NextExecution { get; set; }
+		[DataMember]
 		public TaskDirective InnerDirective { get; set; }
 	}
 }

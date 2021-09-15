@@ -5,12 +5,14 @@ using System.Text;
 using MFiles.VAF.Common;
 using MFiles.VAF.MultiserverMode;
 using MFiles.VAF.AppTasks;
+using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions
 {
 	/// <summary>
 	/// A directive that contains information for a background operation.
 	/// </summary>
+	[DataContract]
 	public class BackgroundOperationTaskDirective
 		: AppTasks.TaskDirective
 	{
@@ -45,16 +47,19 @@ namespace MFiles.VAF.Extensions
 		/// The <see cref="TaskQueueBackgroundOperation.Name"/> of the background operation that
 		/// will process this task.
 		/// </summary>
+		[DataMember]
 		public string BackgroundOperationName { get; set; }
-		
+
 		/// <summary>
 		/// The internal directive information that is passed to this job execution (for serialisation).
 		/// </summary>
+		[DataMember]
 		public byte[] InternalDirectiveForSerialization { get; set; }
 
 		/// <summary>
 		/// The type of the internal directive.
 		/// </summary>
+		[DataMember]
 		public string InternalDirectiveTypeForSerialization { get; set; }
 
 		/// <summary>

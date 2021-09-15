@@ -16,6 +16,8 @@ The [TaskQueueBackgroundOperationManager](TaskQueueBackgroundOperations/TaskQueu
 
 ### Using VAF 2.3 task processors
 
+Read more about VAF 2.3 task processors here: [https://developer.m-files.com/Frameworks/Vault-Application-Framework/Task-Queues/](https://developer.m-files.com/Frameworks/Vault-Application-Framework/Task-Queues/).
+
 Standard VAF task queues are automatically exposed on the above dashboard, but can be customised by adding a `[ShowOnDashboard]` attribute.  In the example below the `ShowRunCommand` property is set to `true`, adding a button to the dashboard allowing the task to be run ad-hoc.
 
 ![An image showing a task queue that can be run on demand](runondemand-taskqueue.png)
