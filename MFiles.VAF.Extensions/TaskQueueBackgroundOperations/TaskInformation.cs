@@ -64,7 +64,15 @@ namespace MFiles.VAF.Extensions
 			else if (false == string.IsNullOrWhiteSpace(this.StatusDetails))
 			{
 				// Otherwise just show the text.
-				return new DashboardCustomContent(System.Security.SecurityElement.Escape(this.StatusDetails));
+				var dashboardCustomContentEx = new DashboardCustomContentEx
+				(
+					new DashboardCustomContent(System.Security.SecurityElement.Escape(this.StatusDetails))
+				);
+				dashboardCustomContentEx.Styles.Add("white-space", "nowrap");
+				dashboardCustomContentEx.Styles.Add("overflow", "hidden");
+				dashboardCustomContentEx.Styles.Add("display", "inline-block");
+				dashboardCustomContentEx.Styles.Add("text-overflow", "ellipsis");
+				return dashboardCustomContentEx;
 			}
 
 			// Return nothing.
