@@ -105,8 +105,12 @@ namespace MFiles.VAF.Extensions
 				taskInfo.PercentageComplete = taskInfo.PercentageComplete ?? execution.Status?.PercentComplete;
 				if (taskInfo.CurrentTaskState != execution.State)
 					taskInfo.CurrentTaskState = execution.State;
+				var removeLineBreaks = false; // By default show the full text as sent.
 				if (taskInfo.CurrentTaskState == MFTaskState.MFTaskStateFailed)
+				{
 					taskInfo.StatusDetails = execution.Status?.ErrorMessage ?? taskInfo.StatusDetails;
+					removeLineBreaks = true; // Exceptions are LONG, so format them.
+				}
 
 				// Add a row for this execution.
 				var row = table.AddRow();
@@ -148,7 +152,7 @@ namespace MFiles.VAF.Extensions
 					taskInfoCell,
 					scheduledCell,
 					new DashboardCustomContent(execution.State == MFilesAPI.MFTaskState.MFTaskStateWaiting ? "" : taskInfo?.GetElapsedTime().ToDisplayString()),
-					taskInfo?.AsDashboardContent()
+					taskInfo?.AsDashboardContent(removeLineBreaks)
 				);
 
 				// First three cells should be as small as possible.

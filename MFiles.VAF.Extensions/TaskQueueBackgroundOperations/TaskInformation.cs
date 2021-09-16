@@ -47,7 +47,7 @@ namespace MFiles.VAF.Extensions
 		/// to render the current task information on a dashboard.
 		/// </summary>
 		/// <returns>The dashboard content.</returns>
-		public IDashboardContent AsDashboardContent()
+		public IDashboardContent AsDashboardContent(bool removeLineBreaks)
 		{
 			
 			// If we have a progress then do a pretty bar chart.
@@ -68,10 +68,13 @@ namespace MFiles.VAF.Extensions
 				(
 					new DashboardCustomContent(System.Security.SecurityElement.Escape(this.StatusDetails))
 				);
-				dashboardCustomContentEx.Styles.Add("white-space", "nowrap");
-				dashboardCustomContentEx.Styles.Add("overflow", "hidden");
-				dashboardCustomContentEx.Styles.Add("display", "inline-block");
-				dashboardCustomContentEx.Styles.Add("text-overflow", "ellipsis");
+				if (removeLineBreaks)
+				{
+					dashboardCustomContentEx.Styles.Add("white-space", "nowrap");
+					dashboardCustomContentEx.Styles.Add("overflow", "hidden");
+					dashboardCustomContentEx.Styles.Add("display", "inline-block");
+					dashboardCustomContentEx.Styles.Add("text-overflow", "ellipsis");
+				}
 				return dashboardCustomContentEx;
 			}
 
