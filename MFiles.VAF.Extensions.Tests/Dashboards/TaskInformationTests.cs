@@ -15,7 +15,7 @@ namespace MFiles.VAF.Extensions.Tests.Dashboards
 		public void NoPercentage_UnencodedValueDoesNotThrow()
 		{
 			var x = new TaskInformation() { StatusDetails = "hello & world" };
-			x.AsDashboardContent().ToXmlString();
+			x.AsDashboardContent(true).ToXmlString();
 		}
 	}
 }
