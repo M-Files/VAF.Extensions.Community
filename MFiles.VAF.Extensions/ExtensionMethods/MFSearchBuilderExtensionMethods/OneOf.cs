@@ -80,10 +80,25 @@ namespace MFiles.VAF.Extensions
 		)
 		{
 			// Use the other overload.
-			return searchBuilder.PropertyOneOf
+			return searchBuilder?.PropertyOneOf
 			(
 				propertyDef,
-				identifiers?.Select(identifier => identifier.ID),
+				identifiers?
+					.Where(i => i != null)
+					.Select(identifier =>
+					{
+						// Ensure that we're resolved.
+						try
+						{
+							return identifier
+								.Resolve(searchBuilder?.Vault, typeof(PropertyDef))
+								.ID;
+						}
+						catch(Exception e)
+						{
+							throw new Exception($"Could not resolve the identifier with alias/GUID {identifier.Alias} in the current vault", e);
+						}
+					}),
 				parentChildBehavior,
 				indirectionLevels
 			);
@@ -108,10 +123,12 @@ namespace MFiles.VAF.Extensions
 		)
 		{
 			// Use the other overload.
-			return searchBuilder.PropertyOneOf
+			return searchBuilder?.PropertyOneOf
 			(
 				propertyDef,
-				objects?.Select(objVer => objVer.ID),
+				objects?
+					.Where(o => o != null)?
+					.Select(objVer => objVer.ID),
 				parentChildBehavior,
 				indirectionLevels
 			);
@@ -139,7 +156,9 @@ namespace MFiles.VAF.Extensions
 			return searchBuilder.PropertyOneOf
 			(
 				propertyDef,
-				objects?.Select(objID => objID.ID),
+				objects?
+					.Where(o => o != null)?
+					.Select(objID => objID.ID),
 				parentChildBehavior,
 				indirectionLevels
 			);
@@ -167,7 +186,7 @@ namespace MFiles.VAF.Extensions
 			return searchBuilder.PropertyOneOf
 			(
 				propertyDef,
-				objects?.Select(objVerEx => objVerEx.ID),
+				objects?.Where(o => o != null)?.Select(objVerEx => objVerEx.ID),
 				parentChildBehavior,
 				indirectionLevels
 			);
@@ -192,7 +211,7 @@ namespace MFiles.VAF.Extensions
 		)
 		{
 			// Use the other overload.
-			return searchBuilder.PropertyOneOf
+			return searchBuilder?.PropertyOneOf
 			(
 				propertyDef,
 				lookups?.Select(lookup => lookup.Item),
@@ -220,10 +239,13 @@ namespace MFiles.VAF.Extensions
 		)
 		{
 			// Use the other overload.
-			return searchBuilder.PropertyOneOf
+			return searchBuilder?.PropertyOneOf
 			(
 				propertyDef,
-				lookups?.Cast<Lookup>()?.Select(lookup => lookup.Item),
+				lookups?
+					.Cast<Lookup>()?
+					.Where(l => l != null)?
+					.Select(lookup => lookup.Item),
 				parentChildBehavior,
 				indirectionLevels
 			);
