@@ -50,5 +50,49 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods
 				interval.ToDashboardDisplayString()
 			);
 		}
+
+		[TestMethod]
+		public void ToDisplayString_2hours_0minutes_23seconds()
+		{
+			TimeSpan? interval = new TimeSpan(2, 0, 23);
+			Assert.AreEqual
+			(
+				"2 hours, and 23 seconds",
+				interval.ToDisplayString()
+			);
+		}
+
+		[TestMethod]
+		public void ToDisplayString_2hours_1minute_23seconds()
+		{
+			TimeSpan? interval = new TimeSpan(2, 1, 23);
+			Assert.AreEqual
+			(
+				"2 hours, 1 minute, and 23 seconds",
+				interval.ToDisplayString()
+			);
+		}
+
+		[TestMethod]
+		public void ToDisplayString_2hours_10minutes_23seconds()
+		{
+			TimeSpan? interval = new TimeSpan(2, 10, 23);
+			Assert.AreEqual
+			(
+				"2 hours, 10 minutes, and 23 seconds",
+				interval.ToDisplayString()
+			);
+		}
+
+		[TestMethod]
+		public void ToDisplayString_2days_2hours_10minutes_23seconds()
+		{
+			TimeSpan? interval = new TimeSpan(2, 2, 10, 23);
+			Assert.AreEqual
+			(
+				"2 days, 2 hours, 10 minutes, and 23 seconds",
+				interval.ToDisplayString()
+			);
+		}
 	}
 }
