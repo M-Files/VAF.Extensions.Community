@@ -93,7 +93,7 @@ namespace MFiles.VAF.Extensions
 							// If we have to resolve it and have no vault reference then die.
 							if (false == identifier.IsResolved)
 								if (null == searchBuilder?.Vault)
-									throw new InvalidOperationException($"The search builder's vault reference is null, so the identifier with alias/GUID {identifier.Alias} cannot be resolved.");
+									throw new InvalidOperationException($"The search builder or vault reference is null, so the identifier with alias/GUID {identifier.Alias} cannot be resolved.");
 							
 							// Resolve if needed.
 							return identifier
