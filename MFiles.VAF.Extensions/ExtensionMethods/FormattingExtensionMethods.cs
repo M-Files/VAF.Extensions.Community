@@ -68,18 +68,18 @@ namespace MFiles.VAF.Extensions
 			var output = "";
 			for (var i = 0; i < components.Count; i++)
 			{
-				if (i == 0)
+				if (i != 0)
 				{
-					output += components[i];
+					if (i == components.Count - 1)
+					{
+						output += ", and ";
+					}
+					else
+					{
+						output += ", ";
+					}
 				}
-				else if (i == components.Count - 1)
-				{
-					output += ", and " + components[i];
-				}
-				else
-				{
-					output += ", ";
-				}
+				output += components[i];
 			}
 			return output;
 		}
