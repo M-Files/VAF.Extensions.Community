@@ -304,7 +304,11 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		/// adds a search condition.
 		/// </summary>
 		[TestMethod]
-		public void AddsSearchCondition()
+		public virtual void AddsSearchCondition()
+		{
+			this.AssertAddSearchCondition(default);
+		}
+		protected virtual void AssertAddSearchCondition(TInputType value)
 		{
 			// Get the test properties.
 			var properties = this
@@ -331,7 +335,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				(
 					mfSearchBuilder,
 					property.ID,
-					default
+					value
 				);
 
 				// Ensure that there is one item in the collection.
@@ -349,7 +353,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 		/// <param name="conditionType">The condition (equal, etc.) expected.</param>
 		/// <param name="parentChildBehavior">The expected parent/child behaviour.</param>
 		/// <param name="indirectionLevels">The expected indirection levels.</param>
-		public void AssertSearchConditionIsCorrect
+		public virtual void AssertSearchConditionIsCorrect
 			(
 			SearchCondition condition,
 			int propertyDef, 
@@ -390,11 +394,16 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 			}
 			else
 			{
-				Assert.AreEqual(input, (TInputType)condition.TypedValue.Value);
+				this.AssertValueIsCorrect(input, condition.TypedValue);
 			}
 
 			// Ensure that the indirection levels are the same.
 			this.AssertIndirectionLevelsAreSame(indirectionLevels, condition.Expression.IndirectionLevels);
+		}
+
+		protected virtual void AssertValueIsCorrect(TInputType expected, TypedValue actual)
+		{
+			Assert.AreEqual(expected, (TInputType)actual?.Value);
 		}
 
 		/// <summary>
