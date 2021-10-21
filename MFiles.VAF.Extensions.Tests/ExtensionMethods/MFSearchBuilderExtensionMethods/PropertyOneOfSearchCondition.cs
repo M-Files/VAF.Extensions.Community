@@ -12,10 +12,10 @@ using System.Collections;
 namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionMethods
 {
 	[TestClass]
-	public class OneOfSearchCondition
+	public class PropertyOneOfSearchCondition
 		: PropertyValueSearchConditionTestBase<int[]>
 	{
-		public OneOfSearchCondition()
+		public PropertyOneOfSearchCondition()
 			: base(new[] { MFDataType.MFDatatypeLookup, MFDataType.MFDatatypeMultiSelectLookup })
 		{
 		}
@@ -37,7 +37,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 				throw new ArgumentNullException(nameof(mfSearchBuilder));
 
 			// Use our extension method.
-			mfSearchBuilder.OneOf(propertyDef, value, parentChildBehavior, indirectionLevels);
+			mfSearchBuilder.PropertyOneOf(propertyDef, value, parentChildBehavior, indirectionLevels);
 		}
 		
 		/// <summary>

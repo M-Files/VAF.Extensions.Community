@@ -25,7 +25,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well (defaults to <see cref="MFParentChildBehavior.MFParentChildBehaviorNone"/>).</param>
 		/// <param name="indirectionLevels">The indirection levels (from the search object) to access the property to match.</param>
 		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
-		public static MFSearchBuilder OneOf
+		public static MFSearchBuilder PropertyOneOf
 		(
 			this MFSearchBuilder searchBuilder,
 			int propertyDef,
@@ -70,7 +70,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well (defaults to <see cref="MFParentChildBehavior.MFParentChildBehaviorNone"/>).</param>
 		/// <param name="indirectionLevels">The indirection levels (from the search object) to access the property to match.</param>
 		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
-		public static MFSearchBuilder OneOf
+		public static MFSearchBuilder PropertyOneOf
 		(
 			this MFSearchBuilder searchBuilder,
 			int propertyDef,
@@ -80,7 +80,7 @@ namespace MFiles.VAF.Extensions
 		)
 		{
 			// Use the other overload.
-			return searchBuilder.OneOf
+			return searchBuilder.PropertyOneOf
 			(
 				propertyDef,
 				identifiers?.Select(identifier => identifier.ID),
@@ -98,7 +98,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well (defaults to <see cref="MFParentChildBehavior.MFParentChildBehaviorNone"/>).</param>
 		/// <param name="indirectionLevels">The indirection levels (from the search object) to access the property to match.</param>
 		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
-		public static MFSearchBuilder OneOf
+		public static MFSearchBuilder PropertyOneOf
 		(
 			this MFSearchBuilder searchBuilder,
 			int propertyDef,
@@ -108,7 +108,7 @@ namespace MFiles.VAF.Extensions
 		)
 		{
 			// Use the other overload.
-			return searchBuilder.OneOf
+			return searchBuilder.PropertyOneOf
 			(
 				propertyDef,
 				objects?.Select(objVer => objVer.ID),
@@ -126,7 +126,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well (defaults to <see cref="MFParentChildBehavior.MFParentChildBehaviorNone"/>).</param>
 		/// <param name="indirectionLevels">The indirection levels (from the search object) to access the property to match.</param>
 		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
-		public static MFSearchBuilder OneOf
+		public static MFSearchBuilder PropertyOneOf
 		(
 			this MFSearchBuilder searchBuilder,
 			int propertyDef,
@@ -136,7 +136,7 @@ namespace MFiles.VAF.Extensions
 		)
 		{
 			// Use the other overload.
-			return searchBuilder.OneOf
+			return searchBuilder.PropertyOneOf
 			(
 				propertyDef,
 				objects?.Select(objID => objID.ID),
@@ -154,7 +154,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well (defaults to <see cref="MFParentChildBehavior.MFParentChildBehaviorNone"/>).</param>
 		/// <param name="indirectionLevels">The indirection levels (from the search object) to access the property to match.</param>
 		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
-		public static MFSearchBuilder OneOf
+		public static MFSearchBuilder PropertyOneOf
 		(
 			this MFSearchBuilder searchBuilder,
 			int propertyDef,
@@ -164,10 +164,66 @@ namespace MFiles.VAF.Extensions
 		)
 		{
 			// Use the other overload.
-			return searchBuilder.OneOf
+			return searchBuilder.PropertyOneOf
 			(
 				propertyDef,
 				objects?.Select(objVerEx => objVerEx.ID),
+				parentChildBehavior,
+				indirectionLevels
+			);
+		}
+
+		/// <summary>
+		/// Adds a <see cref="SearchCondition"/> to the collection to represent a "one of" search condition (https://developer.m-files.com/APIs/COM-API/Searching/SearchConditions/#executing-a-one-of-search).
+		/// </summary>
+		/// <param name="searchBuilder">The <see cref="MFSearchBuilder"/> to add the condition to.</param>
+		/// <param name="propertyDef">The ID of the property to search by.</param>
+		/// <param name="lookups">The items to search for (the object must have the property set to one of these).</param>
+		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well (defaults to <see cref="MFParentChildBehavior.MFParentChildBehaviorNone"/>).</param>
+		/// <param name="indirectionLevels">The indirection levels (from the search object) to access the property to match.</param>
+		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
+		public static MFSearchBuilder PropertyOneOf
+		(
+			this MFSearchBuilder searchBuilder,
+			int propertyDef,
+			IEnumerable<Lookup> lookups,
+			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
+			PropertyDefOrObjectTypes indirectionLevels = null
+		)
+		{
+			// Use the other overload.
+			return searchBuilder.PropertyOneOf
+			(
+				propertyDef,
+				lookups?.Select(lookup => lookup.Item),
+				parentChildBehavior,
+				indirectionLevels
+			);
+		}
+
+		/// <summary>
+		/// Adds a <see cref="SearchCondition"/> to the collection to represent a "one of" search condition (https://developer.m-files.com/APIs/COM-API/Searching/SearchConditions/#executing-a-one-of-search).
+		/// </summary>
+		/// <param name="searchBuilder">The <see cref="MFSearchBuilder"/> to add the condition to.</param>
+		/// <param name="propertyDef">The ID of the property to search by.</param>
+		/// <param name="lookups">The items to search for (the object must have the property set to one of these).</param>
+		/// <param name="parentChildBehavior">Whether to accept matches to parent/child values as well (defaults to <see cref="MFParentChildBehavior.MFParentChildBehaviorNone"/>).</param>
+		/// <param name="indirectionLevels">The indirection levels (from the search object) to access the property to match.</param>
+		/// <returns>The <paramref name="searchBuilder"/> provided, for chaining.</returns>
+		public static MFSearchBuilder PropertyOneOf
+		(
+			this MFSearchBuilder searchBuilder,
+			int propertyDef,
+			Lookups lookups,
+			MFParentChildBehavior parentChildBehavior = MFParentChildBehavior.MFParentChildBehaviorNone,
+			PropertyDefOrObjectTypes indirectionLevels = null
+		)
+		{
+			// Use the other overload.
+			return searchBuilder.PropertyOneOf
+			(
+				propertyDef,
+				lookups?.Cast<Lookup>()?.Select(lookup => lookup.Item),
 				parentChildBehavior,
 				indirectionLevels
 			);
