@@ -5,9 +5,6 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-using FluentAssertions;
-using FluentAssertions.Json;
-
 using MFiles.VAF.Extensions.ScheduledExecution;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -54,14 +51,15 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		[TestMethod]
 		public void SerializesCorrectly()
 		{
-			string json = JsonConvert.SerializeObject(new Frequency()
+			var frequency = new Frequency()
 			{
 				Interval = new TimeSpan(1, 2, 3)
-			});
-			var expected = JObject.Parse(@"{""RecurrenceType"":0,""Interval"":{ ""Interval"": ""01:02:03"",  ""RunOnVaultStartup"": true}}");
-			var output = JObject.Parse(json);
+			};
+			var expected = JToken.Parse("{\"RecurrenceType\":0,\"Interval\":{\r\n  \"Interval\": \"01:02:03\",\r\n  \"RunOnVaultStartup\": true\r\n}}");
+			var output = JToken.Parse(JsonConvert.SerializeObject(frequency));
 
-			output.Should().BeEquivalentTo(expected);
+			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			//output.Should().BeEquivalentTo(expected);
 		}
 
 		/// <summary>
@@ -79,7 +77,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				RecurrenceType = RecurrenceType.Unknown
 			};
 
-			output.ShouldBeEquivalentTo(expected);
+			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			//output.ShouldBeEquivalentTo(expected);
 		}
 
 		/// <summary>
@@ -99,7 +98,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				RecurrenceType = RecurrenceType.Interval
 			};
 
-			output.ShouldBeEquivalentTo(expected);
+			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			//output.ShouldBeEquivalentTo(expected);
 		}
 
 		/// <summary>
@@ -126,7 +126,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				RecurrenceType = RecurrenceType.Interval
 			};
 
-			output.ShouldBeEquivalentTo(expected);
+			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			//output.ShouldBeEquivalentTo(expected);
 		}
 
 		/// <summary>
@@ -162,7 +163,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				RecurrenceType = RecurrenceType.Schedule
 			};
 
-			output.ShouldBeEquivalentTo(expected);
+			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			//output.ShouldBeEquivalentTo(expected);
 		}
 
 		/// <summary>
@@ -188,7 +190,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				}
 			};
 
-			output.ShouldBeEquivalentTo(expected);
+			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			//output.ShouldBeEquivalentTo(expected);
 		}
 
 		/// <summary>
@@ -219,7 +222,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				}
 			};
 
-			output.ShouldBeEquivalentTo(expected);
+			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			//output.ShouldBeEquivalentTo(expected);
 		}
 
 		/// <summary>
@@ -263,8 +267,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				}
 			};
 
-			output.ShouldBeEquivalentTo(expected);
-
+			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			//output.ShouldBeEquivalentTo(expected);
 		}
 	}
 }
