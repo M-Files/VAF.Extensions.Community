@@ -1,4 +1,5 @@
-﻿using MFiles.VAF.Configuration;
+﻿using MFiles.VAF.Common;
+using MFiles.VAF.Configuration;
 using MFiles.VAF.Extensions.ScheduledExecution;
 
 using Newtonsoft.Json;
@@ -139,6 +140,11 @@ namespace MFiles.VAF.Extensions
 		{
 			switch (reader.TokenType)
 			{
+				case JsonToken.None:
+					// Try again.
+					return reader.Read()
+						? this.ReadJson(reader, objectType, existingValue, serializer)
+						: default;
 				case JsonToken.String:
 					var timeSpanEx = JsonConvert.DeserializeObject<TimeSpanEx>($"\"{reader.Value?.ToString()}\"");
 					return new Frequency() { Interval = timeSpanEx, RecurrenceType = RecurrenceType.Interval };
@@ -150,25 +156,36 @@ namespace MFiles.VAF.Extensions
 					// Populate the output.
 					var jToken = JToken.ReadFrom(reader);
 
+					// If it has a recurrence type then it's a frequency.
+					if (jToken[nameof(Frequency.RecurrenceType)] != null)
+					{
+						serializer.Populate(jToken.CreateReader(), output);
+						return output;
+					}
+
 					//Check if this might be a TimeSpanEx
-					if (jToken[nameof(TimeSpanEx.Interval)] != null &&
-						jToken[nameof(TimeSpanEx.RunOnVaultStartup)] != null)
+					if (jToken[nameof(TimeSpanEx.Interval)] != null)
 					{
 						output.RecurrenceType = RecurrenceType.Interval;
 						output.Interval = new TimeSpanEx();
 						serializer.Populate(jToken.CreateReader(), output.Interval);
 					}
 					//Check if this might be a Schedule
-					else if (jToken[nameof(Schedule.Enabled)] != null &&
-						jToken[nameof(Schedule.Triggers)] != null &&
-						jToken[nameof(Schedule.RunOnVaultStartup)] != null)
+					else if (jToken[nameof(Schedule.Triggers)] != null)
 					{
 						output.RecurrenceType = RecurrenceType.Schedule;
 						output.Schedule = new Schedule();
 						serializer.Populate(jToken.CreateReader(), output.Schedule);
 					}
 					else
-						serializer.Populate(jToken.CreateReader(), output);
+					{
+						SysUtils.ReportToEventLog
+						(
+							$"Could not convert value to a Frequency: {jToken}",
+							System.Diagnostics.EventLogEntryType.Warning
+						);
+						return default;
+					}
 
 					// Return the output.
 					return output;

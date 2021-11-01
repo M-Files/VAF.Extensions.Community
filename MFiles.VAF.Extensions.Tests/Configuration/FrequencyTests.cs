@@ -43,17 +43,48 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		/// Basic test to see that serialization happens correctly with the <see cref="FrequencyJsonConverter"/>
 		/// </summary>
 		[TestMethod]
-		public void SerializesCorrectly()
+		public void SerializesCorrectly_Interval()
 		{
 			var frequency = new Frequency()
 			{
-				Interval = new TimeSpan(1, 2, 3)
+				Interval = new TimeSpan(1, 2, 3),
+				RecurrenceType = RecurrenceType.Interval
 			};
-			var expected = JToken.Parse("{\"RecurrenceType\":0,\"Interval\":{\r\n  \"Interval\": \"01:02:03\",\r\n  \"RunOnVaultStartup\": true\r\n}}");
+			var expected = JToken.Parse("{\"RecurrenceType\":1,\"Interval\":{\r\n  \"Interval\": \"01:02:03\",\r\n  \"RunOnVaultStartup\": true\r\n}}");
 			var output = JToken.Parse(JsonConvert.SerializeObject(frequency));
 
 			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
-			//output.Should().BeEquivalentTo(expected);
+		}
+
+		/// <summary>
+		/// Basic test to see that serialization happens correctly with the <see cref="FrequencyJsonConverter"/>
+		/// </summary>
+		[TestMethod]
+		public void SerializesCorrectly_Schedule()
+		{
+			var frequency = new Frequency()
+			{
+				Schedule = new Schedule()
+				{
+					Enabled = true,
+					RunOnVaultStartup = false,
+					Triggers = new List<Trigger>()
+					{
+						new DailyTrigger()
+						{
+							TriggerTimes = new List<TimeSpan>()
+							{
+								new TimeSpan(2, 3, 4)
+							}
+						}
+					}
+				},
+				RecurrenceType = RecurrenceType.Schedule
+			};
+			var expected = JToken.Parse("{\"RecurrenceType\":2,\"Schedule\":{\"Enabled\":true,\"Triggers\":[{\"Type\":1,\"DailyTriggerConfiguration\":{\"TriggerTimes\":[\"02:03:04\"]},\"WeeklyTriggerConfiguration\":{\"TriggerDays\":[],\"TriggerTimes\":[]},\"DayOfMonthTriggerConfiguration\":{\"UnrepresentableDateHandling\":0,\"TriggerDays\":[],\"TriggerTimes\":[]}}],\"RunOnVaultStartup\":false}}");
+			var output = JToken.Parse(JsonConvert.SerializeObject(frequency));
+
+			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
 		}
 
 		/// <summary>
@@ -62,17 +93,78 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		[TestMethod]
 		public void DeserializesCorrectly()
 		{
-			string json = @"{""RecurrenceType"":0,""Interval"":{ ""Interval"": ""01:02:03"",  ""RunOnVaultStartup"": true}}";
+			string json = @"{""RecurrenceType"":1,""Interval"":{ ""Interval"": ""01:02:03"",  ""RunOnVaultStartup"": true}}";
 			Frequency output = JsonConvert.DeserializeObject<Frequency>(json);
 
 			Frequency expected = new Frequency()
 			{
 				Interval = new TimeSpan(1, 2, 3),
-				RecurrenceType = RecurrenceType.Unknown
+				RecurrenceType = RecurrenceType.Interval
 			};
 
 			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
-			//output.ShouldBeEquivalentTo(expected);
+		}
+
+		/// <summary>
+		/// Check that deserialisation works with only basic information.
+		/// </summary>
+		[TestMethod]
+		public void DeserializesTimeSpanExCorrectly_WithoutRunOnVaultStartup()
+		{
+			string json = @"{ ""Interval"": ""01:02:03""}";
+			Frequency output = JsonConvert.DeserializeObject<Frequency>(json);
+
+			Frequency expected = new Frequency()
+			{
+				Interval = new TimeSpanEx()
+				{
+					Interval = new TimeSpan(1, 2, 3),
+					RunOnVaultStartup = true
+				},
+				RecurrenceType = RecurrenceType.Interval
+			};
+
+			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+		}
+
+		/// <summary>
+		/// Check that deserialisation works with only basic information.
+		/// </summary>
+		[TestMethod]
+		public void DeserializesTimeSpanExCorrectly_RunOnVaultStartupEqualsFalse()
+		{
+			string json = @"{ ""Interval"": ""01:02:03"", ""RunOnVaultStartup"": false}";
+			Frequency output = JsonConvert.DeserializeObject<Frequency>(json);
+
+			Frequency expected = new Frequency()
+			{
+				Interval = new TimeSpanEx()
+				{
+					Interval = new TimeSpan(1, 2, 3),
+					RunOnVaultStartup = false
+				},
+				RecurrenceType = RecurrenceType.Interval
+			};
+
+			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+		}
+
+		/// <summary>
+		/// Check that deserialisation works with only basic information.
+		/// </summary>
+		[TestMethod]
+		public void DeserializesTimeSpanExCorrectly_RunOnVaultStartupEqualsTrue()
+		{
+			string json = @"{ ""Interval"": ""01:02:03"",  ""RunOnVaultStartup"": true}";
+			Frequency output = JsonConvert.DeserializeObject<Frequency>(json);
+
+			Frequency expected = new Frequency()
+			{
+				Interval = new TimeSpan(1, 2, 3),
+				RecurrenceType = RecurrenceType.Interval
+			};
+
+			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
 		}
 
 		/// <summary>
@@ -97,31 +189,65 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		}
 
 		/// <summary>
-		/// Check if <see cref="FrequencyJsonConverter"/> can deserialize a TimeSpanEx
+		/// Check that deserialisation works with only basic information.
 		/// </summary>
 		[TestMethod]
-		public void DeserializesTimeSpanEx()
+		public void DeserializesFrequencyScheduleCorrectly_Daily()
 		{
-			TimeSpanEx timeSpanEx = new TimeSpanEx()
-			{
-				Interval = new TimeSpan(1, 2, 3),
-				RunOnVaultStartup = false //Picked false because it's not the default value
-			};
+			string json = "{\"RecurrenceType\":2,\"Schedule\":{\"Triggers\":[{\"Type\":1,\"DailyTriggerConfiguration\":{\"TriggerTimes\":[\"02:03:04\"]}}]}}";
+			Frequency output = JsonConvert.DeserializeObject<Frequency>(json);
 
-			string json = JsonConvert.SerializeObject(timeSpanEx);
-			var output = JsonConvert.DeserializeObject<Frequency>(json);
-			var expected = new Frequency()
+			Frequency expected = new Frequency()
 			{
-				Interval = new TimeSpanEx()
+				Schedule = new Schedule()
 				{
-					Interval = new TimeSpan(1, 2, 3),
-					RunOnVaultStartup = false
+					Enabled = true,
+					Triggers = new List<Trigger>()
+					{
+						new DailyTrigger()
+						{
+							TriggerTimes = new List<TimeSpan>()
+							{
+								new TimeSpan(2, 3, 4)
+							}
+						}
+					}
 				},
-				RecurrenceType = RecurrenceType.Interval
+				RecurrenceType = RecurrenceType.Schedule
 			};
 
 			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
-			//output.ShouldBeEquivalentTo(expected);
+		}
+
+		/// <summary>
+		/// Check that deserialisation works with only basic information.
+		/// </summary>
+		[TestMethod]
+		public void DeserializesScheduleCorrectly_Daily()
+		{
+			string json = "{\"Triggers\":[{\"Type\":1,\"DailyTriggerConfiguration\":{\"TriggerTimes\":[\"02:03:04\"]}}]}";
+			Frequency output = JsonConvert.DeserializeObject<Frequency>(json);
+
+			Frequency expected = new Frequency()
+			{
+				Schedule = new Schedule()
+				{
+					Enabled = true,
+					Triggers = new List<Trigger>()
+					{
+						new DailyTrigger()
+						{
+							TriggerTimes = new List<TimeSpan>()
+							{
+								new TimeSpan(2, 3, 4)
+							}
+						}
+					}
+				},
+				RecurrenceType = RecurrenceType.Schedule
+			};
+
+			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
 		}
 
 		/// <summary>
@@ -154,11 +280,10 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 			var expected = new Frequency()
 			{
 				Schedule = schedule,
-				RecurrenceType = RecurrenceType.Schedule
+				RecurrenceType = RecurrenceType.Schedule,
 			};
 
 			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
-			//output.ShouldBeEquivalentTo(expected);
 		}
 
 		/// <summary>
@@ -185,7 +310,6 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 			};
 
 			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
-			//output.ShouldBeEquivalentTo(expected);
 		}
 
 		/// <summary>
@@ -217,7 +341,6 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 			};
 
 			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
-			//output.ShouldBeEquivalentTo(expected);
 		}
 
 		/// <summary>
@@ -262,7 +385,6 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 			};
 
 			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
-			//output.ShouldBeEquivalentTo(expected);
 		}
 	}
 }

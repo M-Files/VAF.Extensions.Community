@@ -105,6 +105,11 @@ namespace MFiles.VAF.Extensions
 		{
 			switch (reader.TokenType)
 			{
+				case JsonToken.None:
+					// Try again.
+					return reader.Read()
+						? this.ReadJson(reader, objectType, existingValue, serializer)
+						: default;
 				case JsonToken.String:
 					return new TimeSpanEx() { Interval = TimeSpan.Parse(reader.Value?.ToString()) };
 				case JsonToken.StartObject:
