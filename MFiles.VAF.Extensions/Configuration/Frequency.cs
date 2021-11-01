@@ -128,7 +128,7 @@ namespace MFiles.VAF.Extensions
 	/// This allows the system to additionally deserialize <see cref="TimeSpan"/> data to <see cref="Frequency"/>.
 	/// </summary>
 	internal class FrequencyJsonConverter
-		: JsonConverter
+		: JsonConverterBase
 	{
 		public override bool CanConvert(Type objectType)
 		{
@@ -176,15 +176,6 @@ namespace MFiles.VAF.Extensions
 
 			return null;
 		}
-
-		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-		{
-			var converter = new TimeSpanExJsonConverter();
-			converter.WriteJson(writer, value, serializer);
-		}
-
-
-
 
 	}
 }
