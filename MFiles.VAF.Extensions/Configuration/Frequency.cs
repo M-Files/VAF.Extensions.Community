@@ -1,11 +1,18 @@
 ﻿using MFiles.VAF.Configuration;
 using MFiles.VAF.Extensions.ScheduledExecution;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions
 {
 	[DataContract]
+	[JsonConverter(typeof(FrequencyJsonConverter))]
 	public class Frequency
 		: IRecurrenceConfiguration
 	{
@@ -114,5 +121,70 @@ namespace MFiles.VAF.Extensions
 				Schedule = schedule
 			};
 		}
+	}
+
+	/// <summary>
+	/// Controls serialisation/deserialisation of <see cref="Frequency"/>.
+	/// This allows the system to additionally deserialize <see cref="TimeSpan"/> data to <see cref="Frequency"/>.
+	/// </summary>
+	internal class FrequencyJsonConverter
+		: JsonConverter
+	{
+		public override bool CanConvert(Type objectType)
+		{
+			return objectType == typeof(Frequency);
+		}
+
+		public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+		{
+			switch (reader.TokenType)
+			{
+				case JsonToken.String:
+					var timeSpanEx = JsonConvert.DeserializeObject<TimeSpanEx>($"\"{reader.Value?.ToString()}\"");
+					return new Frequency() { Interval = timeSpanEx, RecurrenceType = RecurrenceType.Interval };
+				case JsonToken.StartObject:
+
+					// Set up the output.
+					var output = new Frequency();
+
+					// Populate the output.
+					var jToken = JToken.ReadFrom(reader);
+
+					//Check if this might be a TimeSpanEx
+					if (jToken[nameof(TimeSpanEx.Interval)] != null &&
+						jToken[nameof(TimeSpanEx.RunOnVaultStartup)] != null)
+					{
+						output.RecurrenceType = RecurrenceType.Interval;
+						output.Interval = new TimeSpanEx();
+						serializer.Populate(jToken.CreateReader(), output.Interval);
+					}
+					//Check if this might be a Schedule
+					else if (jToken[nameof(Schedule.Enabled)] != null &&
+						jToken[nameof(Schedule.Triggers)] != null &&
+						jToken[nameof(Schedule.RunOnVaultStartup)] != null)
+					{
+						output.RecurrenceType = RecurrenceType.Schedule;
+						output.Schedule = new Schedule();
+						serializer.Populate(jToken.CreateReader(), output.Schedule);
+					}
+					else
+						serializer.Populate(jToken.CreateReader(), output);
+
+					// Return the output.
+					return output;
+			}
+
+			return null;
+		}
+
+		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+		{
+			var converter = new TimeSpanExJsonConverter();
+			converter.WriteJson(writer, value, serializer);
+		}
+
+
+
+
 	}
 }
