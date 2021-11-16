@@ -17,8 +17,8 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// Whether the schedule is currently enabled or not.
 		/// </summary>
 		[DataMember]
-		[JsonConfEditor(DefaultValue = true)]
-		public bool Enabled { get; set; } = true;
+		[JsonConfEditor(DefaultValue = false)]
+		public bool Enabled { get; set; } = false;
 
 		/// <summary>
 		/// The rules that should trigger the schedule to run.

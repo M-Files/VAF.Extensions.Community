@@ -13,9 +13,9 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 	public class ScheduleTests
 	{
 		[TestMethod]
-		public void ScheduleIsEnabledByDefault()
+		public void ScheduleIsDisabledByDefault()
 		{
-			Assert.IsTrue(new Schedule().Enabled);
+			Assert.IsFalse(new Schedule().Enabled);
 		}
 
 		[TestMethod]

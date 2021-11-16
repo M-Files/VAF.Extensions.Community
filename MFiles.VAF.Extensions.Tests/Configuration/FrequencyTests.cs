@@ -201,7 +201,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 			{
 				Schedule = new Schedule()
 				{
-					Enabled = true,
+					Enabled = false,
 					Triggers = new List<Trigger>()
 					{
 						new DailyTrigger()
@@ -232,7 +232,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 			{
 				Schedule = new Schedule()
 				{
-					Enabled = true,
+					Enabled = false,
 					Triggers = new List<Trigger>()
 					{
 						new DailyTrigger()
