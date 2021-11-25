@@ -1,7 +1,5 @@
 ﻿# Email Extensions
 
-*Note: This is a very early version of a potential addition to the above library.  This content is only valid for the versions being provided here and may not be applicable in the future.*
-
 This builds upon the [COM API Extensions](https://github.com/M-Files/COMAPI.Extensions.Community/tree/master/MFilesAPI.Extensions/Email) functionality, and the readme there should be read before this one.
 
 ## Configuration
@@ -28,25 +26,39 @@ public class Configuration
 The VAF extensions library adds an extension method for `ObjVerEx.AddAllFiles`, allowing files to be easily attached from an existing `ObjVerEx` instance:
 
 ```csharp
-[StateAction("WFS.test.SendEmail")]
-public void SendEmailWorkflowHandler(StateEnvironment env)
+
+using MFilesAPI.Extensions.Email;
+using MFiles.VAF.Extensions.Email;
+
+namespace extensionstest2
 {
-	// Create a message.
-	using (var emailMessage = new EmailMessage(this.Configuration.SmtpConfiguration))
+	public class VaultApplication
+		: MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<Configuration>
 	{
-		// To.
-		emailMessage.AddRecipient(AddressType.To, "craig.hawker@m-files.com");
 
-		// Configure the message metadata.
-		emailMessage.Subject = "hello world";
-		emailMessage.HtmlBody = $"This is a <b>HTML</b> for document {env.ObjVerEx.Title}.";
+		[StateAction("WFS.test.SendEmail")]
+		public void SendEmailWorkflowHandler(StateEnvironment env)
+		{
+			// Create a message.
+			using (var emailMessage = new EmailMessage(this.Configuration.SmtpConfiguration))
+			{
+				// To.
+				emailMessage.AddRecipient(AddressType.To, "craig.hawker@m-files.com");
 
-		// Add all files from the current object.
-		emailMessage.AddAllFiles(env.ObjVerEx, MFFileFormat.MFFileFormatPDF);
+				// Configure the message metadata.
+				emailMessage.Subject = "hello world";
+				emailMessage.HtmlBody = $"This is a <b>HTML</b> for document {env.ObjVerEx.Title}.";
+
+				// Add all files from the current object.
+				emailMessage.AddAllFiles(env.ObjVerEx, MFFileFormat.MFFileFormatPDF);
 		
-		// Send the message.
-		emailMessage.Send();
+				// Send the message.
+				emailMessage.Send();
+			}
+		}
+
 	}
+
 }
 
 ```
