@@ -77,10 +77,11 @@ namespace RecurringTask
 		// in StartApplication.
 		: MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<Configuration>
 	{
+		
 		/// <summary>
 		/// The background operation that can be run on demand.
 		/// </summary>
-		protected TaskQueueBackgroundOperation MyBackgroundOperation { get; private set; }
+		protected TaskQueueBackgroundOperation<Configuration> MyBackgroundOperation { get; private set; }
 
 		/// <inheritdoc />
 		protected override void StartApplication()
@@ -94,17 +95,17 @@ namespace RecurringTask
 					(job) =>
 					{
 						SysUtils.ReportInfoToEventLog("I have been run on demand.");
-					
+
 						// If your background job processing takes more than a few seconds then
 						// you should periodically report back its status:
-						job.UpdateTaskInfo("The process is ongoing...");
+						job.Update("The process is ongoing...");
 
 						// If you fail to do the above then the system may think that the task has
 						// aborted, and start it running a second time!
 					}
 				);
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				SysUtils.ReportErrorToEventLog("Exception starting background operations", e);
 			}
@@ -142,7 +143,7 @@ namespace RecurringTask
 		/// <summary>
 		/// The background operation that can be run on demand.
 		/// </summary>
-		protected TaskQueueBackgroundOperation<ObjVerExTaskQueueDirective> MyBackgroundOperation { get; private set; }
+		protected TaskQueueBackgroundOperation<ObjVerExTaskDirective, Configuration> MyBackgroundOperation { get; private set; }
 
 		/// <inheritdoc />
 		protected override void StartApplication()
@@ -151,7 +152,7 @@ namespace RecurringTask
 			{
 				// Create a background operation that can be run on demand.
 				this.MyBackgroundOperation
-					= this.TaskQueueBackgroundOperationManager.CreateBackgroundOperation<ObjVerExTaskQueueDirective>
+					= this.TaskQueueBackgroundOperationManager.CreateBackgroundOperation<ObjVerExTaskDirective>
 					(
 						"My on-demand background operation",
 						(job, directive) =>
@@ -274,7 +275,7 @@ public class VaultApplication
 	/// <summary>
 	/// The background operation that will be executed according to the configured schedule.
 	/// </summary>
-	protected TaskQueueBackgroundOperation ScheduledBackgroundOperation { get; private set; }
+	protected TaskQueueBackgroundOperation<Configuration> ScheduledBackgroundOperation { get; private set; }
 
 	/// <inheritdoc />
 	protected override void StartApplication()
@@ -287,19 +288,19 @@ public class VaultApplication
 				"This is my scheduled background operation",
 				(job) =>
 				{
-					// This is the code which is run when the schedule is called.
+				// This is the code which is run when the schedule is called.
 
-					// When is it next scheduled for?
-					var nextRun = this.Configuration?.SampleBackgroundOperationSchedule?.GetNextExecution();
-					if(false == nextRun.HasValue)
+				// When is it next scheduled for?
+				var nextRun = this.Configuration?.SampleBackgroundOperationSchedule?.GetNextExecution();
+					if (false == nextRun.HasValue)
 					{
-						// No future executions scheduled.
-						SysUtils.ReportInfoToEventLog($"It is now {DateTime.UtcNow.ToString("O")}.  There are no future executions scheduled.");
+					// No future executions scheduled.
+					SysUtils.ReportInfoToEventLog($"It is now {DateTime.UtcNow.ToString("O")}.  There are no future executions scheduled.");
 					}
 					else
 					{
-						// Is scheduled for nextRun.Value.
-						SysUtils.ReportInfoToEventLog($"Hello world, it is now {DateTime.UtcNow.ToString("O")} (re-scheduling for {nextRun.Value.ToString("O")}).");
+					// Is scheduled for nextRun.Value.
+					SysUtils.ReportInfoToEventLog($"Hello world, it is now {DateTime.UtcNow.ToString("O")} (re-scheduling for {nextRun.Value.ToString("O")}).");
 					}
 				}
 			);
@@ -307,19 +308,19 @@ public class VaultApplication
 			// Start the background operation, if there's a schedule.
 			this.ScheduleBackgroundOperation();
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
 			SysUtils.ReportErrorToEventLog("Exception starting background operations", e);
 		}
 
 	}
-	
-	/// <inheritdoc />
-	protected override void OnConfigurationUpdated(IConfigurationRequestContext context, ClientOperations clientOps, Configuration oldConfiguration)
+
+    /// <inheritdoc />
+    protected override void OnConfigurationUpdated(Configuration oldConfiguration, bool updateExternals)
 	{
 		// Call any base implementation.,
-		base.OnConfigurationUpdated(context, clientOps, oldConfiguration);
-		
+		base.OnConfigurationUpdated(oldConfiguration, updateExternals);
+
 		// Start the background operation, if there's a schedule.
 		this.ScheduleBackgroundOperation();
 	}
