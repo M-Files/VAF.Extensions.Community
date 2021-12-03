@@ -182,11 +182,13 @@ namespace MFiles.VAF.Extensions
 		)
 		{
 			schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>>();
-			if (null == input)
+			if (null == input || null == fieldInfo)
 				return;
 
 			// Get the basic value.
 			var value = fieldInfo.GetValue(input);
+			if (null == value)
+				return;
 
 			// If it is enumerable then iterate over the contents and add.
 			if (typeof(IEnumerable).IsAssignableFrom(fieldInfo.FieldType))
@@ -222,7 +224,7 @@ namespace MFiles.VAF.Extensions
 		)
 		{
 			schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>>();
-			if (null == input)
+			if (null == input || null == propertyInfo)
 				return;
 
 			// Get the basic value.
