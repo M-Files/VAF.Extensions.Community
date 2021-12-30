@@ -1,4 +1,6 @@
-﻿using MFilesAPI;
+﻿using MFiles.VAF.Common;
+using MFilesAPI;
+using System;
 
 namespace MFiles.VAF.Extensions
 {
@@ -28,7 +30,14 @@ namespace MFiles.VAF.Extensions
 			base.StartOperations(vaultPersistent);
 
 			// Ensure that our recurring configuration is updated.
-			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(isVaultStartup: true);
+			try
+			{
+				this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(isVaultStartup: true);
+			}
+			catch(Exception e)
+			{
+				SysUtils.ReportErrorMessageToEventLog("Exception mapping configuration to recurring operations.", e);
+			}
 		}
 	}
 }

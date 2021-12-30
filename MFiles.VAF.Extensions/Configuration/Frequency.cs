@@ -52,7 +52,7 @@ namespace MFiles.VAF.Extensions
 				switch (this.RecurrenceType)
 				{
 					case RecurrenceType.Interval:
-						return this.Interval.RunOnVaultStartup;
+						return this.Interval?.RunOnVaultStartup ?? false;
 					case RecurrenceType.Schedule:
 						if (false == (this.Schedule?.Enabled ?? false))
 							return false;
@@ -69,6 +69,8 @@ namespace MFiles.VAF.Extensions
 			switch (this.RecurrenceType)
 			{
 				case RecurrenceType.Interval:
+					if (null == this.Interval)
+						return null;
 					return (after ?? DateTime.UtcNow).Add(this.Interval);
 				case RecurrenceType.Schedule:
 					return this.Schedule?.GetNextExecution(after);
@@ -85,7 +87,7 @@ namespace MFiles.VAF.Extensions
 			switch (this.RecurrenceType)
 			{
 				case RecurrenceType.Interval:
-					return this.Interval.ToDashboardDisplayString();
+					return this.Interval?.ToDashboardDisplayString();
 				case RecurrenceType.Schedule:
 					return this.Schedule?.ToDashboardDisplayString();
 				case RecurrenceType.Unknown:
