@@ -58,6 +58,12 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// <inheritdoc />
 		public string ToDashboardDisplayString()
 		{
+			// If the schedule is not enabled then report that it will not run.
+			if (!this.Enabled)
+				return "<p>Will not run as the schedule is not enabled.</p>";
+
+			// If there are no triggers then it will not run on a schedule.
+			// Note: may still run on startup.
 			if (this.Triggers == null || this.Triggers.Count == 0)
 				return this.RunOnVaultStartup.HasValue && this.RunOnVaultStartup.Value
 					? "<p>Runs when the vault starts, but does not repeat.<br /></p>"
