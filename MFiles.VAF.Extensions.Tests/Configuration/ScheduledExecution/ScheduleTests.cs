@@ -179,5 +179,19 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 				schedule.ToDashboardDisplayString()
 			);
 		}
+
+		[TestMethod]
+		public void ScheduleToDashboardDisplayString_Disabled()
+		{
+			var schedule = new Schedule()
+			{
+				Enabled = false
+			};
+			Assert.AreEqual
+			(
+				"<p>Will not run as the schedule is not enabled.</p>",
+				schedule.ToDashboardDisplayString()
+			);
+		}
 	}
 }

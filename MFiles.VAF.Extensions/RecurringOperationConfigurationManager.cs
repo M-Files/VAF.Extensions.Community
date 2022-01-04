@@ -142,6 +142,13 @@ namespace MFiles.VAF.Extensions
 					tuple.Item2
 				);
 
+				// Cancel any existing executions.
+				this.VaultApplication.TaskManager.CancelAllFutureExecutions
+				(
+					tuple.Item1.QueueID,
+					tuple.Item1.TaskType
+				);
+
 				// Work out the next execution time.
 				DateTime? nextExecution = null;
 
@@ -155,12 +162,12 @@ namespace MFiles.VAF.Extensions
 					continue;
 
 				// Cancel future executions and schedule the next one if appropriate.
-				this.VaultApplication.TaskManager.RescheduleTask
+				this.VaultApplication.TaskManager.AddTask
 				(
+					this.VaultApplication.PermanentVault,
 					tuple.Item1.QueueID,
 					tuple.Item1.TaskType,
-					vault: this.VaultApplication.PermanentVault,
-					scheduleFor: nextExecution
+					activationTime: nextExecution
 				);
 			}
 		}
