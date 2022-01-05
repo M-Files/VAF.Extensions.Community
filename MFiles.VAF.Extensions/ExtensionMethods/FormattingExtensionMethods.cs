@@ -49,20 +49,24 @@ namespace MFiles.VAF.Extensions
 
 			// Seconds be easy.
 			if (timespan.Value < TimeSpan.FromSeconds(1))
-				return System.Security.SecurityElement.Escape($"{(int)timespan.Value.Milliseconds} {((int)timespan.Value.Milliseconds == 1 ? Resources.TimeResources.Component_Millisecond : Resources.TimeResources.Component_Milliseconds)}");
+				return 
+					$"{timespan.Value.Milliseconds} {(timespan.Value.Milliseconds == 1 ? Resources.TimeResources.Component_Millisecond : Resources.TimeResources.Component_Milliseconds)}"
+						.EscapeXmlForDashboard();
 			if (timespan.Value <= TimeSpan.FromSeconds(120))
-				return System.Security.SecurityElement.Escape($"{(int)timespan.Value.TotalSeconds} {((int)timespan.Value.TotalSeconds == 1 ? Resources.TimeResources.Component_Second : Resources.TimeResources.Component_Seconds)}");
+				return 
+					$"{(int)timespan.Value.TotalSeconds} {((int)timespan.Value.TotalSeconds == 1 ? Resources.TimeResources.Component_Second : Resources.TimeResources.Component_Seconds)}"
+					.EscapeXmlForDashboard();
 
 			// Build a text representation
 			var components = new List<string>();
 			if (timespan.Value.Days > 0)
-				components.Add(System.Security.SecurityElement.Escape($"{timespan.Value.Days} {((int)timespan.Value.Days == 1 ? Resources.TimeResources.Component_Day : Resources.TimeResources.Component_Days)}"));
+				components.Add($"{timespan.Value.Days} {(timespan.Value.Days == 1 ? Resources.TimeResources.Component_Day : Resources.TimeResources.Component_Days)}");
 			if (timespan.Value.Hours > 0)
-				components.Add(System.Security.SecurityElement.Escape($"{timespan.Value.Hours} {((int)timespan.Value.Hours == 1 ? Resources.TimeResources.Component_Hour : Resources.TimeResources.Component_Hours)}"));
+				components.Add($"{timespan.Value.Hours} {(timespan.Value.Hours == 1 ? Resources.TimeResources.Component_Hour : Resources.TimeResources.Component_Hours)}");
 			if (timespan.Value.Minutes > 0)
-				components.Add(System.Security.SecurityElement.Escape($"{timespan.Value.Minutes} {((int)timespan.Value.Minutes == 1 ? Resources.TimeResources.Component_Minute : Resources.TimeResources.Component__Minutes)}"));
+				components.Add($"{timespan.Value.Minutes} {(timespan.Value.Minutes == 1 ? Resources.TimeResources.Component_Minute : Resources.TimeResources.Component__Minutes)}");
 			if (timespan.Value.Seconds > 0)
-				components.Add(System.Security.SecurityElement.Escape($"{timespan.Value.Seconds} {((int)timespan.Value.Seconds == 1 ? Resources.TimeResources.Component_Second : Resources.TimeResources.Component_Seconds)}"));
+				components.Add($"{timespan.Value.Seconds} {(timespan.Value.Seconds == 1 ? Resources.TimeResources.Component_Second : Resources.TimeResources.Component_Seconds)}");
 
 			// Build a text representation
 			var output = "";
@@ -72,14 +76,14 @@ namespace MFiles.VAF.Extensions
 				{
 					if (i == components.Count - 1)
 					{
-						output += System.Security.SecurityElement.Escape(Resources.TimeResources.Component_SeparatorLast);
+						output += Resources.TimeResources.Component_SeparatorLast.EscapeXmlForDashboard();
 					}
 					else
 					{
-						output += System.Security.SecurityElement.Escape(Resources.TimeResources.Component_Separator);
+						output += Resources.TimeResources.Component_Separator.EscapeXmlForDashboard();
 					}
 				}
-				output += components[i];
+				output += components[i].EscapeXmlForDashboard();
 			}
 			return output;
 		}
@@ -103,7 +107,7 @@ namespace MFiles.VAF.Extensions
 		{
 			// Sanity.
 			if (false == timespan.HasValue || timespan.Value <= TimeSpan.Zero)
-				return $"<p>{System.Security.SecurityElement.Escape(Resources.AsynchronousOperationsResources.RepeatType_Interval_NoTimeSpanSpecified)}<br /></p>";
+				return $"<p>{Resources.AsynchronousOperationsResources.RepeatType_Interval_NoTimeSpanSpecified.EscapeXmlForDashboard()}<br /></p>";
 
 			return ((TimeSpanEx)timespan.Value).ToDashboardDisplayString();
 		}
@@ -135,8 +139,8 @@ namespace MFiles.VAF.Extensions
 			// No value?
 			if (null == value)
 				return representation == DateTimeRepresentationOf.LastRun
-					? System.Security.SecurityElement.Escape(Resources.TimeResources.NotRunSinceLastVaultStart)
-					: System.Security.SecurityElement.Escape(Resources.TimeResources.NotScheduled);
+					? Resources.TimeResources.NotRunSinceLastVaultStart.EscapeXmlForDashboard()
+					: Resources.TimeResources.NotScheduled.EscapeXmlForDashboard();
 
 			// Find the difference between the scheduled time and now.
 			var universalValue = value.Value.ToUniversalTime();
@@ -147,8 +151,8 @@ namespace MFiles.VAF.Extensions
 			{
 				// Now!
 				return representation == DateTimeRepresentationOf.LastRun
-					? System.Security.SecurityElement.Escape(Resources.TimeResources.LastRunJustNow)
-					: System.Security.SecurityElement.Escape(Resources.TimeResources.NextRunDueNow);
+					? Resources.TimeResources.LastRunJustNow.EscapeXmlForDashboard()
+					: Resources.TimeResources.NextRunDueNow.EscapeXmlForDashboard();
 			}
 			else
 			{
@@ -161,10 +165,10 @@ namespace MFiles.VAF.Extensions
 					{
 						// If it's <= 15 seconds then we may just be waiting to be notified.
 						if (diff <= TimeSpan.FromSeconds(15))
-							return System.Security.SecurityElement.Escape(Resources.TimeResources.Waiting);
+							return Resources.TimeResources.Waiting.EscapeXmlForDashboard();
 
 						// It is the next run but it's in the past.
-						return System.Security.SecurityElement.Escape(string.Format(Resources.TimeResources.OverdueBySeconds, (int)diff.TotalSeconds));
+						return Resources.TimeResources.OverdueBySeconds.EscapeXmlForDashboard((int)diff.TotalSeconds);
 					}
 				}
 
@@ -189,8 +193,8 @@ namespace MFiles.VAF.Extensions
 				{
 					// Default to the specific time.
 					return localTime.Date == DateTime.Now.ToLocalTime().Date
-						? System.Security.SecurityElement.Escape(string.Format(Resources.TimeResources.AtSpecificTime, localTime.ToString("HH:mm:ss")))
-						: System.Security.SecurityElement.Escape(string.Format(Resources.TimeResources.AtSpecificTimeOnDate, localTime.ToString("HH:mm:ss"), localTime.ToString("yyyy-MM-dd")));
+						? Resources.TimeResources.AtSpecificTime.EscapeXmlForDashboard(localTime.ToString("HH:mm:ss"))
+						: Resources.TimeResources.AtSpecificTimeOnDate.EscapeXmlForDashboard(localTime.ToString("HH:mm:ss"), localTime.ToString("yyyy-MM-dd"));
 				}
 
 				// Render out ago vs in.
@@ -200,16 +204,16 @@ namespace MFiles.VAF.Extensions
 					if (representation == DateTimeRepresentationOf.NextRun)
 					{
 						// It is the next run but it's in the past.
-						return System.Security.SecurityElement.Escape(string.Format(Resources.TimeResources.Overdue, diffString));
+						return Resources.TimeResources.Overdue.EscapeXmlForDashboard(diffString);
 					}
-					return System.Security.SecurityElement.Escape(string.Format(Resources.TimeResources.LastRunInPast, diffString)); 
+					return Resources.TimeResources.LastRunInPast.EscapeXmlForDashboard(diffString); 
 				}
 				else
 				{
 					// Future.
 					return localTime.Date == DateTime.Now.ToLocalTime().Date
-						? System.Security.SecurityElement.Escape(string.Format(Resources.TimeResources.AtSpecificTimeWithDifference, localTime.ToString("HH:mm:ss"), diffString))
-						: System.Security.SecurityElement.Escape(string.Format(Resources.TimeResources.AtSpecificTimeOnDateWithDifference, localTime.ToString("HH:mm:ss"), localTime.ToString("yyyy-MM-dd"), diffString));
+						? Resources.TimeResources.AtSpecificTimeWithDifference.EscapeXmlForDashboard(localTime.ToString("HH:mm:ss"), diffString)
+						: Resources.TimeResources.AtSpecificTimeOnDateWithDifference.EscapeXmlForDashboard(localTime.ToString("HH:mm:ss"), localTime.ToString("yyyy-MM-dd"), diffString);
 				}
 			}
 		}

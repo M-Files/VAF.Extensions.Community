@@ -66,7 +66,7 @@ namespace MFiles.VAF.Extensions
 				// Otherwise just show the text.
 				var dashboardCustomContentEx = new DashboardCustomContentEx
 				(
-					new DashboardCustomContent(System.Security.SecurityElement.Escape(this.StatusDetails))
+					new DashboardCustomContent(this.StatusDetails.EscapeXmlForDashboard())
 				);
 				if (removeLineBreaks)
 				{

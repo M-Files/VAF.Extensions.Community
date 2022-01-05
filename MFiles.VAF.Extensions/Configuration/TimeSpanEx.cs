@@ -34,12 +34,12 @@ namespace MFiles.VAF.Extensions
 		{
 			// Sanity.
 			if (null == this?.Interval || this.Interval <= TimeSpan.Zero)
-				return $"<p>{System.Security.SecurityElement.Escape(Resources.AsynchronousOperationsResources.RepeatType_Interval_NoTimeSpanSpecified)}<br /></p>";
+				return $"<p>{Resources.AsynchronousOperationsResources.RepeatType_Interval_NoTimeSpanSpecified.EscapeXmlForDashboard()}<br /></p>";
 
 			// Does it run on startup?
 			var displayString = (this.RunOnVaultStartup.HasValue && this.RunOnVaultStartup.Value)
-				? System.Security.SecurityElement.Escape(string.Format(Resources.TimeResources.RepeatsOnInterval_RunsOnStartup, this.Interval.ToDisplayString()))
-				: System.Security.SecurityElement.Escape(string.Format(Resources.TimeResources.RepeatsOnInterval_DoesNotRunOnStartup, this.Interval.ToDisplayString()));
+				? Resources.TimeResources.RepeatsOnInterval_RunsOnStartup.EscapeXmlForDashboard(this.Interval.ToDisplayString())
+				: Resources.TimeResources.RepeatsOnInterval_DoesNotRunOnStartup.EscapeXmlForDashboard(this.Interval.ToDisplayString());
 
 			// Build a text representation.
 			return $"<p>{displayString}<br /></p>";

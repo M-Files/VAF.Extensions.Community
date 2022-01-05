@@ -89,15 +89,11 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			if (null == this.TriggerTimes || this.TriggerTimes.Count == 0)
 				return null;
 
-			return System.Security.SecurityElement.Escape
-			(
-				string.Format
+			return Resources.ScheduleResources.Triggers_WeeklyTrigger.EscapeXmlForDashboard
 				(
-					Resources.ScheduleResources.Triggers_WeeklyTrigger,
 					string.Join(", ", this.TriggerDays.OrderBy(t => t)),
 					string.Join(", ", this.TriggerTimes.OrderBy(t => t).Select(t => t.ToString()))
-				)
-			);
+				);
 		}
 	}
 }

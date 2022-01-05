@@ -41,10 +41,10 @@ namespace MFiles.VAF.Extensions
 				var header = table.AddRow(DashboardTableRowType.Header);
 				header.AddCells
 				(
-					new DashboardCustomContent(System.Security.SecurityElement.Escape(Resources.DashboardResources.AsynchronousOperations_Table_TaskHeader)),
-					new DashboardCustomContent(System.Security.SecurityElement.Escape(Resources.DashboardResources.AsynchronousOperations_Table_ScheduledHeader)),
-					new DashboardCustomContent(System.Security.SecurityElement.Escape(Resources.DashboardResources.AsynchronousOperations_Table_DurationHeader)),
-					new DashboardCustomContent(System.Security.SecurityElement.Escape(Resources.DashboardResources.AsynchronousOperations_Table_DetailsHeader))
+					new DashboardCustomContent(Resources.DashboardResources.AsynchronousOperations_Table_TaskHeader.EscapeXmlForDashboard()),
+					new DashboardCustomContent(Resources.DashboardResources.AsynchronousOperations_Table_ScheduledHeader.EscapeXmlForDashboard()),
+					new DashboardCustomContent(Resources.DashboardResources.AsynchronousOperations_Table_DurationHeader.EscapeXmlForDashboard()),
+					new DashboardCustomContent(Resources.DashboardResources.AsynchronousOperations_Table_DetailsHeader.EscapeXmlForDashboard())
 				);
 			}
 
@@ -86,7 +86,7 @@ namespace MFiles.VAF.Extensions
 					: new TaskInformation(execution.Status.Data);
 
 				// Create the content for the scheduled column (including icon).
-				var taskInfoCell = new DashboardCustomContentEx(System.Security.SecurityElement.Escape(displayName));
+				var taskInfoCell = new DashboardCustomContentEx(displayName.EscapeXmlForDashboard());
 				var scheduledCell = new DashboardCustomContentEx
 					(
 						activation.ToTimeOffset
@@ -121,48 +121,36 @@ namespace MFiles.VAF.Extensions
 				{
 					case MFilesAPI.MFTaskState.MFTaskStateWaiting:
 						taskInfoCell.Icon = "Resources/Waiting.png";
-						rowTitle = System.Security.SecurityElement.Escape(string.Format(Resources.DashboardResources.AsynchronousOperations_Table_WaitingRowTitle, activation.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")));
+						rowTitle = Resources.DashboardResources.AsynchronousOperations_Table_WaitingRowTitle.EscapeXmlForDashboard(activation.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"));
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateInProgress:
-						rowTitle = System.Security.SecurityElement.Escape(Resources.DashboardResources.AsynchronousOperations_Table_RunningRowTitle);
+						rowTitle = Resources.DashboardResources.AsynchronousOperations_Table_RunningRowTitle.EscapeXmlForDashboard();
 						if ((taskInfo?.Started.HasValue) ?? false)
-							rowTitle = System.Security.SecurityElement.Escape
-							(
-								string.Format
+							rowTitle = Resources.DashboardResources.AsynchronousOperations_Table_RunningRowTitle_WithTimes.EscapeXmlForDashboard
 								(
-									Resources.DashboardResources.AsynchronousOperations_Table_RunningRowTitle_WithTimes,
 									taskInfo.Started.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"),
 									taskInfo.GetElapsedTime().ToDisplayString()
-								)
-							);
+								);
 						taskInfoCell.Icon = "Resources/Running.png";
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateFailed:
-						rowTitle = System.Security.SecurityElement.Escape(Resources.DashboardResources.AsynchronousOperations_Table_FailedRowTitle);
+						rowTitle = Resources.DashboardResources.AsynchronousOperations_Table_FailedRowTitle.EscapeXmlForDashboard();
 						if ((taskInfo?.Started.HasValue) ?? false)
-							rowTitle = System.Security.SecurityElement.Escape
-							(
-								string.Format
+							rowTitle = Resources.DashboardResources.AsynchronousOperations_Table_FailedRowTitle_WithTimes.EscapeXmlForDashboard
 								(
-									Resources.DashboardResources.AsynchronousOperations_Table_FailedRowTitle_WithTimes,
 									taskInfo.Started.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"),
 									taskInfo.GetElapsedTime().ToDisplayString()
-								)
-							);
+								);
 						taskInfoCell.Icon = "Resources/Failed.png";
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateCompleted:
-						rowTitle = System.Security.SecurityElement.Escape(Resources.DashboardResources.AsynchronousOperations_Table_CompletedRowTitle);
+						rowTitle = Resources.DashboardResources.AsynchronousOperations_Table_CompletedRowTitle.EscapeXmlForDashboard();
 						if ((taskInfo?.Started.HasValue) ?? false)
-							rowTitle = System.Security.SecurityElement.Escape
-							(
-								string.Format
+							rowTitle = Resources.DashboardResources.AsynchronousOperations_Table_CompletedRowTitle_WithTimes.EscapeXmlForDashboard
 								(
-									Resources.DashboardResources.AsynchronousOperations_Table_CompletedRowTitle_WithTimes,
 									taskInfo.Started.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"),
 									taskInfo.GetElapsedTime().ToDisplayString()
-								)
-							);
+								);
 						taskInfoCell.Icon = "Resources/Completed.png";
 						break;
 					default:
@@ -208,7 +196,7 @@ namespace MFiles.VAF.Extensions
 				if (isFiltered)
 					cell1.InnerContent = new DashboardCustomContentEx
 					(
-						$"<p style='font-size: 12px'><em>{System.Security.SecurityElement.Escape(String.Format(Resources.DashboardResources.AsynchronousOperations_Table_FilteredListComment, maximumRowsToShow, list.Count))}</em></p>"
+						$"<p style='font-size: 12px'><em>{Resources.DashboardResources.AsynchronousOperations_Table_FilteredListComment.EscapeXmlForDashboard(maximumRowsToShow, list.Count)}</em></p>"
 					);
 
 				// The second cell contains the totals.
@@ -232,11 +220,9 @@ namespace MFiles.VAF.Extensions
 		}
 		private static string GetTotalTasksInStateForDisplay(Dictionary<MFTaskState, int> data, MFTaskState state, string resourceString, int defaultValue = default)
 		{
-			return string.Format
-			(
-				resourceString,
-				data.ContainsKey(state) ? data[state] : defaultValue
-			);
+			return resourceString?
+				.EscapeXmlForDashboard(data.ContainsKey(state) ? data[state] : defaultValue)?
+				.Replace("'", "&#39;");
 		}
 	}
 }

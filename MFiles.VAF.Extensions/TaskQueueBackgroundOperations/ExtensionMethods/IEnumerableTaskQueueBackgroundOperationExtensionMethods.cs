@@ -44,14 +44,14 @@ namespace MFiles.VAF.Extensions
 				var htmlString = "";
 				if (false == string.IsNullOrWhiteSpace(bgo.Description))
 				{
-					htmlString += new DashboardCustomContent($"<p><em>{System.Security.SecurityElement.Escape(bgo.Description)}</em></p>").ToXmlString();
+					htmlString += new DashboardCustomContent($"<p><em>{bgo.Description.EscapeXmlForDashboard()}</em></p>").ToXmlString();
 				}
 
 				// Show when it should run.
 				switch (bgo.RepeatType)
 				{
 					case TaskQueueBackgroundOperationRepeatType.NotRepeating:
-						htmlString += $"<p>{System.Security.SecurityElement.Escape(Resources.AsynchronousOperationsResources.RepeatType_RunsOnDemandOnly)}.<br /></p>";
+						htmlString += $"<p>{Resources.AsynchronousOperationsResources.RepeatType_RunsOnDemandOnly.EscapeXmlForDashboard()}.<br /></p>";
 						break;
 					case TaskQueueBackgroundOperationRepeatType.Interval:
 						htmlString += bgo.Interval?.ToDashboardDisplayString();
@@ -60,7 +60,7 @@ namespace MFiles.VAF.Extensions
 						htmlString += bgo.Schedule?.ToDashboardDisplayString();
 						break;
 					default:
-						htmlString = $"<p><em>{System.Security.SecurityElement.Escape(string.Format(Resources.AsynchronousOperationsResources.RepeatType_UnhandledRepeatType, bgo.RepeatType))}</em><br /></p>";
+						htmlString = $"<p><em>{Resources.AsynchronousOperationsResources.RepeatType_UnhandledRepeatType.EscapeXmlForDashboard(bgo.RepeatType)}</em><br /></p>";
 						break;
 				}
 
@@ -77,11 +77,11 @@ namespace MFiles.VAF.Extensions
 					Title = bgo.Name,
 					StatusSummary = new DomainStatusSummary()
 					{
-						Label = isRunning
-						? System.Security.SecurityElement.Escape(Resources.AsynchronousOperationsResources.Status_Running)
+						Label = (isRunning
+						? Resources.AsynchronousOperationsResources.Status_Running
 						: isScheduled
-							? System.Security.SecurityElement.Escape(Resources.AsynchronousOperationsResources.Status_Scheduled)
-							: System.Security.SecurityElement.Escape(Resources.AsynchronousOperationsResources.Status_Stopped)
+							? Resources.AsynchronousOperationsResources.Status_Scheduled
+							: Resources.AsynchronousOperationsResources.Status_Stopped).EscapeXmlForDashboard()
 					}
 				};
 
