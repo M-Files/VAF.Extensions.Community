@@ -70,60 +70,6 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No timespan specified; does not repeat..
-        /// </summary>
-        internal static string AsynchronousOperations_RepeatType_Interval_NoTimeSpanSpecified {
-            get {
-                return ResourceManager.GetString("AsynchronousOperations_RepeatType_Interval_NoTimeSpanSpecified", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Runs on demand (does not repeat)..
-        /// </summary>
-        internal static string AsynchronousOperations_RepeatType_RunsOnDemandOnly {
-            get {
-                return ResourceManager.GetString("AsynchronousOperations_RepeatType_RunsOnDemandOnly", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unhandled repeat type: {0}.
-        /// </summary>
-        internal static string AsynchronousOperations_RepeatType_UnhandledRepeatType {
-            get {
-                return ResourceManager.GetString("AsynchronousOperations_RepeatType_UnhandledRepeatType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Running.
-        /// </summary>
-        internal static string AsynchronousOperations_Status_Running {
-            get {
-                return ResourceManager.GetString("AsynchronousOperations_Status_Running", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Scheduled.
-        /// </summary>
-        internal static string AsynchronousOperations_Status_Scheduled {
-            get {
-                return ResourceManager.GetString("AsynchronousOperations_Status_Scheduled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Stopped.
-        /// </summary>
-        internal static string AsynchronousOperations_Status_Stopped {
-            get {
-                return ResourceManager.GetString("AsynchronousOperations_Status_Stopped", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Completed..
         /// </summary>
         internal static string AsynchronousOperations_Table_CompletedRowTitle {

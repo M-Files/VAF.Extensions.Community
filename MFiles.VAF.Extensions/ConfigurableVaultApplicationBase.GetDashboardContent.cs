@@ -84,7 +84,7 @@ namespace MFiles.VAF.Extensions
 				Title = Resources.DashboardResources.AsynchronousOperations_DashboardTitle,
 				InnerContent = new DashboardContentCollection
 				{
-					new DashboardCustomContent($"<em>{string.Format(Resources.DashboardResources.TimeOnServer, DateTime.Now.ToLocalTime().ToString("HH:mm:ss"))}</em>"),
+					new DashboardCustomContent($"<em>{System.Security.SecurityElement.Escape(string.Format(Resources.DashboardResources.TimeOnServer, DateTime.Now.ToLocalTime().ToString("HH:mm:ss")))}</em>"),
 					list
 				}
 			};

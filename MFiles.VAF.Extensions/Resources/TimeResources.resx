@@ -117,71 +117,95 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AsynchronousOperations_DashboardTitle" xml:space="preserve">
-    <value>Asynchronous Operations</value>
+  <data name="AtSpecificTime" xml:space="preserve">
+    <value>At {0} server time.</value>
+    <comment>{0} will be replaced with the scheduled time in 24-hour format.</comment>
   </data>
-  <data name="AsynchronousOperations_Table_CompletedRowTitle" xml:space="preserve">
-    <value>Completed.</value>
+  <data name="AtSpecificTimeOnDate" xml:space="preserve">
+    <value>At {0} server time on {1}.</value>
+    <comment>{0} will be replaced with the scheduled time in 24-hour format.  {1} will be replaced with the scheduled date in ISO 8601 format (yyyy-MM-dd).</comment>
   </data>
-  <data name="AsynchronousOperations_Table_CompletedRowTitle_WithTimes" xml:space="preserve">
-    <value>Completed. Started at approximately {0} server time (took {1}).</value>
-    <comment>{0} will be replaced with started time in yyyy-MM-dd HH:mm:ss format. {1} will be replaced with the duration.</comment>
+  <data name="AtSpecificTimeOnDateWithDifference" xml:space="preserve">
+    <value>At {0} server time on {1} (in {2}).</value>
+    <comment>{0} will be replaced with the scheduled time in 24-hour format.  {1} will be replaced with the scheduled date in ISO 8601 format (yyyy-MM-dd).  {2} will be replaced with the time until the next-run time.</comment>
   </data>
-  <data name="AsynchronousOperations_Table_DetailsHeader" xml:space="preserve">
-    <value>Details</value>
+  <data name="AtSpecificTimeWithDifference" xml:space="preserve">
+    <value>At {0} server time (in {1}).</value>
+    <comment>{0} will be replaced with the scheduled time in 24-hour format.  {1} will be replaced with the time until the next-run time.</comment>
   </data>
-  <data name="AsynchronousOperations_Table_DurationHeader" xml:space="preserve">
-    <value>Duration</value>
+  <data name="Component_Day" xml:space="preserve">
+    <value>day</value>
   </data>
-  <data name="AsynchronousOperations_Table_FailedRowTitle" xml:space="preserve">
-    <value>Failed.</value>
+  <data name="Component_Days" xml:space="preserve">
+    <value>days</value>
   </data>
-  <data name="AsynchronousOperations_Table_FailedRowTitle_WithTimes" xml:space="preserve">
-    <value>Failed. Started at approximately {0} server time (took {1}).</value>
-    <comment>{0} will be replaced with started time in yyyy-MM-dd HH:mm:ss format. {1} will be replaced with the duration.</comment>
+  <data name="Component_Hour" xml:space="preserve">
+    <value>hour</value>
   </data>
-  <data name="AsynchronousOperations_Table_FilteredListComment" xml:space="preserve">
-    <value>This table shows only {0} of {1} tasks.</value>
-    <comment>{0} will be replaced with the number of rows that can be shown, and {1} will be replaced with the number of tasks.</comment>
+  <data name="Component_Hours" xml:space="preserve">
+    <value>hours</value>
   </data>
-  <data name="AsynchronousOperations_Table_Footer_AwaitingProcessing" xml:space="preserve">
-    <value>{0} awaiting processing.</value>
-    <comment>{0} will be replaced with the number of tasks in this state.</comment>
+  <data name="Component_Millisecond" xml:space="preserve">
+    <value>millisecond</value>
   </data>
-  <data name="AsynchronousOperations_Table_Footer_Completed" xml:space="preserve">
-    <value>{0} completed.</value>
-    <comment>{0} will be replaced with the number of tasks in this state.</comment>
+  <data name="Component_Milliseconds" xml:space="preserve">
+    <value>milliseconds</value>
   </data>
-  <data name="AsynchronousOperations_Table_Footer_Failed" xml:space="preserve">
-    <value>{0} failed.</value>
-    <comment>{0} will be replaced with the number of tasks in this state.</comment>
+  <data name="Component_Minute" xml:space="preserve">
+    <value>minute</value>
   </data>
-  <data name="AsynchronousOperations_Table_Footer_Running" xml:space="preserve">
-    <value>{0} running.</value>
-    <comment>{0} will be replaced with the number of tasks in this state.</comment>
+  <data name="Component_Second" xml:space="preserve">
+    <value>second</value>
   </data>
-  <data name="AsynchronousOperations_Table_RunningRowTitle" xml:space="preserve">
-    <value>Running.</value>
+  <data name="Component_Seconds" xml:space="preserve">
+    <value>seconds</value>
   </data>
-  <data name="AsynchronousOperations_Table_RunningRowTitle_WithTimes" xml:space="preserve">
-    <value>Running. Started at approximately {0} server time (taken {1} so far).</value>
-    <comment>{0} will be replaced with started time in yyyy-MM-dd HH:mm:ss format. {1} will be replaced with the duration.</comment>
+  <data name="Component_Separator" xml:space="preserve">
+    <value>, </value>
   </data>
-  <data name="AsynchronousOperations_Table_ScheduledHeader" xml:space="preserve">
-    <value>Scheduled</value>
+  <data name="Component_SeparatorLast" xml:space="preserve">
+    <value>, and </value>
   </data>
-  <data name="AsynchronousOperations_Table_TaskHeader" xml:space="preserve">
-    <value>Task</value>
+  <data name="Component__Minutes" xml:space="preserve">
+    <value>minutes</value>
   </data>
-  <data name="AsynchronousOperations_Table_WaitingRowTitle" xml:space="preserve">
-    <value>Waiting.  Will start at approximately {0}.</value>
-    <comment>{0} will be replaced with activation time in yyyy-MM-dd HH:mm:ss format.</comment>
+  <data name="LastRunInPast" xml:space="preserve">
+    <value>{0} ago.</value>
+    <comment>{0} will be replaced with how long ago it ran (e.g. "2 minutes").</comment>
   </data>
-  <data name="AsynchronousOperations_ThereAreNoCurrentAsynchronousOperations" xml:space="preserve">
-    <value>There are no current asynchronous operations.</value>
+  <data name="LastRunJustNow" xml:space="preserve">
+    <value>Just now.</value>
+    <comment>Shown if the last-run time is requested but it has only just passed.</comment>
   </data>
-  <data name="TimeOnServer" xml:space="preserve">
-    <value>Time on server: {0}</value>
-    <comment>{0} will be replaced with current time in 24-hour format.</comment>
+  <data name="NextRunDueNow" xml:space="preserve">
+    <value>Due now.</value>
+    <comment>Shown if the next-run time is requested but it is due immimently.</comment>
+  </data>
+  <data name="NotRunSinceLastVaultStart" xml:space="preserve">
+    <value>(not since last vault start)</value>
+    <comment>Shown if the last-run time is requested but none is available.</comment>
+  </data>
+  <data name="NotScheduled" xml:space="preserve">
+    <value>(not scheduled)</value>
+    <comment>Shown if the next-run time is requested but none is available.</comment>
+  </data>
+  <data name="Overdue" xml:space="preserve">
+    <value>Overdue (expected {0} ago).</value>
+    <comment>{0} will be replaced with how long ago it was expected to run (e.g. "2 minutes").</comment>
+  </data>
+  <data name="OverdueBySeconds" xml:space="preserve">
+    <value>Overdue by {0}s.</value>
+    <comment>{0} will be replaced by the number of seconds it is overdue by.</comment>
+  </data>
+  <data name="RepeatsOnInterval_DoesNotRunOnStartup" xml:space="preserve">
+    <value>Runs every {0}.</value>
+    <comment>{0} will be replaced with the interval (e.g. "59 seconds");</comment>
+  </data>
+  <data name="RepeatsOnInterval_RunsOnStartup" xml:space="preserve">
+    <value>Runs on vault startup and every {0}.</value>
+    <comment>{0} will be replaced with the interval (e.g. "59 seconds").</comment>
+  </data>
+  <data name="Waiting" xml:space="preserve">
+    <value>Waiting to be run.</value>
   </data>
 </root>

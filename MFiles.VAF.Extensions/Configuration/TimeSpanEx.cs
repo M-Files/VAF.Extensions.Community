@@ -34,46 +34,15 @@ namespace MFiles.VAF.Extensions
 		{
 			// Sanity.
 			if (null == this?.Interval || this.Interval <= TimeSpan.Zero)
-				return "<p>No timespan specified; does not repeat.<br /></p>";
+				return $"<p>{System.Security.SecurityElement.Escape(Resources.AsynchronousOperationsResources.RepeatType_Interval_NoTimeSpanSpecified)}<br /></p>";
 
-			var prefix = "<p>Runs";
-			if (this.RunOnVaultStartup.HasValue && this.RunOnVaultStartup.Value)
-				prefix += " on vault startup and";
-			var suffix = ".<br /></p>";
+			// Does it run on startup?
+			var displayString = (this.RunOnVaultStartup.HasValue && this.RunOnVaultStartup.Value)
+				? System.Security.SecurityElement.Escape(string.Format(Resources.TimeResources.RepeatsOnInterval_RunsOnStartup, this.Interval.ToDisplayString()))
+				: System.Security.SecurityElement.Escape(string.Format(Resources.TimeResources.RepeatsOnInterval_DoesNotRunOnStartup, this.Interval.ToDisplayString()));
 
-			// Seconds be easy.
-			if (this.Interval <= TimeSpan.FromSeconds(120))
-				return $"{prefix} every {(int)this.Interval.TotalSeconds} seconds{suffix}";
-
-			// Build a text representation
-			var components = new List<string>();
-			if (this.Interval.Days > 0)
-				components.Add($"{this.Interval.Days} day{(this.Interval.Days != 1 ? "s" : "")}");
-			if (this.Interval.Hours > 0)
-				components.Add($"{this.Interval.Hours} hour{(this.Interval.Hours != 1 ? "s" : "")}");
-			if (this.Interval.Minutes > 0)
-				components.Add($"{this.Interval.Minutes} minute{(this.Interval.Minutes != 1 ? "s" : "")}");
-			if (this.Interval.Seconds > 0)
-				components.Add($"{this.Interval.Seconds} second{(this.Interval.Seconds != 1 ? "s" : "")}");
-
-			// Build a text representation
-			var output = prefix + " every ";
-			for (var i = 0; i < components.Count; i++)
-			{
-				if (i == 0)
-				{
-					output += components[i];
-				}
-				else if (i == components.Count - 1)
-				{
-					output += ", and " + components[i];
-				}
-				else
-				{
-					output += ", " + components[i];
-				}
-			}
-			return output + suffix;
+			// Build a text representation.
+			return $"<p>{displayString}<br /></p>";
 		}
 
 		public static implicit operator TimeSpan(TimeSpanEx input)

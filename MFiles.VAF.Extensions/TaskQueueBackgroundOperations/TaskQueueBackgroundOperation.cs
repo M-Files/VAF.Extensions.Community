@@ -304,7 +304,7 @@ namespace MFiles.VAF.Extensions
 			// Cancel any existing executions.
 			this.StopRunningAtIntervals();
 
-			// Set up the recurrance data.
+			// Set up the Recurrence data.
 			this.Interval = interval;
 			this.RepeatType = TaskQueueBackgroundOperationRepeatType.Interval;
 
@@ -326,7 +326,7 @@ namespace MFiles.VAF.Extensions
 			// Cancel any existing executions.
 			this.StopRunningAtIntervals();
 
-			// Set up the recurrance data.
+			// Set up the Recurrence data.
 			this.Schedule = schedule;
 			this.RepeatType = TaskQueueBackgroundOperationRepeatType.Schedule;
 

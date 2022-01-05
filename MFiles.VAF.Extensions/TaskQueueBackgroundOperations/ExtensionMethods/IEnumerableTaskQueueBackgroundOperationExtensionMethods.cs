@@ -51,7 +51,7 @@ namespace MFiles.VAF.Extensions
 				switch (bgo.RepeatType)
 				{
 					case TaskQueueBackgroundOperationRepeatType.NotRepeating:
-						htmlString += $"<p>{System.Security.SecurityElement.Escape(Resources.DashboardResources.AsynchronousOperations_RepeatType_RunsOnDemandOnly)}.<br /></p>";
+						htmlString += $"<p>{System.Security.SecurityElement.Escape(Resources.AsynchronousOperationsResources.RepeatType_RunsOnDemandOnly)}.<br /></p>";
 						break;
 					case TaskQueueBackgroundOperationRepeatType.Interval:
 						htmlString += bgo.Interval?.ToDashboardDisplayString();
@@ -60,7 +60,7 @@ namespace MFiles.VAF.Extensions
 						htmlString += bgo.Schedule?.ToDashboardDisplayString();
 						break;
 					default:
-						htmlString = $"<p><em>{System.Security.SecurityElement.Escape(string.Format(Resources.DashboardResources.AsynchronousOperations_RepeatType_UnhandledRepeatType, bgo.RepeatType))}</em><br /></p>";
+						htmlString = $"<p><em>{System.Security.SecurityElement.Escape(string.Format(Resources.AsynchronousOperationsResources.RepeatType_UnhandledRepeatType, bgo.RepeatType))}</em><br /></p>";
 						break;
 				}
 
@@ -78,10 +78,10 @@ namespace MFiles.VAF.Extensions
 					StatusSummary = new DomainStatusSummary()
 					{
 						Label = isRunning
-						? System.Security.SecurityElement.Escape(Resources.DashboardResources.AsynchronousOperations_Status_Running)
+						? System.Security.SecurityElement.Escape(Resources.AsynchronousOperationsResources.Status_Running)
 						: isScheduled
-							? System.Security.SecurityElement.Escape(Resources.DashboardResources.AsynchronousOperations_Status_Scheduled)
-							: System.Security.SecurityElement.Escape(Resources.DashboardResources.AsynchronousOperations_Status_Stopped)
+							? System.Security.SecurityElement.Escape(Resources.AsynchronousOperationsResources.Status_Scheduled)
+							: System.Security.SecurityElement.Escape(Resources.AsynchronousOperationsResources.Status_Stopped)
 					}
 				};
 

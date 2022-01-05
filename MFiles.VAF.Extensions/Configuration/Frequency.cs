@@ -18,7 +18,7 @@ namespace MFiles.VAF.Extensions
 		: IRecurrenceConfiguration
 	{
 		/// <summary>
-		/// The currently-configured type of recurrance.
+		/// The currently-configured type of Recurrence.
 		/// </summary>
 		[DataMember]
 		[JsonConfEditor(Label = "Type")]
@@ -77,7 +77,7 @@ namespace MFiles.VAF.Extensions
 				case RecurrenceType.Unknown:
 					return null;
 				default:
-					throw new InvalidOperationException($"Recurrance type of {this.RecurrenceType} is not supported.");
+					throw new InvalidOperationException($"Recurrence type of {this.RecurrenceType} is not supported.");
 			}
 		}
 
@@ -93,7 +93,7 @@ namespace MFiles.VAF.Extensions
 				case RecurrenceType.Unknown:
 					return ((TimeSpan?)null).ToDashboardDisplayString();
 				default:
-					throw new InvalidOperationException($"Recurrance type of {this.RecurrenceType} is not supported.");
+					throw new InvalidOperationException($"Recurrence type of {this.RecurrenceType} is not supported.");
 			}
 		}
 

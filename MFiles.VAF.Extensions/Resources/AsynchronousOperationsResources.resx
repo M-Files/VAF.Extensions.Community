@@ -117,71 +117,26 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AsynchronousOperations_DashboardTitle" xml:space="preserve">
-    <value>Asynchronous Operations</value>
+  <data name="RepeatType_Interval_NoTimeSpanSpecified" xml:space="preserve">
+    <value>No timespan specified; does not repeat.</value>
   </data>
-  <data name="AsynchronousOperations_Table_CompletedRowTitle" xml:space="preserve">
-    <value>Completed.</value>
+  <data name="RepeatType_RunsOnDemandOnly" xml:space="preserve">
+    <value>Runs on demand (does not repeat).</value>
   </data>
-  <data name="AsynchronousOperations_Table_CompletedRowTitle_WithTimes" xml:space="preserve">
-    <value>Completed. Started at approximately {0} server time (took {1}).</value>
-    <comment>{0} will be replaced with started time in yyyy-MM-dd HH:mm:ss format. {1} will be replaced with the duration.</comment>
+  <data name="RepeatType_UnhandledRepeatType" xml:space="preserve">
+    <value>Unhandled repeat type: {0}</value>
+    <comment>{0} will be replaced with the repeat type (enum value name).</comment>
   </data>
-  <data name="AsynchronousOperations_Table_DetailsHeader" xml:space="preserve">
-    <value>Details</value>
+  <data name="Status_Running" xml:space="preserve">
+    <value>Running</value>
+    <comment>Shown if the asynchronous operation is running at the time the dashboard is rendered.</comment>
   </data>
-  <data name="AsynchronousOperations_Table_DurationHeader" xml:space="preserve">
-    <value>Duration</value>
-  </data>
-  <data name="AsynchronousOperations_Table_FailedRowTitle" xml:space="preserve">
-    <value>Failed.</value>
-  </data>
-  <data name="AsynchronousOperations_Table_FailedRowTitle_WithTimes" xml:space="preserve">
-    <value>Failed. Started at approximately {0} server time (took {1}).</value>
-    <comment>{0} will be replaced with started time in yyyy-MM-dd HH:mm:ss format. {1} will be replaced with the duration.</comment>
-  </data>
-  <data name="AsynchronousOperations_Table_FilteredListComment" xml:space="preserve">
-    <value>This table shows only {0} of {1} tasks.</value>
-    <comment>{0} will be replaced with the number of rows that can be shown, and {1} will be replaced with the number of tasks.</comment>
-  </data>
-  <data name="AsynchronousOperations_Table_Footer_AwaitingProcessing" xml:space="preserve">
-    <value>{0} awaiting processing.</value>
-    <comment>{0} will be replaced with the number of tasks in this state.</comment>
-  </data>
-  <data name="AsynchronousOperations_Table_Footer_Completed" xml:space="preserve">
-    <value>{0} completed.</value>
-    <comment>{0} will be replaced with the number of tasks in this state.</comment>
-  </data>
-  <data name="AsynchronousOperations_Table_Footer_Failed" xml:space="preserve">
-    <value>{0} failed.</value>
-    <comment>{0} will be replaced with the number of tasks in this state.</comment>
-  </data>
-  <data name="AsynchronousOperations_Table_Footer_Running" xml:space="preserve">
-    <value>{0} running.</value>
-    <comment>{0} will be replaced with the number of tasks in this state.</comment>
-  </data>
-  <data name="AsynchronousOperations_Table_RunningRowTitle" xml:space="preserve">
-    <value>Running.</value>
-  </data>
-  <data name="AsynchronousOperations_Table_RunningRowTitle_WithTimes" xml:space="preserve">
-    <value>Running. Started at approximately {0} server time (taken {1} so far).</value>
-    <comment>{0} will be replaced with started time in yyyy-MM-dd HH:mm:ss format. {1} will be replaced with the duration.</comment>
-  </data>
-  <data name="AsynchronousOperations_Table_ScheduledHeader" xml:space="preserve">
+  <data name="Status_Scheduled" xml:space="preserve">
     <value>Scheduled</value>
+    <comment>Shown if the asynchronous operation is scheduled to run in the future.</comment>
   </data>
-  <data name="AsynchronousOperations_Table_TaskHeader" xml:space="preserve">
-    <value>Task</value>
-  </data>
-  <data name="AsynchronousOperations_Table_WaitingRowTitle" xml:space="preserve">
-    <value>Waiting.  Will start at approximately {0}.</value>
-    <comment>{0} will be replaced with activation time in yyyy-MM-dd HH:mm:ss format.</comment>
-  </data>
-  <data name="AsynchronousOperations_ThereAreNoCurrentAsynchronousOperations" xml:space="preserve">
-    <value>There are no current asynchronous operations.</value>
-  </data>
-  <data name="TimeOnServer" xml:space="preserve">
-    <value>Time on server: {0}</value>
-    <comment>{0} will be replaced with current time in 24-hour format.</comment>
+  <data name="Status_Stopped" xml:space="preserve">
+    <value>Stopped</value>
+    <comment>Shown if the asynchronous operation is not running and is not scheduled to run again.</comment>
   </data>
 </root>

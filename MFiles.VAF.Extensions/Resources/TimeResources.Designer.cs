@@ -22,14 +22,14 @@ namespace MFiles.VAF.Extensions.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class TimeOffsetResources {
+    internal class TimeResources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal TimeOffsetResources() {
+        internal TimeResources() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace MFiles.VAF.Extensions.Resources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MFiles.VAF.Extensions.Resources.TimeOffsetResources", typeof(TimeOffsetResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MFiles.VAF.Extensions.Resources.TimeResources", typeof(TimeResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -214,7 +214,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Just now.
+        ///   Looks up a localized string similar to Just now..
         /// </summary>
         internal static string LastRunJustNow {
             get {
@@ -223,7 +223,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Due now.
+        ///   Looks up a localized string similar to Due now..
         /// </summary>
         internal static string NextRunDueNow {
             get {
@@ -259,7 +259,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Overdue by {0}s.
+        ///   Looks up a localized string similar to Overdue by {0}s..
         /// </summary>
         internal static string OverdueBySeconds {
             get {
@@ -268,7 +268,25 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Waiting to be run.
+        ///   Looks up a localized string similar to Runs every {0}..
+        /// </summary>
+        internal static string RepeatsOnInterval_DoesNotRunOnStartup {
+            get {
+                return ResourceManager.GetString("RepeatsOnInterval_DoesNotRunOnStartup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Runs on vault startup and every {0}..
+        /// </summary>
+        internal static string RepeatsOnInterval_RunsOnStartup {
+            get {
+                return ResourceManager.GetString("RepeatsOnInterval_RunsOnStartup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Waiting to be run..
         /// </summary>
         internal static string Waiting {
             get {

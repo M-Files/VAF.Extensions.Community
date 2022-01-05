@@ -57,25 +57,43 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="Resources\AsynchronousOperationsResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AsynchronousOperationsResources.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\DashboardResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>DashboardResources.resx</DependentUpon>
     </Compile>
-    <Compile Update="Resources\TimeOffsetResources.Designer.cs">
+    <Compile Update="Resources\ScheduleResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>TimeOffsetResources.resx</DependentUpon>
+      <DependentUpon>ScheduleResources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\TimeResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TimeResources.resx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Update="Resources\AsynchronousOperationsResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>AsynchronousOperationsResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\DashboardResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>DashboardResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Resources\TimeOffsetResources.resx">
+    <EmbeddedResource Update="Resources\ScheduleResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>TimeOffsetResources.Designer.cs</LastGenOutput>
+      <LastGenOutput>ScheduleResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\TimeResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TimeResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <Target Name="CleanNugetPackages" BeforeTargets="Build">

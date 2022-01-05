@@ -117,10 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AsynchronousOperationsDashboardTitle" xml:space="preserve">
+  <data name="AsynchronousOperations_DashboardTitle" xml:space="preserve">
     <value>Asynchrone Vorgänge</value>
   </data>
-  <data name="ThereAreNoCurrentAsynchronousOperations" xml:space="preserve">
+  <data name="AsynchronousOperations_ThereAreNoCurrentAsynchronousOperations" xml:space="preserve">
     <value>Es gibt keine aktuellen asynchronen Vorgänge.</value>
   </data>
   <data name="TimeOnServer" xml:space="preserve">
