@@ -74,7 +74,7 @@ namespace MFiles.VAF.Extensions.Tests.Dashboards
 		public virtual void Icon_FromResource()
 		{
 			var dashboardContent = this.CreateDashboardContent();
-			dashboardContent.Icon = "/Resources/Completed.png";
+			dashboardContent.Icon = "/Resources/Images/Completed.png";
 			var element = dashboardContent.Generate(new System.Xml.XmlDocument())?.FirstChild;
 			Assert.IsNotNull(element);
 			Assert.AreEqual("icon", element.Attributes["class"]?.Value);

@@ -43,16 +43,16 @@
     </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Completed.png">
+    <EmbeddedResource Include="Resources\Images\Completed.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Failed.png">
+    <EmbeddedResource Include="Resources\Images\Failed.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Running.png">
+    <EmbeddedResource Include="Resources\Images\Running.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Waiting.png">
+    <EmbeddedResource Include="Resources\Images\Waiting.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
