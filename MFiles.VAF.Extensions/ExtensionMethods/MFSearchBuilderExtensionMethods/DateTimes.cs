@@ -70,7 +70,7 @@ namespace MFiles.VAF.Extensions
 					(
 						Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
 						propertyDef,
-						MFDataType.MFDatatypeDate | MFDataType.MFDatatypeTimestamp
+						string.Join(", ", new[] { MFDataType.MFDatatypeDate, MFDataType.MFDatatypeTimestamp })
 					),
 					nameof(propertyDef)
 				);
@@ -144,7 +144,7 @@ namespace MFiles.VAF.Extensions
 						(
 							Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
 							propertyDef,
-							MFDataType.MFDatatypeDate | MFDataType.MFDatatypeTimestamp
+							string.Join(", ", new[] { MFDataType.MFDatatypeDate, MFDataType.MFDatatypeTimestamp })
 						),
 						nameof(propertyDef)
 					);

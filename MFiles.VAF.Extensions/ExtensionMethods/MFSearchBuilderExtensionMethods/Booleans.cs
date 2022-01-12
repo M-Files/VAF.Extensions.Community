@@ -56,7 +56,7 @@ namespace MFiles.VAF.Extensions
 					(
 						Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
 						propertyDef,
-						MFDataType.MFDatatypeBoolean
+						string.Join(", ", new[] { MFDataType.MFDatatypeBoolean })
 					),
 					nameof(propertyDef)
 				);

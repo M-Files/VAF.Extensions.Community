@@ -53,7 +53,7 @@ namespace MFiles.VAF.Extensions
 					(
 						Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
 						propertyDef,
-						MFDataType.MFDatatypeLookup | MFDataType.MFDatatypeMultiSelectLookup
+						string.Join(", ", new[] { MFDataType.MFDatatypeLookup, MFDataType.MFDatatypeMultiSelectLookup })
 					),
 					nameof(propertyDef)
 				);

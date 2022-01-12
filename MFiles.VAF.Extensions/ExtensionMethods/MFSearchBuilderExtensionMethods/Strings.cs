@@ -147,7 +147,7 @@ namespace MFiles.VAF.Extensions
 					(
 						Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
 						propertyDef,
-						MFDataType.MFDatatypeText | MFDataType.MFDatatypeMultiLineText
+						string.Join(", ", new[] { MFDataType.MFDatatypeText, MFDataType.MFDatatypeMultiLineText })
 					),
 					nameof(propertyDef)
 				);
@@ -222,17 +222,11 @@ namespace MFiles.VAF.Extensions
 						(
 							Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
 							propertyDef,
-							MFDataType.MFDatatypeDate | MFDataType.MFDatatypeTimestamp
+							string.Join(", ", new[] { MFDataType.MFDatatypeDate, MFDataType.MFDatatypeTimestamp })
 						),
 						nameof(propertyDef)
 					);
 			}
-			string.Format
-			(
-				Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
-				propertyDef,
-				MFDataType.MFDatatypeDate | MFDataType.MFDatatypeTimestamp
-			),
 
 			// Use the property method.
 			return searchBuilder.Property
@@ -308,7 +302,7 @@ namespace MFiles.VAF.Extensions
 						(
 							Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
 							propertyDef,
-							MFDataType.MFDatatypeDate | MFDataType.MFDatatypeTimestamp
+							string.Join(", ", new[] { MFDataType.MFDatatypeDate, MFDataType.MFDatatypeTimestamp })
 						),
 						nameof(propertyDef)
 					);

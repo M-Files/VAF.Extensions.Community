@@ -88,7 +88,7 @@ namespace MFiles.VAF.Extensions
 					(
 						Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
 						propertyDef,
-						MFDataType.MFDatatypeInteger | MFDataType.MFDatatypeInteger64 | MFDataType.MFDatatypeFloating | MFDataType.MFDatatypeLookup | MFDataType.MFDatatypeMultiSelectLookup
+						string.Join(", ", new[] { MFDataType.MFDatatypeInteger, MFDataType.MFDatatypeInteger64, MFDataType.MFDatatypeFloating, MFDataType.MFDatatypeLookup, MFDataType.MFDatatypeMultiSelectLookup })
 					),
 					nameof(propertyDef)
 				);
@@ -154,7 +154,7 @@ namespace MFiles.VAF.Extensions
 					(
 						Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
 						propertyDef,
-						MFDataType.MFDatatypeInteger | MFDataType.MFDatatypeInteger64 | MFDataType.MFDatatypeFloating | MFDataType.MFDatatypeLookup | MFDataType.MFDatatypeMultiSelectLookup
+						string.Join(", ", new[] { MFDataType.MFDatatypeInteger, MFDataType.MFDatatypeInteger64, MFDataType.MFDatatypeFloating, MFDataType.MFDatatypeLookup, MFDataType.MFDatatypeMultiSelectLookup })
 					),
 					nameof(propertyDef)
 				);
@@ -216,7 +216,7 @@ namespace MFiles.VAF.Extensions
 					(
 						Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
 						propertyDef,
-						MFDataType.MFDatatypeFloating
+						string.Join(", ", new[] { MFDataType.MFDatatypeFloating })
 					),
 					nameof(propertyDef)
 				);
@@ -291,7 +291,7 @@ namespace MFiles.VAF.Extensions
 						(
 							Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
 							propertyDef,
-							MFDataType.MFDatatypeDate | MFDataType.MFDatatypeTimestamp
+							string.Join(", ", new[] { MFDataType.MFDatatypeDate, MFDataType.MFDatatypeTimestamp })
 						),
 						nameof(propertyDef)
 					);
@@ -365,7 +365,7 @@ namespace MFiles.VAF.Extensions
 						(
 							Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
 							propertyDef,
-							MFDataType.MFDatatypeDate | MFDataType.MFDatatypeTimestamp
+							string.Join(", ", new[] { MFDataType.MFDatatypeDate, MFDataType.MFDatatypeTimestamp })
 						),
 						nameof(propertyDef)
 					);
@@ -439,7 +439,7 @@ namespace MFiles.VAF.Extensions
 						(
 							Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
 							propertyDef,
-							MFDataType.MFDatatypeDate | MFDataType.MFDatatypeTimestamp
+							string.Join(", ", new[] { MFDataType.MFDatatypeDate, MFDataType.MFDatatypeTimestamp })
 						),
 						nameof(propertyDef)
 					);
