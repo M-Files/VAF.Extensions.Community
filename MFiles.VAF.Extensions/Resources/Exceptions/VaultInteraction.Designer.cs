@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace MFiles.VAF.Extensions.Resources {
+namespace MFiles.VAF.Extensions.Resources.Exceptions {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace MFiles.VAF.Extensions.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class AsynchronousOperationsResources {
+    internal class VaultInteraction {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal AsynchronousOperationsResources() {
+        internal VaultInteraction() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace MFiles.VAF.Extensions.Resources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MFiles.VAF.Extensions.Resources.AsynchronousOperationsResources", typeof(AsynchronousOperationsResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MFiles.VAF.Extensions.Resources.Exceptions.VaultInteraction", typeof(VaultInteraction).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,56 +61,56 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No timespan specified; does not repeat..
+        ///   Looks up a localized string similar to An object type with ID {0} could not be found in the vault..
         /// </summary>
-        internal static string RepeatType_Interval_NoTimeSpanSpecified {
+        internal static string ObjectType_NotFound {
             get {
-                return ResourceManager.GetString("RepeatType_Interval_NoTimeSpanSpecified", resourceCulture);
+                return ResourceManager.GetString("ObjectType_NotFound", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Runs on demand (does not repeat)..
+        ///   Looks up a localized string similar to Property {0} ({1}) is not based on a value list..
         /// </summary>
-        internal static string RepeatType_RunsOnDemandOnly {
+        internal static string PropertyDefinition_NotBasedOnValueList {
             get {
-                return ResourceManager.GetString("RepeatType_RunsOnDemandOnly", resourceCulture);
+                return ResourceManager.GetString("PropertyDefinition_NotBasedOnValueList", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unhandled repeat type: {0}.
+        ///   Looks up a localized string similar to A property definition with ID {0} could not be found in the vault..
         /// </summary>
-        internal static string RepeatType_UnhandledRepeatType {
+        internal static string PropertyDefinition_NotFound {
             get {
-                return ResourceManager.GetString("RepeatType_UnhandledRepeatType", resourceCulture);
+                return ResourceManager.GetString("PropertyDefinition_NotFound", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Running.
+        ///   Looks up a localized string similar to Property {0} is not of the expected type (expected: {1})..
         /// </summary>
-        internal static string Status_Running {
+        internal static string PropertyDefinition_NotOfExpectedType {
             get {
-                return ResourceManager.GetString("Status_Running", resourceCulture);
+                return ResourceManager.GetString("PropertyDefinition_NotOfExpectedType", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Scheduled.
+        ///   Looks up a localized string similar to Property Ids must be greater than -1; ensure that your property alias was resolved..
         /// </summary>
-        internal static string Status_Scheduled {
+        internal static string PropertyDefinition_NotResolved {
             get {
-                return ResourceManager.GetString("Status_Scheduled", resourceCulture);
+                return ResourceManager.GetString("PropertyDefinition_NotResolved", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Stopped.
+        ///   Looks up a localized string similar to A value list with ID {0} could not be found in the vault..
         /// </summary>
-        internal static string Status_Stopped {
+        internal static string ValueList_NotFound {
             get {
-                return ResourceManager.GetString("Status_Stopped", resourceCulture);
+                return ResourceManager.GetString("ValueList_NotFound", resourceCulture);
             }
         }
     }

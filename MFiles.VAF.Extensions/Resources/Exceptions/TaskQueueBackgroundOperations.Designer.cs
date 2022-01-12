@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace MFiles.VAF.Extensions.Resources {
+namespace MFiles.VAF.Extensions.Resources.Exceptions {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace MFiles.VAF.Extensions.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class ScheduleResources {
+    internal class TaskQueueBackgroundOperations {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal ScheduleResources() {
+        internal TaskQueueBackgroundOperations() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace MFiles.VAF.Extensions.Resources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MFiles.VAF.Extensions.Resources.ScheduleResources", typeof(ScheduleResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MFiles.VAF.Extensions.Resources.Exceptions.TaskQueueBackgroundOperations", typeof(TaskQueueBackgroundOperations).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,74 +61,65 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No schedule specified; does not repeat.
+        ///   Looks up a localized string similar to A background operation with the name {0} in queue {1} already exists..
         /// </summary>
-        internal static string DoesNotRepeat_DoesNotRunWhenVaultStarts {
+        internal static string BackgroundOperationAlreadyExistsWithThatName {
             get {
-                return ResourceManager.GetString("DoesNotRepeat_DoesNotRunWhenVaultStarts", resourceCulture);
+                return ResourceManager.GetString("BackgroundOperationAlreadyExistsWithThatName", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Runs when the vault starts, but does not repeat..
+        ///   Looks up a localized string similar to No background operation with the name {0} in queue {1} exists..
         /// </summary>
-        internal static string DoesNotRepeat_RunsWhenVaultStarts {
+        internal static string BackgroundOperationDoesNotExist {
             get {
-                return ResourceManager.GetString("DoesNotRepeat_RunsWhenVaultStarts", resourceCulture);
+                return ResourceManager.GetString("BackgroundOperationDoesNotExist", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Runs according to the following schedule:.
+        ///   Looks up a localized string similar to The background operation name cannot be null or whitespace..
         /// </summary>
-        internal static string Repeats_Intro_DoesNotRunWhenVaultStarts {
+        internal static string BackgroundOperationMustHaveName {
             get {
-                return ResourceManager.GetString("Repeats_Intro_DoesNotRunWhenVaultStarts", resourceCulture);
+                return ResourceManager.GetString("BackgroundOperationMustHaveName", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Runs when the vault starts and according to the following schedule:.
+        ///   Looks up a localized string similar to Background operation stopped..
         /// </summary>
-        internal static string Repeats_Intro_RunsWhenVaultStarts {
+        internal static string CancellationRemarks_BackgroundOperationStopped {
             get {
-                return ResourceManager.GetString("Repeats_Intro_RunsWhenVaultStarts", resourceCulture);
+                return ResourceManager.GetString("CancellationRemarks_BackgroundOperationStopped", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Daily at the following times: {0}..
+        ///   Looks up a localized string similar to Exception cancelling tasks for background operation {0} of type {1} on queue {2}..
         /// </summary>
-        internal static string Triggers_DailyTrigger {
+        internal static string ExceptionCancellingTasks {
             get {
-                return ResourceManager.GetString("Triggers_DailyTrigger", resourceCulture);
+                return ResourceManager.GetString("ExceptionCancellingTasks", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to On the {0} of the month at the following times: {1}..
+        ///   Looks up a localized string similar to The interval is invalid: {0}.
         /// </summary>
-        internal static string Triggers_DayOfMonthTrigger {
+        internal static string InvalidInterval {
             get {
-                return ResourceManager.GetString("Triggers_DayOfMonthTrigger", resourceCulture);
+                return ResourceManager.GetString("InvalidInterval", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Every {0} at the following times: {1}..
+        ///   Looks up a localized string similar to The queue id cannot be null or whitespace..
         /// </summary>
-        internal static string Triggers_WeeklyTrigger {
+        internal static string TheQueueIdCannotBeNullOrWhitespace {
             get {
-                return ResourceManager.GetString("Triggers_WeeklyTrigger", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Will not run as the schedule is not enabled..
-        /// </summary>
-        internal static string WillNotRunAsScheduleNotEnabled {
-            get {
-                return ResourceManager.GetString("WillNotRunAsScheduleNotEnabled", resourceCulture);
+                return ResourceManager.GetString("TheQueueIdCannotBeNullOrWhitespace", resourceCulture);
             }
         }
     }

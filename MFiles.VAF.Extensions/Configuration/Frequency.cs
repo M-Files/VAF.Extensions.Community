@@ -77,7 +77,7 @@ namespace MFiles.VAF.Extensions
 				case RecurrenceType.Unknown:
 					return null;
 				default:
-					throw new InvalidOperationException($"Recurrence type of {this.RecurrenceType} is not supported.");
+					throw new InvalidOperationException(String.Format(Resources.Exceptions.Configuration.RecurrenceTypeNotSupported, this.RecurrenceType));
 			}
 		}
 
@@ -93,7 +93,7 @@ namespace MFiles.VAF.Extensions
 				case RecurrenceType.Unknown:
 					return ((TimeSpan?)null).ToDashboardDisplayString();
 				default:
-					throw new InvalidOperationException($"Recurrence type of {this.RecurrenceType} is not supported.");
+					throw new InvalidOperationException(String.Format(Resources.Exceptions.Configuration.RecurrenceTypeNotSupported, this.RecurrenceType));
 			}
 		}
 
@@ -183,7 +183,7 @@ namespace MFiles.VAF.Extensions
 					{
 						SysUtils.ReportToEventLog
 						(
-							$"Could not convert value to a Frequency: {jToken}",
+							String.Format(Resources.Exceptions.Configuration.CouldNotConvertJsonValueToFrequency, jToken),
 							System.Diagnostics.EventLogEntryType.Warning
 						);
 						return default;

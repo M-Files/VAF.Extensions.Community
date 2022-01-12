@@ -19,9 +19,16 @@ namespace MFiles.VAF.Extensions
 			lock (TaskQueueBackgroundOperationManager<TSecureConfiguration>._lock)
 			{
 				if (this.BackgroundOperations.ContainsKey(name) == false)
-					throw new ArgumentException(
-						$"No background operation with the name {name} in queue {this.QueueId} exists.",
-						nameof(name));
+					throw new ArgumentException
+					(
+						String.Format
+						(
+							Resources.Exceptions.TaskQueueBackgroundOperations.BackgroundOperationDoesNotExist,
+							name,
+							this.QueueId
+						),
+						nameof(name)
+					);
 
 				// Cancel all Future Executions
 				this.BackgroundOperations[name].CancelFutureExecutions();

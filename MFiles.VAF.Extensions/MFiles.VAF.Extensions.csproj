@@ -57,43 +57,97 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="Resources\AsynchronousOperationsResources.Designer.cs">
+    <Compile Update="Resources\AsynchronousOperations.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>AsynchronousOperationsResources.resx</DependentUpon>
+      <DependentUpon>AsynchronousOperations.resx</DependentUpon>
     </Compile>
-    <Compile Update="Resources\DashboardResources.Designer.cs">
+    <Compile Update="Resources\Dashboard.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>DashboardResources.resx</DependentUpon>
+      <DependentUpon>Dashboard.resx</DependentUpon>
     </Compile>
-    <Compile Update="Resources\ScheduleResources.Designer.cs">
+    <Compile Update="Resources\Exceptions\Configuration.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>ScheduleResources.resx</DependentUpon>
+      <DependentUpon>Configuration.resx</DependentUpon>
     </Compile>
-    <Compile Update="Resources\TimeResources.Designer.cs">
+    <Compile Update="Resources\Exceptions\Dashboard.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>TimeResources.resx</DependentUpon>
+      <DependentUpon>Dashboard.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Exceptions\ObjVerExExtensionMethods.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ObjVerExExtensionMethods.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Exceptions\MFSearchBuilderExtensionMethods.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MFSearchBuilderExtensionMethods.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Exceptions\TaskQueueBackgroundOperations.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TaskQueueBackgroundOperations.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Exceptions\VaultInteraction.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>VaultInteraction.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Schedule.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Schedule.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Time.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Time.resx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Update="Resources\AsynchronousOperationsResources.resx">
+    <EmbeddedResource Update="Resources\AsynchronousOperations.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>AsynchronousOperationsResources.Designer.cs</LastGenOutput>
+      <LastGenOutput>AsynchronousOperations.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Resources\DashboardResources.resx">
+    <EmbeddedResource Update="Resources\Dashboard.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>DashboardResources.Designer.cs</LastGenOutput>
+      <LastGenOutput>Dashboard.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Resources\ScheduleResources.resx">
+    <EmbeddedResource Update="Resources\Exceptions\Configuration.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ScheduleResources.Designer.cs</LastGenOutput>
+      <LastGenOutput>Configuration.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Resources\TimeResources.resx">
+    <EmbeddedResource Update="Resources\Exceptions\Dashboard.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>TimeResources.Designer.cs</LastGenOutput>
+      <LastGenOutput>Dashboard.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Exceptions\ObjVerExExtensionMethods.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ObjVerExExtensionMethods.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Exceptions\MFSearchBuilderExtensionMethods.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MFSearchBuilderExtensionMethods.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Exceptions\TaskQueueBackgroundOperations.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TaskQueueBackgroundOperations.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Exceptions\VaultInteraction.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>VaultInteraction.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Schedule.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Schedule.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Time.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Time.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <Target Name="CleanNugetPackages" BeforeTargets="Build">

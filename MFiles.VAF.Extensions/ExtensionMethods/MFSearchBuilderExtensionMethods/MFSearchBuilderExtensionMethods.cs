@@ -78,15 +78,28 @@ namespace MFiles.VAF.Extensions
 
 						// Does it exist?
 						if (null == indirectionLevelPropertyDef)
-						{
-							throw new ArgumentException($"An indirection level references a property definition with ID {indirectionLevel.ID}, but this property definition could not be found.", nameof(indirectionLevel));
-						}
+							throw new ArgumentException
+							(
+								String.Format
+								(
+									Resources.Exceptions.MFSearchBuilderExtensionMethods.IndirectionLevelPropertyNotFound,
+									indirectionLevel.ID
+								),
+								nameof(indirectionLevel)
+							);
 
 						// Is it a list-based one?
 						if (false == indirectionLevelPropertyDef.BasedOnValueList)
-						{
-							throw new ArgumentException($"The indirection level for property {indirectionLevel.ID} does not reference a lookup-style property definition.", nameof(indirectionLevel));
-						}
+							throw new ArgumentException
+							(
+								String.Format
+								(
+									Resources.Exceptions.MFSearchBuilderExtensionMethods.IndirectionLevelPropertyNotOfExpectedType,
+									indirectionLevel.ID,
+									indirectionLevelPropertyDef.DataType
+								),
+								nameof(indirectionLevel)
+							);
 
 						// Record the object type id.
 						objectTypeId = indirectionLevelPropertyDef.ValueList;
@@ -109,15 +122,27 @@ namespace MFiles.VAF.Extensions
 
 						// Does it exist?
 						if (null == indirectionLevelObjectType)
-						{
-							throw new ArgumentException($"An indirection level references a value list with ID {objectTypeId}, but this value list could not be found.", nameof(indirectionLevel));
-						}
+							throw new ArgumentException
+							(
+								String.Format
+								(
+									Resources.Exceptions.MFSearchBuilderExtensionMethods.IndirectionLevelPointsToInvalidObjectType,
+									objectTypeId
+								),
+								nameof(indirectionLevel)
+							);
 
 						// If it's not a real object type then throw.
 						if (false == indirectionLevelObjectType.RealObjectType)
-						{
-							throw new ArgumentException($"An indirection level references an value list with ID {objectTypeId}, but this list does not refer to an object type (cannot be used with value lists).", nameof(indirectionLevel));
-						}
+							throw new ArgumentException
+							(
+								String.Format
+								(
+									Resources.Exceptions.MFSearchBuilderExtensionMethods.IndirectionLevelPointsToValueList,
+									objectTypeId
+								),
+								nameof(indirectionLevel)
+							);
 					}
 
 				}

@@ -27,9 +27,9 @@ namespace MFiles.VAF.Extensions.Email
 			if (null == objVerEx)
 				throw new ArgumentNullException(nameof(objVerEx));
 			if (null == objVerEx.Vault)
-				throw new ArgumentException("The objVerEx's vault reference is null.", nameof(objVerEx));
-			if (null == objVerEx.Vault)
-				throw new ArgumentException("The objVerEx's info (ObjectVersion) reference is null.", nameof(objVerEx));
+				throw new ArgumentException(Resources.Exceptions.Email.ObjVerExVaultReferenceNull, nameof(objVerEx));
+			if (null == objVerEx.Info)
+				throw new ArgumentException(Resources.Exceptions.Email.ObjVerExVersionInfoReferenceNull, nameof(objVerEx));
 
 			// Use the base implementation.
 			emailMessage.AddAllFiles(objVerEx.Info, objVerEx.Vault, fileFormat);

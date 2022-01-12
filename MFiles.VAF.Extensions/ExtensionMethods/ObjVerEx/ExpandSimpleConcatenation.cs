@@ -134,7 +134,12 @@ namespace MFiles.VAF.Extensions
 							if (propertyId < 0)
 								throw new ArgumentException
 								(
-									$"Property with reference '{aliasOrIds.Captures[i]}' (as part of '{aliasOrIds.Value}') not found in the vault.",
+									string.Format
+									(
+										Resources.Exceptions.ObjVerExExtensionMethods.ExpandSimpleConcatenation_PropertyNotFound,
+										aliasOrIds.Captures[i],
+										aliasOrIds.Value
+									),
 									nameof(concatenationString)
 								);
 
