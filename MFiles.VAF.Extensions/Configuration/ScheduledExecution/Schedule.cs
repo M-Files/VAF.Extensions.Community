@@ -17,20 +17,30 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// Whether the schedule is currently enabled or not.
 		/// </summary>
 		[DataMember]
-		[JsonConfEditor(DefaultValue = true)]
+		[JsonConfEditor
+		(
+			Label = "$$General_Enabled_Label",
+			HelpText = "$$General_Enabled_HelpText",
+			DefaultValue = true
+		)]
 		public bool Enabled { get; set; } = true;
 
 		/// <summary>
 		/// The rules that should trigger the schedule to run.
 		/// </summary>
 		[DataMember]
+		[JsonConfEditor
+		(
+			Label = "$$Schedule_Triggers_Label",
+			HelpText = "$$Schedule_Triggers_HelpText"
+		)]
 		public List<Trigger> Triggers { get; set; } = new List<Trigger>();
 
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "Run on vault start",
-			HelpText = "If true, runs when the vault starts.  If false, the first run is calculated from the triggers.",
+			Label = "$$General_RunOnVaultStart_Label",
+			HelpText = "$$General_RunOnVaultStart_HelpText",
 			DefaultValue = false
 		)]
 		public bool? RunOnVaultStartup { get; set; }

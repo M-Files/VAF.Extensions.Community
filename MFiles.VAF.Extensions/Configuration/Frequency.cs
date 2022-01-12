@@ -21,14 +21,18 @@ namespace MFiles.VAF.Extensions
 		/// The currently-configured type of Recurrence.
 		/// </summary>
 		[DataMember]
-		[JsonConfEditor(Label = "Type")]
+		[JsonConfEditor
+		(
+			Label = "$$Frequency_RecurrenceType_Label",
+			HelpText = "$$Frequency_RecurrenceType_HelpText"
+		)]
 		public RecurrenceType RecurrenceType { get; set; } = RecurrenceType.Unknown;
 
 		/// <inheritdoc />
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "Configuration",
+			Label = "$$General_Configuration",
 			Hidden = true,
 			ShowWhen = ".parent._children{.key == 'RecurrenceType' && .value == 'Interval' }"
 		)]
@@ -38,7 +42,7 @@ namespace MFiles.VAF.Extensions
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "Configuration",
+			Label = "$$General_Configuration",
 			Hidden = true,
 			ShowWhen = ".parent._children{.key == 'RecurrenceType' && .value == 'Schedule' }"
 		)]

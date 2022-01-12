@@ -18,7 +18,12 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// There must be at least one item in this collection for the trigger to be active.
 		/// </summary>
 		[DataMember]
-		[JsonConfEditor(Label = "Trigger Times", ChildTypeEditor = "time")]
+		[JsonConfEditor
+		(
+			Label = "$$Schedule_DailyTrigger_TriggerTimes_Label",
+			HelpText = "$$Schedule_DailyTrigger_TriggerTimes_HelpText",
+			ChildTypeEditor = "time"
+		)]
 		public List<TimeSpan> TriggerTimes { get; set; } = new List<TimeSpan>();
 
 		/// <summary>

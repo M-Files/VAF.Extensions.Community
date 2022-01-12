@@ -19,7 +19,12 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// There must be at least one item in this collection for the trigger to be active.
 		/// </summary>
 		[DataMember]
-		[JsonConfEditor(Label = "Trigger Days")]
+		[JsonConfEditor
+		(
+			Label = "$$Schedule_WeeklyTrigger_TriggerDays_Label",
+			HelpText = "$$Schedule_WeeklyTrigger_TriggerDays_HelpText",
+			ChildName = "$$Schedule_WeeklyTrigger_TriggerDays_ChildName"
+		)]
 		public List<DayOfWeek> TriggerDays { get; set; } = new List<DayOfWeek>();
 
 		/// <summary>

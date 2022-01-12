@@ -13,14 +13,18 @@ namespace MFiles.VAF.Extensions
 		: IRecurrenceConfiguration
 	{
 		[DataMember]
-		[JsonConfEditor(TypeEditor = "time")]
+		[JsonConfEditor
+		(
+			Label = "$$TimeSpanEx_Interval",
+			TypeEditor = "time"
+		)]
 		public TimeSpan Interval { get; set; }
 
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "Run on vault start",
-			HelpText = "If true, runs when the vault starts.  If false, the first run is scheduled to be after the interval has elapsed.",
+			Label = "$$General_RunOnVaultStart_Label",
+			HelpText = "$$General_RunOnVaultStart_HelpText",
 			DefaultValue = true
 		)]
 		public bool? RunOnVaultStartup { get; set; } = true;

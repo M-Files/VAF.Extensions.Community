@@ -62,6 +62,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>AsynchronousOperations.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\Configuration.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Configuration.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Dashboard.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -76,6 +81,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Dashboard.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Exceptions\InternalOperations.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>InternalOperations.resx</DependentUpon>
     </Compile>
     <Compile Update="Resources\Exceptions\ObjVerExExtensionMethods.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -113,6 +123,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>AsynchronousOperations.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Configuration.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Configuration.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Dashboard.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Dashboard.Designer.cs</LastGenOutput>
@@ -124,6 +138,10 @@
     <EmbeddedResource Update="Resources\Exceptions\Dashboard.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Dashboard.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Exceptions\InternalOperations.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>InternalOperations.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Exceptions\ObjVerExExtensionMethods.resx">
       <Generator>ResXFileCodeGenerator</Generator>
