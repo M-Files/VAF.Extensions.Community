@@ -89,7 +89,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			if (null == this.TriggerTimes || this.TriggerTimes.Count == 0)
 				return null;
 
-			return Resources.ScheduleResources.Triggers_WeeklyTrigger.EscapeXmlForDashboard
+			return Resources.Schedule.Triggers_WeeklyTrigger.EscapeXmlForDashboard
 				(
 					string.Join(", ", this.TriggerDays.OrderBy(t => t)),
 					string.Join(", ", this.TriggerTimes.OrderBy(t => t).Select(t => t.ToString()))

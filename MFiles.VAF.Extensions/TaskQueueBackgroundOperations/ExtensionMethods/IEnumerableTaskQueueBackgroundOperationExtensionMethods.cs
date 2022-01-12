@@ -51,7 +51,7 @@ namespace MFiles.VAF.Extensions
 				switch (bgo.RepeatType)
 				{
 					case TaskQueueBackgroundOperationRepeatType.NotRepeating:
-						htmlString += $"<p>{Resources.AsynchronousOperationsResources.RepeatType_RunsOnDemandOnly.EscapeXmlForDashboard()}.<br /></p>";
+						htmlString += $"<p>{Resources.AsynchronousOperations.RepeatType_RunsOnDemandOnly.EscapeXmlForDashboard()}.<br /></p>";
 						break;
 					case TaskQueueBackgroundOperationRepeatType.Interval:
 						htmlString += bgo.Interval?.ToDashboardDisplayString();
@@ -60,7 +60,7 @@ namespace MFiles.VAF.Extensions
 						htmlString += bgo.Schedule?.ToDashboardDisplayString();
 						break;
 					default:
-						htmlString = $"<p><em>{Resources.AsynchronousOperationsResources.RepeatType_UnhandledRepeatType.EscapeXmlForDashboard(bgo.RepeatType)}</em><br /></p>";
+						htmlString = $"<p><em>{Resources.AsynchronousOperations.RepeatType_UnhandledRepeatType.EscapeXmlForDashboard(bgo.RepeatType)}</em><br /></p>";
 						break;
 				}
 
@@ -78,10 +78,10 @@ namespace MFiles.VAF.Extensions
 					StatusSummary = new DomainStatusSummary()
 					{
 						Label = (isRunning
-						? Resources.AsynchronousOperationsResources.Status_Running
+						? Resources.AsynchronousOperations.Status_Running
 						: isScheduled
-							? Resources.AsynchronousOperationsResources.Status_Scheduled
-							: Resources.AsynchronousOperationsResources.Status_Stopped).EscapeXmlForDashboard()
+							? Resources.AsynchronousOperations.Status_Scheduled
+							: Resources.AsynchronousOperations.Status_Stopped).EscapeXmlForDashboard()
 					}
 				};
 

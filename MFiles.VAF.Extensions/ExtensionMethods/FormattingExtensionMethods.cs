@@ -50,23 +50,23 @@ namespace MFiles.VAF.Extensions
 			// Seconds be easy.
 			if (timespan.Value < TimeSpan.FromSeconds(1))
 				return 
-					$"{timespan.Value.Milliseconds} {(timespan.Value.Milliseconds == 1 ? Resources.TimeResources.Component_Millisecond : Resources.TimeResources.Component_Milliseconds)}"
+					$"{timespan.Value.Milliseconds} {(timespan.Value.Milliseconds == 1 ? Resources.Time.Component_Millisecond : Resources.Time.Component_Milliseconds)}"
 						.EscapeXmlForDashboard();
 			if (timespan.Value <= TimeSpan.FromSeconds(120))
 				return 
-					$"{(int)timespan.Value.TotalSeconds} {((int)timespan.Value.TotalSeconds == 1 ? Resources.TimeResources.Component_Second : Resources.TimeResources.Component_Seconds)}"
+					$"{(int)timespan.Value.TotalSeconds} {((int)timespan.Value.TotalSeconds == 1 ? Resources.Time.Component_Second : Resources.Time.Component_Seconds)}"
 					.EscapeXmlForDashboard();
 
 			// Build a text representation
 			var components = new List<string>();
 			if (timespan.Value.Days > 0)
-				components.Add($"{timespan.Value.Days} {(timespan.Value.Days == 1 ? Resources.TimeResources.Component_Day : Resources.TimeResources.Component_Days)}");
+				components.Add($"{timespan.Value.Days} {(timespan.Value.Days == 1 ? Resources.Time.Component_Day : Resources.Time.Component_Days)}");
 			if (timespan.Value.Hours > 0)
-				components.Add($"{timespan.Value.Hours} {(timespan.Value.Hours == 1 ? Resources.TimeResources.Component_Hour : Resources.TimeResources.Component_Hours)}");
+				components.Add($"{timespan.Value.Hours} {(timespan.Value.Hours == 1 ? Resources.Time.Component_Hour : Resources.Time.Component_Hours)}");
 			if (timespan.Value.Minutes > 0)
-				components.Add($"{timespan.Value.Minutes} {(timespan.Value.Minutes == 1 ? Resources.TimeResources.Component_Minute : Resources.TimeResources.Component__Minutes)}");
+				components.Add($"{timespan.Value.Minutes} {(timespan.Value.Minutes == 1 ? Resources.Time.Component_Minute : Resources.Time.Component__Minutes)}");
 			if (timespan.Value.Seconds > 0)
-				components.Add($"{timespan.Value.Seconds} {(timespan.Value.Seconds == 1 ? Resources.TimeResources.Component_Second : Resources.TimeResources.Component_Seconds)}");
+				components.Add($"{timespan.Value.Seconds} {(timespan.Value.Seconds == 1 ? Resources.Time.Component_Second : Resources.Time.Component_Seconds)}");
 
 			// Build a text representation
 			var output = "";
@@ -76,11 +76,11 @@ namespace MFiles.VAF.Extensions
 				{
 					if (i == components.Count - 1)
 					{
-						output += Resources.TimeResources.Component_SeparatorLast.EscapeXmlForDashboard();
+						output += Resources.Time.Component_SeparatorLast.EscapeXmlForDashboard();
 					}
 					else
 					{
-						output += Resources.TimeResources.Component_Separator.EscapeXmlForDashboard();
+						output += Resources.Time.Component_Separator.EscapeXmlForDashboard();
 					}
 				}
 				output += components[i].EscapeXmlForDashboard();
@@ -107,7 +107,7 @@ namespace MFiles.VAF.Extensions
 		{
 			// Sanity.
 			if (false == timespan.HasValue || timespan.Value <= TimeSpan.Zero)
-				return $"<p>{Resources.AsynchronousOperationsResources.RepeatType_Interval_NoTimeSpanSpecified.EscapeXmlForDashboard()}<br /></p>";
+				return $"<p>{Resources.AsynchronousOperations.RepeatType_Interval_NoTimeSpanSpecified.EscapeXmlForDashboard()}<br /></p>";
 
 			return ((TimeSpanEx)timespan.Value).ToDashboardDisplayString();
 		}
@@ -139,8 +139,8 @@ namespace MFiles.VAF.Extensions
 			// No value?
 			if (null == value)
 				return representation == DateTimeRepresentationOf.LastRun
-					? Resources.TimeResources.NotRunSinceLastVaultStart.EscapeXmlForDashboard()
-					: Resources.TimeResources.NotScheduled.EscapeXmlForDashboard();
+					? Resources.Time.NotRunSinceLastVaultStart.EscapeXmlForDashboard()
+					: Resources.Time.NotScheduled.EscapeXmlForDashboard();
 
 			// Find the difference between the scheduled time and now.
 			var universalValue = value.Value.ToUniversalTime();
@@ -151,8 +151,8 @@ namespace MFiles.VAF.Extensions
 			{
 				// Now!
 				return representation == DateTimeRepresentationOf.LastRun
-					? Resources.TimeResources.LastRunJustNow.EscapeXmlForDashboard()
-					: Resources.TimeResources.NextRunDueNow.EscapeXmlForDashboard();
+					? Resources.Time.LastRunJustNow.EscapeXmlForDashboard()
+					: Resources.Time.NextRunDueNow.EscapeXmlForDashboard();
 			}
 			else
 			{
@@ -165,10 +165,10 @@ namespace MFiles.VAF.Extensions
 					{
 						// If it's <= 15 seconds then we may just be waiting to be notified.
 						if (diff <= TimeSpan.FromSeconds(15))
-							return Resources.TimeResources.Waiting.EscapeXmlForDashboard();
+							return Resources.Time.Waiting.EscapeXmlForDashboard();
 
 						// It is the next run but it's in the past.
-						return Resources.TimeResources.OverdueBySeconds.EscapeXmlForDashboard((int)diff.TotalSeconds);
+						return Resources.Time.OverdueBySeconds.EscapeXmlForDashboard((int)diff.TotalSeconds);
 					}
 				}
 
@@ -177,24 +177,24 @@ namespace MFiles.VAF.Extensions
 				if (diff < TimeSpan.FromSeconds(60))
 				{
 					// Show the time in seconds.
-					diffString = $"{(int)diff.TotalSeconds} {Resources.TimeResources.Component_Seconds}";
+					diffString = $"{(int)diff.TotalSeconds} {Resources.Time.Component_Seconds}";
 				}
 				else if (diff < TimeSpan.FromMinutes(60 * 2))
 				{
 					// Show the time in minutes.
-					diffString = $"{(int)diff.TotalMinutes} {Resources.TimeResources.Component__Minutes}";
+					diffString = $"{(int)diff.TotalMinutes} {Resources.Time.Component__Minutes}";
 				}
 				else if (diff < TimeSpan.FromHours(24))
 				{
 					// Show the time in hours.
-					diffString = $"{(int)diff.TotalHours} {Resources.TimeResources.Component_Hours}";
+					diffString = $"{(int)diff.TotalHours} {Resources.Time.Component_Hours}";
 				}
 				else
 				{
 					// Default to the specific time.
 					return localTime.Date == DateTime.Now.ToLocalTime().Date
-						? Resources.TimeResources.AtSpecificTime.EscapeXmlForDashboard(localTime.ToString("HH:mm:ss"))
-						: Resources.TimeResources.AtSpecificTimeOnDate.EscapeXmlForDashboard(localTime.ToString("HH:mm:ss"), localTime.ToString("yyyy-MM-dd"));
+						? Resources.Time.AtSpecificTime.EscapeXmlForDashboard(localTime.ToString("HH:mm:ss"))
+						: Resources.Time.AtSpecificTimeOnDate.EscapeXmlForDashboard(localTime.ToString("HH:mm:ss"), localTime.ToString("yyyy-MM-dd"));
 				}
 
 				// Render out ago vs in.
@@ -204,16 +204,16 @@ namespace MFiles.VAF.Extensions
 					if (representation == DateTimeRepresentationOf.NextRun)
 					{
 						// It is the next run but it's in the past.
-						return Resources.TimeResources.Overdue.EscapeXmlForDashboard(diffString);
+						return Resources.Time.Overdue.EscapeXmlForDashboard(diffString);
 					}
-					return Resources.TimeResources.LastRunInPast.EscapeXmlForDashboard(diffString); 
+					return Resources.Time.LastRunInPast.EscapeXmlForDashboard(diffString); 
 				}
 				else
 				{
 					// Future.
 					return localTime.Date == DateTime.Now.ToLocalTime().Date
-						? Resources.TimeResources.AtSpecificTimeWithDifference.EscapeXmlForDashboard(localTime.ToString("HH:mm:ss"), diffString)
-						: Resources.TimeResources.AtSpecificTimeOnDateWithDifference.EscapeXmlForDashboard(localTime.ToString("HH:mm:ss"), localTime.ToString("yyyy-MM-dd"), diffString);
+						? Resources.Time.AtSpecificTimeWithDifference.EscapeXmlForDashboard(localTime.ToString("HH:mm:ss"), diffString)
+						: Resources.Time.AtSpecificTimeOnDateWithDifference.EscapeXmlForDashboard(localTime.ToString("HH:mm:ss"), localTime.ToString("yyyy-MM-dd"), diffString);
 				}
 			}
 		}

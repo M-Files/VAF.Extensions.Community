@@ -60,7 +60,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			if (null == this.TriggerTimes || this.TriggerTimes.Count == 0)
 				return null;
 
-			return Resources.ScheduleResources.Triggers_DailyTrigger.EscapeXmlForDashboard(string.Join(", ", this.TriggerTimes.OrderBy(t => t).Select(t => t.ToString())));
+			return Resources.Schedule.Triggers_DailyTrigger.EscapeXmlForDashboard(string.Join(", ", this.TriggerTimes.OrderBy(t => t).Select(t => t.ToString())));
 		}
 
 		/// <summary>

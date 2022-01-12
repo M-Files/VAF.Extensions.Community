@@ -60,18 +60,18 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		{
 			// If the schedule is not enabled then report that it will not run.
 			if (!this.Enabled)
-				return $"<p>{Resources.ScheduleResources.WillNotRunAsScheduleNotEnabled.EscapeXmlForDashboard()}</p>";
+				return $"<p>{Resources.Schedule.WillNotRunAsScheduleNotEnabled.EscapeXmlForDashboard()}</p>";
 
 			// If there are no triggers then it will not run on a schedule.
 			// Note: may still run on startup.
 			if (this.Triggers == null || this.Triggers.Count == 0)
 				return this.RunOnVaultStartup.HasValue && this.RunOnVaultStartup.Value
-					? $"<p>{Resources.ScheduleResources.DoesNotRepeat_RunsWhenVaultStarts.EscapeXmlForDashboard()}<br /></p>"
-					: $"<p>{Resources.ScheduleResources.DoesNotRepeat_DoesNotRunWhenVaultStarts.EscapeXmlForDashboard()}<br /></p>";
+					? $"<p>{Resources.Schedule.DoesNotRepeat_RunsWhenVaultStarts.EscapeXmlForDashboard()}<br /></p>"
+					: $"<p>{Resources.Schedule.DoesNotRepeat_DoesNotRunWhenVaultStarts.EscapeXmlForDashboard()}<br /></p>";
 
 			var output = this.RunOnVaultStartup.HasValue && this.RunOnVaultStartup.Value
-				? $"<p>{Resources.ScheduleResources.Repeats_Intro_RunsWhenVaultStarts.EscapeXmlForDashboard()}"
-				: $"<p>{Resources.ScheduleResources.Repeats_Intro_DoesNotRunWhenVaultStarts.EscapeXmlForDashboard()}";
+				? $"<p>{Resources.Schedule.Repeats_Intro_RunsWhenVaultStarts.EscapeXmlForDashboard()}"
+				: $"<p>{Resources.Schedule.Repeats_Intro_DoesNotRunWhenVaultStarts.EscapeXmlForDashboard()}";
 
 			// Output the triggers as a HTML list.
 			output += "<ul>";

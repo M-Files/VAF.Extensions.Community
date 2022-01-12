@@ -71,7 +71,7 @@ namespace MFiles.VAF.Extensions
 			if (0 == list.Items.Count)
 				list.Items.Add(new DashboardListItem()
 				{
-					Title = Resources.DashboardResources.AsynchronousOperations_ThereAreNoCurrentAsynchronousOperations,
+					Title = Resources.Dashboard.AsynchronousOperations_ThereAreNoCurrentAsynchronousOperations,
 					StatusSummary = new DomainStatusSummary()
 					{
 						Status = VAF.Configuration.Domain.DomainStatus.Undefined
@@ -81,10 +81,10 @@ namespace MFiles.VAF.Extensions
 			// Return the panel.
 			return new DashboardPanel()
 			{
-				Title = Resources.DashboardResources.AsynchronousOperations_DashboardTitle,
+				Title = Resources.Dashboard.AsynchronousOperations_DashboardTitle,
 				InnerContent = new DashboardContentCollection
 				{
-					new DashboardCustomContent($"<em>{Resources.DashboardResources.TimeOnServer.EscapeXmlForDashboard(DateTime.Now.ToLocalTime().ToString("HH:mm:ss"))}</em>"),
+					new DashboardCustomContent($"<em>{Resources.Dashboard.TimeOnServer.EscapeXmlForDashboard(DateTime.Now.ToLocalTime().ToString("HH:mm:ss"))}</em>"),
 					list
 				}
 			};

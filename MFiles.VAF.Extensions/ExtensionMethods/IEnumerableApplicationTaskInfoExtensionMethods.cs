@@ -41,10 +41,10 @@ namespace MFiles.VAF.Extensions
 				var header = table.AddRow(DashboardTableRowType.Header);
 				header.AddCells
 				(
-					new DashboardCustomContent(Resources.DashboardResources.AsynchronousOperations_Table_TaskHeader.EscapeXmlForDashboard()),
-					new DashboardCustomContent(Resources.DashboardResources.AsynchronousOperations_Table_ScheduledHeader.EscapeXmlForDashboard()),
-					new DashboardCustomContent(Resources.DashboardResources.AsynchronousOperations_Table_DurationHeader.EscapeXmlForDashboard()),
-					new DashboardCustomContent(Resources.DashboardResources.AsynchronousOperations_Table_DetailsHeader.EscapeXmlForDashboard())
+					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_TaskHeader.EscapeXmlForDashboard()),
+					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_ScheduledHeader.EscapeXmlForDashboard()),
+					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_DurationHeader.EscapeXmlForDashboard()),
+					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_DetailsHeader.EscapeXmlForDashboard())
 				);
 			}
 
@@ -121,12 +121,12 @@ namespace MFiles.VAF.Extensions
 				{
 					case MFilesAPI.MFTaskState.MFTaskStateWaiting:
 						taskInfoCell.Icon = "Resources/Images/Waiting.png";
-						rowTitle = Resources.DashboardResources.AsynchronousOperations_Table_WaitingRowTitle.EscapeXmlForDashboard(activation.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"));
+						rowTitle = Resources.Dashboard.AsynchronousOperations_Table_WaitingRowTitle.EscapeXmlForDashboard(activation.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"));
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateInProgress:
-						rowTitle = Resources.DashboardResources.AsynchronousOperations_Table_RunningRowTitle.EscapeXmlForDashboard();
+						rowTitle = Resources.Dashboard.AsynchronousOperations_Table_RunningRowTitle.EscapeXmlForDashboard();
 						if ((taskInfo?.Started.HasValue) ?? false)
-							rowTitle = Resources.DashboardResources.AsynchronousOperations_Table_RunningRowTitle_WithTimes.EscapeXmlForDashboard
+							rowTitle = Resources.Dashboard.AsynchronousOperations_Table_RunningRowTitle_WithTimes.EscapeXmlForDashboard
 								(
 									taskInfo.Started.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"),
 									taskInfo.GetElapsedTime().ToDisplayString()
@@ -134,9 +134,9 @@ namespace MFiles.VAF.Extensions
 						taskInfoCell.Icon = "Resources/Images/Running.png";
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateFailed:
-						rowTitle = Resources.DashboardResources.AsynchronousOperations_Table_FailedRowTitle.EscapeXmlForDashboard();
+						rowTitle = Resources.Dashboard.AsynchronousOperations_Table_FailedRowTitle.EscapeXmlForDashboard();
 						if ((taskInfo?.Started.HasValue) ?? false)
-							rowTitle = Resources.DashboardResources.AsynchronousOperations_Table_FailedRowTitle_WithTimes.EscapeXmlForDashboard
+							rowTitle = Resources.Dashboard.AsynchronousOperations_Table_FailedRowTitle_WithTimes.EscapeXmlForDashboard
 								(
 									taskInfo.Started.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"),
 									taskInfo.GetElapsedTime().ToDisplayString()
@@ -144,9 +144,9 @@ namespace MFiles.VAF.Extensions
 						taskInfoCell.Icon = "Resources/Images/Failed.png";
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateCompleted:
-						rowTitle = Resources.DashboardResources.AsynchronousOperations_Table_CompletedRowTitle.EscapeXmlForDashboard();
+						rowTitle = Resources.Dashboard.AsynchronousOperations_Table_CompletedRowTitle.EscapeXmlForDashboard();
 						if ((taskInfo?.Started.HasValue) ?? false)
-							rowTitle = Resources.DashboardResources.AsynchronousOperations_Table_CompletedRowTitle_WithTimes.EscapeXmlForDashboard
+							rowTitle = Resources.Dashboard.AsynchronousOperations_Table_CompletedRowTitle_WithTimes.EscapeXmlForDashboard
 								(
 									taskInfo.Started.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"),
 									taskInfo.GetElapsedTime().ToDisplayString()
@@ -196,17 +196,17 @@ namespace MFiles.VAF.Extensions
 				if (isFiltered)
 					cell1.InnerContent = new DashboardCustomContentEx
 					(
-						$"<p style='font-size: 12px'><em>{Resources.DashboardResources.AsynchronousOperations_Table_FilteredListComment.EscapeXmlForDashboard(maximumRowsToShow, list.Count)}</em></p>"
+						$"<p style='font-size: 12px'><em>{Resources.Dashboard.AsynchronousOperations_Table_FilteredListComment.EscapeXmlForDashboard(maximumRowsToShow, list.Count)}</em></p>"
 					);
 
 				// The second cell contains the totals.
 				var cell2 = row.AddCell(new DashboardCustomContentEx
 				(
 					"<span>Totals: </span>"
-					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateWaiting, Resources.DashboardResources.AsynchronousOperations_Table_Footer_AwaitingProcessing)}' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Waiting.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateWaiting) ? data[MFTaskState.MFTaskStateWaiting] : 0)}</span>"
-					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateInProgress, Resources.DashboardResources.AsynchronousOperations_Table_Footer_Running)}' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Running.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateInProgress) ? data[MFTaskState.MFTaskStateInProgress] : 0)}</span>"
-					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateCompleted, Resources.DashboardResources.AsynchronousOperations_Table_Footer_Completed)}' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Completed.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateCompleted) ? data[MFTaskState.MFTaskStateCompleted] : 0)}</span>"
-					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateFailed, Resources.DashboardResources.AsynchronousOperations_Table_Footer_Failed)}' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Failed.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateFailed) ? data[MFTaskState.MFTaskStateFailed] : 0)}</span>"
+					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateWaiting, Resources.Dashboard.AsynchronousOperations_Table_Footer_AwaitingProcessing)}' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Waiting.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateWaiting) ? data[MFTaskState.MFTaskStateWaiting] : 0)}</span>"
+					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateInProgress, Resources.Dashboard.AsynchronousOperations_Table_Footer_Running)}' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Running.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateInProgress) ? data[MFTaskState.MFTaskStateInProgress] : 0)}</span>"
+					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateCompleted, Resources.Dashboard.AsynchronousOperations_Table_Footer_Completed)}' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Completed.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateCompleted) ? data[MFTaskState.MFTaskStateCompleted] : 0)}</span>"
+					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateFailed, Resources.Dashboard.AsynchronousOperations_Table_Footer_Failed)}' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Failed.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateFailed) ? data[MFTaskState.MFTaskStateFailed] : 0)}</span>"
 				));
 				cell2.Styles.AddOrUpdate("text-align", "right");
 			}
