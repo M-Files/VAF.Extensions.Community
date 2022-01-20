@@ -141,8 +141,8 @@ namespace MFiles.VAF.Extensions
 						StatusSummary = new DomainStatusSummary()
 						{
 							Label = isRunning
-							? "Running"
-							: isScheduled ? "Scheduled" : "Stopped"
+							? Resources.AsynchronousOperations.Status_Running
+							: isScheduled ? Resources.AsynchronousOperations.Status_Scheduled : Resources.AsynchronousOperations.Status_Stopped
 						}
 					};
 
