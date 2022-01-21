@@ -25,7 +25,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "$$General_Configuration",
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.General_Configuration),
 			Hidden = true,
 			ShowWhen = ".parent._children{.key == 'Type' && .value == 'Daily' }"
 		)]
@@ -35,7 +35,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "$$General_Configuration",
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.General_Configuration),
 			Hidden = true,
 			ShowWhen = ".parent._children{.key == 'Type' && .value == 'Weekly' }"
 		)]
@@ -45,7 +45,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "$$General_Configuration",
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.General_Configuration),
 			Hidden = true,
 			ShowWhen = ".parent._children{.key == 'Type' && .value == 'Monthly' }"
 		)]

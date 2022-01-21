@@ -20,8 +20,8 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "$$Schedule_DailyTrigger_TriggerTimes_Label",
-			HelpText = "$$Schedule_DailyTrigger_TriggerTimes_HelpText",
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_DailyTrigger_TriggerTimes_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_DailyTrigger_TriggerTimes_HelpText),
 			ChildTypeEditor = "time"
 		)]
 		public List<TimeSpan> TriggerTimes { get; set; } = new List<TimeSpan>();

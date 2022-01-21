@@ -11,13 +11,13 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// <summary>
 		/// Skips any dates that are unrepresentable.
 		/// </summary>
-		[JsonConfEditor(Label = "$$Schedule_UnrepresentableDateHandling_Skip")]
+		[JsonConfEditor(Label = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_UnrepresentableDateHandling_Skip))]
 		Skip = 0,
 
 		/// <summary>
 		/// Attempts to use the last day of the same month.
 		/// </summary>
-		[JsonConfEditor(Label = "$$Schedule_UnrepresentableDateHandling_LastDayOfMonth")]
+		[JsonConfEditor(Label = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_UnrepresentableDateHandling_LastDayOfMonth))]
 		LastDayOfMonth = 1
 	}
 	/// <summary>
@@ -33,8 +33,8 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "$$Schedule_DayOfMonthTrigger_UnrepresentableDateHandling_Label",
-			HelpText = "$$Schedule_DayOfMonthTrigger_UnrepresentableDateHandling_HelpText"
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_DayOfMonthTrigger_UnrepresentableDateHandling_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_DayOfMonthTrigger_UnrepresentableDateHandling_HelpText)
 		)]
 		public UnrepresentableDateHandling UnrepresentableDateHandling { get; set; }
 			= UnrepresentableDateHandling.Skip;
@@ -47,9 +47,9 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "$$Schedule_DayOfMonthTrigger_TriggerDays_Label",
-			HelpText = "$$Schedule_DayOfMonthTrigger_TriggerDays_HelpText",
-			ChildName = "$$Schedule_DayOfMonthTrigger_TriggerDays_ChildName"
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_DayOfMonthTrigger_TriggerDays_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_DayOfMonthTrigger_TriggerDays_HelpText),
+			ChildName = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_DayOfMonthTrigger_TriggerDays_ChildName)
 		)]
 		public List<int> TriggerDays { get; set; } = new List<int>();
 

@@ -21,9 +21,9 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "$$Schedule_WeeklyTrigger_TriggerDays_Label",
-			HelpText = "$$Schedule_WeeklyTrigger_TriggerDays_HelpText",
-			ChildName = "$$Schedule_WeeklyTrigger_TriggerDays_ChildName"
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_WeeklyTrigger_TriggerDays_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_WeeklyTrigger_TriggerDays_HelpText),
+			ChildName = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_WeeklyTrigger_TriggerDays_ChildName)
 		)]
 		public List<DayOfWeek> TriggerDays { get; set; } = new List<DayOfWeek>();
 

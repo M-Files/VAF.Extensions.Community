@@ -19,8 +19,8 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "$$General_Enabled_Label",
-			HelpText = "$$General_Enabled_HelpText",
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.General_Enabled_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.General_Enabled_HelpText),
 			DefaultValue = true
 		)]
 		public bool Enabled { get; set; } = true;
@@ -31,16 +31,16 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "$$Schedule_Triggers_Label",
-			HelpText = "$$Schedule_Triggers_HelpText"
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_Triggers_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_Triggers_HelpText)
 		)]
 		public List<Trigger> Triggers { get; set; } = new List<Trigger>();
 
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "$$General_RunOnVaultStart_Label",
-			HelpText = "$$General_RunOnVaultStart_HelpText",
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.General_RunOnVaultStart_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.General_RunOnVaultStart_HelpText),
 			DefaultValue = false
 		)]
 		public bool? RunOnVaultStartup { get; set; }

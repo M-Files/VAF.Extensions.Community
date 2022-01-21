@@ -23,8 +23,8 @@ namespace MFiles.VAF.Extensions
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "$$Frequency_RecurrenceType_Label",
-			HelpText = "$$Frequency_RecurrenceType_HelpText"
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.Frequency_RecurrenceType_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.Frequency_RecurrenceType_HelpText)
 		)]
 		public RecurrenceType RecurrenceType { get; set; } = RecurrenceType.Unknown;
 
@@ -32,7 +32,7 @@ namespace MFiles.VAF.Extensions
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "$$General_Configuration",
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.General_Configuration),
 			Hidden = true,
 			ShowWhen = ".parent._children{.key == 'RecurrenceType' && .value == 'Interval' }"
 		)]
@@ -42,7 +42,7 @@ namespace MFiles.VAF.Extensions
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "$$General_Configuration",
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.General_Configuration),
 			Hidden = true,
 			ShowWhen = ".parent._children{.key == 'RecurrenceType' && .value == 'Schedule' }"
 		)]

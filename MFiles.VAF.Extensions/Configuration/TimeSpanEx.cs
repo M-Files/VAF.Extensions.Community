@@ -15,7 +15,7 @@ namespace MFiles.VAF.Extensions
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "$$TimeSpanEx_Interval",
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.TimeSpanEx_Interval),
 			TypeEditor = "time"
 		)]
 		public TimeSpan Interval { get; set; }
@@ -23,8 +23,8 @@ namespace MFiles.VAF.Extensions
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "$$General_RunOnVaultStart_Label",
-			HelpText = "$$General_RunOnVaultStart_HelpText",
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.General_RunOnVaultStart_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.General_RunOnVaultStart_HelpText),
 			DefaultValue = true
 		)]
 		public bool? RunOnVaultStartup { get; set; } = true;
