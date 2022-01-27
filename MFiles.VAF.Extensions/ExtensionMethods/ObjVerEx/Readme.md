@@ -249,3 +249,23 @@ an identifier object not set or not resolved, the ``TryGetPropertyText`` would j
 This could be also implemented for all other methods where the identifier may be invalid or
 not set like ``GetPropertyAs<T>``. If someone would implement this or similar functions
 I would probably use it.
+
+## CanCurrentUserChangePermissions
+
+This method is needed when a property was changes which influences the
+result of the permission checks.
+
+If you want to give only access to CEO, legal department and one employee
+who has to approve it then you may need ChangePermissions access to
+change the value of Approver's user id which is part of the NACL definition.
+
+The method works analog to the existing methods
+- ObjVerEx.CanCurrentUserRead(SessionInfo sessionInfo)
+- ObjVerEx.CanCurrentUserWrite(SessionInfo sessionInfo)
+- ObjVerEx.CanCurrentUserDelete(SessionInfo sessionInfo)
+
+as new method
+- ObjVerEx.CanCurrentUserChangePermissions(SessionInfo sessionInfo)
+
+The value of the sessionInfo can be taken from the vault object
+of the EventHandlerEnvironment.
