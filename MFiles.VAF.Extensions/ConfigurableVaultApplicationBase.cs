@@ -24,7 +24,7 @@ namespace MFiles.VAF.Extensions
 	/// <typeparam name="TSecureConfiguration">The configuration type.</typeparam>
 	public abstract partial class ConfigurableVaultApplicationBase<TSecureConfiguration>
 		: MFiles.VAF.Core.ConfigurableVaultApplicationBase<TSecureConfiguration>
-	where TSecureConfiguration : class, new()
+		where TSecureConfiguration : class, new()
 	{
 		/// <summary>
 		/// Contains information about VAF configuration that

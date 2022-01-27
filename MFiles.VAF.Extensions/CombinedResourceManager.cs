@@ -9,71 +9,39 @@ namespace MFiles.VAF.Extensions
 	/// A resource manager that can retrieve resources from a set of files.
 	/// </summary>
 	public class CombinedResourceManager
-		: ResourceManager
+		: MFiles.VaultApplications.Logging.Resources.CombinedResourceManager
 	{
 		/// <summary>
-		/// The resource managers that provide resources for this application.
+		/// Creates a <see cref="CombinedResourceManager"/>
+		/// that wraps the given resource managers.
 		/// </summary>
-		public List<ResourceManager> ResourceManagers { get; } = new List<ResourceManager>();
-		public CombinedResourceManager() { }
+		/// <param name="resourceManagers"></param>
 		public CombinedResourceManager(params ResourceManager[] resourceManagers)
-			: this()
+			: base(true, resourceManagers)
 		{
-			if (null == resourceManagers)
-				return;
-
-			// Add the resource managers.
-			foreach(var resourceManager in resourceManagers)
-				if(null != resourceManager)
-					this.ResourceManagers.Add(resourceManager);
 		}
 
 		/// <inheritdoc />
-		/// <remarks>Iterates through <see cref="ResourceManagers"/> in order to find one that contains a value for the supplied <paramref name="name"/>.</remarks>
-		public override string GetString(string name, CultureInfo culture)
+		protected override IEnumerable<ResourceManager> GetDefaultResourceManagers()
 		{
-			culture = culture ?? System.Globalization.CultureInfo.CurrentUICulture;
-			foreach (var manager in this.ResourceManagers)
-			{
-				if (null == manager)
-					continue;
-				try
-				{
-					var value = manager.GetString(name, culture);
-					if (null != value)
-						return value;
-				}
-				catch { }
-			}
-			return null;
+			// Get the ones exposed by the base library.
+			foreach(var resourceManager in base.GetDefaultResourceManagers() ?? new ResourceManager[0])
+				yield return resourceManager;
+
+			// Return ones from this library.
+			yield return Resources.AsynchronousOperations.ResourceManager;
+			yield return Resources.Configuration.ResourceManager;
+			yield return Resources.Dashboard.ResourceManager;
+			yield return Resources.Schedule.ResourceManager;
+			yield return Resources.Time.ResourceManager;
+			yield return Resources.Exceptions.Configuration.ResourceManager;
+			yield return Resources.Exceptions.Dashboard.ResourceManager;
+			yield return Resources.Exceptions.InternalOperations.ResourceManager;
+			yield return Resources.Exceptions.MFSearchBuilderExtensionMethods.ResourceManager;
+			yield return Resources.Exceptions.ObjVerExExtensionMethods.ResourceManager;
+			yield return Resources.Exceptions.TaskQueueBackgroundOperations.ResourceManager;
+			yield return Resources.Exceptions.VaultInteraction.ResourceManager;
+
 		}
-
-		/// <inheritdoc />
-		/// <remarks>Iterates through <see cref="ResourceManagers"/> in order to find one that contains a value for the supplied <paramref name="name"/>.</remarks>
-		public override string GetString(string name) => this.GetString(name, null);
-
-		/// <inheritdoc />
-		/// <remarks>Iterates through <see cref="ResourceManagers"/> in order to find one that contains a value for the supplied <paramref name="name"/>.</remarks>
-		public override object GetObject(string name, CultureInfo culture)
-		{
-			culture = culture ?? System.Globalization.CultureInfo.CurrentUICulture;
-			foreach (var manager in this.ResourceManagers)
-			{
-				if (null == manager)
-					continue;
-				try
-				{
-					var value = manager.GetObject(name, culture);
-					if (null != value)
-						return value;
-				}
-				catch { }
-			}
-			return null;
-		}
-
-		/// <inheritdoc />
-		/// <remarks>Iterates through <see cref="ResourceManagers"/> in order to find one that contains a value for the supplied <paramref name="name"/>.</remarks>
-		public override object GetObject(string name) => this.GetObject(name, null);
 	}
 }

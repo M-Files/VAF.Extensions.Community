@@ -138,6 +138,12 @@
   <data name="General_RunOnVaultStart_Label" xml:space="preserve">
     <value>Run on vault start</value>
   </data>
+  <data name="LoggingConfiguration_HelpText" xml:space="preserve">
+    <value />
+  </data>
+  <data name="LoggingConfiguration_Label" xml:space="preserve">
+    <value>Logging Configuration</value>
+  </data>
   <data name="RecurrenceType_Interval" xml:space="preserve">
     <value>Interval</value>
   </data>

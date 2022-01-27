@@ -180,6 +180,15 @@
   <data name="AsynchronousOperations_ThereAreNoCurrentAsynchronousOperations" xml:space="preserve">
     <value>There are no current asynchronous operations.</value>
   </data>
+  <data name="Logging_DashboardTitle" xml:space="preserve">
+    <value>Logging</value>
+  </data>
+  <data name="Logging_LoggingNotEnabled" xml:space="preserve">
+    <value>Logging is not enabled.</value>
+  </data>
+  <data name="Logging_NoLogTargetsAreConfigured" xml:space="preserve">
+    <value>No log targets are currently configured.</value>
+  </data>
   <data name="TimeOnServer" xml:space="preserve">
     <value>Time on server: {0}</value>
     <comment>{0} will be replaced with current time in 24-hour format.</comment>

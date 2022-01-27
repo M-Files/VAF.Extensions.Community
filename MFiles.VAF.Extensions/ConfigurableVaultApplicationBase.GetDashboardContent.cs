@@ -34,6 +34,11 @@ namespace MFiles.VAF.Extensions
 			if(null != asynchronousOperationContent)
 				dashboard.AddContent(asynchronousOperationContent);
 
+			// Do we have any logging content?
+			var loggingContent = this.GetLoggingDashboardContent();
+			if (null != loggingContent)
+				dashboard.AddContent(loggingContent);
+
 			// Return the dashboard.
 			return dashboard.ToString();
 		}
@@ -85,6 +90,71 @@ namespace MFiles.VAF.Extensions
 				InnerContent = new DashboardContentCollection
 				{
 					new DashboardCustomContent($"<em>{Resources.Dashboard.TimeOnServer.EscapeXmlForDashboard(DateTime.Now.ToLocalTime().ToString("HH:mm:ss"))}</em>"),
+					list
+				}
+			};
+		}
+
+		/// <summary>
+		/// Returns the dashboard content showing logging status.
+		/// </summary>
+		/// <returns>The dashboard content.  Can be null if no logging data is available or configured.</returns>
+		public virtual DashboardPanel GetLoggingDashboardContent()
+		{
+			// If we don't have any logging configuration then return null.
+			if (!(this.Configuration is Configuration.IConfigurationWithLoggingConfiguration configurationWithLogging))
+				return null;
+
+			// Get the logging configuration.
+			var loggingConfiguration = configurationWithLogging?.GetLoggingConfiguration();
+			if (null == loggingConfiguration)
+				return null;
+
+			// Declare our list which will go into the panel.
+			var list = new DashboardList();
+
+			// If logging is not enabled then return a simple panel.
+			if (!loggingConfiguration.Enabled)
+			{
+				return new DashboardPanel()
+				{
+					Title = Resources.Dashboard.Logging_DashboardTitle,
+					InnerContent = new DashboardContentCollection
+					{
+						new DashboardCustomContent($"<em>{Resources.Dashboard.Logging_LoggingNotEnabled}</em>")
+					}
+				};
+			}
+
+			// Retrieve all loggers.
+			var logTargetConfiguration = loggingConfiguration.GetAllLogTargetConfigurations();
+
+			// Add each in turn to the list.
+			foreach (var config in logTargetConfiguration)
+			{
+				var dashboardContent = config.GetDashboardContent();
+				if (null == dashboardContent)
+					continue;
+				list.Items.Add(dashboardContent);
+			}
+
+			// Did we get anything?
+			if (0 == list.Items.Count)
+				list.Items.Add(new DashboardListItem()
+				{
+					Title = Resources.Dashboard.Logging_NoLogTargetsAreConfigured,
+					StatusSummary = new DomainStatusSummary()
+					{
+						Status = DomainStatus.Undefined
+					}
+				});
+
+			// Return the panel.
+			return new DashboardPanel()
+			{
+				Title = Resources.Dashboard.Logging_DashboardTitle,
+				InnerContent = new DashboardContentCollection
+				{
 					list
 				}
 			};
