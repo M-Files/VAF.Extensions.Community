@@ -133,10 +133,24 @@ namespace MFiles.VAF.Extensions
 			switch (e.EventType)
 			{
 				case TaskManagerEventType.TaskJobStarted:
+					// Log out that we started.
 					this.Logger?.Trace($"Starting job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))}");
 					break;
 				case TaskManagerEventType.TaskJobFinished:
-					this.Logger?.Trace($"Job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))} finished ({e.JobResult})");
+					//Log out that we're odne.
+					if(e.JobResult == TaskProcessingJobResult.Fatal)
+					{
+						// Something went badly wrong.
+						this.Logger?.Error
+						(
+							e.Exception,
+							$"Job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))} finished with a fatal result: {e.JobStatus.ErrorMessage}."
+						);
+					}
+					else
+						this.Logger?.Trace($"Job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))} finished ({e.JobResult})");
+
+					// Re-schedule as appropriate.
 					switch (e.JobResult)
 					{
 						case TaskProcessingJobResult.Complete:
@@ -154,9 +168,10 @@ namespace MFiles.VAF.Extensions
 									.RecurringOperationConfigurationManager?
 									.GetNextTaskProcessorExecution(t.QueueID, t.TaskType);
 								if (false == nextExecutionDate.HasValue)
-									continue;							
+									continue;
 
 								// Schedule.
+								this.Logger?.Debug($"Re-scheduling {t.TaskType} on {t.QueueID} for {nextExecutionDate.Value}");
 								this.RescheduleTask(t.QueueID, t.TaskType, vault: this.Vault, scheduleFor: nextExecutionDate);
 							}
 							break;
