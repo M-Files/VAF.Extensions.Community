@@ -43,9 +43,9 @@ namespace MFiles.VAF.Extensions
 				catch
 				{
 					// Throws if the queue is incorrect.
-					SysUtils.ReportToEventLog
-					($"Cannot load details for queue {queue}; is there a static field with the [TaskQueue] attribute?",
-						System.Diagnostics.EventLogEntryType.Warning
+					this.Logger?.Warn
+					(
+						$"Cannot load details for queue {queue}; is there a static field with the [TaskQueue] attribute?"
 					);
 					continue;
 				}
@@ -81,10 +81,9 @@ namespace MFiles.VAF.Extensions
 					catch
 					{
 						// Throws if the task processor is not found.
-						SysUtils.ReportToEventLog
+						this.Logger?.Warn
 						(
-							$"Cannot load processor details for task type {processor.Type} on queue {queue}.",
-							System.Diagnostics.EventLogEntryType.Warning
+							$"Cannot load processor details for task type {processor.Type} on queue {queue}."
 						);
 						continue;
 					}

@@ -75,7 +75,7 @@ namespace MFiles.VAF.Extensions
 			}
 			catch(Exception e)
 			{
-				SysUtils.ReportErrorMessageToEventLog("Exception mapping configuration to recurring operations.", e);
+				this.Logger?.Fatal(e, "Exception mapping configuration to recurring operations.");
 			}
 
 

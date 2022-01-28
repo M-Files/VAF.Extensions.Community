@@ -12,6 +12,7 @@ using System.Linq;
 using MFiles.VAF.MultiserverMode;
 using MFiles.VAF.AppTasks;
 using MFiles.VAF.Common;
+using MFiles.VaultApplications.Logging;
 
 namespace MFiles.VAF.Extensions
 {
@@ -78,8 +79,7 @@ namespace MFiles.VAF.Extensions
 				// Report an error if task manager is not supported, but queues have been resolved.
 				// If someone tries to declare queues programmatically, the TaskManager should be null,
 				// and therefore throw its own errors.
-				SysUtils.ReportErrorToEventLog(
-						"The application requires support for tasks. Please upgrade to M-Files 20.4 or later.");
+				this.Logger?.Fatal("The application requires support for tasks. Please upgrade to M-Files 20.4 or later.");
 			}
 		}
 
@@ -97,11 +97,10 @@ namespace MFiles.VAF.Extensions
 					}
 					catch (Exception e)
 					{
-						SysUtils.ReportErrorToEventLog
+						this.Logger?.Fatal
 						(
-							SysUtils.DefaultEventSourceIdentifier,
-							$"Could not cancel future executions of task type {key.TaskType} on queue {key.QueueID}.",
-							e
+							e,
+							$"Could not cancel future executions of task type {key.TaskType} on queue {key.QueueID}."
 						);
 					}
 				}

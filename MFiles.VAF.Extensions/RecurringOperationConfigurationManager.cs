@@ -7,6 +7,7 @@ using System.Reflection;
 using MFiles.VAF.AppTasks;
 using MFiles.VAF.Common;
 using MFiles.VAF.Extensions.ScheduledExecution;
+using MFiles.VaultApplications.Logging;
 
 namespace MFiles.VAF.Extensions
 {
@@ -18,11 +19,13 @@ namespace MFiles.VAF.Extensions
 		: Dictionary<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>
 		where TSecureConfiguration : class, new()
 	{
+		private ILogger Logger { get; }
 		protected ConfigurableVaultApplicationBase<TSecureConfiguration> VaultApplication { get; private set; }
 		public RecurringOperationConfigurationManager(ConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication)
 		{
 			this.VaultApplication = vaultApplication
 				?? throw new ArgumentNullException(nameof(vaultApplication));
+			this.Logger = LogManager.GetLogger(this.GetType());
 		}
 		/// <summary>
 		/// Attempts to get the configured provider of how to repeat the task processing.
@@ -116,10 +119,9 @@ namespace MFiles.VAF.Extensions
 				// Validate.
 				if (false == dictionary.ContainsKey(key))
 				{
-					SysUtils.ReportToEventLog
+					this.Logger?.Warn
 					(
-						$"Found configuration schedule for queue {tuple.Item1.QueueID} and type {tuple.Item1.TaskType}, but no task processors were registered with that combination.",
-						System.Diagnostics.EventLogEntryType.Warning
+						$"Found configuration schedule for queue {tuple.Item1.QueueID} and type {tuple.Item1.TaskType}, but no task processors were registered with that combination."
 					);
 					continue;
 				}
@@ -127,10 +129,9 @@ namespace MFiles.VAF.Extensions
 				// Make sure we have no duplicates.
 				if (this.Keys.Count(k => k.QueueID == tuple.Item1.QueueID && k.TaskType == tuple.Item1.TaskType) > 0)
 				{
-					SysUtils.ReportToEventLog
+					this.Logger?.Error
 					(
-						$"Multiple configuration schedules found for queue {tuple.Item1.QueueID} and type {tuple.Item1.TaskType}.  Only the first loaded will be used.",
-						System.Diagnostics.EventLogEntryType.Error
+						$"Multiple configuration schedules found for queue {tuple.Item1.QueueID} and type {tuple.Item1.TaskType}.  Only the first loaded will be used."
 					);
 					continue;
 				}
@@ -293,10 +294,9 @@ namespace MFiles.VAF.Extensions
 						// Validate the field type.
 						if (!recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldTypes.Any(t => t.IsAssignableFrom(f.FieldType)))
 						{
-							SysUtils.ReportToEventLog
+							this.Logger?.Warn
 							(
-								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not one of types {(string.Join(", ", recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldTypes.Select(t => t.FullName)))} (actual: {f.FieldType.FullName})",
-								System.Diagnostics.EventLogEntryType.Warning
+								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not one of types {(string.Join(", ", recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldTypes.Select(t => t.FullName)))} (actual: {f.FieldType.FullName})"
 							);
 							continue;
 						}
@@ -311,10 +311,9 @@ namespace MFiles.VAF.Extensions
 						// Validate that the value is a recurring operation.
 						if (!typeof(IRecurrenceConfiguration).IsAssignableFrom(value.GetType()))
 						{
-							SysUtils.ReportToEventLog
+							this.Logger?.Warn
 							(
-								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not of type IRecurrenceConfiguration (actual: {value.GetType().FullName})",
-								System.Diagnostics.EventLogEntryType.Warning
+								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not of type IRecurrenceConfiguration (actual: {value.GetType().FullName})"
 							);
 							continue;
 						}
@@ -360,10 +359,9 @@ namespace MFiles.VAF.Extensions
 						// Validate the property type.
 						if (!recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldTypes.Any(t => t.IsAssignableFrom(p.PropertyType)))
 						{
-							SysUtils.ReportToEventLog
+							this.Logger?.Warn
 							(
-								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type {(string.Join(", ", recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldTypes.Select(t => t.FullName)))} (actual: {p.PropertyType.FullName})",
-								System.Diagnostics.EventLogEntryType.Warning
+								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type {(string.Join(", ", recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldTypes.Select(t => t.FullName)))} (actual: {p.PropertyType.FullName})"
 							);
 							continue;
 						}
@@ -378,10 +376,9 @@ namespace MFiles.VAF.Extensions
 						// Validate the type.
 						if (!typeof(IRecurrenceConfiguration).IsAssignableFrom(value.GetType()))
 						{
-							SysUtils.ReportToEventLog
+							this.Logger?.Warn
 							(
-								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type IRecurrenceConfiguration (actual: {value.GetType().FullName})",
-								System.Diagnostics.EventLogEntryType.Warning
+								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type IRecurrenceConfiguration (actual: {value.GetType().FullName})"
 							);
 							continue;
 						}

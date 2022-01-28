@@ -1,7 +1,7 @@
 ﻿using MFiles.VAF.Common;
 using MFiles.VAF.Configuration;
 using MFiles.VAF.Extensions.ScheduledExecution;
-
+using MFiles.VaultApplications.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -137,6 +137,8 @@ namespace MFiles.VAF.Extensions
 	internal class FrequencyJsonConverter
 		: JsonConverterBase
 	{
+		private ILogger Logger { get; } = LogManager.GetLogger(typeof(FrequencyJsonConverter));
+
 		public override bool CanConvert(Type objectType)
 		{
 			return objectType == typeof(Frequency);
@@ -185,10 +187,9 @@ namespace MFiles.VAF.Extensions
 					}
 					else
 					{
-						SysUtils.ReportToEventLog
+						this.Logger?.Warn
 						(
-							String.Format(Resources.Exceptions.Configuration.CouldNotConvertJsonValueToFrequency, jToken),
-							System.Diagnostics.EventLogEntryType.Warning
+							String.Format(Resources.Exceptions.Configuration.CouldNotConvertJsonValueToFrequency, jToken)
 						);
 						return default;
 					}

@@ -3,6 +3,7 @@ using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Core;
 using MFiles.VAF.Extensions.Dashboards;
+using MFiles.VaultApplications.Logging;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,8 @@ namespace MFiles.VAF.Extensions
 		: TaskManager
 		where TConfiguration : class, new()
 	{
+		private ILogger Logger { get; }
+
 		/// <summary>
 		/// The vault application used to create this task manager.
 		/// </summary>
@@ -38,6 +41,7 @@ namespace MFiles.VAF.Extensions
 			this.VaultApplication = vaultApplication
 				?? throw new ArgumentNullException(nameof(vaultApplication));
 			this.TaskEvent += TaskManagerEx_TaskEvent;
+			this.Logger = LogManager.GetLogger(this.GetType());
 		}
 
 		/// <summary>
@@ -129,8 +133,10 @@ namespace MFiles.VAF.Extensions
 			switch (e.EventType)
 			{
 				case TaskManagerEventType.TaskJobStarted:
+					this.Logger?.Trace($"Starting job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))}");
 					break;
 				case TaskManagerEventType.TaskJobFinished:
+					this.Logger?.Trace($"Job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))} finished ({e.JobResult})");
 					switch (e.JobResult)
 					{
 						case TaskProcessingJobResult.Complete:
