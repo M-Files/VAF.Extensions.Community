@@ -15,7 +15,6 @@ namespace MFiles.VAF.Extensions
 		/// The logger for the vault application class.
 		/// </summary>
 		public ILogger Logger { get; private set; }
-			= new NullLogger();
 
 		/// <inheritdoc />
 		protected override void StartApplication()
@@ -26,7 +25,6 @@ namespace MFiles.VAF.Extensions
 			if (this.Configuration is Configuration.IConfigurationWithLoggingConfiguration configurationWithLogging)
 			{
 				LogManager.Initialize(this.PermanentVault, configurationWithLogging?.GetLoggingConfiguration());
-				this.Logger = LogManager.GetLogger(this.GetType());
 				this.Logger?.Debug("Logging started");
 			}
 

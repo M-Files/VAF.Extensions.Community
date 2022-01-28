@@ -13,6 +13,7 @@ using MFiles.VAF.AppTasks;
 using MFiles.VAF.Common;
 using System.Reflection;
 using System.Collections;
+using MFiles.VaultApplications.Logging;
 
 namespace MFiles.VAF.Extensions
 {
@@ -52,6 +53,7 @@ namespace MFiles.VAF.Extensions
 		public ConfigurableVaultApplicationBase()
 			: base()
 		{
+			this.Logger = LogManager.GetLogger(this.GetType());
 			this.RecurringOperationConfigurationManager = new RecurringOperationConfigurationManager<TSecureConfiguration>(this);
 		}
 		private TaskQueueBackgroundOperationManager<TSecureConfiguration> taskQueueBackgroundOperationManager;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Resources;
 using System.Globalization;
+using System.Linq;
 
 namespace MFiles.VAF.Extensions
 {
