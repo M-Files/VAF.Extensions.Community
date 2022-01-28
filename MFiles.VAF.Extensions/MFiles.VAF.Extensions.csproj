@@ -32,6 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MFiles.VAF" Version="2.3.623.6" />
+    <PackageReference Include="MFiles.VaultApplications.Logging" Version="22.1.35-prerelease" />
     <PackageReference Include="MFilesAPI.Extensions" Version="1.0.6" />
   </ItemGroup>
   <ItemGroup>
@@ -55,9 +56,6 @@
     <EmbeddedResource Include="Resources\Images\Waiting.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\mfiles.vaultapplications.logging\MFiles.VaultApplications.Logging\MFiles.VaultApplications.Logging.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Resources\AsynchronousOperations.Designer.cs">
