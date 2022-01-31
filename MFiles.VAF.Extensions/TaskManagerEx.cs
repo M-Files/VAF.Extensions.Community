@@ -44,6 +44,13 @@ namespace MFiles.VAF.Extensions
 			this.Logger = LogManager.GetLogger(this.GetType());
 		}
 
+		/// <inheritdoc />
+		public new string AddTask(Vault vault, string queueId, string taskType, TaskDirective directive = null, DateTime? activationTime = null)
+		{
+			this.Logger?.Debug($"Adding task to queue {queueId} of type {taskType}.");
+			return base.AddTask(vault, queueId, taskType, directive, activationTime);
+		}
+
 		/// <summary>
 		/// Cancels any future executions of tasks of type <paramref name="taskType"/> on queue <paramref name="queueId"/>.
 		/// If <paramref name="scheduleFor"/> has a value then a new execution of the task is scheduled for this date/time.
@@ -80,6 +87,7 @@ namespace MFiles.VAF.Extensions
 		public virtual void RegisterSchedulingQueue()
 		{
 			// Register the scheduler queue.
+			this.Logger?.Trace($"Registering scheduler queue {this.VaultApplication.GetSchedulerQueueID()}");
 			this.RegisterQueue
 			(
 				this.VaultApplication.GetSchedulerQueueID(),

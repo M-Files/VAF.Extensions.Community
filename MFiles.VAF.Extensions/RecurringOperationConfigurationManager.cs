@@ -82,11 +82,15 @@ namespace MFiles.VAF.Extensions
 			if (null == configuration
 				|| null == this.VaultApplication?.TaskQueueResolver
 				|| null == this.VaultApplication?.TaskManager)
+			{
+				this.Logger?.Warn("Vault application, task manager, or task queue resolver are null so cannot populate configuration; skipping.");
 				return;
+			}
 
 			// Attempt to find any scheduled operation configuration.
 			var schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>>();
 			this.GetTaskProcessorConfiguration(configuration, out schedules);
+			this.Logger?.Trace($"{(schedules?.Count ?? 0)} schedules were located in the configuration.");
 
 			// If we have nothing to apply to then die.
 			if (null == schedules || schedules.Count == 0)
@@ -136,6 +140,9 @@ namespace MFiles.VAF.Extensions
 					continue;
 				}
 
+				// TODO: This would be nicer without the HTML...
+				this.Logger?.Trace($"Schedule located for queue {tuple.Item1.QueueID} and type {tuple.Item1.TaskType}: {tuple.Item2.ToDashboardDisplayString()}");
+
 				// Add it to the dictionary.
 				this.Add
 				(
@@ -144,6 +151,7 @@ namespace MFiles.VAF.Extensions
 				);
 
 				// Cancel any existing executions.
+				this.Logger?.Trace($"Cancelling future executions for items in queue {tuple.Item1.QueueID} of type {tuple.Item1.TaskType}.");
 				this.VaultApplication.TaskManager.CancelAllFutureExecutions
 				(
 					tuple.Item1.QueueID,
@@ -155,12 +163,22 @@ namespace MFiles.VAF.Extensions
 
 				// If this should run at vault startup then run it now.
 				if (isVaultStartup && schedule.RunOnVaultStartup.HasValue && schedule.RunOnVaultStartup.Value)
+				{
+					this.Logger?.Debug($"Processor for queue {tuple.Item1.QueueID} of type {tuple.Item1.TaskType} should run on vault startup; scheduling for now.");
 					nextExecution = DateTime.UtcNow;
+				}
 
 				// If we don't have a schedule then stop.
 				nextExecution = nextExecution ?? schedule?.GetNextExecution();
 				if (false == nextExecution.HasValue)
+				{
+					this.Logger?.Debug($"Processor for queue {tuple.Item1.QueueID} of type {tuple.Item1.TaskType} has no next-execution returned.  It will not be scheduled to run.");
 					continue;
+				}
+				else
+				{
+					this.Logger?.Debug($"Processor for queue {tuple.Item1.QueueID} of type {tuple.Item1.TaskType} will be scheduled for {nextExecution.Value.ToString("s")}");
+				}
 
 				// Cancel future executions and schedule the next one if appropriate.
 				this.VaultApplication.TaskManager.AddTask
@@ -319,6 +337,7 @@ namespace MFiles.VAF.Extensions
 						}
 
 						// Add the schedule to the collection.
+						this.Logger?.Trace($"{f.DeclaringType.FullName}.{f.Name} defines the recurrence schedule for queue {recurringOperationConfigurationAttribute.QueueID} and type {recurringOperationConfigurationAttribute.TaskType}.");
 						schedules
 						.Add
 						(
@@ -384,6 +403,7 @@ namespace MFiles.VAF.Extensions
 						}
 
 						// Add the schedule to the collection.
+						this.Logger?.Trace($"{p.DeclaringType.FullName}.{p.Name} defines the recurrence schedule for queue {recurringOperationConfigurationAttribute.QueueID} and type {recurringOperationConfigurationAttribute.TaskType}.");
 						schedules.Add
 						(
 							new Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>

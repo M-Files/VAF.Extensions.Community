@@ -93,6 +93,7 @@ namespace MFiles.VAF.Extensions
 				{
 					try
 					{
+						this.Logger?.Trace($"Cancelling future tasks on queue {key.QueueID} with type {key.TaskType}.");
 						this.TaskManager?.CancelAllFutureExecutions(key.QueueID, key.TaskType, vault: vaultSrc);
 					}
 					catch (Exception e)
