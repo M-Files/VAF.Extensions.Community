@@ -2,7 +2,7 @@ name: Publish release to nuget
 
 on:
   push:
-    branches: [ release ]
+    branches: [ testing-actions ]
     
 jobs:
   build:
@@ -36,5 +36,5 @@ jobs:
     - name: Test
       run: dotnet test --no-restore --verbosity normal
 
-    - name: Push with dotnet
-      run: dotnet nuget push MFiles.VAF.Extensions/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+#    - name: Push with dotnet
+#      run: dotnet nuget push MFiles.VAF.Extensions/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
