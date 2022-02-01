@@ -1,0 +1,38 @@
+name: Publish release to nuget
+
+on:
+  push:
+    branches: [ testing-actions ]
+    
+jobs:
+  build:
+    timeout-minutes: 10
+    runs-on: 'windows-latest'
+
+    
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Get date format
+      id: date
+      run: powershell Get-Date -Format "yy.M"
+
+    - name: Setup MSBuild path
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Setup dot net
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+
+    - name: Restore NuGet packages
+      run: nuget restore MFiles.VAF.Extensions.sln
+
+    - name: Build solution - RELEASE configuration
+      run: dotnet build MFiles.VAF.Extensions.sln --configuration Release /p:Version=${{ steps.date }}.${{ github.run_number }}.0 /p:AssemblyVersion=${{ steps.date }}.${{ github.run_number }}.0 /p:InformationalVersion=${{ steps.date }}.${{ github.run_number }}.0
+
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
+
+#    - name: Push with dotnet
+#      run: dotnet nuget push MFiles.VAF.Extensions/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
