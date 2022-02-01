@@ -18,6 +18,9 @@
   <ItemGroup>
     <None Remove="Resources\Completed.png" />
     <None Remove="Resources\Failed.png" />
+    <None Remove="Resources\Images\enabled.png" />
+    <None Remove="Resources\Images\error.png" />
+    <None Remove="Resources\Images\notenabled.png" />
     <None Remove="Resources\Running.png" />
     <None Remove="Resources\Waiting.png" />
   </ItemGroup>
@@ -32,7 +35,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MFiles.VAF" Version="2.3.623.6" />
-    <PackageReference Include="MFiles.VaultApplications.Logging" Version="22.1.63-prerelease" />
     <PackageReference Include="MFilesAPI.Extensions" Version="1.0.6" />
   </ItemGroup>
   <ItemGroup>
@@ -47,15 +49,21 @@
     <EmbeddedResource Include="Resources\Images\Completed.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Images\enabled.png" />
+    <EmbeddedResource Include="Resources\Images\error.png" />
     <EmbeddedResource Include="Resources\Images\Failed.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Images\notenabled.png" />
     <EmbeddedResource Include="Resources\Images\Running.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Images\Waiting.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\mfiles.vaultapplications.logging\MFiles.VaultApplications.Logging\MFiles.VaultApplications.Logging.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Resources\AsynchronousOperations.Designer.cs">

@@ -9,6 +9,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MFiles.VAF.Configuration.Domain;
+using MFiles.VAF.Extensions.Dashboards;
+using MFiles.VAF.Configuration;
+using System.Resources;
+using MFiles.VaultApplications.Logging.NLog.ExtensionMethods;
 
 namespace MFiles.VAF.Extensions
 {
@@ -110,9 +114,6 @@ namespace MFiles.VAF.Extensions
 			if (null == loggingConfiguration)
 				return null;
 
-			// Declare our list which will go into the panel.
-			var list = new DashboardList();
-
 			// If logging is not enabled then return a simple panel.
 			if (!loggingConfiguration.Enabled)
 			{
@@ -126,28 +127,59 @@ namespace MFiles.VAF.Extensions
 				};
 			}
 
+			// Create the table
+			var table = new DashboardTable();
+			{
+				var header = table.AddRow(DashboardTableRowType.Header);
+				header.AddCells
+				(
+					Resources.Dashboard.Logging_Table_NameHeader,
+					Resources.Dashboard.Logging_Table_LogLevelsHeader,
+					Resources.Dashboard.Logging_Table_SensitivityHeader
+				);
+			}
+			table.Styles.Add("background-color", "#f2f2f2");
+			table.Styles.Add("padding", "10px");
+
 			// Retrieve all loggers.
 			var logTargetConfiguration = loggingConfiguration.GetAllLogTargetConfigurations();
 
 			// Add each in turn to the list.
-			foreach (var config in logTargetConfiguration)
+			foreach (var config in logTargetConfiguration.OrderByDescending(t => t.Enabled).ThenBy(t => t.Name))
 			{
-				var dashboardContent = config.GetDashboardContent();
-				if (null == dashboardContent)
-					continue;
-				list.Items.Add(dashboardContent);
-			}
-
-			// Did we get anything?
-			if (0 == list.Items.Count)
-				list.Items.Add(new DashboardListItem()
+				// Build up the row.
+				var row = table.AddRow();
+				if(false == config.Enabled)
 				{
-					Title = Resources.Dashboard.Logging_NoLogTargetsAreConfigured,
-					StatusSummary = new DomainStatusSummary()
+					// Not enabled.
+					row.Styles.Add("text-decoration", "line-through");
+				}
+
+				// Sort out the name.
+				{
+					var name = new DashboardCustomContentEx($"{config.Name} ({config.TypeName})");
+
+					if(config.Enabled == false)
 					{
-						Status = DomainStatus.Undefined
+						name.Icon = "Resources/Images/notenabled.png";
+						row.Attributes.Add("title", Resources.Dashboard.Logging_TargetNotEnabled);
 					}
-				});
+					// Validation can take some time to run; let's not incur that cost.
+					//else if(config.GetValidationFindings().Any(f => f.Type == ValidationFindingType.Error || f.Type == ValidationFindingType.Exception))
+					//{
+					//	name.Icon = "Resources/Images/error.png";
+					//	row.Attributes.Add("title", Resources.Dashboard.Logging_TargetValidationErrors);
+					//}
+					else
+					{
+						name.Icon = "Resources/Images/enabled.png";
+					}
+
+					row.AddCell(name);
+				}
+				row.AddCell($"{config.MinimumLogLevel.ToDisplayString()} to {config.MaximumLogLevel.ToDisplayString()}");
+				row.AddCell(config.Sensitivity.ToLabel(this.ConfManager?.ResourceManager));
+			}
 
 			// Return the panel.
 			return new DashboardPanel()
@@ -155,9 +187,54 @@ namespace MFiles.VAF.Extensions
 				Title = Resources.Dashboard.Logging_DashboardTitle,
 				InnerContent = new DashboardContentCollection
 				{
-					list
+					0 == table.Rows.Count(r => r.DashboardTableRowType == DashboardTableRowType.Body)
+						? (IDashboardContent)new DashboardList()
+						{
+							Items = new List<DashboardListItem>()
+							{
+								new DashboardListItem()
+								{
+									Title = Resources.Dashboard.Logging_NoLogTargetsAreConfigured,
+									StatusSummary = new DomainStatusSummary()
+									{
+										Status = DomainStatus.Undefined
+									}
+								}
+							}
+						}
+						: (IDashboardContent)table
 				}
 			};
+		}
+	}
+
+	// TODO: This could be a more generic helper method.
+	internal static class SensitivityExtensionMethods
+	{
+		public static string ToLabel(this VaultApplications.Logging.Sensitivity.Sensitivity sensitivity, ResourceManager resourceManager = null)
+		{
+			var enumType = typeof(VaultApplications.Logging.Sensitivity.Sensitivity);
+			var name = Enum.GetName(enumType, sensitivity);
+			var jsonConfEditorAttribute = enumType
+				.GetField(name)
+				.GetCustomAttributes(true)
+				.FirstOrDefault(a => a is JsonConfEditorAttribute) as JsonConfEditorAttribute;
+
+			// No label?
+			if (string.IsNullOrWhiteSpace(jsonConfEditorAttribute?.Label))
+				return sensitivity.ToString();
+
+			var key = jsonConfEditorAttribute.Label;
+			var prefix = jsonConfEditorAttribute.ResourceIdPrefix ?? "$$";
+			if (key?.StartsWith(prefix) ?? false)
+			{
+				// Get the label.
+				var label = resourceManager?.GetString(key.Substring(prefix.Length));
+				if (string.IsNullOrWhiteSpace(label))
+					return sensitivity.ToString();
+				return label;
+			}
+			return key;
 		}
 	}
 }
