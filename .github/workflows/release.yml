@@ -14,7 +14,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Get version number
-      shell: pswh
+      shell: pwsh
       run: |
         $versionNumber = Get-Date -Format "yy.M.${{ github.run_number }}.0"
         echo "versionNumber=$versionNumber"
