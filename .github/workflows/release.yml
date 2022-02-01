@@ -19,7 +19,9 @@ jobs:
       env:
         POWERSHELL_TELEMETRY_OPTOUT: 1
       with:
-        inlineScript: $formattedDate = Get-Date -Format "yy.M"
+        inlineScript: |
+            $formattedDate = Get-Date -Format "yy.M"
+            echo ::set-output name=formattedDate::$( $formattedDate )
         azPSVersion : '3.1.0'
 
     - name: Setup MSBuild path
