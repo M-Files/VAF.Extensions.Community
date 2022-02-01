@@ -51,6 +51,7 @@ namespace MFiles.VAF.Extensions
 		)
 			where TDirective : TaskDirective
 		{
+			this.Logger?.Debug($"Cancelling future executions on queue {queueId} of task {taskType}.");
 			var tasks = this.GetPendingExecutions<TDirective>(queueId, taskType, includeCurrentlyExecuting);
 			foreach (var task in tasks)
 				this.CancelExecution(task, vault, remarks);

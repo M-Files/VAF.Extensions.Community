@@ -30,7 +30,7 @@ namespace MFiles.VAF.Extensions.Logging.Sensitivity.Filters
 				return filter?.FilterValueForLogging(value, level, format, formatProvider);
 
 			// No suitable filter.
-			this.Logger.Error($"Could not load required sensitivity filter for {typeof(ObjectVersion).FullName}.  Minimum data will be logged.");
+			this.Logger?.Error($"Could not load required sensitivity filter for {typeof(ObjectVersion).FullName}.  Minimum data will be logged.");
 			return $"{value.ObjVer.Type}-{value.ObjVer.ID}-{value.ObjVer.Version}";
 		}
 	}
