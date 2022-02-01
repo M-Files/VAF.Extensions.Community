@@ -14,12 +14,16 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: versionSuffix
+      shell: pwsh
       run: |
-        if github.ref == 'release'
-          echo "versionSuffix=-preview" >> $GITHUB_ENV
+        If('${{ github.ref }}' -eq 'release')
+        {
+          echo "versionSuffix=-preview" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+        }
         else
-          echo "versionSuffix=" >> $GITHUB_ENV
-        fi
+        {
+          echo "versionSuffix=" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+        }
 
     - name: Get version number
       shell: pwsh
