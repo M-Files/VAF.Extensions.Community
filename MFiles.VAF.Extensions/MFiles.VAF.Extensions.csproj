@@ -175,11 +175,4 @@
     </ItemGroup>
     <Delete Files="@(FilesToDelete)" />
   </Target>
-  <Target Name="PostBuild" AfterTargets="Pack" Condition=" '$(Configuration)' == 'Release'">
-    <CreateItem Include="$(OutputPath)*.nupkg">
-      <Output TaskParameter="Include" ItemName="NugetPackages" />
-    </CreateItem>
-    <RemoveDir Directories="..\current" />
-    <Copy SourceFiles="@(NugetPackages)" DestinationFolder="..\current" />
-</Target>
 </Project>
