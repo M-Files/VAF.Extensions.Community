@@ -16,7 +16,7 @@ jobs:
     - name: versionSuffix
       shell: pwsh
       run: |
-        If('${{ github.ref_name }}' -eq 'refs/heads/release')
+        If('${{ github.ref_name }}' -eq 'release')
         {
           echo "versionSuffix=" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
         }
