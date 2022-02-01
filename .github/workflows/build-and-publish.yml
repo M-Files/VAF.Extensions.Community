@@ -61,7 +61,7 @@ jobs:
         tag_name: ${{ env.versionNumber }}
         release_name: ${{ env.versionNumber }}
         draft: false
-        prerelease: false
+        prerelease: ${{ github.ref_name == 'prerelease' }}
 
     - name: Upload asset
       id: uploadAsset
