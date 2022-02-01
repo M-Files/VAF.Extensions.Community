@@ -29,5 +29,6 @@ jobs:
     - name: Build solution - RELEASE configuration
       run: msbuild MFiles.VAF.Extensions.sln /nologo /verbosity:m /p:Configuration=Release /t:Build /p:DefineConstants="DONOTDEPLOY"
 
-    - name: Test
-      run: dotnet test --no-restore --verbosity normal
+# Tests cannot be run as MFAPI is not installed.
+#    - name: Test
+#      run: dotnet test --no-restore --verbosity normal
