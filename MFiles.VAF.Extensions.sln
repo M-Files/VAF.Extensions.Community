@@ -18,9 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{442416AF-8A79-4D4D-B126-077BA84F5068}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\build-and-test.yml = .github\workflows\build-and-test.yml
-		.github\workflows\prerelease.yml = .github\workflows\prerelease.yml
-		.github\workflows\release.yml = .github\workflows\release.yml
+		.github\workflows\build-and-publish.yml = .github\workflows\build-and-publish.yml
+		.github\workflows\build.yml = .github\workflows\build.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DB025D1F-EAB3-42A6-B49C-1C9917C11ED0}"

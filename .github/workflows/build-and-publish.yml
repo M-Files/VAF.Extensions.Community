@@ -1,8 +1,8 @@
-name: Publish release to nuget
+name: Build and publish
 
 on:
   push:
-    branches: [ release ]
+    branches: [ testing-actions ]
     
 jobs:
   build:
@@ -13,10 +13,18 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: versionSuffix
+      run: |
+        if github.ref == 'release'
+          echo "versionSuffix=-preview" >> $GITHUB_ENV
+        else
+          echo "versionSuffix=" >> $GITHUB_ENV
+        fi
+
     - name: Get version number
       shell: pwsh
       run: |
-        $versionNumber = Get-Date -Format "yy.M.${{ github.run_number }}.0"
+        $versionNumber = Get-Date -Format "yy.M.${{ github.run_number }}.0{{ env.versionSuffix }}"
         echo "versionNumber=$versionNumber" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
 
     - name: Setup MSBuild path
