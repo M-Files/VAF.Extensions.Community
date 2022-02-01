@@ -14,8 +14,13 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Get date format
+      uses: azure/powershell@v1
       id: date
-      run: powershell Get-Date -Format "yy.M"
+      env:
+        POWERSHELL_TELEMETRY_OPTOUT: 1
+      with:
+        inlineScript: $formattedDate = Get-Date -Format "yy.M"
+        azPSVersion : '3.1.0'
 
     - name: Setup MSBuild path
       uses: microsoft/setup-msbuild@v1.0.2
@@ -28,8 +33,8 @@ jobs:
     - name: Restore NuGet packages
       run: nuget restore MFiles.VAF.Extensions.sln
 
-    - name: Build solution - RELEASE configuration
-      run: dotnet build MFiles.VAF.Extensions.sln --configuration Release /p:Version=${{ steps.date }}.${{ github.run_number }}.0 /p:AssemblyVersion=${{ steps.date }}.${{ github.run_number }}.0 /p:InformationalVersion=${{ steps.date }}.${{ github.run_number }}.0
+    - name: Build solution and create nuget package
+      run: dotnet build MFiles.VAF.Extensions.sln --configuration Release /p:Version=${{ steps.date.outputs.formattedDate }}.${{ github.run_number }}.0 /p:AssemblyVersion=${{ steps.date.outputs.formattedDate }}.${{ github.run_number }}.0 /p:InformationalVersion=${{ steps.date.outputs.formattedDate }}.${{ github.run_number }}.0
 
     - name: Test
       run: dotnet test --no-restore --verbosity normal
