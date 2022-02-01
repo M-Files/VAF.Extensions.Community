@@ -7,6 +7,7 @@ using System.Reflection;
 using MFiles.VAF.AppTasks;
 using MFiles.VAF.Common;
 using MFiles.VAF.Extensions.ScheduledExecution;
+using MFiles.VaultApplications.Logging;
 
 namespace MFiles.VAF.Extensions
 {
@@ -18,11 +19,13 @@ namespace MFiles.VAF.Extensions
 		: Dictionary<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>
 		where TSecureConfiguration : class, new()
 	{
+		private ILogger Logger { get; }
 		protected ConfigurableVaultApplicationBase<TSecureConfiguration> VaultApplication { get; private set; }
 		public RecurringOperationConfigurationManager(ConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication)
 		{
 			this.VaultApplication = vaultApplication
 				?? throw new ArgumentNullException(nameof(vaultApplication));
+			this.Logger = LogManager.GetLogger(this.GetType());
 		}
 		/// <summary>
 		/// Attempts to get the configured provider of how to repeat the task processing.
@@ -79,11 +82,15 @@ namespace MFiles.VAF.Extensions
 			if (null == configuration
 				|| null == this.VaultApplication?.TaskQueueResolver
 				|| null == this.VaultApplication?.TaskManager)
+			{
+				this.Logger?.Warn("Vault application, task manager, or task queue resolver are null so cannot populate configuration; skipping.");
 				return;
+			}
 
 			// Attempt to find any scheduled operation configuration.
 			var schedules = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>>();
 			this.GetTaskProcessorConfiguration(configuration, out schedules);
+			this.Logger?.Trace($"{(schedules?.Count ?? 0)} schedules were located in the configuration.");
 
 			// If we have nothing to apply to then die.
 			if (null == schedules || schedules.Count == 0)
@@ -116,10 +123,9 @@ namespace MFiles.VAF.Extensions
 				// Validate.
 				if (false == dictionary.ContainsKey(key))
 				{
-					SysUtils.ReportToEventLog
+					this.Logger?.Warn
 					(
-						$"Found configuration schedule for queue {tuple.Item1.QueueID} and type {tuple.Item1.TaskType}, but no task processors were registered with that combination.",
-						System.Diagnostics.EventLogEntryType.Warning
+						$"Found configuration schedule for queue {tuple.Item1.QueueID} and type {tuple.Item1.TaskType}, but no task processors were registered with that combination."
 					);
 					continue;
 				}
@@ -127,13 +133,15 @@ namespace MFiles.VAF.Extensions
 				// Make sure we have no duplicates.
 				if (this.Keys.Count(k => k.QueueID == tuple.Item1.QueueID && k.TaskType == tuple.Item1.TaskType) > 0)
 				{
-					SysUtils.ReportToEventLog
+					this.Logger?.Error
 					(
-						$"Multiple configuration schedules found for queue {tuple.Item1.QueueID} and type {tuple.Item1.TaskType}.  Only the first loaded will be used.",
-						System.Diagnostics.EventLogEntryType.Error
+						$"Multiple configuration schedules found for queue {tuple.Item1.QueueID} and type {tuple.Item1.TaskType}.  Only the first loaded will be used."
 					);
 					continue;
 				}
+
+				// TODO: This would be nicer without the HTML...
+				this.Logger?.Trace($"Schedule located for queue {tuple.Item1.QueueID} and type {tuple.Item1.TaskType}: {tuple.Item2.ToDashboardDisplayString()}");
 
 				// Add it to the dictionary.
 				this.Add
@@ -143,6 +151,7 @@ namespace MFiles.VAF.Extensions
 				);
 
 				// Cancel any existing executions.
+				this.Logger?.Trace($"Cancelling future executions for items in queue {tuple.Item1.QueueID} of type {tuple.Item1.TaskType}.");
 				this.VaultApplication.TaskManager.CancelAllFutureExecutions
 				(
 					tuple.Item1.QueueID,
@@ -154,12 +163,22 @@ namespace MFiles.VAF.Extensions
 
 				// If this should run at vault startup then run it now.
 				if (isVaultStartup && schedule.RunOnVaultStartup.HasValue && schedule.RunOnVaultStartup.Value)
+				{
+					this.Logger?.Debug($"Processor for queue {tuple.Item1.QueueID} of type {tuple.Item1.TaskType} should run on vault startup; scheduling for now.");
 					nextExecution = DateTime.UtcNow;
+				}
 
 				// If we don't have a schedule then stop.
 				nextExecution = nextExecution ?? schedule?.GetNextExecution();
 				if (false == nextExecution.HasValue)
+				{
+					this.Logger?.Debug($"Processor for queue {tuple.Item1.QueueID} of type {tuple.Item1.TaskType} has no next-execution returned.  It will not be scheduled to run.");
 					continue;
+				}
+				else
+				{
+					this.Logger?.Debug($"Processor for queue {tuple.Item1.QueueID} of type {tuple.Item1.TaskType} will be scheduled for {nextExecution.Value.ToString("s")}");
+				}
 
 				// Cancel future executions and schedule the next one if appropriate.
 				this.VaultApplication.TaskManager.AddTask
@@ -293,10 +312,9 @@ namespace MFiles.VAF.Extensions
 						// Validate the field type.
 						if (!recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldTypes.Any(t => t.IsAssignableFrom(f.FieldType)))
 						{
-							SysUtils.ReportToEventLog
+							this.Logger?.Warn
 							(
-								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not one of types {(string.Join(", ", recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldTypes.Select(t => t.FullName)))} (actual: {f.FieldType.FullName})",
-								System.Diagnostics.EventLogEntryType.Warning
+								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not one of types {(string.Join(", ", recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldTypes.Select(t => t.FullName)))} (actual: {f.FieldType.FullName})"
 							);
 							continue;
 						}
@@ -311,15 +329,15 @@ namespace MFiles.VAF.Extensions
 						// Validate that the value is a recurring operation.
 						if (!typeof(IRecurrenceConfiguration).IsAssignableFrom(value.GetType()))
 						{
-							SysUtils.ReportToEventLog
+							this.Logger?.Warn
 							(
-								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not of type IRecurrenceConfiguration (actual: {value.GetType().FullName})",
-								System.Diagnostics.EventLogEntryType.Warning
+								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but field was not of type IRecurrenceConfiguration (actual: {value.GetType().FullName})"
 							);
 							continue;
 						}
 
 						// Add the schedule to the collection.
+						this.Logger?.Trace($"{f.DeclaringType.FullName}.{f.Name} defines the recurrence schedule for queue {recurringOperationConfigurationAttribute.QueueID} and type {recurringOperationConfigurationAttribute.TaskType}.");
 						schedules
 						.Add
 						(
@@ -360,10 +378,9 @@ namespace MFiles.VAF.Extensions
 						// Validate the property type.
 						if (!recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldTypes.Any(t => t.IsAssignableFrom(p.PropertyType)))
 						{
-							SysUtils.ReportToEventLog
+							this.Logger?.Warn
 							(
-								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type {(string.Join(", ", recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldTypes.Select(t => t.FullName)))} (actual: {p.PropertyType.FullName})",
-								System.Diagnostics.EventLogEntryType.Warning
+								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type {(string.Join(", ", recurringOperationConfigurationAttribute.ExpectedPropertyOrFieldTypes.Select(t => t.FullName)))} (actual: {p.PropertyType.FullName})"
 							);
 							continue;
 						}
@@ -378,15 +395,15 @@ namespace MFiles.VAF.Extensions
 						// Validate the type.
 						if (!typeof(IRecurrenceConfiguration).IsAssignableFrom(value.GetType()))
 						{
-							SysUtils.ReportToEventLog
+							this.Logger?.Warn
 							(
-								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type IRecurrenceConfiguration (actual: {value.GetType().FullName})",
-								System.Diagnostics.EventLogEntryType.Warning
+								$"Found [{recurringOperationConfigurationAttribute.GetType().Name}] but property was not of type IRecurrenceConfiguration (actual: {value.GetType().FullName})"
 							);
 							continue;
 						}
 
 						// Add the schedule to the collection.
+						this.Logger?.Trace($"{p.DeclaringType.FullName}.{p.Name} defines the recurrence schedule for queue {recurringOperationConfigurationAttribute.QueueID} and type {recurringOperationConfigurationAttribute.TaskType}.");
 						schedules.Add
 						(
 							new Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>

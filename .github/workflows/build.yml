@@ -1,0 +1,34 @@
+name: Build
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    timeout-minutes: 10
+    runs-on: 'windows-latest'
+
+    
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup MSBuild path
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Setup dot net
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+
+    - name: Restore NuGet packages
+      run: nuget restore MFiles.VAF.Extensions.sln
+
+    - name: Build solution - RELEASE configuration
+      run: msbuild MFiles.VAF.Extensions.sln /nologo /verbosity:m /p:Configuration=Release /t:Build /p:DefineConstants="DONOTDEPLOY"
+
+# Tests cannot be run as MFAPI is not installed.
+#    - name: Test
+#      run: dotnet test --no-restore --verbosity normal

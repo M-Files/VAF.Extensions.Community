@@ -49,7 +49,7 @@ namespace MFiles.VAF.Extensions.Dashboards
 		{
 			var fragment = this.GenerateXmlDocumentFragment(xml);
 			if (null == fragment)
-				throw new ApplicationException($"XML fragment for {this.GetType().Name} was null so cannot be rendered");
+				throw new ApplicationException(String.Format(Resources.Exceptions.Dashboard.XmlFragmentNull, this.GetType().Name));
 
 			var element = fragment.FirstChild as XmlElement;
 			if (null == element)

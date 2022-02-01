@@ -31,7 +31,11 @@ namespace MFiles.VAF.Extensions
 			if (false == objType.HasOwnerType)
 				throw new ArgumentException
 				(
-					$"{objType.NamePlural} do not have an owning object type.",
+					string.Format
+					(
+						Resources.Exceptions.ObjVerExExtensionMethods.GetOwner_ObjectTypeDoesNotHaveOwner,
+						objType.NamePlural
+					),
 					nameof(objVerEx)
 				);
 

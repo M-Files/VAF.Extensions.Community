@@ -18,7 +18,12 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// There must be at least one item in this collection for the trigger to be active.
 		/// </summary>
 		[DataMember]
-		[JsonConfEditor(Label = "Trigger Times", ChildTypeEditor = "time")]
+		[JsonConfEditor
+		(
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_DailyTrigger_TriggerTimes_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_DailyTrigger_TriggerTimes_HelpText),
+			ChildTypeEditor = "time"
+		)]
 		public List<TimeSpan> TriggerTimes { get; set; } = new List<TimeSpan>();
 
 		/// <summary>
@@ -60,7 +65,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			if (null == this.TriggerTimes || this.TriggerTimes.Count == 0)
 				return null;
 
-			return $"Daily at the following times: {string.Join(", ", this.TriggerTimes.OrderBy(t => t).Select(t => t.ToString()))}.";
+			return Resources.Schedule.Triggers_DailyTrigger.EscapeXmlForDashboard(string.Join(", ", this.TriggerTimes.OrderBy(t => t).Select(t => t.ToString())));
 		}
 
 		/// <summary>

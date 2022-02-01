@@ -43,7 +43,7 @@ namespace MFiles.VAF.Extensions
 			if (null == searchBuilder)
 				throw new ArgumentNullException(nameof(searchBuilder));
 			if (0 > propertyDef)
-				throw new ArgumentOutOfRangeException(nameof(propertyDef), "Property Ids must be greater than -1; ensure that your property alias was resolved.");
+				throw new ArgumentOutOfRangeException(nameof(propertyDef), Resources.Exceptions.VaultInteraction.PropertyDefinition_NotResolved);
 
 			// What is the type of this property?
 			var dataType = searchBuilder.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
@@ -64,27 +64,34 @@ namespace MFiles.VAF.Extensions
 
 						// Ensure value has a value.
 						if (null == value)
-							throw new ArgumentException($"value cannot be null.", nameof(value));
+							throw new ArgumentException(Resources.Exceptions.MFSearchBuilderExtensionMethods.DataFunctionCallValueNull, nameof(value));
 
 						// If it's a year then it should be four-digits.
 						if (dataFunctionCall.DataFunction == MFDataFunction.MFDataFunctionYear
 							&& (value < 1000 || value > 9999))
-						{
-							throw new ArgumentException($"The year must be four digits.", nameof(value));
-						}
+							throw new ArgumentException(Resources.Exceptions.MFSearchBuilderExtensionMethods.DataFunctionCallYearInvalid, nameof(value));
 
 						break;
 					}
 				}
 			}
-			
+
 			// If it is not the right data type then throw.
 			if (dataType != MFDataType.MFDatatypeInteger
 				&& dataType != MFDataType.MFDatatypeInteger64
 				&& dataType != MFDataType.MFDatatypeFloating
 				&& dataType != MFDataType.MFDatatypeLookup
 				&& dataType != MFDataType.MFDatatypeMultiSelectLookup)
-				throw new ArgumentException($"Property {propertyDef} is not an integer, long, real, lookup or multi-select lookup property.", nameof(propertyDef));
+				throw new ArgumentException
+				(
+					string.Format
+					(
+						Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
+						propertyDef,
+						string.Join(", ", new[] { MFDataType.MFDatatypeInteger, MFDataType.MFDatatypeInteger64, MFDataType.MFDatatypeFloating, MFDataType.MFDatatypeLookup, MFDataType.MFDatatypeMultiSelectLookup })
+					),
+					nameof(propertyDef)
+				);
 
 			// Add the search condition.
 			return searchBuilder.AddPropertyValueSearchCondition
@@ -130,7 +137,7 @@ namespace MFiles.VAF.Extensions
 			if (null == searchBuilder)
 				throw new ArgumentNullException(nameof(searchBuilder));
 			if (0 > propertyDef)
-				throw new ArgumentOutOfRangeException(nameof(propertyDef), "Property Ids must be greater than -1; ensure that your property alias was resolved.");
+				throw new ArgumentOutOfRangeException(nameof(propertyDef), Resources.Exceptions.VaultInteraction.PropertyDefinition_NotResolved);
 
 			// What is the type of this property?
 			var dataType = searchBuilder.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
@@ -141,7 +148,16 @@ namespace MFiles.VAF.Extensions
 				&& dataType != MFDataType.MFDatatypeFloating
 				&& dataType != MFDataType.MFDatatypeLookup
 				&& dataType != MFDataType.MFDatatypeMultiSelectLookup)
-				throw new ArgumentException($"Property {propertyDef} is not an integer, long, real, lookup or multi-select lookup property.", nameof(propertyDef));
+				throw new ArgumentException
+				(
+					string.Format
+					(
+						Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
+						propertyDef,
+						string.Join(", ", new[] { MFDataType.MFDatatypeInteger, MFDataType.MFDatatypeInteger64, MFDataType.MFDatatypeFloating, MFDataType.MFDatatypeLookup, MFDataType.MFDatatypeMultiSelectLookup })
+					),
+					nameof(propertyDef)
+				);
 
 			// Add the search condition.
 			return searchBuilder.AddPropertyValueSearchCondition
@@ -187,14 +203,23 @@ namespace MFiles.VAF.Extensions
 			if (null == searchBuilder)
 				throw new ArgumentNullException(nameof(searchBuilder));
 			if (0 > propertyDef)
-				throw new ArgumentOutOfRangeException(nameof(propertyDef), "Property Ids must be greater than -1; ensure that your property alias was resolved.");
+				throw new ArgumentOutOfRangeException(nameof(propertyDef), Resources.Exceptions.VaultInteraction.PropertyDefinition_NotResolved);
 
 			// What is the type of this property?
 			var dataType = searchBuilder.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
 
 			// If it is not valid then throw.
 			if (dataType != MFDataType.MFDatatypeFloating)
-				throw new ArgumentException($"Property {propertyDef} is not a floating-point property.", nameof(propertyDef));
+				throw new ArgumentException
+				(
+					string.Format
+					(
+						Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
+						propertyDef,
+						string.Join(", ", new[] { MFDataType.MFDatatypeFloating })
+					),
+					nameof(propertyDef)
+				);
 
 			// Add the search condition.
 			return searchBuilder.AddPropertyValueSearchCondition
@@ -240,9 +265,9 @@ namespace MFiles.VAF.Extensions
 			if (null == searchBuilder)
 				throw new ArgumentNullException(nameof(searchBuilder));
 			if (0 > propertyDef)
-				throw new ArgumentOutOfRangeException(nameof(propertyDef), "Property Ids must be greater than -1; ensure that your property alias was resolved.");
+				throw new ArgumentOutOfRangeException(nameof(propertyDef), Resources.Exceptions.VaultInteraction.PropertyDefinition_NotResolved);
 			if(year < 1000 || year > 9999)
-				throw new ArgumentOutOfRangeException(nameof(year), "The year must be four digits.");
+				throw new ArgumentOutOfRangeException(nameof(year), Resources.Exceptions.MFSearchBuilderExtensionMethods.DataFunctionCallYearInvalid);
 
 			// What is the type of this property?
 			var dataType = searchBuilder.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
@@ -260,7 +285,16 @@ namespace MFiles.VAF.Extensions
 
 					break;
 				default:
-					throw new ArgumentException($"Property {propertyDef} is not a date or timestamp property.", nameof(propertyDef));
+					throw new ArgumentException
+					(
+						string.Format
+						(
+							Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
+							propertyDef,
+							string.Join(", ", new[] { MFDataType.MFDatatypeDate, MFDataType.MFDatatypeTimestamp })
+						),
+						nameof(propertyDef)
+					);
 			}
 
 			// Use the property method.
@@ -307,7 +341,7 @@ namespace MFiles.VAF.Extensions
 			if (null == searchBuilder)
 				throw new ArgumentNullException(nameof(searchBuilder));
 			if (0 > propertyDef)
-				throw new ArgumentOutOfRangeException(nameof(propertyDef), "Property Ids must be greater than -1; ensure that your property alias was resolved.");
+				throw new ArgumentOutOfRangeException(nameof(propertyDef), Resources.Exceptions.VaultInteraction.PropertyDefinition_NotResolved);
 
 			// What is the type of this property?
 			var dataType = searchBuilder.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
@@ -325,7 +359,16 @@ namespace MFiles.VAF.Extensions
 
 					break;
 				default:
-					throw new ArgumentException($"Property {propertyDef} is not a date or timestamp property.", nameof(propertyDef));
+					throw new ArgumentException
+					(
+						string.Format
+						(
+							Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
+							propertyDef,
+							string.Join(", ", new[] { MFDataType.MFDatatypeDate, MFDataType.MFDatatypeTimestamp })
+						),
+						nameof(propertyDef)
+					);
 			}
 
 			// Use the property method.
@@ -372,7 +415,7 @@ namespace MFiles.VAF.Extensions
 			if (null == searchBuilder)
 				throw new ArgumentNullException(nameof(searchBuilder));
 			if (0 > propertyDef)
-				throw new ArgumentOutOfRangeException(nameof(propertyDef), "Property Ids must be greater than -1; ensure that your property alias was resolved.");
+				throw new ArgumentOutOfRangeException(nameof(propertyDef), Resources.Exceptions.VaultInteraction.PropertyDefinition_NotResolved);
 
 			// What is the type of this property?
 			var dataType = searchBuilder.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
@@ -390,7 +433,16 @@ namespace MFiles.VAF.Extensions
 
 					break;
 				default:
-					throw new ArgumentException($"Property {propertyDef} is not a date or timestamp property.", nameof(propertyDef));
+					throw new ArgumentException
+					(
+						string.Format
+						(
+							Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
+							propertyDef,
+							string.Join(", ", new[] { MFDataType.MFDatatypeDate, MFDataType.MFDatatypeTimestamp })
+						),
+						nameof(propertyDef)
+					);
 			}
 
 			// Use the property method.

@@ -67,20 +67,20 @@ namespace MFiles.VAF.Extensions
 					}
 					catch (Exception e)
 					{
-						SysUtils.ReportErrorToEventLog
+						this.Logger?.Error
 						(
-							$"Exception cancelling task {task.TaskID} of type {TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId} on queue {this.QueueId} to cancel.",
-							e
+							e,
+							$"Exception cancelling task {task.TaskID} of type {TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId} on queue {this.QueueId} to cancel."
 						);
 					}
 				}
 			}
 			catch (Exception e)
 			{
-				SysUtils.ReportErrorToEventLog
+				this.Logger?.Error
 				(
-					$"Exception retrieving tasks of type {TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId} on queue {this.QueueId} to cancel.",
-					e
+					e,
+					$"Exception retrieving tasks of type {TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId} on queue {this.QueueId} to cancel."
 				);
 			}
 		}

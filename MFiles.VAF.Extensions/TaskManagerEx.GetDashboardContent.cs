@@ -43,9 +43,9 @@ namespace MFiles.VAF.Extensions
 				catch
 				{
 					// Throws if the queue is incorrect.
-					SysUtils.ReportToEventLog
-					($"Cannot load details for queue {queue}; is there a static field with the [TaskQueue] attribute?",
-						System.Diagnostics.EventLogEntryType.Warning
+					this.Logger?.Warn
+					(
+						$"Cannot load details for queue {queue}; is there a static field with the [TaskQueue] attribute?"
 					);
 					continue;
 				}
@@ -81,10 +81,9 @@ namespace MFiles.VAF.Extensions
 					catch
 					{
 						// Throws if the task processor is not found.
-						SysUtils.ReportToEventLog
+						this.Logger?.Warn
 						(
-							$"Cannot load processor details for task type {processor.Type} on queue {queue}.",
-							System.Diagnostics.EventLogEntryType.Warning
+							$"Cannot load processor details for task type {processor.Type} on queue {queue}."
 						);
 						continue;
 					}
@@ -110,7 +109,7 @@ namespace MFiles.VAF.Extensions
 					var htmlString = "";
 					if (false == string.IsNullOrWhiteSpace(showOnDashboardAttribute?.Description))
 					{
-						htmlString += new DashboardCustomContent($"<p><em>{System.Security.SecurityElement.Escape(showOnDashboardAttribute?.Description)}</em></p>").ToXmlString();
+						htmlString += new DashboardCustomContent($"<p><em>{showOnDashboardAttribute?.Description.EscapeXmlForDashboard()}</em></p>").ToXmlString();
 					}
 
 					// Does it have any configuration instructions?
@@ -141,8 +140,8 @@ namespace MFiles.VAF.Extensions
 						StatusSummary = new DomainStatusSummary()
 						{
 							Label = isRunning
-							? "Running"
-							: isScheduled ? "Scheduled" : "Stopped"
+							? Resources.AsynchronousOperations.Status_Running
+							: isScheduled ? Resources.AsynchronousOperations.Status_Scheduled : Resources.AsynchronousOperations.Status_Stopped
 						}
 					};
 

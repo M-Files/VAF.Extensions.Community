@@ -31,9 +31,9 @@ namespace MFiles.VAF.Extensions
 			if (null == objVerEx)
 				throw new ArgumentNullException(nameof(objVerEx));
 			if (null == objVerEx.Vault)
-				throw new ArgumentException("The ObjVerEx does not have a valid vault connection.", nameof(objVerEx));
+				throw new ArgumentException(Resources.Exceptions.ObjVerExExtensionMethods.ObjVerExVaultReferenceNull, nameof(objVerEx));
 			if (String.IsNullOrWhiteSpace(title))
-				throw new ArgumentException("The file must have a title/name.", nameof(title));
+				throw new ArgumentException(Resources.Exceptions.ObjVerExExtensionMethods.AddFile_FileMustHaveTitle, nameof(title));
 			if (null == fileContents)
 				throw new ArgumentNullException(nameof(fileContents));
 
