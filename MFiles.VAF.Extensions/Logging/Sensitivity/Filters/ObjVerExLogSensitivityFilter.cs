@@ -19,7 +19,7 @@ namespace MFiles.VAF.Extensions.Logging.Sensitivity.Filters
 		private ILogger Logger { get; } = LogManager.GetLogger(typeof(ObjVerExLogSensitivityFilter));
 
 		/// <inheritdoc />
-		public override string FilterValueForLogging(ObjVerEx value, VaultApplications.Logging.Sensitivity.Sensitivity level, string format, IFormatProvider formatProvider)
+		public override string FilterValueForLogging(ObjVerEx value, VaultApplications.Logging.Sensitivity.Sensitivity level, IEnumerable<string> customFlags, string format, IFormatProvider formatProvider)
 		{
 			// Sanity.
 			if (null == value?.Info)
@@ -27,7 +27,7 @@ namespace MFiles.VAF.Extensions.Logging.Sensitivity.Filters
 
 			// Try and get an ObjectVersion filter from the registered factories.
 			if (this.TryGetFilter<ObjectVersion>(out ILogSensitivityFilter filter))
-				return filter?.FilterValueForLogging(value, level, format, formatProvider);
+				return filter?.FilterValueForLogging(value, level, customFlags, format, formatProvider);
 
 			// No suitable filter.
 			this.Logger?.Error($"Could not load required sensitivity filter for {typeof(ObjectVersion).FullName}.  Minimum data will be logged.");

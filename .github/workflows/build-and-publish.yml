@@ -16,7 +16,7 @@ jobs:
     - name: versionSuffix
       shell: pwsh
       run: |
-        If('${{ github.ref_name }}' -eq 'refs/heads/release')
+        If('${{ github.ref_name }}' -eq 'release')
         {
           echo "versionSuffix=" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
         }
@@ -50,7 +50,7 @@ jobs:
 #      run: dotnet test --no-restore --verbosity normal
 
     - name: Push with dotnet
-      run: dotnet nuget push MFiles.VAF.Extensions/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      run: dotnet nuget push ./MFiles.VAF.Extensions/bin/Release/MFiles.VAF.Extensions.${{ env.versionNumber }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       
     - name: Create release
       id: createRelease
