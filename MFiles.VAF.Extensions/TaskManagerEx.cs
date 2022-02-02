@@ -96,7 +96,8 @@ namespace MFiles.VAF.Extensions
 						new TaskProcessor<RescheduleProcessorTaskDirective>
 						(
 							this.VaultApplication.GetRescheduleTaskType(),
-							this.HandleReschedule
+							this.HandleReschedule,
+							TransactionMode.Full
 						)
 				},
 				MFTaskQueueProcessingBehavior.MFProcessingBehaviorSequential
@@ -145,7 +146,7 @@ namespace MFiles.VAF.Extensions
 					this.Logger?.Trace($"Starting job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))}");
 					break;
 				case TaskManagerEventType.TaskJobFinished:
-					//Log out that we're odne.
+					//Log out that we're done.
 					if(e.JobResult == TaskProcessingJobResult.Fatal)
 					{
 						// Something went badly wrong.
