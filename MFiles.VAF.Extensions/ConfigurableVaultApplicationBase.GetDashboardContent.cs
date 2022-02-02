@@ -49,7 +49,7 @@ namespace MFiles.VAF.Extensions
 		/// Returns the dashboard content showing asynchronous operation status.
 		/// </summary>
 		/// <returns>The dashboard content.  Can be null if no background operation managers, background operations or task processors.</returns>
-		public virtual DashboardPanel GetAsynchronousOperationDashboardContent()
+		public virtual IDashboardContent GetAsynchronousOperationDashboardContent()
 		{
 			// Declare our list which will go into the panel.
 			var list = new DashboardList();
@@ -86,7 +86,7 @@ namespace MFiles.VAF.Extensions
 				});
 
 			// Return the panel.
-			return new DashboardPanel()
+			return new DashboardPanelEx()
 			{
 				Title = Resources.Dashboard.AsynchronousOperations_DashboardTitle,
 				InnerContent = new DashboardContentCollection
@@ -101,7 +101,7 @@ namespace MFiles.VAF.Extensions
 		/// Returns the dashboard content showing logging status.
 		/// </summary>
 		/// <returns>The dashboard content.  Can be null if no logging data is available or configured.</returns>
-		public virtual DashboardPanel GetLoggingDashboardContent()
+		public virtual IDashboardContent GetLoggingDashboardContent()
 		{
 			// If we don't have any logging configuration then return null.
 			if (!(this.Configuration is Configuration.IConfigurationWithLoggingConfiguration configurationWithLogging))
@@ -115,7 +115,7 @@ namespace MFiles.VAF.Extensions
 			// If logging is not enabled then return a simple panel.
 			if (!loggingConfiguration.Enabled)
 			{
-				return new DashboardPanel()
+				return new DashboardPanelEx()
 				{
 					Title = Resources.Dashboard.Logging_DashboardTitle,
 					InnerContent = new DashboardContentCollection
@@ -180,7 +180,7 @@ namespace MFiles.VAF.Extensions
 			}
 
 			// Return the panel.
-			return new DashboardPanel()
+			return new DashboardPanelEx()
 			{
 				Title = Resources.Dashboard.Logging_DashboardTitle,
 				InnerContent = new DashboardContentCollection
