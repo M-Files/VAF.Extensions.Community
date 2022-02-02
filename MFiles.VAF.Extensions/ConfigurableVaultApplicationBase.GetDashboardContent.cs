@@ -10,8 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using MFiles.VAF.Configuration.Domain;
 using MFiles.VAF.Extensions.Dashboards;
-using MFiles.VAF.Configuration;
-using System.Resources;
 using MFiles.VaultApplications.Logging.NLog.ExtensionMethods;
 
 namespace MFiles.VAF.Extensions
@@ -178,7 +176,7 @@ namespace MFiles.VAF.Extensions
 					row.AddCell(name);
 				}
 				row.AddCell($"{config.MinimumLogLevel.ToDisplayString()} to {config.MaximumLogLevel.ToDisplayString()}");
-				row.AddCell(config.Sensitivity.ToLabel(this.ConfManager?.ResourceManager));
+				row.AddCell(config.Sensitivity.GetJsonConfEditorLabel(this.ConfManager?.ResourceManager));
 			}
 
 			// Return the panel.
@@ -205,36 +203,6 @@ namespace MFiles.VAF.Extensions
 						: (IDashboardContent)table
 				}
 			};
-		}
-	}
-
-	// TODO: This could be a more generic helper method.
-	internal static class SensitivityExtensionMethods
-	{
-		public static string ToLabel(this VaultApplications.Logging.Sensitivity.Sensitivity sensitivity, ResourceManager resourceManager = null)
-		{
-			var enumType = typeof(VaultApplications.Logging.Sensitivity.Sensitivity);
-			var name = Enum.GetName(enumType, sensitivity);
-			var jsonConfEditorAttribute = enumType
-				.GetField(name)
-				.GetCustomAttributes(true)
-				.FirstOrDefault(a => a is JsonConfEditorAttribute) as JsonConfEditorAttribute;
-
-			// No label?
-			if (string.IsNullOrWhiteSpace(jsonConfEditorAttribute?.Label))
-				return sensitivity.ToString();
-
-			var key = jsonConfEditorAttribute.Label;
-			var prefix = jsonConfEditorAttribute.ResourceIdPrefix ?? "$$";
-			if (key?.StartsWith(prefix) ?? false)
-			{
-				// Get the label.
-				var label = resourceManager?.GetString(key.Substring(prefix.Length));
-				if (string.IsNullOrWhiteSpace(label))
-					return sensitivity.ToString();
-				return label;
-			}
-			return key;
 		}
 	}
 }
