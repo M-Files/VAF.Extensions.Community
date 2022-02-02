@@ -25,9 +25,6 @@
     <None Remove="Resources\Waiting.png" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\lib\Resources\logo.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
