@@ -28,7 +28,7 @@ jobs:
     - name: Get version number
       shell: pwsh
       run: |
-        $versionNumber = Get-Date -Format "yy.M.${{ github.run_number }}"
+        $versionNumber = Get-Date -Format "yy.M.${{ github.run_number }}${{ env.versionSuffix }}"
         echo "versionNumber=$versionNumber" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
 
     - name: Setup MSBuild path
@@ -40,14 +40,14 @@ jobs:
         dotnet-version: 3.1.101
       
     - name: Create nuget package
-      run: dotnet pack ./MFiles.VAF.Extensions/MFiles.VAF.Extensions.csproj --configuration Release -p:Version=${{ env.versionNumber }} --version-suffix ${{ env.versionSuffix }} 
+      run: dotnet pack ./MFiles.VAF.Extensions/MFiles.VAF.Extensions.csproj --configuration Release -p:Version=${{ env.versionNumber }}
 
 # Tests cannot be run as MFAPI is not installed.
 #    - name: Test
 #      run: dotnet test --no-restore --verbosity normal
 
     - name: Push with dotnet
-      run: dotnet nuget push ./MFiles.VAF.Extensions/bin/Release/MFiles.VAF.Extensions.${{ env.versionNumber }}${{ env.versionSuffix }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      run: dotnet nuget push ./MFiles.VAF.Extensions/bin/Release/MFiles.VAF.Extensions.${{ env.versionNumber }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       
     - name: Create release
       id: createRelease
@@ -67,6 +67,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.createRelease.outputs.upload_url }}
-        asset_path: ./MFiles.VAF.Extensions/bin/Release/MFiles.VAF.Extensions.${{ env.versionNumber }}${{ env.versionSuffix }}.nupkg
+        asset_path: ./MFiles.VAF.Extensions/bin/Release/MFiles.VAF.Extensions.${{ env.versionNumber }}.nupkg
         asset_name: MFiles.VAF.Extensions.nupkg
         asset_content_type: application/zip
