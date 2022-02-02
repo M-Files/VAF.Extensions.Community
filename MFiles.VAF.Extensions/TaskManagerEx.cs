@@ -152,7 +152,7 @@ namespace MFiles.VAF.Extensions
 						this.Logger?.Error
 						(
 							e.Exception,
-							$"Job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))} finished with a fatal result: {e.JobStatus.ErrorMessage}."
+							$"Job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))} finished with a fatal result: {e.JobStatus.ErrorMessage}"
 						);
 					}
 					else
