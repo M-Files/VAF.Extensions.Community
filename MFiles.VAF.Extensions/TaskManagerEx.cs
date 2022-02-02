@@ -97,7 +97,7 @@ namespace MFiles.VAF.Extensions
 						(
 							this.VaultApplication.GetRescheduleTaskType(),
 							this.HandleReschedule,
-							TransactionMode.Full
+							TransactionMode.Unsafe
 						)
 				},
 				MFTaskQueueProcessingBehavior.MFProcessingBehaviorSequential
