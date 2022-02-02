@@ -38,16 +38,25 @@ namespace MFiles.VAF.Extensions
 			if (null == searchBuilder)
 				throw new ArgumentNullException(nameof(searchBuilder));
 			if (0 > propertyDef)
-				throw new ArgumentOutOfRangeException(nameof(propertyDef), "Property Ids must be greater than -1; ensure that your property alias was resolved.");
+				throw new ArgumentOutOfRangeException(nameof(propertyDef), Resources.Exceptions.VaultInteraction.PropertyDefinition_NotResolved);
 			if (null == lookupIds || false == lookupIds.Any())
-				throw new ArgumentException("The lookup collection does not contain any items.", nameof(lookupIds));
+				throw new ArgumentException(Resources.Exceptions.MFSearchBuilderExtensionMethods.OneOf_CollectionEmpty, nameof(lookupIds));
 
 			// What is the type of this property?
 			var dataType = searchBuilder.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
 
 			// If it is not valid then throw.
 			if (dataType != MFDataType.MFDatatypeLookup && dataType != MFDataType.MFDatatypeMultiSelectLookup)
-				throw new ArgumentException($"Property {propertyDef} is not a lookup or multi-select lookup property.", nameof(propertyDef));
+				throw new ArgumentException
+				(
+					string.Format
+					(
+						Resources.Exceptions.VaultInteraction.PropertyDefinition_NotOfExpectedType,
+						propertyDef,
+						string.Join(", ", new[] { MFDataType.MFDatatypeLookup, MFDataType.MFDatatypeMultiSelectLookup })
+					),
+					nameof(propertyDef)
+				);
 
 			// Add the search condition.
 			return searchBuilder.AddPropertyValueSearchCondition
@@ -93,7 +102,14 @@ namespace MFiles.VAF.Extensions
 							// If we have to resolve it and have no vault reference then die.
 							if (false == identifier.IsResolved)
 								if (null == searchBuilder?.Vault)
-									throw new InvalidOperationException($"The search builder or vault reference is null, so the identifier with alias/GUID {identifier.Alias} cannot be resolved.");
+									throw new InvalidOperationException
+									(
+										String.Format
+										(
+											Resources.Exceptions.MFSearchBuilderExtensionMethods.CannotResolveAlias_VaultReferenceNull,
+											identifier.Alias
+										)
+									);
 							
 							// Resolve if needed.
 							return identifier
@@ -102,7 +118,14 @@ namespace MFiles.VAF.Extensions
 						}
 						catch(Exception e)
 						{
-							throw new Exception($"Could not resolve the identifier with alias/GUID {identifier.Alias} in the current vault", e);
+							throw new InvalidOperationException
+							(
+								String.Format
+								(
+									Resources.Exceptions.MFSearchBuilderExtensionMethods.CannotResolveAlias_NotFound,
+									identifier.Alias
+								)
+							);
 						}
 					}),
 				parentChildBehavior,

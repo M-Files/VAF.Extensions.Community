@@ -44,14 +44,14 @@ namespace MFiles.VAF.Extensions
 				var htmlString = "";
 				if (false == string.IsNullOrWhiteSpace(bgo.Description))
 				{
-					htmlString += new DashboardCustomContent($"<p><em>{System.Security.SecurityElement.Escape(bgo.Description)}</em></p>").ToXmlString();
+					htmlString += new DashboardCustomContent($"<p><em>{bgo.Description.EscapeXmlForDashboard()}</em></p>").ToXmlString();
 				}
 
 				// Show when it should run.
 				switch (bgo.RepeatType)
 				{
 					case TaskQueueBackgroundOperationRepeatType.NotRepeating:
-						htmlString += "<p>Runs on demand (does not repeat).<br /></p>";
+						htmlString += $"<p>{Resources.AsynchronousOperations.RepeatType_RunsOnDemandOnly.EscapeXmlForDashboard()}.<br /></p>";
 						break;
 					case TaskQueueBackgroundOperationRepeatType.Interval:
 						htmlString += bgo.Interval?.ToDashboardDisplayString();
@@ -60,7 +60,7 @@ namespace MFiles.VAF.Extensions
 						htmlString += bgo.Schedule?.ToDashboardDisplayString();
 						break;
 					default:
-						htmlString = "<p><em>Unhandled repeat type: " + bgo.RepeatType + "</em><br /></p>";
+						htmlString = $"<p><em>{Resources.AsynchronousOperations.RepeatType_UnhandledRepeatType.EscapeXmlForDashboard(bgo.RepeatType)}</em><br /></p>";
 						break;
 				}
 
@@ -77,9 +77,11 @@ namespace MFiles.VAF.Extensions
 					Title = bgo.Name,
 					StatusSummary = new DomainStatusSummary()
 					{
-						Label = isRunning
-						? "Running"
-						: isScheduled ? "Scheduled" : "Stopped"
+						Label = (isRunning
+						? Resources.AsynchronousOperations.Status_Running
+						: isScheduled
+							? Resources.AsynchronousOperations.Status_Scheduled
+							: Resources.AsynchronousOperations.Status_Stopped).EscapeXmlForDashboard()
 					}
 				};
 

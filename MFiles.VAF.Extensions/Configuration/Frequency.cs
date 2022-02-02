@@ -18,17 +18,21 @@ namespace MFiles.VAF.Extensions
 		: IRecurrenceConfiguration
 	{
 		/// <summary>
-		/// The currently-configured type of recurrance.
+		/// The currently-configured type of Recurrence.
 		/// </summary>
 		[DataMember]
-		[JsonConfEditor(Label = "Type")]
+		[JsonConfEditor
+		(
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.Frequency_RecurrenceType_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.Frequency_RecurrenceType_HelpText)
+		)]
 		public RecurrenceType RecurrenceType { get; set; } = RecurrenceType.Unknown;
 
 		/// <inheritdoc />
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "Configuration",
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.General_Configuration),
 			Hidden = true,
 			ShowWhen = ".parent._children{.key == 'RecurrenceType' && .value == 'Interval' }"
 		)]
@@ -38,7 +42,7 @@ namespace MFiles.VAF.Extensions
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "Configuration",
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.General_Configuration),
 			Hidden = true,
 			ShowWhen = ".parent._children{.key == 'RecurrenceType' && .value == 'Schedule' }"
 		)]
@@ -77,7 +81,7 @@ namespace MFiles.VAF.Extensions
 				case RecurrenceType.Unknown:
 					return null;
 				default:
-					throw new InvalidOperationException($"Recurrance type of {this.RecurrenceType} is not supported.");
+					throw new InvalidOperationException(String.Format(Resources.Exceptions.Configuration.RecurrenceTypeNotSupported, this.RecurrenceType));
 			}
 		}
 
@@ -93,7 +97,7 @@ namespace MFiles.VAF.Extensions
 				case RecurrenceType.Unknown:
 					return ((TimeSpan?)null).ToDashboardDisplayString();
 				default:
-					throw new InvalidOperationException($"Recurrance type of {this.RecurrenceType} is not supported.");
+					throw new InvalidOperationException(String.Format(Resources.Exceptions.Configuration.RecurrenceTypeNotSupported, this.RecurrenceType));
 			}
 		}
 
@@ -183,7 +187,7 @@ namespace MFiles.VAF.Extensions
 					{
 						SysUtils.ReportToEventLog
 						(
-							$"Could not convert value to a Frequency: {jToken}",
+							String.Format(Resources.Exceptions.Configuration.CouldNotConvertJsonValueToFrequency, jToken),
 							System.Diagnostics.EventLogEntryType.Warning
 						);
 						return default;

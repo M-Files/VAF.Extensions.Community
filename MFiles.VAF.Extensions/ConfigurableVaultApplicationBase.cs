@@ -7,7 +7,6 @@ using MFiles.VAF.Extensions;
 using MFiles.VAF;
 using MFilesAPI;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using MFiles.VAF.MultiserverMode;
 using MFiles.VAF.AppTasks;
@@ -51,6 +50,7 @@ namespace MFiles.VAF.Extensions
 		}
 
 		public ConfigurableVaultApplicationBase()
+			: base()
 		{
 			this.RecurringOperationConfigurationManager = new RecurringOperationConfigurationManager<TSecureConfiguration>(this);
 		}

@@ -251,7 +251,7 @@ namespace MFiles.VAF.Extensions
 		{
 			// Sanity.
 			if (string.IsNullOrWhiteSpace(name))
-				throw new ArgumentException("The background operation name cannot be null or whitespace.", nameof(name));
+				throw new ArgumentException(Resources.Exceptions.TaskQueueBackgroundOperations.BackgroundOperationMustHaveName, nameof(name));
 
 			// Save parameters.
 			this.CancellationTokenSource = cancellationTokenSource;
@@ -298,13 +298,13 @@ namespace MFiles.VAF.Extensions
 				throw new ArgumentOutOfRangeException
 				(
 					nameof(interval),
-					"The timer interval cannot be less than zero."
+					String.Format(Resources.Exceptions.TaskQueueBackgroundOperations.InvalidInterval, interval)
 				);
 
 			// Cancel any existing executions.
 			this.StopRunningAtIntervals();
 
-			// Set up the recurrance data.
+			// Set up the Recurrence data.
 			this.Interval = interval;
 			this.RepeatType = TaskQueueBackgroundOperationRepeatType.Interval;
 
@@ -326,7 +326,7 @@ namespace MFiles.VAF.Extensions
 			// Cancel any existing executions.
 			this.StopRunningAtIntervals();
 
-			// Set up the recurrance data.
+			// Set up the Recurrence data.
 			this.Schedule = schedule;
 			this.RepeatType = TaskQueueBackgroundOperationRepeatType.Schedule;
 
@@ -409,7 +409,13 @@ namespace MFiles.VAF.Extensions
 			{
 				SysUtils.ReportErrorToEventLog
 				(
-					$"Exception cancelling tasks for background operation {this.Name} of type {TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId} on queue {this.BackgroundOperationManager.QueueId}.",
+					String.Format
+					(
+						Resources.Exceptions.TaskQueueBackgroundOperations.ExceptionCancellingTasks,
+						this.Name,
+						TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId,
+						this.BackgroundOperationManager.QueueId
+					),
 					e
 				);
 			}
@@ -425,7 +431,7 @@ namespace MFiles.VAF.Extensions
 			this.RepeatType = TaskQueueBackgroundOperationRepeatType.NotRepeating;
 
 			// Cancel any future executions.
-			this.CancelFutureExecutions("Superseded.");
+			this.CancelFutureExecutions(Resources.Exceptions.TaskQueueBackgroundOperations.CancellationRemarks_BackgroundOperationStopped);
 		}
 
 		/// <summary>

@@ -13,14 +13,18 @@ namespace MFiles.VAF.Extensions
 		: IRecurrenceConfiguration
 	{
 		[DataMember]
-		[JsonConfEditor(TypeEditor = "time")]
+		[JsonConfEditor
+		(
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.TimeSpanEx_Interval),
+			TypeEditor = "time"
+		)]
 		public TimeSpan Interval { get; set; }
 
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "Run on vault start",
-			HelpText = "If true, runs when the vault starts.  If false, the first run is scheduled to be after the interval has elapsed.",
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.General_RunOnVaultStart_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.General_RunOnVaultStart_HelpText),
 			DefaultValue = true
 		)]
 		public bool? RunOnVaultStartup { get; set; } = true;
@@ -34,46 +38,15 @@ namespace MFiles.VAF.Extensions
 		{
 			// Sanity.
 			if (null == this?.Interval || this.Interval <= TimeSpan.Zero)
-				return "<p>No timespan specified; does not repeat.<br /></p>";
+				return $"<p>{Resources.AsynchronousOperations.RepeatType_Interval_NoTimeSpanSpecified.EscapeXmlForDashboard()}<br /></p>";
 
-			var prefix = "<p>Runs";
-			if (this.RunOnVaultStartup.HasValue && this.RunOnVaultStartup.Value)
-				prefix += " on vault startup and";
-			var suffix = ".<br /></p>";
+			// Does it run on startup?
+			var displayString = (this.RunOnVaultStartup.HasValue && this.RunOnVaultStartup.Value)
+				? Resources.Time.RepeatsOnInterval_RunsOnStartup.EscapeXmlForDashboard(this.Interval.ToDisplayString())
+				: Resources.Time.RepeatsOnInterval_DoesNotRunOnStartup.EscapeXmlForDashboard(this.Interval.ToDisplayString());
 
-			// Seconds be easy.
-			if (this.Interval <= TimeSpan.FromSeconds(120))
-				return $"{prefix} every {(int)this.Interval.TotalSeconds} seconds{suffix}";
-
-			// Build a text representation
-			var components = new List<string>();
-			if (this.Interval.Days > 0)
-				components.Add($"{this.Interval.Days} day{(this.Interval.Days != 1 ? "s" : "")}");
-			if (this.Interval.Hours > 0)
-				components.Add($"{this.Interval.Hours} hour{(this.Interval.Hours != 1 ? "s" : "")}");
-			if (this.Interval.Minutes > 0)
-				components.Add($"{this.Interval.Minutes} minute{(this.Interval.Minutes != 1 ? "s" : "")}");
-			if (this.Interval.Seconds > 0)
-				components.Add($"{this.Interval.Seconds} second{(this.Interval.Seconds != 1 ? "s" : "")}");
-
-			// Build a text representation
-			var output = prefix + " every ";
-			for (var i = 0; i < components.Count; i++)
-			{
-				if (i == 0)
-				{
-					output += components[i];
-				}
-				else if (i == components.Count - 1)
-				{
-					output += ", and " + components[i];
-				}
-				else
-				{
-					output += ", " + components[i];
-				}
-			}
-			return output + suffix;
+			// Build a text representation.
+			return $"<p>{displayString}<br /></p>";
 		}
 
 		public static implicit operator TimeSpan(TimeSpanEx input)

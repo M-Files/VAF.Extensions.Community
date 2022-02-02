@@ -29,7 +29,7 @@ namespace MFiles.VAF.Extensions
 			if (null == objVerEx)
 				throw new ArgumentNullException(nameof(objVerEx));
 			if (0 > propertyDef)
-				throw new ArgumentOutOfRangeException(nameof(propertyDef), "Property Ids must be greater than -1; ensure that your property alias was resolved.");
+				throw new ArgumentOutOfRangeException(nameof(propertyDef), Resources.Exceptions.VaultInteraction.PropertyDefinition_NotResolved);
 
 			// Does this property exist in the collection?
 			var propertyValue = objVerEx.Properties.SearchForPropertyEx(propertyDef, true);
@@ -47,7 +47,13 @@ namespace MFiles.VAF.Extensions
 				{
 					throw new ArgumentException
 					(
-						$"The property definition with ID {propertyDef} was of type {dataType}, but only {string.Join(", ", validDataTypes)} are allowed.",
+						String.Format
+						(
+							Resources.Exceptions.ObjVerExExtensionMethods.GetPropertyAs_PropertyNotOfExpectedType,
+							propertyDef,
+							dataType,
+							string.Join(", ", validDataTypes)
+						),
 						nameof(propertyDef)
 					);
 				}

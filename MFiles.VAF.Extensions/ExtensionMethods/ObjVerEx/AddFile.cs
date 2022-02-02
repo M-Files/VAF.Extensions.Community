@@ -28,9 +28,9 @@ namespace MFiles.VAF.Extensions
 			if (null == objVerEx)
 				throw new ArgumentNullException(nameof(objVerEx));
 			if (null == objVerEx.Vault?.ObjectFileOperations)
-				throw new ArgumentException("The ObjVerEx does not have a valid vault connection.", nameof(objVerEx));
+				throw new ArgumentException(Resources.Exceptions.ObjVerExExtensionMethods.ObjVerExVaultReferenceNull, nameof(objVerEx));
 			if (String.IsNullOrWhiteSpace(title))
-				throw new ArgumentException("The file must have a title/name.", nameof(title));
+				throw new ArgumentException(Resources.Exceptions.ObjVerExExtensionMethods.AddFile_FileMustHaveTitle, nameof(title));
 			if (null == fileContents)
 				throw new ArgumentNullException(nameof(fileContents));
 
@@ -93,13 +93,13 @@ namespace MFiles.VAF.Extensions
 			if (null == objVerEx)
 				throw new ArgumentNullException(nameof(objVerEx));
 			if (null == objVerEx.Info?.Files)
-				throw new ArgumentException($"The object version does not contain information about its files.", nameof(objVerEx));
+				throw new ArgumentException(Resources.Exceptions.ObjVerExExtensionMethods.ObjVerExFilesNull, nameof(objVerEx));
 			if (null == fileContents)
 				throw new ArgumentNullException(nameof(fileContents));
 
 			// Does it have exactly one file?
 			if (1 != objVerEx.Info.FilesCount)
-				throw new ArgumentException($"The object version does not contain exactly one file.", nameof(objVerEx));
+				throw new ArgumentException(String.Format(Resources.Exceptions.ObjVerExExtensionMethods.ObjVerExFileCountExpectedOne, objVerEx.Info.FilesCount), nameof(objVerEx));
 
 			// Use the other extension method.
 			objVerEx.ReplaceFileContent

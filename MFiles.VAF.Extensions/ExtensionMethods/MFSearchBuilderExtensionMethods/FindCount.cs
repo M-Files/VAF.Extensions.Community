@@ -28,11 +28,11 @@ namespace MFiles.VAF.Extensions
 			if (null == searchBuilder)
 				throw new ArgumentNullException(nameof(searchBuilder));
 			if (null == searchBuilder.Vault)
-				throw new ArgumentException("The search builder's vault reference is null.", nameof(searchBuilder));
+				throw new ArgumentException(Resources.Exceptions.MFSearchBuilderExtensionMethods.VaultReferenceNull, nameof(searchBuilder));
 			if (null == searchBuilder.Vault.ObjectSearchOperations)
-				throw new ArgumentException("The vault's ObjectSearchOperations reference is null.", nameof(searchBuilder));
+				throw new ArgumentException(Resources.Exceptions.MFSearchBuilderExtensionMethods.VaultObjectSearchOperationsReferenceNull, nameof(searchBuilder));
 			if (null == searchBuilder.Conditions)
-				throw new ArgumentException("The search builder's conditions are null.", nameof(searchBuilder));
+				throw new ArgumentException(Resources.Exceptions.MFSearchBuilderExtensionMethods.SearchConditionsNull, nameof(searchBuilder));
 
 			// Use the GetObjectCountInSearch API method.
 			return searchBuilder

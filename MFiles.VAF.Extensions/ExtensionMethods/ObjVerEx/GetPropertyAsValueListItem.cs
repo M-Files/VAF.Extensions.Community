@@ -29,9 +29,10 @@ namespace MFiles.VAF.Extensions
 			// Validity of the property def id
 			if (0 > propDefId)
 			{
-				throw new ArgumentOutOfRangeException(
+				throw new ArgumentOutOfRangeException
+				(
 					nameof(propDefId),
-					"Property Ids must be greater than -1; ensure that your property alias was resolved."
+					Resources.Exceptions.VaultInteraction.PropertyDefinition_NotResolved
 				);
 			}
 
@@ -44,8 +45,9 @@ namespace MFiles.VAF.Extensions
 			// Exception if property was not found
 			if (null == propDef)
 			{
-				throw new ArgumentException(
-					$"The property could not be found.",
+				throw new ArgumentException
+				(
+					String.Format(Resources.Exceptions.VaultInteraction.PropertyDefinition_NotFound, propDefId),
 					nameof(propDefId)
 				);
 			}
@@ -53,8 +55,14 @@ namespace MFiles.VAF.Extensions
 			// Does this have an owning type?
 			if (false == propDef.BasedOnValueList || 0 > propDef.ValueList)
 			{
-				throw new ArgumentException(
-					$"The property \"{propDef.Name}\" is not based on a value list.",
+				throw new ArgumentException
+				(
+					String.Format
+					(
+						Resources.Exceptions.VaultInteraction.PropertyDefinition_NotBasedOnValueList,
+						propDefId,
+						propDef.Name
+					),
 					nameof(propDefId)
 				);
 			}

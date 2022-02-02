@@ -17,20 +17,30 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// Whether the schedule is currently enabled or not.
 		/// </summary>
 		[DataMember]
-		[JsonConfEditor(DefaultValue = true)]
+		[JsonConfEditor
+		(
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.General_Enabled_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.General_Enabled_HelpText),
+			DefaultValue = true
+		)]
 		public bool Enabled { get; set; } = true;
 
 		/// <summary>
 		/// The rules that should trigger the schedule to run.
 		/// </summary>
 		[DataMember]
+		[JsonConfEditor
+		(
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_Triggers_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_Triggers_HelpText)
+		)]
 		public List<Trigger> Triggers { get; set; } = new List<Trigger>();
 
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = "Run on vault start",
-			HelpText = "If true, runs when the vault starts.  If false, the first run is calculated from the triggers.",
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.General_RunOnVaultStart_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.General_RunOnVaultStart_HelpText),
 			DefaultValue = false
 		)]
 		public bool? RunOnVaultStartup { get; set; }
@@ -60,18 +70,18 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		{
 			// If the schedule is not enabled then report that it will not run.
 			if (!this.Enabled)
-				return "<p>Will not run as the schedule is not enabled.</p>";
+				return $"<p>{Resources.Schedule.WillNotRunAsScheduleNotEnabled.EscapeXmlForDashboard()}</p>";
 
 			// If there are no triggers then it will not run on a schedule.
 			// Note: may still run on startup.
 			if (this.Triggers == null || this.Triggers.Count == 0)
 				return this.RunOnVaultStartup.HasValue && this.RunOnVaultStartup.Value
-					? "<p>Runs when the vault starts, but does not repeat.<br /></p>"
-					: "<p>No schedule specified; does not repeat.<br /></p>";
+					? $"<p>{Resources.Schedule.DoesNotRepeat_RunsWhenVaultStarts.EscapeXmlForDashboard()}<br /></p>"
+					: $"<p>{Resources.Schedule.DoesNotRepeat_DoesNotRunWhenVaultStarts.EscapeXmlForDashboard()}<br /></p>";
 
 			var output = this.RunOnVaultStartup.HasValue && this.RunOnVaultStartup.Value
-				? "<p>Runs when the vault starts and according to the following schedule:"
-				: "<p>Runs according to the following schedule:";
+				? $"<p>{Resources.Schedule.Repeats_Intro_RunsWhenVaultStarts.EscapeXmlForDashboard()}"
+				: $"<p>{Resources.Schedule.Repeats_Intro_DoesNotRunWhenVaultStarts.EscapeXmlForDashboard()}";
 
 			// Output the triggers as a HTML list.
 			output += "<ul>";

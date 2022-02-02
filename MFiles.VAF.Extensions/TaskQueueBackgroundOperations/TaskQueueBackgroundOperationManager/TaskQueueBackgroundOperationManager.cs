@@ -59,9 +59,16 @@ namespace MFiles.VAF.Extensions
 		public TaskQueueBackgroundOperation<TSecureConfiguration> GetTaskQueueBackgroundOperationByName(string name)
 		{
 			if (this.BackgroundOperations.ContainsKey(name) == false)
-				throw new ArgumentException(
-					$"No background operation with the name {name} in queue {this.QueueId} exists.",
-					nameof(name));
+				throw new ArgumentException
+				(
+					String.Format
+					(
+						Resources.Exceptions.TaskQueueBackgroundOperations.BackgroundOperationDoesNotExist,
+						name,
+						this.QueueId
+					),
+					nameof(name)
+				);
 
 			// Return the background operation by name
 			return this.BackgroundOperations[name];
@@ -145,7 +152,7 @@ namespace MFiles.VAF.Extensions
 		{
 			// Sanity.
 			if (string.IsNullOrWhiteSpace(queueId))
-				throw new ArgumentException("The queue id cannot be null or whitespace.", nameof(queueId));
+				throw new ArgumentException(Resources.Exceptions.TaskQueueBackgroundOperations.TheQueueIdCannotBeNullOrWhitespace, nameof(queueId));
 
 			// Assign.
 			this.CancellationTokenSource = cancellationTokenSource;

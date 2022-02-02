@@ -23,7 +23,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 
 			// Sanity.
 			if (this.HandledDataTypes.Length == 0)
-				throw new ArgumentException("Handled data types cannot be empty", nameof(handledDataTypes));
+				throw new ArgumentException(Resources.Exceptions.MFSearchBuilderExtensionMethods.HandledDataTypesCannotBeEmpty, nameof(handledDataTypes));
 		}
 		
 		// ReSharper disable InconsistentNaming
@@ -188,7 +188,10 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 						.FirstOrDefault(p => p.ID == propertyDef);
 					if (null == property)
 					{
-						throw new InvalidOperationException($"Unknown property definition {propertyDef}.");
+						throw new InvalidOperationException
+						(
+							string.Format(Resources.Exceptions.VaultInteraction.PropertyDefinition_NotFound, propertyDef)
+						);
 					}
 
 					return property;
@@ -213,7 +216,10 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 						.FirstOrDefault(p => p.ID == objectTypeId);
 					if (null == objType)
 					{
-						throw new InvalidOperationException($"Unknown object type {objectTypeId}.");
+						throw new InvalidOperationException
+						(
+							string.Format(Resources.Exceptions.VaultInteraction.ObjectType_NotFound, objType)
+						);
 					}
 
 					return objType;
@@ -233,7 +239,10 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.MFSearchBuilderExtensionM
 						.FirstOrDefault(p => p.ID == valueListId);
 					if (null == objType)
 					{
-						throw new InvalidOperationException($"Unknown value list {valueListId}.");
+						throw new InvalidOperationException
+						(
+							string.Format(Resources.Exceptions.VaultInteraction.PropertyDefinition_NotFound, objType)
+						);
 					}
 
 					return objType;
