@@ -250,6 +250,51 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Log Levels.
+        /// </summary>
+        internal static string Logging_Table_LogLevelsHeader {
+            get {
+                return ResourceManager.GetString("Logging_Table_LogLevelsHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        internal static string Logging_Table_NameHeader {
+            get {
+                return ResourceManager.GetString("Logging_Table_NameHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sensitivity.
+        /// </summary>
+        internal static string Logging_Table_SensitivityHeader {
+            get {
+                return ResourceManager.GetString("Logging_Table_SensitivityHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Target not enabled.
+        /// </summary>
+        internal static string Logging_TargetNotEnabled {
+            get {
+                return ResourceManager.GetString("Logging_TargetNotEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are validation errors for this target.
+        /// </summary>
+        internal static string Logging_TargetValidationErrors {
+            get {
+                return ResourceManager.GetString("Logging_TargetValidationErrors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Time on server: {0}.
         /// </summary>
         internal static string TimeOnServer {
