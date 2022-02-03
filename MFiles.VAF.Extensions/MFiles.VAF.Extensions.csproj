@@ -32,7 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MFiles.VAF" Version="2.3.623.6" />
-    <PackageReference Include="MFiles.VaultApplications.Logging" Version="22.2.51-prerelease" />
+    <PackageReference Include="MFiles.VaultApplications.Logging" Version="22.2.60-prerelease" />
     <PackageReference Include="MFilesAPI.Extensions" Version="1.0.6" />
   </ItemGroup>
   <ItemGroup>
