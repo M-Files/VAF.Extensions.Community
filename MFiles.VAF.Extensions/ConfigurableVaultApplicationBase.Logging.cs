@@ -35,6 +35,7 @@ namespace MFiles.VAF.Extensions
 		{
 			// If we have a logger then write out that we're stopping.
 			this.Logger?.Debug("Logging stopping");
+			LogManager.Shutdown();
 			base.UninitializeApplication(vault);
 		}
 

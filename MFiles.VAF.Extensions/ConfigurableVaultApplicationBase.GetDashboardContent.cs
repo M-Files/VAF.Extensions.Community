@@ -10,8 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using MFiles.VAF.Configuration.Domain;
 using MFiles.VAF.Extensions.Dashboards;
-using MFiles.VAF.Configuration;
-using System.Resources;
 using MFiles.VaultApplications.Logging.NLog.ExtensionMethods;
 
 namespace MFiles.VAF.Extensions
@@ -51,7 +49,7 @@ namespace MFiles.VAF.Extensions
 		/// Returns the dashboard content showing asynchronous operation status.
 		/// </summary>
 		/// <returns>The dashboard content.  Can be null if no background operation managers, background operations or task processors.</returns>
-		public virtual DashboardPanel GetAsynchronousOperationDashboardContent()
+		public virtual IDashboardContent GetAsynchronousOperationDashboardContent()
 		{
 			// Declare our list which will go into the panel.
 			var list = new DashboardList();
@@ -88,7 +86,7 @@ namespace MFiles.VAF.Extensions
 				});
 
 			// Return the panel.
-			return new DashboardPanel()
+			return new DashboardPanelEx()
 			{
 				Title = Resources.Dashboard.AsynchronousOperations_DashboardTitle,
 				InnerContent = new DashboardContentCollection
@@ -103,7 +101,7 @@ namespace MFiles.VAF.Extensions
 		/// Returns the dashboard content showing logging status.
 		/// </summary>
 		/// <returns>The dashboard content.  Can be null if no logging data is available or configured.</returns>
-		public virtual DashboardPanel GetLoggingDashboardContent()
+		public virtual IDashboardContent GetLoggingDashboardContent()
 		{
 			// If we don't have any logging configuration then return null.
 			if (!(this.Configuration is Configuration.IConfigurationWithLoggingConfiguration configurationWithLogging))
@@ -117,7 +115,7 @@ namespace MFiles.VAF.Extensions
 			// If logging is not enabled then return a simple panel.
 			if (!loggingConfiguration.Enabled)
 			{
-				return new DashboardPanel()
+				return new DashboardPanelEx()
 				{
 					Title = Resources.Dashboard.Logging_DashboardTitle,
 					InnerContent = new DashboardContentCollection
@@ -178,11 +176,11 @@ namespace MFiles.VAF.Extensions
 					row.AddCell(name);
 				}
 				row.AddCell($"{config.MinimumLogLevel.ToDisplayString()} to {config.MaximumLogLevel.ToDisplayString()}");
-				row.AddCell(config.Sensitivity.ToLabel(this.ConfManager?.ResourceManager));
+				row.AddCell(config.Sensitivity.GetJsonConfEditorLabel(this.ConfManager?.ResourceManager));
 			}
 
 			// Return the panel.
-			return new DashboardPanel()
+			return new DashboardPanelEx()
 			{
 				Title = Resources.Dashboard.Logging_DashboardTitle,
 				InnerContent = new DashboardContentCollection
@@ -205,36 +203,6 @@ namespace MFiles.VAF.Extensions
 						: (IDashboardContent)table
 				}
 			};
-		}
-	}
-
-	// TODO: This could be a more generic helper method.
-	internal static class SensitivityExtensionMethods
-	{
-		public static string ToLabel(this VaultApplications.Logging.Sensitivity.Sensitivity sensitivity, ResourceManager resourceManager = null)
-		{
-			var enumType = typeof(VaultApplications.Logging.Sensitivity.Sensitivity);
-			var name = Enum.GetName(enumType, sensitivity);
-			var jsonConfEditorAttribute = enumType
-				.GetField(name)
-				.GetCustomAttributes(true)
-				.FirstOrDefault(a => a is JsonConfEditorAttribute) as JsonConfEditorAttribute;
-
-			// No label?
-			if (string.IsNullOrWhiteSpace(jsonConfEditorAttribute?.Label))
-				return sensitivity.ToString();
-
-			var key = jsonConfEditorAttribute.Label;
-			var prefix = jsonConfEditorAttribute.ResourceIdPrefix ?? "$$";
-			if (key?.StartsWith(prefix) ?? false)
-			{
-				// Get the label.
-				var label = resourceManager?.GetString(key.Substring(prefix.Length));
-				if (string.IsNullOrWhiteSpace(label))
-					return sensitivity.ToString();
-				return label;
-			}
-			return key;
 		}
 	}
 }

@@ -61,20 +61,49 @@ namespace MFiles.VAF.Extensions
 		/// <param name="vault">The vault reference to use for the operation.</param>
 		/// <param name="scheduleFor">The date/time to schedule a new execution for.  If <see langword="null"/>, does not schedule a future execution.</param>
 		/// <remarks>Adds an item to the scheduling queue, so that only one server performs this operation.</remarks>
-		public virtual void RescheduleTask(string queueId, string taskType, TaskDirective innerDirective = null, Vault vault = null, DateTime? scheduleFor = null)
-			=> this.AddTask
-			(
-				vault ?? this.VaultApplication.PermanentVault,
-				this.VaultApplication.GetSchedulerQueueID(),
-				this.VaultApplication.GetRescheduleTaskType(),
-				new RescheduleProcessorTaskDirective()
+		public virtual void RescheduleTask
+		(
+			string queueId,
+			string taskType,
+			TaskDirective innerDirective = null,
+			Vault vault = null,
+			DateTime? scheduleFor = null
+		)
+		{
+			// If we can use a transactional vault then do that.
+			var transactionRunner = this.VaultApplication.GetTransactionRunner();
+			if (null != transactionRunner)
+			{
+				transactionRunner.Run((transactionalVault) =>
 				{
-					QueueID = queueId,
-					TaskType = taskType,
-					NextExecution = scheduleFor,
-					InnerDirective = innerDirective
-				}
-			);
+					this.HandleReschedule
+					(
+						new RescheduleProcessorTaskDirective()
+						{
+							QueueID = queueId,
+							TaskType = taskType,
+							NextExecution = scheduleFor,
+							InnerDirective = innerDirective
+						},
+						transactionalVault
+					 );
+				});
+			}
+			else
+			{
+				this.HandleReschedule
+				(
+					new RescheduleProcessorTaskDirective()
+					{
+						QueueID = queueId,
+						TaskType = taskType,
+						NextExecution = scheduleFor,
+						InnerDirective = innerDirective
+					},
+					vault
+				 );
+			}
+		}
 
 		/// <summary>
 		/// Registers/opens a queue with ID provided by <see cref="ConfigurableVaultApplicationBase{TSecureConfiguration}.GetSchedulerQueueID"/>
@@ -96,7 +125,8 @@ namespace MFiles.VAF.Extensions
 						new TaskProcessor<RescheduleProcessorTaskDirective>
 						(
 							this.VaultApplication.GetRescheduleTaskType(),
-							this.HandleReschedule
+							this.HandleReschedule,
+							TransactionMode.Unsafe
 						)
 				},
 				MFTaskQueueProcessingBehavior.MFProcessingBehaviorSequential
@@ -110,25 +140,36 @@ namespace MFiles.VAF.Extensions
 		/// <param name="job"></param>
 		protected virtual void HandleReschedule(ITaskProcessingJob<RescheduleProcessorTaskDirective> job)
 		{
+			// Use the other overload.
+			if (null != job.Directive)
+				this.HandleReschedule(job.Directive);
+		}
+		/// <summary>
+		/// Cancels future executions of a task with a given queue ID and task type (read from the <paramref name="job"/>'s directive).
+		/// If the directive also contains a next-execution date then reschedules an execution of the task at that time.
+		/// </summary>
+		/// <param name="job"></param>
+		protected virtual void HandleReschedule(RescheduleProcessorTaskDirective directive, Vault vault = null)
+		{
 			// Cancel any future executions.
 			this.CancelAllFutureExecutions
 			(
-				job.Directive.QueueID,
-				job.Directive.TaskType,
+				directive.QueueID,
+				directive.TaskType,
 				includeCurrentlyExecuting: false,
-				vault: job.Vault
+				vault: vault ?? this.Vault
 			);
 
 			// Re-schedule?
-			if (job.Directive.NextExecution.HasValue)
+			if (directive.NextExecution.HasValue)
 				// Schedule the next run.
 				this.AddTask
 				(
-					job.Vault,
-					job.Directive.QueueID,
-					job.Directive.TaskType,
-					directive: job.Directive.InnerDirective,
-					activationTime: job.Directive.NextExecution.Value
+					vault ?? this.Vault,
+					directive.QueueID,
+					directive.TaskType,
+					directive: directive.InnerDirective,
+					activationTime: directive.NextExecution.Value
 				);
 		}
 
@@ -145,14 +186,14 @@ namespace MFiles.VAF.Extensions
 					this.Logger?.Trace($"Starting job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))}");
 					break;
 				case TaskManagerEventType.TaskJobFinished:
-					//Log out that we're odne.
+					//Log out that we're done.
 					if(e.JobResult == TaskProcessingJobResult.Fatal)
 					{
 						// Something went badly wrong.
 						this.Logger?.Error
 						(
 							e.Exception,
-							$"Job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))} finished with a fatal result: {e.JobStatus.ErrorMessage}."
+							$"Job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))} finished with a fatal result: {e.JobStatus.ErrorMessage}"
 						);
 					}
 					else

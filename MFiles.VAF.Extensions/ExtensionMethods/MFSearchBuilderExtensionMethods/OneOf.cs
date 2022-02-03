@@ -124,7 +124,8 @@ namespace MFiles.VAF.Extensions
 								(
 									Resources.Exceptions.MFSearchBuilderExtensionMethods.CannotResolveAlias_NotFound,
 									identifier.Alias
-								)
+								),
+								e
 							);
 						}
 					}),

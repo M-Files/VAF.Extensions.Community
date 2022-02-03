@@ -22,10 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\MFiles.VAF.Extensions\MFiles.VAF.Extensions.csproj" />
   </ItemGroup>
 

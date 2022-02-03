@@ -38,12 +38,9 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.101
-
-    - name: Restore NuGet packages
-      run: nuget restore MFiles.VAF.Extensions.sln
-
-    - name: Build solution and create nuget package
-      run: dotnet build MFiles.VAF.Extensions.sln --configuration Release /p:Version=${{ env.versionNumber }}
+      
+    - name: Create nuget package
+      run: dotnet pack ./MFiles.VAF.Extensions/MFiles.VAF.Extensions.csproj --configuration Release -p:Version=${{ env.versionNumber }}
 
 # Tests cannot be run as MFAPI is not installed.
 #    - name: Test
