@@ -70,38 +70,44 @@ namespace MFiles.VAF.Extensions
 			DateTime? scheduleFor = null
 		)
 		{
-			// If we can use a transactional vault then do that.
-			var transactionRunner = this.VaultApplication.GetTransactionRunner();
-			if (null != transactionRunner)
+			// Create the re-schedule directive.
+			var directive = new RescheduleProcessorTaskDirective()
 			{
-				transactionRunner.Run((transactionalVault) =>
-				{
-					this.HandleReschedule
-					(
-						new RescheduleProcessorTaskDirective()
-						{
-							QueueID = queueId,
-							TaskType = taskType,
-							NextExecution = scheduleFor,
-							InnerDirective = innerDirective
-						},
-						transactionalVault
-					 );
-				});
+				QueueID = queueId,
+				TaskType = taskType,
+				NextExecution = scheduleFor,
+				InnerDirective = innerDirective
+			};
+
+			// What do we want to do?
+			var action = new Action<Vault>((Vault v) =>
+			{
+				this.HandleReschedule(directive, v);
+			});
+
+			// Try and run the action.
+			try
+			{
+				// If we have a transactional runner then run using that.
+				var transactionRunner = this.VaultApplication?.GetTransactionRunner();
+				if (null != transactionRunner)
+					transactionRunner.Run((transactionalVault) => action(transactionalVault));
+				else
+					// Otherwise fall back to trying to run it outside of a transaction.
+					action(vault ?? this.Vault);
 			}
-			else
+			catch
 			{
-				this.HandleReschedule
+				// If this fails for some transient issue then fall back to using the task approach to schedule it.
+				// This might delay the task being added (e.g. if the task is not processed for a few seconds),
+				// but it will also deal with retrying.
+				this.AddTask
 				(
-					new RescheduleProcessorTaskDirective()
-					{
-						QueueID = queueId,
-						TaskType = taskType,
-						NextExecution = scheduleFor,
-						InnerDirective = innerDirective
-					},
-					vault
-				 );
+					vault ?? this.Vault,
+					this.VaultApplication.GetSchedulerQueueID(),
+					this.VaultApplication.GetRescheduleTaskType(),
+					directive
+				);
 			}
 		}
 
