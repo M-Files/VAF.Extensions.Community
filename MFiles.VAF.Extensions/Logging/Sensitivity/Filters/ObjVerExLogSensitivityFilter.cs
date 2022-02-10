@@ -1,6 +1,4 @@
 ﻿using MFiles.VAF.Common;
-using MFiles.VaultApplications.Logging;
-using MFiles.VaultApplications.Logging.Sensitivity;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
@@ -8,7 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MFiles.VAF.Extensions.Logging.Sensitivity.Filters
+// By placing this in the MFiles.VaultApplications.Logging namespace, the "RenderInternalLogs" will apply to this too.
+namespace MFiles.VaultApplications.Logging.Sensitivity
 {
 	/// <summary>
 	/// Implements a log sensitivity filter for <see cref="ObjVerEx>"/>.
