@@ -15,8 +15,6 @@ namespace MFiles.VaultApplications.Logging.Sensitivity.Filters
 	public class ObjVerExLogSensitivityFilter
 		: LogSensitivityFilterBase<ObjVerEx>
 	{
-		private ILogger Logger { get; } = LogManager.GetLogger(typeof(ObjVerExLogSensitivityFilter));
-
 		/// <inheritdoc />
 		public override string FilterValueForLogging(ObjVerEx value, Sensitivity level, IEnumerable<string> customFlags, string format, IFormatProvider formatProvider)
 		{
