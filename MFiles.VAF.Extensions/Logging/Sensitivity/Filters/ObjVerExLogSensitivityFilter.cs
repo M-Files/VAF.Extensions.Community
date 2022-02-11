@@ -25,7 +25,7 @@ namespace MFiles.VaultApplications.Logging.Sensitivity.Filters
 				return String.Empty;
 
 			// Try and get an ObjectVersion filter from the registered factories.
-			if (false == this.TryGetFilter<IObjectVersion>(out ILogSensitivityFilter<IObjectVersion> filter) || null == filter)
+			if (false == this.TryGetFilter(out ILogSensitivityFilter<IObjectVersion> filter) || null == filter)
 			{
 				this.Logger?.Error($"Could not load required sensitivity filter for {typeof(IObjectVersion).FullName}.  {typeof(ObjectVersionLogSensitivityFilter).FullName} will be used.");
 				filter = new ObjectVersionLogSensitivityFilter();
