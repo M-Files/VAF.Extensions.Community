@@ -18,6 +18,8 @@ This library is available [via nuget](https://www.nuget.org/packages/MFiles.VAF.
 
 ## Using the library
 
+**Ensure that you read documentation in the "MFiles.VAF.Extensions" folder - and others it links to on how to use common functionality.**
+
 The steps required will depend upon which functionality you wish to take into use, but the basic steps include:
 
 1. Open the project to be updated using Visual Studio 2017 or Visual Studio 2019.

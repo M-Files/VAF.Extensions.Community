@@ -4,7 +4,7 @@ Please drill into the sub-folders for details on available objects/methods and t
 
 ## ConfigurableVaultApplicationBase<T>
 
-This base class should be used for vault applications that use the VAF Extensions library.  This base class implements various functionality such as generating dashboards for your task processors and background operations:
+This base class should be used for vault applications that use the VAF Extensions library.  This base class implements various functionality such as generating dashboards for your task processors and background operations, and implementing the [logging framework](https://development.m-files.com/Frameworks/Logging/):
 
 ![An image showing a VAF dashboard with a list of background operations and their current status](sample-dashboard.png)
 
@@ -312,5 +312,71 @@ public class Configuration
 		DefaultValue = "Runs randomly throughout the day"
 	)]
 	public RandomRecurrenceConfiguration TaskOneSchedule { get; set; } = new RandomRecurrenceConfiguration();
+}
+```
+
+## Logging
+
+The VAF Extensions library also implements the boilerplate code required to integrate the [M-Files Vault Application Logging Framework](https://developer.m-files.com/Frameworks/Logging/) into your VAF applications.  For this to work your vault application class **must** inherit from `MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<T>`.
+
+To use logging from within your vault application class, simply log using the logger instance:
+
+```
+using MFiles.VAF.Extensions.Dashboards;
+using MFiles.VaultApplications.Logging;
+namespace LoggingExample
+{
+	public class VaultApplication
+		: MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<Configuration>
+	{
+ 
+		[TaskQueue]
+		public const string QueueId = "test.VaultApplication.myQueueId";
+		public const string TaskTypeA = "taskTypeA";
+ 
+		[TaskProcessor(QueueId, TaskTypeA, TransactionMode = TransactionMode.Full)]
+		[ShowOnDashboard("Import data", ShowRunCommand = true)]
+		public void ProcessBackgroundTask(ITaskProcessingJob<TaskDirective> job)
+		{
+			// Log "hello world" to appropriate targets
+			this.Logger.Info("hello world");
+		}
+ 
+	}
+}
+```
+
+Where you need to log from other classes, create your own logger instance.  Each class should have its own logger.
+
+```
+using MFiles.VaultApplications.Logging;
+namespace LoggingExample
+{
+	public class DocumentProcessor
+	{
+		private ILogger Logger { get; }
+		public DocumentProcessor()
+		{
+			// Instantiate the logger.
+			this.Logger = LogManager.GetLogger(this.GetType());
+		}
+
+		public void ProcessDocument(ObjVerEx o)
+		{
+			// Note the syntax for compatibility with log sensitivity filters.
+			this.Logger?.Trace($"Starting processing {o}");
+
+			try
+			{
+				// TODO: Implement.
+			}
+			catch(Exception e)
+			{
+				// Also log the exceptions.
+				this.Logger?.Error(e, $"Exception processing {o}.");
+			}
+		}
+ 
+	}
 }
 ```
