@@ -317,7 +317,7 @@ public class Configuration
 
 ## Logging
 
-The VAF Extensions library also implements the boilerplate code required to integrate the [M-Files Vault Application Logging Framework](https://developer.m-files.com/Frameworks/Logging/) into your VAF applications.  For this to work your vault application class **must** inherit from `MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<T>`.
+The VAF Extensions library also implements the boilerplate code required to integrate the [M-Files Vault Application Logging Framework](https://developer.m-files.com/Frameworks/Logging/) into your VAF applications.  For this to work your vault application class **must** inherit from `MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<T>`.  Your configuration class must also either inherit from `MFiles.VAF.Extensions.Configuration.ConfigurationBase`, or must implement `MFiles.VAF.Extensions.Configuration.IConfigurationWithLoggingConfiguration`.
 
 To use logging from within your vault application class, simply log using the logger instance:
 
