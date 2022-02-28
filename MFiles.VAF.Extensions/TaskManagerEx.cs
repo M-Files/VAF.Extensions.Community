@@ -134,6 +134,7 @@ namespace MFiles.VAF.Extensions
 					switch (e.JobResult)
 					{
 						case TaskProcessingJobResult.Complete:
+						case TaskProcessingJobResult.Fail:
 						case TaskProcessingJobResult.Fatal:
 							// Re-schedule.
 							foreach (var t in e.Tasks)
