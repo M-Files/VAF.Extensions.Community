@@ -407,7 +407,7 @@ namespace MFiles.VAF.Extensions
 			}
 			catch (Exception e)
 			{
-				SysUtils.ReportErrorToEventLog
+				SysUtils.ReportErrorMessageToEventLog
 				(
 					$"Exception cancelling tasks for background operation {this.Name} of type {TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId} on queue {this.BackgroundOperationManager.QueueId}.",
 					e

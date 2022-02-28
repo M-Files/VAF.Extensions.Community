@@ -97,9 +97,8 @@ namespace MFiles.VAF.Extensions
 					}
 					catch (Exception e)
 					{
-						SysUtils.ReportErrorToEventLog
+						SysUtils.ReportErrorMessageToEventLog
 						(
-							SysUtils.DefaultEventSourceIdentifier,
 							$"Could not cancel future executions of task type {key.TaskType} on queue {key.QueueID}.",
 							e
 						);

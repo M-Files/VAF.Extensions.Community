@@ -67,7 +67,7 @@ namespace MFiles.VAF.Extensions
 					}
 					catch (Exception e)
 					{
-						SysUtils.ReportErrorToEventLog
+						SysUtils.ReportErrorMessageToEventLog
 						(
 							$"Exception cancelling task {task.TaskID} of type {TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId} on queue {this.QueueId} to cancel.",
 							e
@@ -77,7 +77,7 @@ namespace MFiles.VAF.Extensions
 			}
 			catch (Exception e)
 			{
-				SysUtils.ReportErrorToEventLog
+				SysUtils.ReportErrorMessageToEventLog
 				(
 					$"Exception retrieving tasks of type {TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId} on queue {this.QueueId} to cancel.",
 					e

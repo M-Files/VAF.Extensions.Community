@@ -50,7 +50,7 @@ namespace RecurringTask
 			}
 			catch(Exception e)
 			{
-				SysUtils.ReportErrorToEventLog("Exception starting background operations", e);
+				SysUtils.ReportErrorMessageToEventLog("Exception starting background operations", e);
 			}
 		}
 
@@ -107,7 +107,7 @@ namespace RecurringTask
 			}
 			catch (Exception e)
 			{
-				SysUtils.ReportErrorToEventLog("Exception starting background operations", e);
+				SysUtils.ReportErrorMessageToEventLog("Exception starting background operations", e);
 			}
 		}
 
@@ -171,7 +171,7 @@ namespace RecurringTask
 			}
 			catch(Exception e)
 			{
-				SysUtils.ReportErrorToEventLog("Exception starting background operations", e);
+				SysUtils.ReportErrorMessageToEventLog("Exception starting background operations", e);
 			}
 		}
 
@@ -243,7 +243,7 @@ public class VaultApplication
 		}
 		catch(Exception e)
 		{
-			SysUtils.ReportErrorToEventLog("Exception starting background operations", e);
+			SysUtils.ReportErrorMessageToEventLog("Exception starting background operations", e);
 		}
     }
 }
@@ -310,7 +310,7 @@ public class VaultApplication
 		}
 		catch (Exception e)
 		{
-			SysUtils.ReportErrorToEventLog("Exception starting background operations", e);
+			SysUtils.ReportErrorMessageToEventLog("Exception starting background operations", e);
 		}
 
 	}
