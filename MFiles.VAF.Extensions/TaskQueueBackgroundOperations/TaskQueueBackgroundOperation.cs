@@ -407,7 +407,7 @@ namespace MFiles.VAF.Extensions
 			}
 			catch (Exception e)
 			{
-				SysUtils.ReportErrorToEventLog
+				SysUtils.ReportErrorMessageToEventLog
 				(
 					String.Format
 					(
