@@ -48,6 +48,7 @@ namespace MFiles.VAF.Extensions
 		internal new TSecureConfiguration Configuration
 		{
 			get => base.Configuration;
+			set => base.Configuration = value;
 		}
 
 		public ConfigurableVaultApplicationBase()
