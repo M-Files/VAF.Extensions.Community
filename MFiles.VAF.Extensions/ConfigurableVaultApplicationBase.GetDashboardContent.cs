@@ -132,8 +132,7 @@ namespace MFiles.VAF.Extensions
 				header.AddCells
 				(
 					Resources.Dashboard.Logging_Table_NameHeader,
-					Resources.Dashboard.Logging_Table_LogLevelsHeader,
-					Resources.Dashboard.Logging_Table_SensitivityHeader
+					Resources.Dashboard.Logging_Table_LogLevelsHeader
 				);
 			}
 			table.Styles.Add("background-color", "#f2f2f2");
@@ -176,7 +175,6 @@ namespace MFiles.VAF.Extensions
 					row.AddCell(name);
 				}
 				row.AddCell($"{config.MinimumLogLevel.ToDisplayString()} to {config.MaximumLogLevel.ToDisplayString()}");
-				row.AddCell(config.Sensitivity.GetJsonConfEditorLabel(this.ConfManager?.ResourceManager));
 			}
 
 			// Return the panel.

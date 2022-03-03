@@ -268,15 +268,6 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sensitivity.
-        /// </summary>
-        internal static string Logging_Table_SensitivityHeader {
-            get {
-                return ResourceManager.GetString("Logging_Table_SensitivityHeader", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Target not enabled.
         /// </summary>
         internal static string Logging_TargetNotEnabled {
