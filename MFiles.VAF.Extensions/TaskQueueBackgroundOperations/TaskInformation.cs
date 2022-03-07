@@ -40,7 +40,7 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// The current task state.
 		/// </summary>
-		public MFTaskState CurrentTaskState { get; internal set; }
+		public MFTaskState CurrentTaskState { get; set; }
 
 		/// <summary>
 		/// Creates either a <see cref="DashboardProgressBar"/> or <see cref="DashboardCustomContent"/>

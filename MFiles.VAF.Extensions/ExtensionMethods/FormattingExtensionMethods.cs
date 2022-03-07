@@ -9,7 +9,7 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// A flag to note whether the datetime is in the future or past.
 		/// </summary>
-		internal enum DateTimeRepresentationOf
+		public enum DateTimeRepresentationOf
 		{
 			Unknown = 0,
 
@@ -30,7 +30,7 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="timespan">The timespan to convert.</param>
 		/// <returns>A string in English describing the timespan.</returns>
-		internal static string ToDisplayString(this TimeSpan timespan)
+		public static string ToDisplayString(this TimeSpan timespan)
 		{
 			return ((TimeSpan?)timespan).ToDisplayString();
 		}
@@ -41,7 +41,7 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="timespan">The timespan to convert.</param>
 		/// <returns>A string in English describing the timespan.</returns>
-		internal static string ToDisplayString(this TimeSpan? timespan)
+		public static string ToDisplayString(this TimeSpan? timespan)
 		{
 			// Sanity.
 			if (false == timespan.HasValue || timespan.Value < TimeSpan.Zero)
@@ -121,7 +121,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="value">The value to represent.</param>
 		/// <param name="representation">Whether the value is supposed to be last-run (past) or next-run (future).</param>
 		/// <returns>A string in English stating when it should run.</returns>
-		internal static string ToTimeOffset(this DateTime value, DateTimeRepresentationOf representation)
+		public static string ToTimeOffset(this DateTime value, DateTimeRepresentationOf representation)
 		{
 			return ((DateTime?)value).ToTimeOffset(representation);
 		}
@@ -134,7 +134,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="value">The value to represent.</param>
 		/// <param name="representation">Whether the value is supposed to be last-run (past) or next-run (future).</param>
 		/// <returns>A string in English stating when it should run.</returns>
-		internal static string ToTimeOffset(this DateTime? value, DateTimeRepresentationOf representation)
+		public static string ToTimeOffset(this DateTime? value, DateTimeRepresentationOf representation)
 		{
 			// No value?
 			if (null == value)
