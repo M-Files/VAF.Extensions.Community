@@ -1,10 +1,6 @@
-﻿// ReSharper disable once CheckNamespace
-using MFiles.VAF.Common.ApplicationTaskQueue;
-using MFiles.VAF.Configuration.AdminConfigurations;
+﻿using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain.Dashboards;
-using MFiles.VAF.Core;
 using MFiles.VAF.Extensions;
-using MFiles.VAF;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,30 +12,77 @@ namespace MFiles.VAF.Extensions
 {
 	public abstract partial class ConfigurableVaultApplicationBase<TSecureConfiguration>
 	{
+		/// <summary>
+		/// Creates the status dashboard object that will be populated by <see cref="GetDashboardContent(IConfigurationRequestContext)"/>.
+		/// </summary>
+		/// <param name="refreshIntervalInSeconds"></param>
+		/// <returns></returns>
+		public virtual StatusDashboard CreateStatusDashboard(int refreshIntervalInSeconds = 30)
+		{
+			return new StatusDashboard()
+			{
+				RefreshInterval = refreshIntervalInSeconds
+			};
+		}
+
+		/// <summary>
+		/// Gets the content showing the application name, version, etc.
+		/// </summary>
+		/// <param name="context">The request context for this dashboard generation.</param>
+		/// <returns>The dashboard content, or null if none should be rendered.</returns>
+		public virtual IDashboardContent GetApplicationOverviewDashboardContent(IConfigurationRequestContext context)
+		{
+			// If there's some base content then add that.
+			var baseContent = base.GetDashboardContent(context);
+			return false == string.IsNullOrWhiteSpace(baseContent)
+				? new DashboardCustomContent(baseContent)
+				: null; // No content so return null.
+		}
+
+		/// <summary>
+		/// Gets all the content for the dashboard.
+		/// </summary>
+		/// <param name="context">The request context for this dashboard generation.</param>
+		/// <returns>The dashboard content.</returns>
+		public virtual IEnumerable<IDashboardContent> GetDashboardContentForStatusDashboard(IConfigurationRequestContext context)
+		{
+			// Application overview?
+			{
+				var content = this.GetApplicationOverviewDashboardContent(context);
+				if (null != content)
+					yield return content;
+			}
+
+			// Do we have any asynchronous operation content?
+			{
+				var content = this.GetAsynchronousOperationDashboardContent(context);
+				if (null != content)
+					yield return content;
+			}
+
+			// Do we have any logging content?
+			{
+				var content = this.GetLoggingDashboardContent(context);
+				if (null != content)
+					yield return content;
+			}
+
+		}
 
 		/// <inheritdoc />
+		/// <remarks>
+		/// Calls <see cref="CreateStatusDashboard(int)"/> to create the dashboard,
+		/// then <see cref="GetDashboardContentForStatusDashboard(IConfigurationRequestContext)"/> to get the items to display,
+		/// then returns <see cref="StatusDashboard.ToString()"/>.
+		/// </remarks>
 		public override string GetDashboardContent(IConfigurationRequestContext context)
 		{
 			// Create a new dashboard that refreshes every 30 seconds.
-			var dashboard = new StatusDashboard()
-			{
-				RefreshInterval = 30
-			};
+			var dashboard = this.CreateStatusDashboard();
 
-			// If there's some base content then add that.
-			var baseContent = base.GetDashboardContent(context);
-			if (false == string.IsNullOrWhiteSpace(baseContent))
-				dashboard.AddContent(new DashboardCustomContent(baseContent));
-
-			// Do we have any asynchronous operation content?
-			var asynchronousOperationContent = this.GetAsynchronousOperationDashboardContent();
-			if(null != asynchronousOperationContent)
-				dashboard.AddContent(asynchronousOperationContent);
-
-			// Do we have any logging content?
-			var loggingContent = this.GetLoggingDashboardContent();
-			if (null != loggingContent)
-				dashboard.AddContent(loggingContent);
+			// Add all content in turn.
+			foreach (var content in this.GetDashboardContentForStatusDashboard(context) ?? Enumerable.Empty<IDashboardContent>())
+				dashboard.AddContent(content);
 
 			// Return the dashboard.
 			return dashboard.ToString();
@@ -49,7 +92,7 @@ namespace MFiles.VAF.Extensions
 		/// Returns the dashboard content showing asynchronous operation status.
 		/// </summary>
 		/// <returns>The dashboard content.  Can be null if no background operation managers, background operations or task processors.</returns>
-		public virtual IDashboardContent GetAsynchronousOperationDashboardContent()
+		public virtual IDashboardContent GetAsynchronousOperationDashboardContent(IConfigurationRequestContext context)
 		{
 			// Declare our list which will go into the panel.
 			var list = new DashboardList();
@@ -101,7 +144,7 @@ namespace MFiles.VAF.Extensions
 		/// Returns the dashboard content showing logging status.
 		/// </summary>
 		/// <returns>The dashboard content.  Can be null if no logging data is available or configured.</returns>
-		public virtual IDashboardContent GetLoggingDashboardContent()
+		public virtual IDashboardContent GetLoggingDashboardContent(IConfigurationRequestContext context)
 		{
 			// If we don't have any logging configuration then return null.
 			if (!(this.Configuration is Configuration.IConfigurationWithLoggingConfiguration configurationWithLogging))
