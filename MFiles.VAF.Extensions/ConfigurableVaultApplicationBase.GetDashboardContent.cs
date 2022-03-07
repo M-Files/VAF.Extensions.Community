@@ -21,7 +21,7 @@ namespace MFiles.VAF.Extensions
 		{
 			return new StatusDashboard()
 			{
-				RefreshInterval = refreshIntervalInSeconds
+				RefreshInterval = refreshIntervalInSeconds				
 			};
 		}
 
@@ -47,25 +47,13 @@ namespace MFiles.VAF.Extensions
 		public virtual IEnumerable<IDashboardContent> GetDashboardContentForStatusDashboard(IConfigurationRequestContext context)
 		{
 			// Application overview?
-			{
-				var content = this.GetApplicationOverviewDashboardContent(context);
-				if (null != content)
-					yield return content;
-			}
+			yield return this.GetApplicationOverviewDashboardContent(context);
 
 			// Do we have any asynchronous operation content?
-			{
-				var content = this.GetAsynchronousOperationDashboardContent(context);
-				if (null != content)
-					yield return content;
-			}
+			yield return this.GetAsynchronousOperationDashboardContent(context);
 
 			// Do we have any logging content?
-			{
-				var content = this.GetLoggingDashboardContent(context);
-				if (null != content)
-					yield return content;
-			}
+			yield return this.GetLoggingDashboardContent(context);
 
 		}
 
@@ -79,10 +67,13 @@ namespace MFiles.VAF.Extensions
 		{
 			// Create a new dashboard that refreshes every 30 seconds.
 			var dashboard = this.CreateStatusDashboard();
+			if (null == dashboard)
+				return "";
 
 			// Add all content in turn.
 			foreach (var content in this.GetDashboardContentForStatusDashboard(context) ?? Enumerable.Empty<IDashboardContent>())
-				dashboard.AddContent(content);
+				if(null != content)
+					dashboard.AddContent(content);
 
 			// Return the dashboard.
 			return dashboard.ToString();
