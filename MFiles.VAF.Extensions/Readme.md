@@ -339,7 +339,7 @@ namespace LoggingExample
 		public void ProcessBackgroundTask(ITaskProcessingJob<TaskDirective> job)
 		{
 			// Log "hello world" to appropriate targets
-			this.Logger.Info("hello world");
+			this.Logger?.Info("hello world");
 		}
  
 	}
