@@ -424,6 +424,16 @@ public override IDashboardContent GetApplicationOverviewDashboardContent(IConfig
 ```
 Note that all of the other dashboard content is still included in the order it would be normally.
 
+You could even remove a standard section by overriding the appropriate method and returning null:
+
+```csharp
+public override IDashboardContent GetApplicationOverviewDashboardContent(IConfigurationRequestContext context)
+{
+    // This would cause the application overview section to be omitted, but the rest of the dashboard rendered as normal.
+    return null;
+}
+```
+
 #### Method signatures
 
 The dashboard-generation methods now get provided with the configuration request context, so a method with a signature of `IDashboardContent GetAsynchronousOperationDashboardContent()` has changed to `IDashboardContent GetAsynchronousOperationDashboardContent(IConfigurationRequestContext context)`.  If you are overriding these methods then alter the method signature to the new one.
