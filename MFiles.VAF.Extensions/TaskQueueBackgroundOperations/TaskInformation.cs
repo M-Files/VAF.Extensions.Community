@@ -72,7 +72,9 @@ namespace MFiles.VAF.Extensions
 				{
 					dashboardCustomContentEx.Styles.Add("white-space", "nowrap");
 					dashboardCustomContentEx.Styles.Add("overflow", "hidden");
-					dashboardCustomContentEx.Styles.Add("display", "inline-block");
+					dashboardCustomContentEx.Styles.Add("display", "block");
+					dashboardCustomContentEx.Styles.Add("margin", "0");
+					dashboardCustomContentEx.Styles.Add("padding", "0");
 					dashboardCustomContentEx.Styles.Add("text-overflow", "ellipsis");
 				}
 				return dashboardCustomContentEx;
