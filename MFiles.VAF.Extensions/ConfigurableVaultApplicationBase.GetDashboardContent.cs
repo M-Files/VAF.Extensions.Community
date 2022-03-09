@@ -40,11 +40,11 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
-		/// Gets all the content for the dashboard.
+		/// Gets the root items for the dashboard.
 		/// </summary>
 		/// <param name="context">The request context for this dashboard generation.</param>
 		/// <returns>The dashboard content.</returns>
-		public virtual IEnumerable<IDashboardContent> GetDashboardContentForStatusDashboard(IConfigurationRequestContext context)
+		public virtual IEnumerable<IDashboardContent> GetStatusDashboardRootItems(IConfigurationRequestContext context)
 		{
 			// Application overview?
 			yield return this.GetApplicationOverviewDashboardContent(context);
@@ -65,13 +65,13 @@ namespace MFiles.VAF.Extensions
 		/// </remarks>
 		public override string GetDashboardContent(IConfigurationRequestContext context)
 		{
-			// Create a new dashboard that refreshes every 30 seconds.
+			// Create a new dashboard.
 			var dashboard = this.CreateStatusDashboard();
 			if (null == dashboard)
 				return "";
 
 			// Add all content in turn.
-			foreach (var content in this.GetDashboardContentForStatusDashboard(context) ?? Enumerable.Empty<IDashboardContent>())
+			foreach (var content in this.GetStatusDashboardRootItems(context) ?? Enumerable.Empty<IDashboardContent>())
 				if(null != content)
 					dashboard.AddContent(content);
 
