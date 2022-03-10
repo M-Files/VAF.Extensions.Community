@@ -61,6 +61,15 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There are {0} tasks waiting in this queue, so only the in-progress tasks are shown.  When the number of waiting tasks in this queue falls under {1} we will show more details..
+        /// </summary>
+        internal static string DegradedQueueDashboardNotice {
+            get {
+                return ResourceManager.GetString("DegradedQueueDashboardNotice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No timespan specified; does not repeat..
         /// </summary>
         internal static string RepeatType_Interval_NoTimeSpanSpecified {

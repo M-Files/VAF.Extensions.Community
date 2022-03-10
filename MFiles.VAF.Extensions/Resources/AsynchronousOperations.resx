@@ -117,6 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="DegradedQueueDashboardNotice" xml:space="preserve">
+    <value>There are {0} tasks waiting in this queue, so only the in-progress tasks are shown.  When the number of waiting tasks in this queue falls under {1} we will show more details.</value>
+    <comment>{0} will be replaced with the number of waiting tasks.  {1} will be replaced with the threshold at which point this degraded notice (and associated functionality) is shown.</comment>
+  </data>
   <data name="RepeatType_Interval_NoTimeSpanSpecified" xml:space="preserve">
     <value>No timespan specified; does not repeat.</value>
   </data>

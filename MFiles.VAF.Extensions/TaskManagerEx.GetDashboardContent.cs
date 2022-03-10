@@ -124,7 +124,14 @@ namespace MFiles.VAF.Extensions
 					// If we are running degraded then highlight that.
 					if (showDegraded)
 					{
-						htmlString += $"<p style='background-color: red; font-weight: bold; color: white; padding: 5px 10px;'>There are {waitingTasks} tasks waiting in this queue, so only the in-progress tasks are shown.  When the number of waiting tasks in this queue falls under {DegradedDashboardThreshold} we will show more details.</p>";
+						htmlString += "<p style='background-color: red; font-weight: bold; color: white; padding: 5px 10px;'>";
+						htmlString += String.Format
+						(
+							Resources.AsynchronousOperations.DegradedQueueDashboardNotice,
+							waitingTasks,
+							DegradedDashboardThreshold
+						);
+						htmlString += "</p>";
 					}
 
 					// Does it have any configuration instructions?
@@ -138,7 +145,7 @@ namespace MFiles.VAF.Extensions
 					}
 					else
 					{
-						htmlString += "<p>Does not repeat.<br /></p>";
+						htmlString += $"<p>{Resources.AsynchronousOperations.RepeatType_Interval_NoTimeSpanSpecified.EscapeXmlForDashboard()}<br /></p>";
 					}
 
 					// Get known executions (prior, running and future).
