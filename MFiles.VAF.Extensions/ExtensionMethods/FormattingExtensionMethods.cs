@@ -44,13 +44,13 @@ namespace MFiles.VAF.Extensions
 		public static string ToDisplayString(this TimeSpan? timespan)
 		{
 			// Sanity.
-			if (false == timespan.HasValue || timespan.Value < TimeSpan.Zero)
+			if (false == timespan.HasValue || timespan.Value <= TimeSpan.Zero)
 				return "";
 
 			// Seconds be easy.
 			if (timespan.Value < TimeSpan.FromSeconds(1))
 				return 
-					$"{timespan.Value.Milliseconds} {(timespan.Value.Milliseconds == 1 ? Resources.Time.Component_Millisecond : Resources.Time.Component_Milliseconds)}"
+					$"{timespan.Value.TotalMilliseconds} {(timespan.Value.TotalMilliseconds == 1 ? Resources.Time.Component_Millisecond : Resources.Time.Component_Milliseconds)}"
 						.EscapeXmlForDashboard();
 			if (timespan.Value <= TimeSpan.FromSeconds(120))
 				return 
