@@ -143,6 +143,41 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
+		/// Retrieves the total number of tasks in this queue.
+		/// </summary>
+		/// <param name="queueId">The id of the queue to query.</param>
+		/// <returns>The count of items in the waiting, in-progress, completed, or failed states.</returns>
+		public int GetTaskCountInQueue
+		(
+			string queueId
+		)
+			=> this.GetTaskCountInQueue
+			(
+				queueId,
+				MFTaskState.MFTaskStateWaiting,
+				MFTaskState.MFTaskStateInProgress,
+				// If we include cancelled then we get lots of stuff that's not wanted.
+				// MFTaskState.MFTaskStateCanceled, 
+				MFTaskState.MFTaskStateCompleted,
+				MFTaskState.MFTaskStateFailed
+			);
+
+		/// <summary>
+		/// Retrieves the total number of tasks in this queue.
+		/// </summary>
+		/// <param name="queueId">The id of the queue to query.</param>
+		/// <param name="taskStates">The task states.</param>
+		/// <returns>The count of items in the supplied states.</returns>
+		public int GetTaskCountInQueue
+		(
+			string queueId,
+			params MFTaskState[] taskStates
+		)
+		{
+			return TaskHelper.GetTaskIDs(this.Vault, queueId, taskStates).Count;
+		}
+
+		/// <summary>
 		/// Returns executions of items on queue <paramref name="queueId"/>
 		/// with optional type of <paramref name="taskType"/> in state(s) <paramref name="taskStates"/>.
 		/// </summary>
