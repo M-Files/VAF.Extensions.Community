@@ -162,7 +162,7 @@ namespace MFiles.VAF.Extensions
 						Title = showOnDashboardAttribute?.Name ?? processor.Type,
 						StatusSummary = new DomainStatusSummary()
 						{
-							Label = isRunning
+							Label = isRunning || showDegraded
 							? Resources.AsynchronousOperations.Status_Running
 							: isScheduled ? Resources.AsynchronousOperations.Status_Scheduled : Resources.AsynchronousOperations.Status_Stopped
 						}
