@@ -130,7 +130,7 @@ namespace MFiles.VAF.Extensions
 							Resources.AsynchronousOperations.DegradedQueueDashboardNotice,
 							waitingTasks,
 							DegradedDashboardThreshold
-						);
+						).EscapeXmlForDashboard();
 						htmlString += "</p>";
 					}
 
@@ -145,7 +145,7 @@ namespace MFiles.VAF.Extensions
 					}
 					else
 					{
-						htmlString += $"<p>{Resources.AsynchronousOperations.RepeatType_Interval_NoTimeSpanSpecified.EscapeXmlForDashboard()}<br /></p>";
+						htmlString += $"<p>{Resources.AsynchronousOperations.RepeatType_RunsOnDemandOnly.EscapeXmlForDashboard()}<br /></p>";
 					}
 
 					// Get known executions (prior, running and future).
