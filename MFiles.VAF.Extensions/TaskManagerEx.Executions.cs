@@ -21,16 +21,19 @@ namespace MFiles.VAF.Extensions
 		/// <param name="taskType">The task type ID (null or not provided means all tasks on the queue).</param>
 		/// <param name="includeCurrentlyExecuting">Whether to attempt to cancel executing tasks.</param>
 		/// <param name="vault">The vault reference to use.</param>
+		/// <param name="remarks">The remarks to note alongside the cancellation.</param>
+		/// <param name="throwExceptions">Whether to throw underlying exceptions.</param>
 		public void CancelAllFutureExecutions
 		(
 			string queueId,
 			string taskType = null,
 			bool includeCurrentlyExecuting = true,
 			Vault vault = null,
-			string remarks = null
+			string remarks = null,
+			bool throwExceptions = true
 		)
 		{
-			this.CancelAllFutureExecutions<TaskDirective>(queueId, taskType, includeCurrentlyExecuting, vault, remarks);
+			this.CancelAllFutureExecutions<TaskDirective>(queueId, taskType, includeCurrentlyExecuting, vault, remarks, throwExceptions);
 		}
 
 		/// <summary>
@@ -41,20 +44,46 @@ namespace MFiles.VAF.Extensions
 		/// <param name="taskType">The task type ID (null or not provided means all tasks on the queue).</param>
 		/// <param name="includeCurrentlyExecuting">Whether to attempt to cancel executing tasks.</param>
 		/// <param name="vault">The vault reference to use.</param>
+		/// <param name="remarks">The remarks to note alongside the cancellation.</param>
+		/// <param name="throwExceptions">Whether to throw underlying exceptions.</param>
 		public void CancelAllFutureExecutions<TDirective>
 		(
 			string queueId,
 			string taskType = null,
 			bool includeCurrentlyExecuting = true,
 			Vault vault = null,
-			string remarks = null
+			string remarks = null,
+			bool throwExceptions = true
 		)
 			where TDirective : TaskDirective
 		{
 			this.Logger?.Debug($"Cancelling future executions on queue {queueId} of task {taskType}.");
-			var tasks = this.GetPendingExecutions<TDirective>(queueId, taskType, includeCurrentlyExecuting);
+			List<TaskInfo<TDirective>> tasks = null;
+			try
+			{
+				tasks = this.GetPendingExecutions<TDirective>(queueId, taskType, includeCurrentlyExecuting)?.ToList();
+			}
+			catch(Exception ex)
+			{
+				this.Logger?.Error(ex, $"Exception retrieving pending executions.");
+				if (throwExceptions)
+					throw;
+			}
+			if (null == tasks || tasks.Count == 0)
+				return;
 			foreach (var task in tasks)
-				this.CancelExecution(task, vault, remarks);
+			{
+				try
+				{
+					this.CancelExecution(task, vault, remarks);
+				}
+				catch (Exception ex)
+				{
+					this.Logger?.Error(ex, $"Exception cancelling task {task}");
+					if (throwExceptions)
+						throw;
+				}
+			}
 		}
 
 		/// <summary>

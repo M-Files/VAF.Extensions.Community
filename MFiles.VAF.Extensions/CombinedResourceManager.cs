@@ -35,6 +35,7 @@ namespace MFiles.VAF.Extensions
 			yield return Resources.Dashboard.ResourceManager;
 			yield return Resources.Schedule.ResourceManager;
 			yield return Resources.Time.ResourceManager;
+			yield return Resources.Logging.ResourceManager;
 			yield return Resources.Exceptions.Configuration.ResourceManager;
 			yield return Resources.Exceptions.Dashboard.ResourceManager;
 			yield return Resources.Exceptions.InternalOperations.ResourceManager;

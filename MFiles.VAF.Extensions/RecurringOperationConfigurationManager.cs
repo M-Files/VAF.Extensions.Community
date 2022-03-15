@@ -155,7 +155,8 @@ namespace MFiles.VAF.Extensions
 				this.VaultApplication.TaskManager.CancelAllFutureExecutions
 				(
 					tuple.Item1.QueueID,
-					tuple.Item1.TaskType
+					tuple.Item1.TaskType,
+					throwExceptions: false
 				);
 
 				// Work out the next execution time.

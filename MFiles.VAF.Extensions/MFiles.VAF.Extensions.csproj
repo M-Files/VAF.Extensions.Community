@@ -14,6 +14,7 @@
     <PackageIcon>logo.png</PackageIcon>
     <PackageIconUrl />
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Configurations>Debug;Release;DebugNoDeployment</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\Completed.png" />
@@ -111,6 +112,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>VaultInteraction.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\Logging.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Logging.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Schedule.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -162,6 +168,10 @@
     <EmbeddedResource Update="Resources\Exceptions\VaultInteraction.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>VaultInteraction.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Logging.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Logging.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Schedule.resx">
       <Generator>ResXFileCodeGenerator</Generator>
