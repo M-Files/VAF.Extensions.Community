@@ -38,6 +38,7 @@ namespace MFiles.VAF.Extensions.Configuration
 			Label = ResourceMarker.Id + nameof(Resources.Configuration.LoggingConfiguration_Label),
 			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.LoggingConfiguration_HelpText)
 		)]
+		[Security(ChangeBy = SecurityAttribute.UserLevel.VaultAdmin, ViewBy = SecurityAttribute.UserLevel.VaultAdmin)]
 		public NLogLoggingConfiguration Logging { get; set; } = new NLogLoggingConfiguration();
 
 		/// <inheritdoc />
