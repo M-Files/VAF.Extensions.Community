@@ -1,4 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions.Tests.Directives
 {
@@ -16,12 +19,31 @@ namespace MFiles.VAF.Extensions.Tests.Directives
 		}
 
 		[TestMethod]
+		public void DisplayName_HasDataMemberAttribute()
+		{
+			this.AssertPropertyHasDataMemberAttribute(nameof(TaskDirectiveWithDisplayName.DisplayName));
+		}
+
+		[TestMethod]
 		public void DisplayNamePersistsData()
 		{
 			var instance = new TDirective();
 			Assert.IsNull(instance.DisplayName);
 			instance.DisplayName = "hello world";
 			Assert.AreEqual("hello world", instance.DisplayName);
+		}
+
+		[TestMethod]
+		public void DirectiveType_HasDataContractAttribute()
+		{
+			var type = typeof(TDirective);
+			Assert.IsNotNull(type.GetCustomAttributes(false).FirstOrDefault(a => a is DataContractAttribute));
+		}
+
+		protected void AssertPropertyHasDataMemberAttribute(string propertyName, BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance)
+		{
+			var type = typeof(TDirective);
+			Assert.IsNotNull(type.GetProperty(propertyName, bindingFlags).GetCustomAttribute(typeof(DataMemberAttribute)));
 		}
 
 	}
