@@ -13,6 +13,7 @@ using MFiles.VAF.AppTasks;
 using MFiles.VAF.Common;
 using System.Reflection;
 using System.Collections;
+using MFiles.VaultApplications.Logging;
 
 namespace MFiles.VAF.Extensions
 {
@@ -24,7 +25,7 @@ namespace MFiles.VAF.Extensions
 	/// <typeparam name="TSecureConfiguration">The configuration type.</typeparam>
 	public abstract partial class ConfigurableVaultApplicationBase<TSecureConfiguration>
 		: MFiles.VAF.Core.ConfigurableVaultApplicationBase<TSecureConfiguration>
-	where TSecureConfiguration : class, new()
+		where TSecureConfiguration : class, new()
 	{
 		/// <summary>
 		/// Contains information about VAF configuration that
@@ -47,11 +48,13 @@ namespace MFiles.VAF.Extensions
 		internal new TSecureConfiguration Configuration
 		{
 			get => base.Configuration;
+			set => base.Configuration = value;
 		}
 
 		public ConfigurableVaultApplicationBase()
 			: base()
 		{
+			this.Logger = LogManager.GetLogger(this.GetType());
 			this.RecurringOperationConfigurationManager = new RecurringOperationConfigurationManager<TSecureConfiguration>(this);
 		}
 		private TaskQueueBackgroundOperationManager<TSecureConfiguration> taskQueueBackgroundOperationManager;

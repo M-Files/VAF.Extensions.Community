@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Common;
 using MFiles.VAF.Configuration;
+using MFiles.VaultApplications.Logging;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,15 @@ namespace MFiles.VAF.Extensions
 
 			// Populate the task processing schedule configuration.
 			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(isVaultStartup: false);
+
+			// If we have logging configuration then set it up.
+			if (this.Configuration is Configuration.IConfigurationWithLoggingConfiguration configurationWithLogging)
+			{
+				this.Logger?.Debug("Logging configuration updating");
+				base.OnConfigurationUpdated(oldConfiguration, updateExternals);
+				LogManager.UpdateConfiguration(configurationWithLogging?.GetLoggingConfiguration());
+				this.Logger?.Debug("Logging configuration updated");
+			}
 		}
 
 		/// <inheritdoc />
@@ -34,35 +44,9 @@ namespace MFiles.VAF.Extensions
 			// Set the resource manager for the configuration manager.
 			var combinedResourceManager = new CombinedResourceManager(configurationManager.ResourceManager);
 
-			// Populate the resource manager with the resources we have.
-			foreach (var resourceManager in this.GetResourceManagers())
-				if(null != resourceManager)
-					combinedResourceManager.ResourceManagers.Add(resourceManager);
-
 			// Set the resource manager for the configuration.
 			configurationManager.ResourceManager = combinedResourceManager;
 			return configurationManager;
-		}
-
-		/// <summary>
-		/// Returns resource managers for all the resources exposed by this application.
-		/// </summary>
-		/// <returns>The resource managers.</returns>
-		/// <remarks>If overriding this method, ensure that you additionally return the resource managers exposed by the base implementation.</remarks>
-		protected virtual IEnumerable<ResourceManager> GetResourceManagers()
-		{
-			yield return Resources.AsynchronousOperations.ResourceManager;
-			yield return Resources.Configuration.ResourceManager;
-			yield return Resources.Dashboard.ResourceManager;
-			yield return Resources.Schedule.ResourceManager;
-			yield return Resources.Time.ResourceManager;
-			yield return Resources.Exceptions.Configuration.ResourceManager;
-			yield return Resources.Exceptions.Dashboard.ResourceManager;
-			yield return Resources.Exceptions.InternalOperations.ResourceManager;
-			yield return Resources.Exceptions.MFSearchBuilderExtensionMethods.ResourceManager;
-			yield return Resources.Exceptions.ObjVerExExtensionMethods.ResourceManager;
-			yield return Resources.Exceptions.TaskQueueBackgroundOperations.ResourceManager;
-			yield return Resources.Exceptions.VaultInteraction.ResourceManager;
 		}
 
 		protected void AddResourceManagerToConfiguration(ResourceManager resourceManager)
@@ -91,7 +75,7 @@ namespace MFiles.VAF.Extensions
 			}
 			catch(Exception e)
 			{
-				SysUtils.ReportErrorMessageToEventLog("Exception mapping configuration to recurring operations.", e);
+				this.Logger?.Fatal(e, "Exception mapping configuration to recurring operations.");
 			}
 
 

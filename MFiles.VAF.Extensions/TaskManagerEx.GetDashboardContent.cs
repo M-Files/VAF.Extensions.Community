@@ -18,6 +18,11 @@ namespace MFiles.VAF.Extensions
 	public partial class TaskManagerEx<TConfiguration>
 	{
 		/// <summary>
+		/// The number of waiting tasks in a single queue at which point the dashboard is shown degraded.
+		/// </summary>
+		private const int DegradedDashboardThreshold = 3000;
+
+		/// <summary>
 		/// Returns some dashboard content that shows the background operations and their current status.
 		/// </summary>
 		/// <returns>The dashboard content.</returns>
@@ -43,9 +48,9 @@ namespace MFiles.VAF.Extensions
 				catch
 				{
 					// Throws if the queue is incorrect.
-					SysUtils.ReportToEventLog
-					($"Cannot load details for queue {queue}; is there a static field with the [TaskQueue] attribute?",
-						System.Diagnostics.EventLogEntryType.Warning
+					this.Logger?.Warn
+					(
+						$"Cannot load details for queue {queue}; is there a static field with the [TaskQueue] attribute?"
 					);
 					continue;
 				}
@@ -62,6 +67,10 @@ namespace MFiles.VAF.Extensions
 					if (attributes.Length != 0)
 						continue;
 				}
+
+				// Get the number of items in the queue.
+				var waitingTasks = this.GetTaskCountInQueue(queue, MFTaskState.MFTaskStateWaiting);
+				var showDegraded = waitingTasks > DegradedDashboardThreshold;
 
 				// Get each task processor.
 				foreach (var processor in taskQueueResolver.GetTaskProcessors(queue))
@@ -81,10 +90,9 @@ namespace MFiles.VAF.Extensions
 					catch
 					{
 						// Throws if the task processor is not found.
-						SysUtils.ReportToEventLog
+						this.Logger?.Warn
 						(
-							$"Cannot load processor details for task type {processor.Type} on queue {queue}.",
-							System.Diagnostics.EventLogEntryType.Warning
+							$"Cannot load processor details for task type {processor.Type} on queue {queue}."
 						);
 						continue;
 					}
@@ -113,8 +121,21 @@ namespace MFiles.VAF.Extensions
 						htmlString += new DashboardCustomContent($"<p><em>{showOnDashboardAttribute?.Description.EscapeXmlForDashboard()}</em></p>").ToXmlString();
 					}
 
+					// If we are running degraded then highlight that.
+					if (showDegraded)
+					{
+						htmlString += "<p style='background-color: red; font-weight: bold; color: white; padding: 5px 10px;'>";
+						htmlString += String.Format
+						(
+							Resources.AsynchronousOperations.DegradedQueueDashboardNotice,
+							waitingTasks,
+							DegradedDashboardThreshold
+						).EscapeXmlForDashboard();
+						htmlString += "</p>";
+					}
+
 					// Does it have any configuration instructions?
-					IRecurrenceConfiguration recurrenceConfiguration = null;
+						IRecurrenceConfiguration recurrenceConfiguration = null;
 					if (this
 						.VaultApplication?
 						.RecurringOperationConfigurationManager?
@@ -124,12 +145,13 @@ namespace MFiles.VAF.Extensions
 					}
 					else
 					{
-						htmlString += "<p>Does not repeat.<br /></p>";
+						htmlString += $"<p>{Resources.AsynchronousOperations.RepeatType_RunsOnDemandOnly.EscapeXmlForDashboard()}<br /></p>";
 					}
 
 					// Get known executions (prior, running and future).
-					var executions = this
-						.GetAllExecutions<TaskDirective>(queue, processor.Type)
+					var executions = showDegraded
+						? this.GetExecutions<TaskDirective>(queue, processor.Type, MFTaskState.MFTaskStateInProgress)
+						: this.GetAllExecutions<TaskDirective>(queue,processor.Type)
 						.ToList();
 					var isRunning = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateInProgress);
 					var isScheduled = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateWaiting);
@@ -140,7 +162,7 @@ namespace MFiles.VAF.Extensions
 						Title = showOnDashboardAttribute?.Name ?? processor.Type,
 						StatusSummary = new DomainStatusSummary()
 						{
-							Label = isRunning
+							Label = isRunning || showDegraded
 							? Resources.AsynchronousOperations.Status_Running
 							: isScheduled ? Resources.AsynchronousOperations.Status_Scheduled : Resources.AsynchronousOperations.Status_Stopped
 						}

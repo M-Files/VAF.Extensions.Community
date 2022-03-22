@@ -11,6 +11,7 @@ using MFiles.VAF.MultiserverMode;
 using System.Collections.Generic;
 using MFiles.VAF.AppTasks;
 using MFiles.VAF.Extensions.Dashboards;
+using MFiles.VaultApplications.Logging;
 
 namespace MFiles.VAF.Extensions
 {
@@ -126,6 +127,8 @@ namespace MFiles.VAF.Extensions
 	public class TaskQueueBackgroundOperation<TSecureConfiguration>
 		where TSecureConfiguration : class, new()
 	{
+		private ILogger Logger { get; }
+
 		/// <summary>
 		/// The task type for this background operation.
 		/// </summary>
@@ -271,6 +274,8 @@ namespace MFiles.VAF.Extensions
 					o.ShowMessage(this.RunCommandSuccessText);
 				o.RefreshDashboard();
 			};
+
+			this.Logger = LogManager.GetLogger(this.GetType());
 		}
 
 		/// <summary>
@@ -407,16 +412,13 @@ namespace MFiles.VAF.Extensions
 			}
 			catch (Exception e)
 			{
-				SysUtils.ReportErrorMessageToEventLog
+				this.Logger?.Error
 				(
-					String.Format
-					(
-						Resources.Exceptions.TaskQueueBackgroundOperations.ExceptionCancellingTasks,
-						this.Name,
-						TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId,
-						this.BackgroundOperationManager.QueueId
-					),
-					e
+					e,
+					Resources.Exceptions.TaskQueueBackgroundOperations.ExceptionCancellingTasks,
+					this.Name,
+					TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId,
+					this.BackgroundOperationManager.QueueId
 				);
 			}
 		}

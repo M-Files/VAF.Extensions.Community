@@ -124,6 +124,24 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string LoggingConfiguration_HelpText {
+            get {
+                return ResourceManager.GetString("LoggingConfiguration_HelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Logging Configuration.
+        /// </summary>
+        internal static string LoggingConfiguration_Label {
+            get {
+                return ResourceManager.GetString("LoggingConfiguration_Label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Interval.
         /// </summary>
         internal static string RecurrenceType_Interval {

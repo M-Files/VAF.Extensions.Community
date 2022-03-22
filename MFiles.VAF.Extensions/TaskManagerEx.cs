@@ -3,6 +3,7 @@ using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Core;
 using MFiles.VAF.Extensions.Dashboards;
+using MFiles.VaultApplications.Logging;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,8 @@ namespace MFiles.VAF.Extensions
 		: TaskManager
 		where TConfiguration : class, new()
 	{
+		private ILogger Logger { get; }
+
 		/// <summary>
 		/// The vault application used to create this task manager.
 		/// </summary>
@@ -38,6 +41,14 @@ namespace MFiles.VAF.Extensions
 			this.VaultApplication = vaultApplication
 				?? throw new ArgumentNullException(nameof(vaultApplication));
 			this.TaskEvent += TaskManagerEx_TaskEvent;
+			this.Logger = LogManager.GetLogger(this.GetType());
+		}
+
+		/// <inheritdoc />
+		public new string AddTask(Vault vault, string queueId, string taskType, TaskDirective directive = null, DateTime? activationTime = null)
+		{
+			this.Logger?.Debug($"Adding task to queue {queueId} of type {taskType}.");
+			return base.AddTask(vault, queueId, taskType, directive, activationTime);
 		}
 
 		/// <summary>
@@ -50,20 +61,55 @@ namespace MFiles.VAF.Extensions
 		/// <param name="vault">The vault reference to use for the operation.</param>
 		/// <param name="scheduleFor">The date/time to schedule a new execution for.  If <see langword="null"/>, does not schedule a future execution.</param>
 		/// <remarks>Adds an item to the scheduling queue, so that only one server performs this operation.</remarks>
-		public virtual void RescheduleTask(string queueId, string taskType, TaskDirective innerDirective = null, Vault vault = null, DateTime? scheduleFor = null)
-			=> this.AddTask
-			(
-				vault ?? this.VaultApplication.PermanentVault,
-				this.VaultApplication.GetSchedulerQueueID(),
-				this.VaultApplication.GetRescheduleTaskType(),
-				new RescheduleProcessorTaskDirective()
-				{
-					QueueID = queueId,
-					TaskType = taskType,
-					NextExecution = scheduleFor,
-					InnerDirective = innerDirective
-				}
-			);
+		public virtual void RescheduleTask
+		(
+			string queueId,
+			string taskType,
+			TaskDirective innerDirective = null,
+			Vault vault = null,
+			DateTime? scheduleFor = null
+		)
+		{
+			// Create the re-schedule directive.
+			var directive = new RescheduleProcessorTaskDirective()
+			{
+				QueueID = queueId,
+				TaskType = taskType,
+				NextExecution = scheduleFor,
+				InnerDirective = innerDirective
+			};
+
+			// What do we want to do?
+			var action = new Action<Vault>((Vault v) =>
+			{
+				this.HandleReschedule(directive, v);
+			});
+
+			// Try and run the action.
+			try
+			{
+				// If we have a transactional runner then run using that.
+				var transactionRunner = this.VaultApplication?.GetTransactionRunner();
+				if (null != transactionRunner)
+					transactionRunner.Run((transactionalVault) => action(transactionalVault));
+				else
+					// Otherwise fall back to trying to run it outside of a transaction.
+					action(vault ?? this.Vault);
+			}
+			catch
+			{
+				// If this fails for some transient issue then fall back to using the task approach to schedule it.
+				// This might delay the task being added (e.g. if the task is not processed for a few seconds),
+				// but it will also deal with retrying.
+				this.AddTask
+				(
+					vault ?? this.Vault,
+					this.VaultApplication.GetSchedulerQueueID(),
+					this.VaultApplication.GetRescheduleTaskType(),
+					directive
+				);
+			}
+		}
 
 		/// <summary>
 		/// Registers/opens a queue with ID provided by <see cref="ConfigurableVaultApplicationBase{TSecureConfiguration}.GetSchedulerQueueID"/>
@@ -76,6 +122,7 @@ namespace MFiles.VAF.Extensions
 		public virtual void RegisterSchedulingQueue()
 		{
 			// Register the scheduler queue.
+			this.Logger?.Trace($"Registering scheduler queue {this.VaultApplication.GetSchedulerQueueID()}");
 			this.RegisterQueue
 			(
 				this.VaultApplication.GetSchedulerQueueID(),
@@ -84,7 +131,8 @@ namespace MFiles.VAF.Extensions
 						new TaskProcessor<RescheduleProcessorTaskDirective>
 						(
 							this.VaultApplication.GetRescheduleTaskType(),
-							this.HandleReschedule
+							this.HandleReschedule,
+							TransactionMode.Unsafe
 						)
 				},
 				MFTaskQueueProcessingBehavior.MFProcessingBehaviorSequential
@@ -98,25 +146,36 @@ namespace MFiles.VAF.Extensions
 		/// <param name="job"></param>
 		protected virtual void HandleReschedule(ITaskProcessingJob<RescheduleProcessorTaskDirective> job)
 		{
+			// Use the other overload.
+			if (null != job.Directive)
+				this.HandleReschedule(job.Directive);
+		}
+		/// <summary>
+		/// Cancels future executions of a task with a given queue ID and task type (read from the <paramref name="job"/>'s directive).
+		/// If the directive also contains a next-execution date then reschedules an execution of the task at that time.
+		/// </summary>
+		/// <param name="job"></param>
+		protected virtual void HandleReschedule(RescheduleProcessorTaskDirective directive, Vault vault = null)
+		{
 			// Cancel any future executions.
 			this.CancelAllFutureExecutions
 			(
-				job.Directive.QueueID,
-				job.Directive.TaskType,
+				directive.QueueID,
+				directive.TaskType,
 				includeCurrentlyExecuting: false,
-				vault: job.Vault
+				vault: vault ?? this.Vault
 			);
 
 			// Re-schedule?
-			if (job.Directive.NextExecution.HasValue)
+			if (directive.NextExecution.HasValue)
 				// Schedule the next run.
 				this.AddTask
 				(
-					job.Vault,
-					job.Directive.QueueID,
-					job.Directive.TaskType,
-					directive: job.Directive.InnerDirective,
-					activationTime: job.Directive.NextExecution.Value
+					vault ?? this.Vault,
+					directive.QueueID,
+					directive.TaskType,
+					directive: directive.InnerDirective,
+					activationTime: directive.NextExecution.Value
 				);
 		}
 
@@ -129,8 +188,24 @@ namespace MFiles.VAF.Extensions
 			switch (e.EventType)
 			{
 				case TaskManagerEventType.TaskJobStarted:
+					// Log out that we started.
+					this.Logger?.Trace($"Starting job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))}");
 					break;
 				case TaskManagerEventType.TaskJobFinished:
+					//Log out that we're done.
+					if(e.JobResult == TaskProcessingJobResult.Fatal)
+					{
+						// Something went badly wrong.
+						this.Logger?.Error
+						(
+							e.Exception,
+							$"Job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))} finished with a fatal result: {e.JobStatus.ErrorMessage}"
+						);
+					}
+					else
+						this.Logger?.Trace($"Job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))} finished ({e.JobResult})");
+
+					// Re-schedule as appropriate.
 					switch (e.JobResult)
 					{
 						case TaskProcessingJobResult.Complete:
@@ -149,9 +224,10 @@ namespace MFiles.VAF.Extensions
 									.RecurringOperationConfigurationManager?
 									.GetNextTaskProcessorExecution(t.QueueID, t.TaskType);
 								if (false == nextExecutionDate.HasValue)
-									continue;							
+									continue;
 
 								// Schedule.
+								this.Logger?.Debug($"Re-scheduling {t.TaskType} on {t.QueueID} for {nextExecutionDate.Value}");
 								this.RescheduleTask(t.QueueID, t.TaskType, vault: this.Vault, scheduleFor: nextExecutionDate);
 							}
 							break;
