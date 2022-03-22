@@ -8,55 +8,56 @@ using System.Threading.Tasks;
 namespace MFiles.VAF.Extensions
 {
 	[DataContract]
-	public class GenericTaskDirective<T> : TaskDirectiveWithDisplayName
+	public class GenericTaskDirective<TA> : TaskDirectiveWithDisplayName
 	{
 		public GenericTaskDirective()
 		{
 
 		}
-		public GenericTaskDirective(T value, string displayName = null)
+		public GenericTaskDirective(TA item1, string displayName = null)
 			: this()
 		{
 			this.DisplayName = displayName;
-			this.Value = value;
+			this.Item1 = item1;
 		}
 
 		[DataMember]
-		public T Value { get; set; }
+		public TA Item1 { get; set; }
 	}
 
 	[DataContract]
-	public class GenericTaskDirective<T, Y> : GenericTaskDirective<T>
+	public class GenericTaskDirective<TA, TB> : GenericTaskDirective<TA>
 	{
 		public GenericTaskDirective()
 			: base()
 		{
 
 		}
-		public GenericTaskDirective(T value, Y value2, string displayName = null)
-			: base(value, displayName)
+		public GenericTaskDirective(TA item1, TB item2, string displayName = null)
+			: base(item1, displayName)
 		{
-			this.Value2 = value2;
+			this.Item2 = item2;
 		}
 
 		[DataMember]
-		public Y Value2 { get; set; }
+		public TB Item2 { get; set; }
 	}
 
 	[DataContract]
-	public class GenericTaskDirective<T, Y, Z> : GenericTaskDirective<T, Y>
+	public class GenericTaskDirective<TA, TB, TC> : GenericTaskDirective<TA, TB>
 	{
 		public GenericTaskDirective()
 			: base()
 		{
 
 		}
-		public GenericTaskDirective(T value, Y value2, Z value3, string displayName = null) : base(value, value2, displayName)
+		public GenericTaskDirective(TA item1, TB item2, TC item3, string displayName = null)
+			: base(item1, item2, displayName)
 		{
-			this.Value3 = value3;
+			this.Item3 = item3;
 		}
 
 		[DataMember]
-		public Z Value3 { get; set; }
+		public TC Item3 { get; set; }
 	}
 }
