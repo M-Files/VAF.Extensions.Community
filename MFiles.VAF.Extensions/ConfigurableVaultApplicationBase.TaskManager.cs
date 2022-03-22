@@ -67,7 +67,10 @@ namespace MFiles.VAF.Extensions
 			// Report an error to the event log if queues were declared, but tasks aren't supported.
 			if (AppTasks.TaskManager.IsSupported(PermanentVault))
 			{
-				// Initialize the new task manager, and register the queues from the resolver.
+				// Delegate to base.
+				base.InitializeTaskManager();
+
+				// Initialize the new task manager, and register the queues from the task manager.
 				this.TaskManager = this.GetTaskManager();
 				this.TaskQueueResolver?.RegisterAll(this.TaskManager);
 				TaskStatusHelper.Attach(this.TaskManager);
