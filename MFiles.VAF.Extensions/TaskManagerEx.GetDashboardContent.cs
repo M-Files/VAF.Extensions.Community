@@ -38,18 +38,17 @@ namespace MFiles.VAF.Extensions
 					continue;
 
 				// Get information about the queues.
-				TaskQueueAttribute queueSettings = null;
 				System.Reflection.FieldInfo fieldInfo = null;
 				try
 				{
-					queueSettings = taskQueueResolver.GetQueueSettings(queue);
 					fieldInfo = taskQueueResolver.GetQueueFieldInfo(queue);
 				}
-				catch
+				catch(Exception e)
 				{
 					// Throws if the queue is incorrect.
 					this.Logger?.Warn
 					(
+						e,
 						$"Cannot load details for queue {queue}; is there a static field with the [TaskQueue] attribute?"
 					);
 					continue;
@@ -57,7 +56,7 @@ namespace MFiles.VAF.Extensions
 				
 
 				// Skip anything broken.
-				if (null == queueSettings || null == fieldInfo)
+				if (null == fieldInfo)
 					continue;
 
 				// If it's marked as hidden then skip.
