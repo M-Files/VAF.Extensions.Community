@@ -50,7 +50,7 @@ namespace MFiles.VAF.Extensions
 			// Seconds be easy.
 			if (timespan.Value < TimeSpan.FromSeconds(1))
 				return 
-					$"{timespan.Value.TotalMilliseconds} {(timespan.Value.TotalMilliseconds == 1 ? Resources.Time.Component_Millisecond : Resources.Time.Component_Milliseconds)}"
+					$"{(int)timespan.Value.TotalMilliseconds} {((int)timespan.Value.TotalMilliseconds == 1 ? Resources.Time.Component_Millisecond : Resources.Time.Component_Milliseconds)}"
 						.EscapeXmlForDashboard();
 			if (timespan.Value <= TimeSpan.FromSeconds(120))
 				return 
