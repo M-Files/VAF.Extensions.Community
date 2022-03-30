@@ -171,7 +171,8 @@ namespace MFiles.VAF.Extensions
 			}
 			table.Styles.Add("background-color", "#f2f2f2");
 			table.Styles.Add("padding", "10px");
-
+			table.Styles.Add("margin", "16px 0px");
+			
 			// Retrieve all loggers.
 			var logTargetConfiguration = loggingConfiguration.GetAllLogTargetConfigurations();
 
