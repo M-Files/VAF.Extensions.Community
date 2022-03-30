@@ -99,7 +99,7 @@ namespace MFiles.VAF.Extensions
 					);
 
 				// Copy data from the execution if needed.
-				taskInfo.Started = taskInfo.Started ?? taskInfo.LastActivity;
+				taskInfo.Started = taskInfo.Started ?? execution.Status?.ReservedAt ?? execution.Status?.LastRetryStarted ?? taskInfo.LastActivity;
 				taskInfo.LastActivity = taskInfo.LastActivity ?? execution.Status?.EndedAt ?? execution.Status?.LastUpdatedAt ?? DateTime.UtcNow;
 				taskInfo.StatusDetails = taskInfo.StatusDetails ?? execution.Status?.Details;
 				taskInfo.PercentageComplete = taskInfo.PercentageComplete ?? execution.Status?.PercentComplete;
