@@ -383,13 +383,13 @@ namespace LoggingExample
 
 ## Dashboards
 
-The VAF Extensions library contains some default functionality to create basic [VAF dashboards](https://developer.m-files.com/Frameworks/Vault-Application-Framework/Configuration/Custom-Dashboards/) showing information about your application, any asynchronous operations that are defined, and logging configuration.  Version 22.3 of the extensions library brings some breaking changes aimed to improve the extensibility of this concept.
+The VAF Extensions library contains some default functionality to create basic [VAF dashboards](https://developer.m-files.com/Frameworks/Vault-Application-Framework/Configuration/Custom-Dashboards/) showing information about your application, any asynchronous operations that are defined, and logging configuration.  Version 22.4 of the extensions library brings some breaking changes aimed to improve the extensibility of this concept.
 
-### Breaking changes in VAF Extensions 22.3
+### Breaking changes in VAF Extensions 22.4
 
 #### Approach
 
-If you wanted to customise the dashboard in previous versions of the VAF Extensions (e.g. to create your own section of content) the you needed to override `GetDashboardContent`.  The primary issue with this was that, if you wanted to include any of the standard content, you had to build the status dashboard in a specific way to ensure that the refresh functionality and the like still worked.  VAF Extensions 22.3 changes the approach needed to allow you more control.
+If you wanted to customise the dashboard in previous versions of the VAF Extensions (e.g. to create your own section of content) the you needed to override `GetDashboardContent`.  The primary issue with this was that, if you wanted to include any of the standard content, you had to build the status dashboard in a specific way to ensure that the refresh functionality and the like still worked.  VAF Extensions 22.4 changes the approach needed to allow you more control.
 
 **IT IS STRONGLY RECOMMENDED THAT YOU DO NOT OVERRIDE `GetDashboardContent` ANY MORE**
 
