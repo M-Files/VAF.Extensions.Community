@@ -28,6 +28,13 @@ namespace MFiles.VAF.Extensions
 				this.Logger?.Debug("Logging started");
 			}
 
+#if DEBUG
+			// If we are debugging then populate the cache of referenced assemblies.
+
+			// Populate the referenced assemblies (do it via a task though to allow application to start).
+			Task.Run(this.PopulateReferencedAssemblies);
+#endif
+
 		}
 
 		/// <inheritdoc />

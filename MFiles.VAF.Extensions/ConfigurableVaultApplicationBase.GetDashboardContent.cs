@@ -7,6 +7,8 @@ using System.Linq;
 using MFiles.VAF.Configuration.Domain;
 using MFiles.VAF.Extensions.Dashboards;
 using MFiles.VaultApplications.Logging.NLog.ExtensionMethods;
+using MFiles.VAF.Extensions.ExtensionMethods;
+using MFilesAPI;
 
 namespace MFiles.VAF.Extensions
 {
@@ -55,6 +57,11 @@ namespace MFiles.VAF.Extensions
 			// Do we have any logging content?
 			yield return this.GetLoggingDashboardContent(context);
 
+#if DEBUG
+			// Output any data that may be useful for development of the extensions library.
+			yield return this.GetDevelopmentDashboardData(context);
+#endif
+
 		}
 
 		/// <inheritdoc />
@@ -78,6 +85,126 @@ namespace MFiles.VAF.Extensions
 			// Return the dashboard.
 			return dashboard.ToString();
 		}
+
+#if DEBUG
+		protected void PopulateReferencedAssemblies()
+		{
+			this.Logger?.Trace($"Starting to load referenced assemblies");
+			using (var context = this.Logger?.BeginLoggingContext($"Loading referenced assemblies"))
+			{
+				try
+				{
+					var rootAssembly = this.Configuration?.GetType()?.Assembly
+						?? this.GetType().Assembly;
+					this.Logger?.Info($"Loading assemblies referenced by {rootAssembly.FullName}");
+					this.referencedAssemblies =
+						this.GetReferencedAssemblies(rootAssembly.GetName())?
+						.Distinct()?
+						.OrderBy(a => a.GetName().Name)?
+						.ToList();
+					this.Logger?.Info($"{this.referencedAssemblies.Count} assemblies loaded.");
+					foreach (var a in this.referencedAssemblies)
+					{
+						this.Logger?.Trace($"Assembly {a.FullName} is referenced from {a.Location}");
+					}
+				}
+				catch (Exception e)
+				{
+					this.Logger?.Error(e, $"Exception loading referenced assemblies");
+				}
+			}
+		}
+		private List<System.Reflection.Assembly> referencedAssemblies = null;
+		protected IEnumerable<System.Reflection.Assembly> GetReferencedAssemblies(System.Reflection.AssemblyName assemblyName)
+		{
+			// Try and load the assembly.
+			System.Reflection.Assembly assembly;
+			try { assembly = System.Reflection.Assembly.Load(assemblyName); }
+			catch { assembly = null;}
+			if(null != assembly)
+				yield return assembly;
+
+			// If we loaded it from somewhere other than the GAC then return its referenced items.
+			if(false == assembly.GlobalAssemblyCache)
+				foreach (var referencedAssembly in assembly.GetReferencedAssemblies())
+					foreach (var x in this.GetReferencedAssemblies(referencedAssembly))
+						yield return x;
+		}
+		public virtual IDashboardContent GetDevelopmentDashboardData(IConfigurationRequestContext context)
+		{
+			// Our data will go in a list.
+			var list = new DashboardList();
+
+			// Add the assemblies.
+			if(null != this.referencedAssemblies)
+			{
+
+				// Create the table to populate with assembly data.
+				var table = new DashboardTable();
+				{
+					var header = table.AddRow(DashboardTableRowType.Header);
+					header.AddCells
+					(
+						new DashboardCustomContent("Company"),
+						new DashboardCustomContent("Assembly"),
+						new DashboardCustomContent("Version"),
+						new DashboardCustomContent("Location")
+					);
+				}
+
+				Func<System.Reflection.Assembly, string> getCompanyName = (assembly) =>
+				{
+					try
+					{
+						var info = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+						if(false == string.IsNullOrWhiteSpace(info.CompanyName))
+							return info.CompanyName;
+						var attributes = assembly.GetCustomAttributes(typeof(System.Reflection.AssemblyCompanyAttribute), false);
+						if (null != attributes && attributes.Length > 0)
+							return (attributes.FirstOrDefault() as System.Reflection.AssemblyCompanyAttribute).Company;
+					}
+					catch
+					{
+					}
+					return "";
+				};
+
+				// Render the table.
+				foreach (var assembly in referencedAssemblies)
+				{
+					var row = table.AddRow();
+					row.AddCells
+					(
+						new DashboardCustomContent(getCompanyName(assembly)),
+						new DashboardCustomContent(assembly.GetName().Name),
+						new DashboardCustomContent(assembly.GetName().Version.ToString()),
+						new DashboardCustomContent(assembly.Location)
+					);
+					// Don't wrap the company name or assembly location.
+					row.Cells[0].Styles.AddOrUpdate("white-space", "nowrap");
+					row.Cells[2].Styles.AddOrUpdate("white-space", "nowrap");
+				}
+
+				// Add it to the list.
+				list.Items.Add(new DashboardListItemWithNormalWhitespace()
+				{
+					Title = "Referenced Assemblies",
+					InnerContent = table
+				});
+
+			}
+
+			// Return a panel with the table in it.
+			return new DashboardPanelEx()
+			{
+				Title = "Development Data",
+				InnerContent = new DashboardContentCollection
+				{
+					list
+				}
+			};
+		}
+#endif
 
 		/// <summary>
 		/// Returns the dashboard content showing asynchronous operation status.
