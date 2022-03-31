@@ -33,7 +33,8 @@ namespace MFiles.VAF.Extensions
 				return null;
 
 			// We can only show a certain number.
-			var totalTaskCount = applicationTasks.Count();
+			var allTasks = applicationTasks.ToList();
+			var totalTaskCount = allTasks.Count;
 			bool isFiltered = false;
 			if (totalTaskCount > maximumRowsToShow)
 				isFiltered = true;
@@ -169,7 +170,7 @@ namespace MFiles.VAF.Extensions
 			}
 
 			// Create an overview of the statuses.
-			var data = list.GroupBy(e => e.State).ToDictionary(e => e.Key, e => e.Count());
+			var data = allTasks.GroupBy(e => e.State).ToDictionary(e => e.Key, e => e.Count());
 			
 			var overview = new DashboardTable();
 			{
