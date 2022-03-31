@@ -196,6 +196,15 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Started.
+        /// </summary>
+        internal static string AsynchronousOperations_Table_StartedHeader {
+            get {
+                return ResourceManager.GetString("AsynchronousOperations_Table_StartedHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Task.
         /// </summary>
         internal static string AsynchronousOperations_Table_TaskHeader {

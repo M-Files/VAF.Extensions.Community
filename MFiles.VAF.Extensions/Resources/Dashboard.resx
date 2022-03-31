@@ -170,6 +170,9 @@
   <data name="AsynchronousOperations_Table_ScheduledHeader" xml:space="preserve">
     <value>Scheduled</value>
   </data>
+  <data name="AsynchronousOperations_Table_StartedHeader" xml:space="preserve">
+    <value>Started</value>
+  </data>
   <data name="AsynchronousOperations_Table_TaskHeader" xml:space="preserve">
     <value>Task</value>
   </data>

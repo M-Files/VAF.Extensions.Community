@@ -51,6 +51,7 @@ namespace MFiles.VAF.Extensions
 				(
 					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_TaskHeader.EscapeXmlForDashboard()),
 					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_ScheduledHeader.EscapeXmlForDashboard()),
+					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_StartedHeader.EscapeXmlForDashboard()),
 					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_DurationHeader.EscapeXmlForDashboard()),
 					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_DetailsHeader.EscapeXmlForDashboard())
 				);
@@ -75,6 +76,20 @@ namespace MFiles.VAF.Extensions
 					? new TaskInformation()
 					: new TaskInformation(execution.Status.Data);
 
+				// Copy data from the execution if needed.
+				taskInfo.Started = taskInfo.Started ?? execution.Status?.ReservedAt ?? execution.Status?.LastRetryStarted;
+				taskInfo.LastActivity = taskInfo.LastActivity ?? execution.Status?.EndedAt ?? execution.Status?.LastUpdatedAt;
+				taskInfo.StatusDetails = taskInfo.StatusDetails ?? execution.Status?.Details;
+				taskInfo.PercentageComplete = taskInfo.PercentageComplete ?? execution.Status?.PercentComplete;
+				if (taskInfo.CurrentTaskState != execution.State)
+					taskInfo.CurrentTaskState = execution.State;
+				var removeLineBreaks = false; // By default show the full text as sent.
+				if (taskInfo.CurrentTaskState == MFTaskState.MFTaskStateFailed)
+				{
+					taskInfo.StatusDetails = execution.Status?.ErrorMessage ?? taskInfo.StatusDetails;
+					removeLineBreaks = true; // Exceptions are LONG, so format them.
+				}
+
 				// Create the content for the scheduled column (including icon).
 				var taskInfoCell = new DashboardCustomContentEx(displayName.EscapeXmlForDashboard());
 				var scheduledCell = new DashboardCustomContentEx
@@ -87,20 +102,12 @@ namespace MFiles.VAF.Extensions
 								: FormattingExtensionMethods.DateTimeRepresentationOf.LastRun
 						)
 					);
-
-				// Copy data from the execution if needed.
-				taskInfo.Started = taskInfo.Started ?? execution.Status?.ReservedAt ?? execution.Status?.LastRetryStarted ?? taskInfo.LastActivity;
-				taskInfo.LastActivity = taskInfo.LastActivity ?? execution.Status?.EndedAt ?? execution.Status?.LastUpdatedAt ?? DateTime.UtcNow;
-				taskInfo.StatusDetails = taskInfo.StatusDetails ?? execution.Status?.Details;
-				taskInfo.PercentageComplete = taskInfo.PercentageComplete ?? execution.Status?.PercentComplete;
-				if (taskInfo.CurrentTaskState != execution.State)
-					taskInfo.CurrentTaskState = execution.State;
-				var removeLineBreaks = false; // By default show the full text as sent.
-				if (taskInfo.CurrentTaskState == MFTaskState.MFTaskStateFailed)
-				{
-					taskInfo.StatusDetails = execution.Status?.ErrorMessage ?? taskInfo.StatusDetails;
-					removeLineBreaks = true; // Exceptions are LONG, so format them.
-				}
+				var startedCell = new DashboardCustomContentEx
+				(
+					taskInfo.Started.HasValue
+					? taskInfo.Started.Value.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.LastRun)
+					: ""
+				);
 
 				// Add a row for this execution.
 				var row = table.AddRow();
@@ -153,20 +160,23 @@ namespace MFiles.VAF.Extensions
 				(
 					taskInfoCell,
 					scheduledCell,
+					startedCell,
 					new DashboardCustomContent(execution.State == MFilesAPI.MFTaskState.MFTaskStateWaiting ? "" : taskInfo?.GetElapsedTime().ToDisplayString()),
 					taskInfo?.AsDashboardContent(removeLineBreaks)
 				);
 
-				// First three cells should be as small as possible.
+				// First cells should be as small as possible.
 				row.Cells[0].Styles.AddOrUpdate("width", "1%");
 				row.Cells[0].Styles.AddOrUpdate("white-space", "nowrap");
 				row.Cells[1].Styles.AddOrUpdate("width", "1%");
 				row.Cells[1].Styles.AddOrUpdate("white-space", "nowrap");
 				row.Cells[2].Styles.AddOrUpdate("width", "1%");
 				row.Cells[2].Styles.AddOrUpdate("white-space", "nowrap");
+				row.Cells[3].Styles.AddOrUpdate("width", "1%");
+				row.Cells[3].Styles.AddOrUpdate("white-space", "nowrap");
 
 				// Last cell should have as much space as possible.
-				row.Cells[3].Styles.AddOrUpdate("width", "100%");
+				row.Cells[4].Styles.AddOrUpdate("width", "100%");
 			}
 
 			// Create an overview of the statuses.

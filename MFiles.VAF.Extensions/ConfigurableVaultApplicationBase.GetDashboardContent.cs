@@ -182,7 +182,7 @@ namespace MFiles.VAF.Extensions
 					);
 					// Don't wrap the company name or assembly location.
 					row.Cells[0].Styles.AddOrUpdate("white-space", "nowrap");
-					row.Cells[2].Styles.AddOrUpdate("white-space", "nowrap");
+					row.Cells[3].Styles.AddOrUpdate("white-space", "nowrap");
 				}
 
 				// Add it to the list.
