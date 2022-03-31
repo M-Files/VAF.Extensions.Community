@@ -24,16 +24,23 @@ namespace MFiles.VAF.Extensions
 		public static IDashboardContent AsDashboardContent<TDirective>
 		(
 			this IEnumerable<TaskInfo<TDirective>> applicationTasks,
-			int maximumRowsToShow = 40
+			int maximumRowsToShow = 100
 		)
 			where TDirective : TaskDirective
 		{
 			// Sanity.
 			if (null == applicationTasks || false == applicationTasks.Any())
 				return null;
+
+			// We can only show a certain number.
+			var totalTaskCount = applicationTasks.Count();
+			bool isFiltered = false;
+			if (totalTaskCount > maximumRowsToShow)
+				isFiltered = true;
+
 			var list = applicationTasks
 				.OrderByDescending(e => e.LatestActivity)
-				.ToList();
+				.Take(maximumRowsToShow);
 
 			// Create the table and header row.
 			DashboardTable table = new DashboardTable();
@@ -48,26 +55,8 @@ namespace MFiles.VAF.Extensions
 				);
 			}
 
-			List<TaskInfo<TDirective>> executionsToShow;
-			bool isFiltered = false;
-			if (list.Count <= maximumRowsToShow)
-				executionsToShow = list;
-			else
-			{
-				isFiltered = true;
-
-				// Show the latest 20 errors, then the rest filled with non-errors.
-				executionsToShow = new List<TaskInfo<TDirective>>
-				(
-					list
-						.Where(e => e.State == MFTaskState.MFTaskStateFailed)
-						.Take(20)
-						.Union(list.Where(e => e.State != MFTaskState.MFTaskStateFailed).Take(maximumRowsToShow - 20))
-				);
-			}
-
 			// Add a row for each execution to show.
-			foreach (var execution in executionsToShow)
+			foreach (var execution in list)
 			{
 				TaskDirective internalDirective = execution.Directive;
 				{
@@ -196,7 +185,7 @@ namespace MFiles.VAF.Extensions
 				if (isFiltered)
 					cell1.InnerContent = new DashboardCustomContentEx
 					(
-						$"<p style='font-size: 12px'><em>{Resources.Dashboard.AsynchronousOperations_Table_FilteredListComment.EscapeXmlForDashboard(maximumRowsToShow, list.Count)}</em></p>"
+						$"<p style='font-size: 12px'><em>{Resources.Dashboard.AsynchronousOperations_Table_FilteredListComment.EscapeXmlForDashboard(maximumRowsToShow, totalTaskCount)}</em></p>"
 					);
 
 				// The second cell contains the totals.

@@ -141,7 +141,7 @@
     <comment>{0} will be replaced with started time in yyyy-MM-dd HH:mm:ss format. {1} will be replaced with the duration.</comment>
   </data>
   <data name="AsynchronousOperations_Table_FilteredListComment" xml:space="preserve">
-    <value>This table shows only {0} of {1} tasks.</value>
+    <value>This table shows the most recently-modified {0} of {1} total tasks.</value>
     <comment>{0} will be replaced with the number of rows that can be shown, and {1} will be replaced with the number of tasks.</comment>
   </data>
   <data name="AsynchronousOperations_Table_Footer_AwaitingProcessing" xml:space="preserve">

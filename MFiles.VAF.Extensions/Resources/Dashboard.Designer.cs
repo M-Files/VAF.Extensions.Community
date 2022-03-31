@@ -124,7 +124,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This table shows only {0} of {1} tasks..
+        ///   Looks up a localized string similar to This table shows the most recently-modified {0} of {1} total tasks..
         /// </summary>
         internal static string AsynchronousOperations_Table_FilteredListComment {
             get {
