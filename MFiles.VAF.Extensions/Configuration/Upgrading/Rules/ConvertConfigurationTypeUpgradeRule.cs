@@ -21,14 +21,22 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		{
 		}
 
+		/// <summary>
+		/// Returns the configuration storage to use.
+		/// </summary>
+		/// <param name="namedValueType">The type of data to be read/written.</param>
+		/// <returns>The configuration storage.</returns>
+		protected virtual IConfigurationStorage GetConfigurationStorage(MFNamedValueType namedValueType)
+			=> new ConfigurationStorageInVault
+			(
+				primaryLocation: namedValueType
+			);
+
 		/// <inheritdoc />
 		public override bool Execute(Vault vault)
 		{
 			// Create a configuration storage to use.
-			var configurationStorage = new ConfigurationStorageInVault
-			(
-				primaryLocation: this.Options.Source.NamedValueType
-			);
+			var configurationStorage = this.GetConfigurationStorage(this.Options.Source.NamedValueType);
 
 			// Attempt to load the data from storage.
 			if(false == configurationStorage.ReadConfigurationData(vault, this.Options.Source.Namespace, this.Options.Source.Name, out string oldData))
