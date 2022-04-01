@@ -5,12 +5,8 @@ using System.Linq;
 namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 {
 	public class MoveConfigurationUpgradeRule
-		: IUpgradeRule
+		: UpgradeRuleBase<MoveConfigurationUpgradeRule.MoveConfigurationUpgradeRuleOptions>
 	{
-		/// <summary>
-		/// Options defining how to move the configuration.
-		/// </summary>
-		protected MoveConfigurationUpgradeRuleOptions Options { get; }
 
 		/// <summary>
 		/// The manager to interact with named value storage.
@@ -25,26 +21,17 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// <exception cref="ArgumentNullException">If <paramref name="options"/> is null.</exception>
 		/// <exception cref="ArgumentException">If some part of <paramref name="options"/> is invalid.</exception>
 		public MoveConfigurationUpgradeRule(MoveConfigurationUpgradeRuleOptions options)
+			: base(options)
 		{
 			// Sanity.
-			if (null == options)
-				throw new ArgumentNullException(nameof(options));
-			if (null == options.Source)
-				throw new ArgumentException("The source location is null.", nameof(options));
-			if (null == options.Target)
-				throw new ArgumentException("The target location is null.", nameof(options));
-			if (false == options.Source.IsValid())
-				throw new ArgumentException($"The source location is invalid.");
-			if (false == options.Target.IsValid())
-				throw new ArgumentException($"The target location is invalid.");
-
-			this.Options = options;
+			if(false == options.IsValid())
+				throw new ArgumentException("The options are invalid.", nameof(options));
 		}
 
 		/// <inheritdoc />
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="vault"/> is null.</exception>
 		/// <exception cref="InvalidOperationException">Thrown if <see cref="NamedValueStorageManager"/> is null.</exception>
-		public bool Execute(Vault vault)
+		public override bool Execute(Vault vault)
 		{
 			// Sanity.
 			if (null == vault)
@@ -74,6 +61,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// Options for <see cref="MoveConfigurationUpgradeRule"/>.
 		/// </summary>
 		public class MoveConfigurationUpgradeRuleOptions
+			: UpgradeRuleOptionsBase
 		{
 			/// <summary>
 			/// Whether to remove values from the <see cref="Source"/> once they have been moved.
@@ -90,6 +78,17 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 			/// A definition of where to copy the values to.
 			/// </summary>
 			public ITargetNamedValueItem Target { get; set; }
+
+			/// <inheritdoc />
+			public override bool IsValid()
+			{
+				if (null == this.Source || false == this.Source.IsValid())
+					return false;
+				if (null == this.Target || false == this.Target.IsValid())
+					return false;
+
+				return true;
+			}
 		}
 	}
 }

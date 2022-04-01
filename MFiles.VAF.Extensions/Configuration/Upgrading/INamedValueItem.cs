@@ -17,6 +17,12 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		/// The namespace for this item.
 		/// </summary>
 		string Namespace { get; set; }
+
+		/// <summary>
+		/// Whether the item is considered valid (e.g. it may be invalid if the <see cref="Namespace"/> is null).
+		/// </summary>
+		/// <returns><see langword="true"/> if the source is considered valid and can be used.</returns>
+		bool IsValid();
 	}
 
 	/// <summary>

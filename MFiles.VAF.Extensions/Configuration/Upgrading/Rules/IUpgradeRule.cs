@@ -1,4 +1,5 @@
 ﻿using MFilesAPI;
+using System;
 
 namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 {
@@ -15,5 +16,37 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// <returns><see langword="true"/> if the rule ran successfully, <see langword="false"/> if the rule chose not to run (e.g. there was nothing to migrate).</returns>
 		/// <remarks>May throw exceptions.</remarks>
 		bool Execute(Vault vault);
+	}
+	public abstract class UpgradeRuleBase<TOptions>
+		: IUpgradeRule
+		where TOptions : class, IUpgradeRuleOptions
+	{
+		/// <summary>
+		/// Options for the rule.
+		/// </summary>
+		protected TOptions Options { get; }
+
+		public UpgradeRuleBase(TOptions options)
+		{
+			// Sanity.
+			this.Options = options ?? throw new ArgumentNullException(nameof(options));
+		}
+
+		/// <inheritdoc />
+		public abstract bool Execute(Vault vault);
+	}
+	public interface IUpgradeRuleOptions
+	{
+		/// <summary>
+		/// Returns whether the rules are correctly configured to allow execution.
+		/// </summary>
+		/// <returns><see langword="true"/> if execution can be attempted.</returns>
+		bool IsValid();
+	}
+	public abstract class UpgradeRuleOptionsBase
+		: IUpgradeRuleOptions
+	{
+		/// <inheritdoc />
+		public abstract bool IsValid();
 	}
 }
