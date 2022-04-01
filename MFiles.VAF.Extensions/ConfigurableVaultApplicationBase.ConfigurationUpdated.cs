@@ -1,5 +1,7 @@
 ﻿using MFiles.VAF.Common;
 using MFiles.VAF.Configuration;
+using MFiles.VAF.Extensions.Configuration;
+using MFiles.VAF.Extensions.Configuration.Upgrading;
 using MFiles.VaultApplications.Logging;
 using MFilesAPI;
 using System;
@@ -18,10 +20,10 @@ namespace MFiles.VAF.Extensions
 	where TSecureConfiguration : class, new()
 	{
 		/// <inheritdoc />
-		protected override void OnConfigurationUpdated(TSecureConfiguration oldConfiguration, bool updateExternals)
+		protected override void OnConfigurationUpdated(TSecureConfiguration oldConfiguration, bool isValid, bool updateExternals)
 		{
 			// Base implementation is empty, but good practice to call it.
-			base.OnConfigurationUpdated(oldConfiguration, updateExternals);
+			base.OnConfigurationUpdated(oldConfiguration, isValid, updateExternals);
 
 			// Populate the task processing schedule configuration.
 			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(isVaultStartup: false);
@@ -30,10 +32,38 @@ namespace MFiles.VAF.Extensions
 			if (this.Configuration is Configuration.IConfigurationWithLoggingConfiguration configurationWithLogging)
 			{
 				this.Logger?.Debug("Logging configuration updating");
-				base.OnConfigurationUpdated(oldConfiguration, updateExternals);
 				LogManager.UpdateConfiguration(configurationWithLogging?.GetLoggingConfiguration());
 				this.Logger?.Debug("Logging configuration updated");
 			}
+		}
+
+		/// <summary>
+		/// Gets any rules that should be applied to the configuration.
+		/// These rules may define a change in configuration location (e.g. to migrate older configuration to a newer location),
+		/// or define how to map older configuration structures across to new.
+		/// Rules will be executed in the order that they appear in the list.
+		/// Rules are run when the configuration is loaded.
+		/// </summary>
+		/// <returns>
+		/// The rules to run.
+		/// </returns>
+		protected virtual IEnumerable<Configuration.Upgrading.Rules.IUpgradeRule> GetConfigurationUpgradeRules()
+		{
+			yield break;
+		}
+
+		/// <inheritdoc />
+		/// <remarks>Will run any <see cref="GetConfigurationUpgradeRules"/> at this point.</remarks>
+		protected override void PopulateConfigurationObjects(Vault vault)
+		{
+			// Run any configuration upgrade rules.
+			var rules = this.GetConfigurationUpgradeRules();
+			if (null != rules)
+				foreach (var rule in rules)
+					rule?.Execute(vault);
+
+			// Use the base implementation.
+			base.PopulateConfigurationObjects(vault);
 		}
 
 		/// <inheritdoc />
