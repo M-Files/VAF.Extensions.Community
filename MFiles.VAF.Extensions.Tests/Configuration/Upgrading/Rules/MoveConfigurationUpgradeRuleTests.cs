@@ -11,21 +11,6 @@ using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 {
-	public abstract class UpgradeRuleTestBase
-	{
-		public Mock<ISourceNamedValueItem> CreateSourceNamedValueItemMock(bool isValid)
-		{
-			var mock = new Mock<ISourceNamedValueItem>();
-			mock.Setup(m => m.IsValid()).Returns(isValid);
-			return mock;
-		}
-		public Mock<ITargetNamedValueItem> CreateTargetNamedValueItemMock(bool isValid)
-		{
-			var mock = new Mock<ITargetNamedValueItem>();
-			mock.Setup(m => m.IsValid()).Returns(isValid);
-			return mock;
-		}
-	}
 	[TestClass]
 	public class MoveConfigurationUpgradeRuleTests
 		: UpgradeRuleTestBase
@@ -100,20 +85,13 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		public void Execute_ReturnsFalseIfNoMatchingNamedValues()
 		{
 			var mock = new Mock<INamedValueStorageManager>();
-			mock.Setup(m => m.GetNamedValues(It.IsAny<Vault>(), MFNamedValueType.MFConfigurationValue, "a"))
+			mock.Setup(m => m.GetNamedValues(It.IsAny<Vault>(), DefaultSourceNVSType, DefaultSourceNamespace))
 				.Returns((NamedValues)null)
 				.Verifiable("Data was not retrieved from NVS.");
 
-			var sourceMock = this.CreateSourceNamedValueItemMock(true);
-			sourceMock.Setup(m => m.GetNamedValues(It.IsAny<INamedValueStorageManager>(), It.IsAny<Vault>()))
-				.Returns((INamedValueStorageManager manager, Vault vault) =>
-				{
-					return manager?.GetNamedValues(vault, MFNamedValueType.MFConfigurationValue, "a");
-				});
-
 			var rule = new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.MoveConfigurationUpgradeRuleOptions()
 			{
-				Source = sourceMock.Object,
+				Source = this.CreateSourceNamedValueItemMock(true).Object,
 				Target = this.CreateTargetNamedValueItemMock(true).Object
 			}, mock);
 
@@ -127,30 +105,16 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		{
 			var namedValues = new NamedValues();
 			var mock = new Mock<INamedValueStorageManager>();
-			mock.Setup(m => m.GetNamedValues(It.IsAny<Vault>(), MFNamedValueType.MFConfigurationValue, "a"))
+			mock.Setup(m => m.GetNamedValues(It.IsAny<Vault>(), DefaultSourceNVSType, DefaultSourceNamespace))
 				.Returns(namedValues)
 				.Verifiable("Data was not retrieved from NVS.");
-			mock.Setup(m => m.SetNamedValues(It.IsAny<Vault>(), MFNamedValueType.MFConfigurationValue, "b", namedValues))
+			mock.Setup(m => m.SetNamedValues(It.IsAny<Vault>(), DefaultTargetNVSType, DefaultTargetNamespace, namedValues))
 				.Verifiable("Data was not set in NVS.");
-
-			var sourceMock = this.CreateSourceNamedValueItemMock(true);
-			sourceMock.Setup(m => m.GetNamedValues(It.IsAny<INamedValueStorageManager>(), It.IsAny<Vault>()))
-				.Returns((INamedValueStorageManager manager, Vault vault) =>
-				{
-					return manager?.GetNamedValues(vault, MFNamedValueType.MFConfigurationValue, "a");
-				});
-
-			var targetMock = this.CreateTargetNamedValueItemMock(true);
-			targetMock.Setup(m => m.SetNamedValues(It.IsAny<INamedValueStorageManager>(), It.IsAny<Vault>(), namedValues))
-				.Callback((INamedValueStorageManager manager, Vault vault, NamedValues nv) =>
-				{
-					manager?.SetNamedValues(vault, MFNamedValueType.MFConfigurationValue, "b", nv);
-				});
 
 			var rule = new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.MoveConfigurationUpgradeRuleOptions()
 			{
-				Source = sourceMock.Object,
-				Target = targetMock.Object
+				Source = this.CreateSourceNamedValueItemMock(true).Object,
+				Target = this.CreateTargetNamedValueItemMock(true).Object
 			}, mock);
 
 			Assert.IsTrue(rule.Execute(Mock.Of<Vault>()));
@@ -163,27 +127,13 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		{
 			var namedValues = new NamedValues();
 			var mock = new Mock<INamedValueStorageManager>();
-			mock.Setup(m => m.GetNamedValues(It.IsAny<Vault>(), MFNamedValueType.MFConfigurationValue, "a"))
+			mock.Setup(m => m.GetNamedValues(It.IsAny<Vault>(), DefaultSourceNVSType, DefaultSourceNamespace))
 				.Returns(namedValues);
-
-			var sourceMock = this.CreateSourceNamedValueItemMock(true);
-			sourceMock.Setup(m => m.GetNamedValues(It.IsAny<INamedValueStorageManager>(), It.IsAny<Vault>()))
-				.Returns((INamedValueStorageManager manager, Vault vault) =>
-				{
-					return manager?.GetNamedValues(vault, MFNamedValueType.MFConfigurationValue, "a");
-				});
-
-			var targetMock = this.CreateTargetNamedValueItemMock(true);
-			targetMock.Setup(m => m.SetNamedValues(It.IsAny<INamedValueStorageManager>(), It.IsAny<Vault>(), namedValues))
-				.Callback((INamedValueStorageManager manager, Vault vault, NamedValues nv) =>
-				{
-					manager?.SetNamedValues(vault, MFNamedValueType.MFConfigurationValue, "b", nv);
-				});
 
 			var rule = new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.MoveConfigurationUpgradeRuleOptions()
 			{
-				Source = sourceMock.Object,
-				Target = targetMock.Object,
+				Source = this.CreateSourceNamedValueItemMock(true).Object,
+				Target = this.CreateTargetNamedValueItemMock(true).Object,
 				RemoveMovedValues = false
 			}, mock);
 
@@ -209,38 +159,19 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			var namedValues = new NamedValues();
 			namedValues["hello"] = "world";
 			var mock = new Mock<INamedValueStorageManager>();
-			mock.Setup(m => m.GetNamedValues(It.IsAny<Vault>(), MFNamedValueType.MFConfigurationValue, "a"))
+			mock.Setup(m => m.GetNamedValues(It.IsAny<Vault>(), DefaultSourceNVSType, DefaultSourceNamespace))
 				.Returns(namedValues);
-			mock.Setup(m => m.RemoveNamedValues(It.IsAny<Vault>(), MFNamedValueType.MFConfigurationValue, "a", It.IsAny<string[]>()))
+			mock.Setup(m => m.RemoveNamedValues(It.IsAny<Vault>(), DefaultSourceNVSType, DefaultSourceNamespace, It.IsAny<string[]>()))
 				.Callback((Vault vault, MFNamedValueType type, string @namespace, string[] names) =>
 				{
 					Assert.AreEqual(1, names.Length);
 					Assert.AreEqual("hello", names[0]);
 				});
 
-			var sourceMock = this.CreateSourceNamedValueItemMock(true);
-			sourceMock.Setup(m => m.GetNamedValues(It.IsAny<INamedValueStorageManager>(), It.IsAny<Vault>()))
-				.Returns((INamedValueStorageManager manager, Vault vault) =>
-				{
-					return manager?.GetNamedValues(vault, MFNamedValueType.MFConfigurationValue, "a");
-				});
-			sourceMock.Setup(m => m.RemoveNamedValues(It.IsAny<INamedValueStorageManager>(), It.IsAny<Vault>(), It.IsAny<string[]>()))
-				.Callback((INamedValueStorageManager manager, Vault vault, string[] names) =>
-				{
-					manager?.RemoveNamedValues(vault, MFNamedValueType.MFConfigurationValue, "a", names);
-				});
-
-			var targetMock = this.CreateTargetNamedValueItemMock(true);
-			targetMock.Setup(m => m.SetNamedValues(It.IsAny<INamedValueStorageManager>(), It.IsAny<Vault>(), namedValues))
-				.Callback((INamedValueStorageManager manager, Vault vault, NamedValues nv) =>
-				{
-					manager?.SetNamedValues(vault, MFNamedValueType.MFConfigurationValue, "b", nv);
-				});
-
 			var rule = new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.MoveConfigurationUpgradeRuleOptions()
 			{
-				Source = sourceMock.Object,
-				Target = targetMock.Object,
+				Source = this.CreateSourceNamedValueItemMock(true).Object,
+				Target = this.CreateTargetNamedValueItemMock(true).Object,
 				RemoveMovedValues = true
 			}, mock);
 
