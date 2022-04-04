@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 {
+
 	[TestClass]
 	public class MoveConfigurationUpgradeRuleTests
 		: UpgradeRuleTestBase
