@@ -1,4 +1,6 @@
 ﻿using MFilesAPI;
+using System;
+using System.Linq;
 
 namespace MFiles.VAF.Extensions.Configuration.Upgrading
 {
@@ -173,6 +175,14 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		/// <inheritdoc />
 		public override NamedValues GetNamedValues(INamedValueStorageManager manager, Vault vault)
 		{
+			// Sanity.
+			if (null == manager)
+				throw new ArgumentNullException(nameof(manager));
+			if (null == vault)
+				throw new ArgumentNullException(nameof(vault));
+			if (false == this.IsValid())
+				throw new InvalidOperationException("This object is not in a valid state");
+
 			// Get all the items in this namespace.
 			var allValuesInNamespace = manager.GetNamedValues(vault, this.NamedValueType, this.Namespace);
 			if (null == allValuesInNamespace)
@@ -196,6 +206,25 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 
 		/// <inheritdoc />
 		public override void SetNamedValues(INamedValueStorageManager manager, Vault vault, NamedValues namedValues)
-			=> manager.SetNamedValues(vault, this.NamedValueType, this.Namespace, namedValues);
+		{
+			// Sanity.
+			if (null == manager)
+				throw new ArgumentNullException(nameof(manager));
+			if (null == vault)
+				throw new ArgumentNullException(nameof(vault));
+			if (false == this.IsValid())
+				throw new InvalidOperationException("This object is not in a valid state");
+
+			if ((namedValues?.Names?.Count ?? 0) == 0)
+				return;
+			if (namedValues.Names.Count != 1)
+				throw new ArgumentException("Cannot move multiple named values to a single location.", nameof(namedValues));
+
+			// Copy to a new instance for the target key.
+			var toSet = new NamedValues();
+			toSet[this.Name] = namedValues[namedValues.Names.Cast<string>().First()];
+
+			manager.SetNamedValues(vault, this.NamedValueType, this.Namespace, toSet);
+		}
 	}
 }

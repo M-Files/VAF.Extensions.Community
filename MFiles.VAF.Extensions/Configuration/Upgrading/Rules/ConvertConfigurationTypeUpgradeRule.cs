@@ -1,6 +1,7 @@
 ﻿using MFiles.VAF.Configuration;
 using MFilesAPI;
 using System;
+using System.Resources;
 
 namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 {
@@ -12,25 +13,39 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 	/// </summary>
 	/// <typeparam name="TInput">The older type of configuration.</typeparam>
 	/// <typeparam name="TOutput">The newer type of configuration.</typeparam>
-	public abstract class ConvertConfigurationTypeUpgradeRule<TInput, TOutput>
+	public class ConvertConfigurationTypeUpgradeRule<TInput, TOutput>
 		: UpgradeRuleBase<ConvertConfigurationTypeUpgradeRule<TInput, TOutput>.ConvertConfigurationTypeUpgradeRuleOptions>
 		where TInput : class, new()
-		where TOutput: class, new()
+		where TOutput : class, new()
 	{
 		/// <summary>
 		/// The configuration storage to use.
 		/// </summary>
 		protected internal virtual IConfigurationStorage ConfigurationStorage { get; }
 
-		protected ConvertConfigurationTypeUpgradeRule(ConvertConfigurationTypeUpgradeRuleOptions options)
-			: this(options, null)
+		protected Func<TInput, TOutput> Conversion { get; }
+
+		public Newtonsoft.Json.JsonSerializerSettings JsonSerializerSettings { get; set; }
+			= new Newtonsoft.Json.JsonSerializerSettings()
+			{
+				DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore,
+				NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
+			};
+
+		public ConvertConfigurationTypeUpgradeRule
+		(
+			ConvertConfigurationTypeUpgradeRuleOptions options,
+			Func<TInput, TOutput> conversion = null
+		)
+			: this(options, null, conversion)
 		{
 		}
 
 		internal ConvertConfigurationTypeUpgradeRule
 		(
 			ConvertConfigurationTypeUpgradeRuleOptions options, 
-			IConfigurationStorage configurationStorage
+			IConfigurationStorage configurationStorage,
+			Func<TInput, TOutput> conversion = null
 		)
 			: base(options)
 		{
@@ -38,6 +53,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 			(
 				primaryLocation: options.Source.NamedValueType
 			);
+			this.Conversion = conversion ?? throw new ArgumentNullException(nameof(conversion), "The conversion function cannot be null.");
 		}
 
 		/// <inheritdoc />
@@ -53,9 +69,15 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 
 			// Convert it.
 			var newObject = this.Convert(oldObject);
+			var newString = Newtonsoft.Json.JsonConvert.SerializeObject
+			(
+				newObject,
+				Newtonsoft.Json.Formatting.Indented,
+				this.JsonSerializerSettings
+			);
 
 			// Save the new data to storage.
-			this.ConfigurationStorage.Save(vault, newObject, this.Options.Source.Namespace, this.Options.Source.Name);
+			this.ConfigurationStorage.SaveConfigurationData(vault, this.Options.Source.Namespace, newString, this.Options.Source.Name);
 
 			return true;
 		}
@@ -65,7 +87,8 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// </summary>
 		/// <param name="input">An instance of the older configuration to migrate.</param>
 		/// <returns>The equivalent new configuration structure.</returns>
-		public abstract TOutput Convert(TInput input);
+		public TOutput Convert(TInput input)
+			=> this.Conversion(input);
 
 		/// <summary>
 		/// Options for <see cref="ConvertConfigurationTypeUpgradeRule"/>.
@@ -86,6 +109,19 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 					return false;
 
 				return true;
+			}
+
+			public static ConvertConfigurationTypeUpgradeRuleOptions ForLatestLocation(VaultApplicationBase vaultApplication)
+			{
+				return new ConvertConfigurationTypeUpgradeRuleOptions()
+				{
+					Source = new SingleNamedValueItem
+					(
+						MFNamedValueType.MFSystemAdminConfiguration,
+						vaultApplication?.GetType()?.FullName ?? throw new ArgumentNullException(nameof(vaultApplication)),
+						"configuration"
+					)
+				};
 			}
 		}
 	}

@@ -29,7 +29,7 @@ namespace MFiles.VAF.Extensions.Configuration
 
 		/// <inheritdoc />
 		[DataMember(EmitDefaultValue = true)]
-		public abstract Version Version { get; set; }
+		public Version Version { get; set; }
 
 		/// <inheritdoc />
 		public ILoggingConfiguration GetLoggingConfiguration()

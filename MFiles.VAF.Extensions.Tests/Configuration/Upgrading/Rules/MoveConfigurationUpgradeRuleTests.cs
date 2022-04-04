@@ -105,6 +105,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		public void Execute_SetsValuesAndReturnsTrue()
 		{
 			var namedValues = new NamedValues();
+			namedValues["conf"] = "hello world";
 			var mock = new Mock<INamedValueStorageManager>();
 			mock.Setup(m => m.GetNamedValues(It.IsAny<Vault>(), DefaultSourceNVSType, DefaultSourceNamespace))
 				.Returns(namedValues)

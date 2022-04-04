@@ -125,7 +125,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		}
 
 		[TestMethod]
-		public void Execute_CallsSave()
+		public void Execute_CallsSaveConfigurationData()
 		{
 			var sourceMock = new Mock<ISingleNamedValueItem>();
 			sourceMock.Setup(m => m.IsValid()).Returns(true);
@@ -148,21 +148,19 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 
 			Assert.IsTrue(instance.Execute(Mock.Of<Vault>()));
 
-			storageMock.Verify(m => m.Save(It.IsAny<Vault>(), It.IsAny<object>(), sourceMock.Object.Namespace, sourceMock.Object.Name));
+			storageMock.Verify(m => m.SaveConfigurationData(It.IsAny<Vault>(), sourceMock.Object.Namespace, "{}", sourceMock.Object.Name));
 		}
 
 		private class ConvertConfigurationTypeUpgradeRuleProxy
 			: ConvertConfigurationTypeUpgradeRule<Input, Output>
 		{
-			public Func<Input, Output> Conversion { get; set; }
 			public ConvertConfigurationTypeUpgradeRuleProxy
 			(
 				ConvertConfigurationTypeUpgradeRuleOptions options,
 				Func<Input, Output> conversion = null
 			)
-				: base(options)
+				: base(options, conversion ?? new Func<Input, Output>(input => DefaultConvert(input)))
 			{
-				this.Conversion = conversion?? new Func<Input, Output>(input => this.DefaultConvert(input));
 			}
 
 			public ConvertConfigurationTypeUpgradeRuleProxy
@@ -171,19 +169,15 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 				IConfigurationStorage configurationStorage,
 				Func<Input, Output> conversion = null
 			)
-				: base(options, configurationStorage)
+				: base(options, configurationStorage, conversion ?? new Func<Input, Output>(input => DefaultConvert(input)))
 			{
-				this.Conversion = conversion ?? new Func<Input, Output>(input => this.DefaultConvert(input));
 			}
 
-			public Output DefaultConvert(Input input)
+			protected static Output DefaultConvert(Input input)
 				=> new Output()
 				{
 					Y = input?.X
 				};
-
-			public override Output Convert(Input input)
-				=> Conversion(input);
 
 		}
 
