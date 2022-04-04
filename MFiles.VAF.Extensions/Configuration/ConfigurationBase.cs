@@ -10,27 +10,13 @@ using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions.Configuration
 {
-	/// <summary>
-	/// An interface that is used to denote that the configuration class exposes
-	/// logging configuration somehow.
-	/// </summary>
-	public interface IConfigurationWithLoggingConfiguration
-	{
-		/// <summary>
-		/// Returns the logging configuration from whereever it may be configured.
-		/// </summary>
-		/// <returns>
-		/// The logging configuration.
-		/// </returns>
-		ILoggingConfiguration GetLoggingConfiguration();
-	}
 
 	/// <summary>
 	/// A base class for configuration that implements <see cref="IConfigurationWithLoggingConfiguration"/>.
 	/// </summary>
 	[DataContract]
 	public abstract class ConfigurationBase
-		: IConfigurationWithLoggingConfiguration
+		: IConfigurationWithLoggingConfiguration, IVersionedConfiguration
 	{
 		[DataMember]
 		[JsonConfEditor
@@ -40,6 +26,10 @@ namespace MFiles.VAF.Extensions.Configuration
 		)]
 		[Security(ChangeBy = SecurityAttribute.UserLevel.VaultAdmin, ViewBy = SecurityAttribute.UserLevel.VaultAdmin)]
 		public NLogLoggingConfiguration Logging { get; set; } = new NLogLoggingConfiguration();
+
+		/// <inheritdoc />
+		[DataMember(EmitDefaultValue = true)]
+		public abstract Version Version { get; set; }
 
 		/// <inheritdoc />
 		public ILoggingConfiguration GetLoggingConfiguration()

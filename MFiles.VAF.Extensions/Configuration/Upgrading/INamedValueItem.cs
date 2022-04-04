@@ -6,7 +6,6 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 	/// Defines an item in Named Value Storage that can be read and written to.
 	/// </summary>
 	public interface INamedValueItem
-		: ISourceNamedValueItem, ITargetNamedValueItem
 	{
 		/// <summary>
 		/// The type of entry.
@@ -29,6 +28,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 	/// Defines an item in Named Value Storage that can be read.
 	/// </summary>
 	public interface ISourceNamedValueItem
+		: INamedValueItem
 	{
 		/// <summary>
 		/// Retrieves the item(s) from Named Value Storage.
@@ -45,18 +45,13 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		/// <param name="vault">The vault to read the data from.</param>
 		/// <param name="namedValueNames">The item(s) within this namespace to remove.</param>
 		void RemoveNamedValues(INamedValueStorageManager manager, Vault vault, params string[] namedValueNames);
-
-		/// <summary>
-		/// Whether the item is considered valid (e.g. it may be invalid if the <see cref="Namespace"/> is null).
-		/// </summary>
-		/// <returns><see langword="true"/> if the source is considered valid and can be used.</returns>
-		bool IsValid();
 	}
 
 	/// <summary>
 	/// Defines an item in Named Value Storage that can be written to.
 	/// </summary>
 	public interface ITargetNamedValueItem
+		: INamedValueItem
 	{
 		/// <summary>
 		/// Writes the item(s) to Named Value Storage.
@@ -65,12 +60,6 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		/// <param name="vault">The vault to write the data to.</param>
 		/// <param name="namedValues">The item(s) to write.</param>
 		void SetNamedValues(INamedValueStorageManager manager, Vault vault, NamedValues namedValues);
-
-		/// <summary>
-		/// Whether the item is considered valid (e.g. it may be invalid if the <see cref="Namespace"/> is null).
-		/// </summary>
-		/// <returns><see langword="true"/> if the source is considered valid and can be used.</returns>
-		bool IsValid();
 	}
 
 	/// <summary>
@@ -115,11 +104,17 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 			=> manager.RemoveNamedValues(vault, this.NamedValueType, this.Namespace, namedValueNames);
 	}
 
+	public interface IEntireNamespaceNamedValueItem
+		: ISourceNamedValueItem, ITargetNamedValueItem
+	{
+
+	}
+
 	/// <summary>
 	/// Represents all items within a namespace.
 	/// </summary>
 	public class EntireNamespaceNamedValueItem
-		: NamedValueItemBase
+		: NamedValueItemBase, IEntireNamespaceNamedValueItem
 	{
 		/// <summary>
 		/// Creates a reference to all items in a given namespace.
@@ -144,11 +139,21 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 			=> manager.SetNamedValues(vault, this.NamedValueType, this.Namespace, namedValues);
 	}
 
+	public interface ISingleNamedValueItem
+		: ISourceNamedValueItem, ITargetNamedValueItem
+	{
+
+		/// <summary>
+		/// The name (key) of the item within the namespace.
+		/// </summary>
+		string Name { get; set; }
+	}
+
 	/// <summary>
 	/// Represents a single named item within a namespace.
 	/// </summary>
 	public class SingleNamedValueItem
-		: NamedValueItemBase, ISourceNamedValueItem, ITargetNamedValueItem
+		: NamedValueItemBase, ISingleNamedValueItem
 	{
 		/// <summary>
 		/// Creates a reference to a single named item (<paramref name="name"/>) within a given namespace.
@@ -162,9 +167,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 			this.Name = name;
 		}
 
-		/// <summary>
-		/// The name (key) of the item within the namespace.
-		/// </summary>
+		/// <inheritdoc />
 		public string Name { get; set; }
 
 		/// <inheritdoc />
@@ -172,6 +175,8 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		{
 			// Get all the items in this namespace.
 			var allValuesInNamespace = manager.GetNamedValues(vault, this.NamedValueType, this.Namespace);
+			if (null == allValuesInNamespace)
+				return null;
 
 			// If we don't have a value then return null, so that it gets skipped.
 			if (false == allValuesInNamespace.Contains(this.Name))

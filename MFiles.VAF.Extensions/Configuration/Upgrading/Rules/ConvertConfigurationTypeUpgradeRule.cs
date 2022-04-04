@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Configuration;
 using MFilesAPI;
+using System;
 
 namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 {
@@ -16,40 +17,45 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		where TInput : class, new()
 		where TOutput: class, new()
 	{
+		/// <summary>
+		/// The configuration storage to use.
+		/// </summary>
+		protected internal virtual IConfigurationStorage ConfigurationStorage { get; }
+
 		protected ConvertConfigurationTypeUpgradeRule(ConvertConfigurationTypeUpgradeRuleOptions options)
-			: base(options)
+			: this(options, null)
 		{
 		}
 
-		/// <summary>
-		/// Returns the configuration storage to use.
-		/// </summary>
-		/// <param name="namedValueType">The type of data to be read/written.</param>
-		/// <returns>The configuration storage.</returns>
-		protected virtual IConfigurationStorage GetConfigurationStorage(MFNamedValueType namedValueType)
-			=> new ConfigurationStorageInVault
+		internal ConvertConfigurationTypeUpgradeRule
+		(
+			ConvertConfigurationTypeUpgradeRuleOptions options, 
+			IConfigurationStorage configurationStorage
+		)
+			: base(options)
+		{
+			this.ConfigurationStorage = configurationStorage ?? new ConfigurationStorageInVault
 			(
-				primaryLocation: namedValueType
+				primaryLocation: options.Source.NamedValueType
 			);
+		}
 
 		/// <inheritdoc />
 		public override bool Execute(Vault vault)
 		{
-			// Create a configuration storage to use.
-			var configurationStorage = this.GetConfigurationStorage(this.Options.Source.NamedValueType);
 
 			// Attempt to load the data from storage.
-			if(false == configurationStorage.ReadConfigurationData(vault, this.Options.Source.Namespace, this.Options.Source.Name, out string oldData))
+			if(false == this.ConfigurationStorage.ReadConfigurationData(vault, this.Options.Source.Namespace, this.Options.Source.Name, out string oldData))
 				return false; // Not there, so die.
 
 			// Deserialize it.
-			var oldObject = configurationStorage.Deserialize<TInput>(oldData);
+			var oldObject = this.ConfigurationStorage.Deserialize<TInput>(oldData);
 
 			// Convert it.
 			var newObject = this.Convert(oldObject);
 
 			// Save the new data to storage.
-			configurationStorage.Save(vault, newObject, this.Options.Source.Namespace, this.Options.Source.Name);
+			this.ConfigurationStorage.Save(vault, newObject, this.Options.Source.Namespace, this.Options.Source.Name);
 
 			return true;
 		}
@@ -71,7 +77,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 			/// A definition of where the values are stored.
 			/// The value will be read, converted, then written to the same location.
 			/// </summary>
-			public SingleNamedValueItem Source { get; set; }
+			public ISingleNamedValueItem Source { get; set; }
 
 			/// <inheritdoc />
 			public override bool IsValid()

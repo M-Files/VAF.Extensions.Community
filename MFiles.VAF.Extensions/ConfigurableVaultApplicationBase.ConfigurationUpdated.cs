@@ -59,8 +59,19 @@ namespace MFiles.VAF.Extensions
 			// Run any configuration upgrade rules.
 			var rules = this.GetConfigurationUpgradeRules();
 			if (null != rules)
+			{
 				foreach (var rule in rules)
-					rule?.Execute(vault);
+				{
+					try
+					{
+						rule?.Execute(vault);
+					}
+					catch (Exception ex)
+					{
+						this.Logger?.Error(ex, $"Could not execute configuration migration rule of type {rule?.GetType()?.FullName}");
+					}
+				}
+			}
 
 			// Use the base implementation.
 			base.PopulateConfigurationObjects(vault);

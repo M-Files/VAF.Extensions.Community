@@ -24,7 +24,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// <summary>
 		/// Options for the rule.
 		/// </summary>
-		protected TOptions Options { get; }
+		protected internal TOptions Options { get; }
 
 		public UpgradeRuleBase(TOptions options)
 		{
