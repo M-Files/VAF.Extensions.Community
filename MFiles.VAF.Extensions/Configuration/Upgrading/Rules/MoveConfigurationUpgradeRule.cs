@@ -38,22 +38,38 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 				throw new ArgumentNullException(nameof(vault));
 			if (null == this.NamedValueStorageManager)
 				throw new InvalidOperationException("The named value storage manager cannot be null.");
+			this.Logger?.Trace($"Starting move of configuration from {this.Options.Source} to {this.Options.Target}");
 
-			// Read the values from the source.
-			var values = this.Options.Source.GetNamedValues(this.NamedValueStorageManager, vault);
-			if (null == values)
-				return false;
-
-			// Set the values in the target.
-			this.Options.Target.SetNamedValues(this.NamedValueStorageManager, vault, values);
-
-			// Optionally remove the old value(s).
-			if(this.Options.RemoveMovedValues)
+			try
 			{
-				this.Options.Source.RemoveNamedValues(this.NamedValueStorageManager, vault, values.Names.Cast<string>().ToArray());
+
+				// Read the values from the source.
+				var values = this.Options.Source.GetNamedValues(this.NamedValueStorageManager, vault);
+				if (null == values)
+				{
+					this.Logger?.Debug($"Skipping move configuration rule, as no configuration found in {this.Options.Source}");
+					return false;
+				}
+
+				// Set the values in the target.
+				this.Logger?.Info($"Setting configuration in {this.Options.Target} ({ values })");
+				this.Options.Target.SetNamedValues(this.NamedValueStorageManager, vault, values);
+
+				// Optionally remove the old value(s).
+				if (this.Options.RemoveMovedValues)
+				{
+					this.Logger?.Info($"Removing configuration from {this.Options.Source} ({ values })");
+					this.Options.Source.RemoveNamedValues(this.NamedValueStorageManager, vault, values.Names.Cast<string>().ToArray());
+				}
+
+			}
+			catch(Exception e)
+			{
+				this.Logger?.Error(e, $"Could not move configuration from {this.Options.Source} to {this.Options.Target}");
 			}
 
 			// All done!
+			this.Logger?.Trace($"Configuration successfully moved from {this.Options.Source} to {this.Options.Target}");
 			return true;
 		}
 

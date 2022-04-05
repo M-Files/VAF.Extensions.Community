@@ -1,4 +1,5 @@
-﻿using MFilesAPI;
+﻿using MFiles.VaultApplications.Logging;
+using MFilesAPI;
 using System;
 
 namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
@@ -22,6 +23,11 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		where TOptions : class, IUpgradeRuleOptions
 	{
 		/// <summary>
+		/// The logger for this class.
+		/// </summary>
+		protected ILogger Logger { get; }
+
+		/// <summary>
 		/// Options for the rule.
 		/// </summary>
 		protected internal TOptions Options { get; }
@@ -30,6 +36,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		{
 			// Sanity.
 			this.Options = options ?? throw new ArgumentNullException(nameof(options));
+			this.Logger = LogManager.GetLogger(this.GetType());
 		}
 
 		/// <inheritdoc />

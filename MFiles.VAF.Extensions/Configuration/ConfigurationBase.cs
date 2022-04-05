@@ -16,23 +16,19 @@ namespace MFiles.VAF.Extensions.Configuration
 	/// </summary>
 	[DataContract]
 	public abstract class ConfigurationBase
-		: IConfigurationWithLoggingConfiguration, IVersionedConfiguration
+		: VersionedConfigurationBase, IConfigurationWithLoggingConfiguration
 	{
-		[DataMember]
+		[DataMember(EmitDefaultValue = false)]
 		[JsonConfEditor
 		(
 			Label = ResourceMarker.Id + nameof(Resources.Configuration.LoggingConfiguration_Label),
 			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.LoggingConfiguration_HelpText)
 		)]
 		[Security(ChangeBy = SecurityAttribute.UserLevel.VaultAdmin, ViewBy = SecurityAttribute.UserLevel.VaultAdmin)]
-		public NLogLoggingConfiguration Logging { get; set; } = new NLogLoggingConfiguration();
-
-		/// <inheritdoc />
-		[DataMember(EmitDefaultValue = true)]
-		public Version Version { get; set; }
+		public NLogLoggingConfiguration Logging { get; set; }
 
 		/// <inheritdoc />
 		public ILoggingConfiguration GetLoggingConfiguration()
-			=> this.Logging;
+			=> this.Logging ?? new NLogLoggingConfiguration();
 	}
 }

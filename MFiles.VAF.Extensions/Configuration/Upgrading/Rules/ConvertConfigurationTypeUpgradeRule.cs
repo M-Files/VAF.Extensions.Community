@@ -1,10 +1,20 @@
 ﻿using MFiles.VAF.Configuration;
 using MFilesAPI;
 using System;
+using System.Linq;
 using System.Resources;
 
 namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 {
+	public class ConvertConfigurationTypeUpgradeRule
+	{
+		public static Newtonsoft.Json.JsonSerializerSettings DefaultJsonSerializerSettings { get; }
+			= new Newtonsoft.Json.JsonSerializerSettings()
+			{
+				DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore,
+				NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
+			};
+	}
 	/// <summary>
 	/// Defines an upgrade rule where the type of configuration data fundamentally changes
 	/// from <typeparamref name="TInput"/> to <typeparamref name="TOutput"/>.  An instance of
@@ -15,8 +25,8 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 	/// <typeparam name="TOutput">The newer type of configuration.</typeparam>
 	public class ConvertConfigurationTypeUpgradeRule<TInput, TOutput>
 		: UpgradeRuleBase<ConvertConfigurationTypeUpgradeRule<TInput, TOutput>.ConvertConfigurationTypeUpgradeRuleOptions>
-		where TInput : class, new()
-		where TOutput : class, new()
+		where TInput : class, IVersionedConfiguration, new()
+		where TOutput : class, IVersionedConfiguration, new()
 	{
 		/// <summary>
 		/// The configuration storage to use.
@@ -25,27 +35,22 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 
 		protected Func<TInput, TOutput> Conversion { get; }
 
-		public Newtonsoft.Json.JsonSerializerSettings JsonSerializerSettings { get; set; }
-			= new Newtonsoft.Json.JsonSerializerSettings()
-			{
-				DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore,
-				NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
-			};
+		public Newtonsoft.Json.JsonSerializerSettings JsonSerializerSettings { get; set; } = ConvertConfigurationTypeUpgradeRule.DefaultJsonSerializerSettings;
 
 		public ConvertConfigurationTypeUpgradeRule
 		(
 			ConvertConfigurationTypeUpgradeRuleOptions options,
-			Func<TInput, TOutput> conversion = null
+			Func<TInput, TOutput> conversion
 		)
-			: this(options, null, conversion)
+			: this(options, conversion, null)
 		{
 		}
 
 		internal ConvertConfigurationTypeUpgradeRule
 		(
 			ConvertConfigurationTypeUpgradeRuleOptions options, 
-			IConfigurationStorage configurationStorage,
-			Func<TInput, TOutput> conversion = null
+			Func<TInput, TOutput> conversion,
+			IConfigurationStorage configurationStorage = null
 		)
 			: base(options)
 		{
@@ -59,27 +64,77 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// <inheritdoc />
 		public override bool Execute(Vault vault)
 		{
+			this.Logger?.Trace($"Starting conversion of configuration in {this.Options.Source} from {typeof(TInput)} to {typeof(TOutput)}.");
 
-			// Attempt to load the data from storage.
-			if(false == this.ConfigurationStorage.ReadConfigurationData(vault, this.Options.Source.Namespace, this.Options.Source.Name, out string oldData))
-				return false; // Not there, so die.
+			try
+			{
 
-			// Deserialize it.
-			var oldObject = this.ConfigurationStorage.Deserialize<TInput>(oldData);
+				// Attempt to load the data from storage.
+				if (false == this.ConfigurationStorage.ReadConfigurationData(vault, this.Options.Source.Namespace, this.Options.Source.Name, out string oldData))
+				{
+					this.Logger?.Debug($"Skipping convert configuration rule, as no configuration found in {this.Options.Source}");
+					return false; // Not there, so die.
+				}
 
-			// Convert it.
-			var newObject = this.Convert(oldObject);
-			var newString = Newtonsoft.Json.JsonConvert.SerializeObject
-			(
-				newObject,
-				Newtonsoft.Json.Formatting.Indented,
-				this.JsonSerializerSettings
-			);
+				// What are we going "from" and "to"?
+				var migrateFromVersion = this.GetVersionFromConfiguration<TInput>();
+				var migrateToVersion = this.GetVersionFromConfiguration<TOutput>();
 
-			// Save the new data to storage.
-			this.ConfigurationStorage.SaveConfigurationData(vault, this.Options.Source.Namespace, newString, this.Options.Source.Name);
+				// Sanity.
+				if(null == migrateToVersion)
+				{
+					this.Logger?.Error($"Cannot convert configuration as the target type ({typeof(TOutput).FullName}) does not have a [Version] attribute.");
+					return false;
+				}
 
+				// Deserialize it.
+				var oldObject = this.ConfigurationStorage.Deserialize<TInput>(oldData);
+
+				// If the version is not the same as what we expected then die.
+				if (oldObject?.Version != null
+					&& oldObject.Version != migrateFromVersion)
+				{
+					this.Logger?.Debug($"Skipping convert configuration rule, as configured version ({oldObject.Version}) does not match expected version ({migrateFromVersion}).");
+					return false;
+				}
+
+				// Convert it.
+				var newObject = this.Convert(oldObject);
+				var newString = Newtonsoft.Json.JsonConvert.SerializeObject
+				(
+					newObject,
+					Newtonsoft.Json.Formatting.Indented,
+					this.JsonSerializerSettings
+				);
+
+				// Save the new data to storage.
+				this.Logger?.Info($"Converted configuration in {this.Options.Source} from {typeof(TInput)} to {typeof(TOutput)}.");
+				this.ConfigurationStorage.SaveConfigurationData(vault, this.Options.Source.Namespace, newString, this.Options.Source.Name);
+
+			}
+			catch (Exception e)
+			{
+				this.Logger?.Error(e, $"Could not convert configuration in {this.Options.Source} from {typeof(TInput)} to {typeof(TOutput)}.");
+			}
+
+			this.Logger?.Trace($"Successfully converted configuration in {this.Options.Source} from {typeof(TInput)} to {typeof(TOutput)}.");
 			return true;
+		}
+
+		/// <summary>
+		/// Returns the version from any [ConfigurationVersion] attribute on <typeparamref name="TConfigurationType"/>.
+		/// </summary>
+		/// <typeparam name="TConfigurationType">The type to check.</typeparam>
+		/// <returns>The version, or a version indicating a zero version number.</returns>
+		protected virtual Version GetVersionFromConfiguration<TConfigurationType>()
+			where TConfigurationType : IVersionedConfiguration
+		{
+			return typeof(TConfigurationType)
+				.GetCustomAttributes(false)?
+				.Where(a => a is ConfigurationVersionAttribute)
+				.Cast<ConfigurationVersionAttribute>()
+				.FirstOrDefault()?
+				.Version ?? new Version("0.0");
 		}
 
 		/// <summary>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MFiles.VAF.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -7,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions.Configuration
 {
+	/// <summary>
+	/// A root configuration structure with version data.
+	/// </summary>
 	public interface IVersionedConfiguration
 	{
 		/// <summary>
@@ -15,11 +19,62 @@ namespace MFiles.VAF.Extensions.Configuration
 		/// </summary>
 		Version Version { get; set; }
 	}
-	internal class VersionedConfiguration
+
+	/// <summary>
+	/// Allows definition of the version of this configuration structure.
+	/// Expected to be used on a class that implemented <see cref="IVersionedConfiguration"/>.
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+	public class ConfigurationVersionAttribute : Attribute
+	{
+		public Version Version { get; set; }
+		public ConfigurationVersionAttribute(string version)
+		{
+			this.Version = Version.Parse(version);
+		}
+	}
+
+	/// <summary>
+	/// A base class for configuration that implements <see cref="IVersionedConfiguration"/>.
+	/// When <see cref="ConfigurationVersionAttribute"/> is used on a derived class, the version
+	/// data will be loaded from the attribute and <see cref="Version"/> will be populated.
+	/// </summary>
+	[DataContract]
+	public class VersionedConfigurationBase
 		: IVersionedConfiguration
 	{
+		public VersionedConfigurationBase()
+		{
+			// Set the version from the attribute.
+			this.Version = this
+				.GetType()
+				.GetCustomAttributes(false)?
+				.Where(a => a is ConfigurationVersionAttribute)
+				.Cast<ConfigurationVersionAttribute>()
+				.FirstOrDefault()?
+				.Version ?? new Version("0.0");
+		}
+
 		/// <inheritdoc />
-		[DataMember(EmitDefaultValue = true)]
-		public Version Version { get; set; }
+		[IgnoreDataMember]
+		public Version Version { get;set; }
+
+		/// <summary>
+		/// The current version of the configuration.
+		/// Used for managing upgrading of configuration structures.
+		/// </summary>
+		[DataMember(EmitDefaultValue = true, Name="Version")]
+		[JsonConfEditor(Hidden = true)]
+		public string VersionString
+		{
+			get => this.Version?.ToString();
+			set => this.Version = value == null ? new Version("0.0") : Version.Parse(value);
+		}
+
+		public bool ShouldSerializeVersionString()
+		{
+			return this.Version != null
+				&& this.Version.ToString() != "0.0";
+		}
 	}
 }
