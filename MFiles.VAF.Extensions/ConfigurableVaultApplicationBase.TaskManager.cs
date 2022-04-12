@@ -44,14 +44,30 @@ namespace MFiles.VAF.Extensions
 		public virtual string GetRescheduleTaskType()
 			=> $"reschedule";
 
+		/// <summary>
+		/// The generic logger for the task manager.
+		/// </summary>
+		private TaskManagerLogger taskManagerLogger;
+
+		/// <summary>
+		/// Overridden to append the logger to the TaskManager as soon as it is created.
+		/// </summary>
+		/// <returns>A new TaskManager instance.</returns>
 		protected override TaskManager CreateTaskManager()
-			=> new TaskManagerEx<TSecureConfiguration>
-				(
+		{
+			var taskManager = new TaskManagerEx<TSecureConfiguration>
+			(
 					this,
 					this.GetType().Namespace,
 					this.PermanentVault,
 					GetTransactionRunner()
-				);
+			);
+
+			// We want to attach logging the second after it is created so we don't miss any events.
+			this.taskManagerLogger = new TaskManagerLogger(taskManager);
+
+			return taskManager;
+		}
 
 		/// <inheritdoc />
 		public override void Uninstall(Vault vaultSrc)

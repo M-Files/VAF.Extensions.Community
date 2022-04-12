@@ -57,7 +57,7 @@ namespace MFiles.VAF.Extensions
 		)
 			where TDirective : TaskDirective
 		{
-			this.Logger?.Debug($"Cancelling future executions on queue {queueId} of task {taskType}.");
+			this.Logger?.Info($"Cancelling future executions on queue {queueId} of task {taskType}.");
 			List<TaskInfo<TDirective>> tasks = null;
 			try
 			{
