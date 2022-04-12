@@ -10,9 +10,7 @@ using System.Linq;
 
 
 namespace MFiles.VAF.Extensions
-{
-
-	
+{	
 	/// <summary>
 	/// Logs events emitted by a <see cref="VAF.AppTasks.TaskManager"/>.
 	/// Automatically disposed when the <see cref="TaskManager"/> is shutdown.

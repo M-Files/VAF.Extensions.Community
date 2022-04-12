@@ -18,6 +18,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\Completed.png" />
+    <None Remove="Resources\DefaultLogDownloadDashboard.html" />
     <None Remove="Resources\Failed.png" />
     <None Remove="Resources\Images\enabled.png" />
     <None Remove="Resources\Images\error.png" />
@@ -45,6 +46,7 @@
     </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\DefaultLogDownloadDashboard.html" />
     <EmbeddedResource Include="Resources\Images\Completed.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
