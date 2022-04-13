@@ -58,6 +58,9 @@ namespace MFiles.VAF.Extensions
 				);
 			}
 
+			// Remove the bottom border so we don't get it doubled on smaller tables.
+			table.TableStyles.AddOrUpdate("border-bottom", "0px");
+
 			// Add a row for each execution to show.
 			foreach (var execution in list)
 			{
@@ -205,11 +208,11 @@ namespace MFiles.VAF.Extensions
 				// The second cell contains the totals.
 				var cell2 = row.AddCell(new DashboardCustomContentEx
 				(
-					"<span>Totals: </span>"
-					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateWaiting, Resources.Dashboard.AsynchronousOperations_Table_Footer_AwaitingProcessing)}' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Waiting.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateWaiting) ? data[MFTaskState.MFTaskStateWaiting] : 0)}</span>"
-					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateInProgress, Resources.Dashboard.AsynchronousOperations_Table_Footer_Running)}' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Running.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateInProgress) ? data[MFTaskState.MFTaskStateInProgress] : 0)}</span>"
-					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateCompleted, Resources.Dashboard.AsynchronousOperations_Table_Footer_Completed)}' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Completed.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateCompleted) ? data[MFTaskState.MFTaskStateCompleted] : 0)}</span>"
-					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateFailed, Resources.Dashboard.AsynchronousOperations_Table_Footer_Failed)}' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Failed.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateFailed) ? data[MFTaskState.MFTaskStateFailed] : 0)}</span>"
+					"<span style=\"display: inline-block; margin: 0px 7px;\">Totals:</span>"
+					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateWaiting, Resources.Dashboard.AsynchronousOperations_Table_Footer_AwaitingProcessing)}' style=\"border-bottom: 1px dashed #CCC; padding: 3px; height: 1.2em; display: inline-block; margin: 0px 4px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Waiting.png")}); background-repeat: no-repeat; background-position: 1px 4px; background-size: 14px; padding-left: 21px\">{(data.ContainsKey(MFTaskState.MFTaskStateWaiting) ? data[MFTaskState.MFTaskStateWaiting] : 0)}</span>"
+					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateInProgress, Resources.Dashboard.AsynchronousOperations_Table_Footer_Running)}' style=\"border-bottom: 1px dashed #CCC; padding: 3px; height: 1.2em; display: inline-block; margin: 0px 4px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Running.png")}); background-repeat: no-repeat; background-position: 3px 4px; background-size: 14px; padding-left: 23px\">{(data.ContainsKey(MFTaskState.MFTaskStateInProgress) ? data[MFTaskState.MFTaskStateInProgress] : 0)}</span>"
+					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateCompleted, Resources.Dashboard.AsynchronousOperations_Table_Footer_Completed)}' style=\"border-bottom: 1px dashed #CCC; padding: 3px; height: 1.2em; display: inline-block; margin: 0px 4px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Completed.png")}); background-repeat: no-repeat; background-position: 1px 4px; background-size: 14px; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateCompleted) ? data[MFTaskState.MFTaskStateCompleted] : 0)}</span>"
+					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateFailed, Resources.Dashboard.AsynchronousOperations_Table_Footer_Failed)}' style=\"border-bottom: 1px dashed #CCC; padding: 3px; height: 1.2em; display: inline-block; margin: 0px 4px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Failed.png")}); background-repeat: no-repeat; background-position: 0px 3px; background-size: 14px; padding-left: 15px; color: {Resources.Dashboard.AsynchronousOperations_Table_ColorFailed}\">{(data.ContainsKey(MFTaskState.MFTaskStateFailed) ? data[MFTaskState.MFTaskStateFailed] : 0)}</span>"
 				));
 				cell2.Styles.AddOrUpdate("text-align", "right");
 			}
