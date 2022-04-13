@@ -9,6 +9,7 @@ using MFiles.VAF.Extensions.Dashboards;
 using MFiles.VaultApplications.Logging.NLog.ExtensionMethods;
 using MFiles.VAF.Extensions.ExtensionMethods;
 using MFilesAPI;
+using MFiles.VAF.Configuration;
 
 namespace MFiles.VAF.Extensions
 {
@@ -293,7 +294,8 @@ namespace MFiles.VAF.Extensions
 				header.AddCells
 				(
 					Resources.Dashboard.Logging_Table_NameHeader,
-					Resources.Dashboard.Logging_Table_LogLevelsHeader
+					Resources.Dashboard.Logging_Table_LogLevelsHeader,
+					""
 				);
 			}
 			table.Styles.Add("background-color", "#f2f2f2");
@@ -311,24 +313,26 @@ namespace MFiles.VAF.Extensions
 				if(false == config.Enabled)
 				{
 					// Not enabled.
-					row.Styles.Add("text-decoration", "line-through");
+					//row.Styles.Add("text-decoration", "line-through");
+					row.Attributes.Add("title", Resources.Dashboard.Logging_TargetNotEnabled);
+					row.Styles.AddOrUpdate("color", "#DDD");
 				}
 
 				// Sort out the name.
 				{
-					var name = new DashboardCustomContentEx($"{config.Name} ({config.TypeName})");
+					var name = new DashboardCustomContentEx($"{(string.IsNullOrWhiteSpace(config.Name) ? Resources.Dashboard.Logging_Table_UnnamedTarget : config.Name)} ({config.TypeName})");
 
 					if(config.Enabled == false)
 					{
 						name.Icon = "Resources/Images/notenabled.png";
-						row.Attributes.Add("title", Resources.Dashboard.Logging_TargetNotEnabled);
 					}
 					// Validation can take some time to run; let's not incur that cost.
-					//else if(config.GetValidationFindings().Any(f => f.Type == ValidationFindingType.Error || f.Type == ValidationFindingType.Exception))
-					//{
-					//	name.Icon = "Resources/Images/error.png";
-					//	row.Attributes.Add("title", Resources.Dashboard.Logging_TargetValidationErrors);
-					//}
+					else if (config.GetValidationFindings().Any(f => f.Type == ValidationFindingType.Error || f.Type == ValidationFindingType.Exception))
+					{
+						name.Icon = "Resources/Images/error.png";
+						row.Attributes.Add("title", Resources.Dashboard.Logging_TargetValidationErrors);
+						row.Styles.AddOrUpdate("color", "#F00");
+					}
 					else
 					{
 						name.Icon = "Resources/Images/enabled.png";
@@ -337,6 +341,24 @@ namespace MFiles.VAF.Extensions
 					row.AddCell(name);
 				}
 				row.AddCell($"{config.MinimumLogLevel.ToDisplayString()} to {config.MaximumLogLevel.ToDisplayString()}");
+
+				// If it's the default one then allow downloads.
+				if(config is VaultApplications.Logging.NLog.Targets.DefaultTargetConfiguration)
+				{
+					row.AddCell
+					(
+						new DashboardDomainCommand
+						{
+							DomainCommandID = Dashboards.Commands.ShowSelectLogDownloadDashboardCommand.CommandId,
+							Title = Resources.Dashboard.Logging_Table_DownloadLogs,
+							Style = DashboardCommandStyle.Link
+						}
+					);
+				}
+				else
+				{
+					row.AddCell("");
+				}
 			}
 
 			// Return the panel.

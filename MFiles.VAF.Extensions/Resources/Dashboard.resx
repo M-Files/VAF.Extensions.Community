@@ -192,11 +192,17 @@
   <data name="Logging_NoLogTargetsAreConfigured" xml:space="preserve">
     <value>No log targets are currently configured.</value>
   </data>
+  <data name="Logging_Table_DownloadLogs" xml:space="preserve">
+    <value>Download logs</value>
+  </data>
   <data name="Logging_Table_LogLevelsHeader" xml:space="preserve">
     <value>Log Levels</value>
   </data>
   <data name="Logging_Table_NameHeader" xml:space="preserve">
     <value>Name</value>
+  </data>
+  <data name="Logging_Table_UnnamedTarget" xml:space="preserve">
+    <value>Unnamed target</value>
   </data>
   <data name="Logging_TargetNotEnabled" xml:space="preserve">
     <value>Target not enabled</value>

@@ -29,6 +29,14 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 		private const string DashboardResourceId =
 				"MFiles.VAF.Extensions.Resources.DefaultLogDownloadDashboard.html";
 
+#if DEBUG
+		/// <summary>
+		/// Location of the development dashboard file, for easy development in debug mode.
+		/// </summary>
+		private const string DebugResourcePath =
+				@"C:\Users\craig.hawker\source\repos\MFiles.VAF.Extensions\MFiles.VAF.Extensions\Resources\DefaultLogDownloadDashboard.html";
+#endif
+
 		private ShowSelectLogDownloadDashboardCommand() { }
 
 		public static ShowSelectLogDownloadDashboardCommand Create()
@@ -36,7 +44,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			var command = new ShowSelectLogDownloadDashboardCommand
 			{
 				ID = CommandId,
-				DisplayName = "Download Logs",
+				DisplayName = Resources.Dashboard.Logging_Table_DownloadLogs,
 				Locations = new List<ICommandLocation> { new DomainMenuCommandLocation() }
 			};
 			command.Execute = command.ShowLogSelectionDashboard;
@@ -65,14 +73,21 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			// Resolve the assembly that contains the dashboard template.
 			string template = null;
 
-			// Load the template from embedded resources.
-			Assembly assembly = Assembly.GetExecutingAssembly();
-			using (Stream s = assembly.GetManifestResourceStream(DashboardResourceId))
+			// Populate the template with the source file if available while in debug.
+			// This allows for "live" editing of the file during development.
+#if DEBUG
+			if (File.Exists(DebugResourcePath))
+				template = File.ReadAllText(DebugResourcePath);
+#endif
+
+			// Check if we've loaded the template already.
+			if (template == null)
 			{
+				// Load the template from embedded resources.
+				Assembly assembly = Assembly.GetExecutingAssembly();
+				using (Stream s = assembly.GetManifestResourceStream(DashboardResourceId))
 				using (var reader = new StreamReader(s))
-				{
 					template = reader.ReadToEnd();
-				}
 			}
 
 			// Inject the log file list into the dashboard template.

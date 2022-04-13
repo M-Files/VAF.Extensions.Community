@@ -259,6 +259,15 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Download logs.
+        /// </summary>
+        internal static string Logging_Table_DownloadLogs {
+            get {
+                return ResourceManager.GetString("Logging_Table_DownloadLogs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Log Levels.
         /// </summary>
         internal static string Logging_Table_LogLevelsHeader {
@@ -273,6 +282,15 @@ namespace MFiles.VAF.Extensions.Resources {
         internal static string Logging_Table_NameHeader {
             get {
                 return ResourceManager.GetString("Logging_Table_NameHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unnamed target.
+        /// </summary>
+        internal static string Logging_Table_UnnamedTarget {
+            get {
+                return ResourceManager.GetString("Logging_Table_UnnamedTarget", resourceCulture);
             }
         }
         
