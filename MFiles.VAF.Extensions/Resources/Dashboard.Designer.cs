@@ -70,6 +70,42 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to #08A14E.
+        /// </summary>
+        internal static string AsynchronousOperations_Table_ColorCompleted {
+            get {
+                return ResourceManager.GetString("AsynchronousOperations_Table_ColorCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #D64554.
+        /// </summary>
+        internal static string AsynchronousOperations_Table_ColorFailed {
+            get {
+                return ResourceManager.GetString("AsynchronousOperations_Table_ColorFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #79ADE4.
+        /// </summary>
+        internal static string AsynchronousOperations_Table_ColorRunning {
+            get {
+                return ResourceManager.GetString("AsynchronousOperations_Table_ColorRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #BFE0F4.
+        /// </summary>
+        internal static string AsynchronousOperations_Table_ColorWaiting {
+            get {
+                return ResourceManager.GetString("AsynchronousOperations_Table_ColorWaiting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Completed..
         /// </summary>
         internal static string AsynchronousOperations_Table_CompletedRowTitle {
@@ -205,6 +241,15 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Status.
+        /// </summary>
+        internal static string AsynchronousOperations_Table_StatusHeader {
+            get {
+                return ResourceManager.GetString("AsynchronousOperations_Table_StatusHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Task.
         /// </summary>
         internal static string AsynchronousOperations_Table_TaskHeader {
@@ -228,6 +273,24 @@ namespace MFiles.VAF.Extensions.Resources {
         internal static string AsynchronousOperations_ThereAreNoCurrentAsynchronousOperations {
             get {
                 return ResourceManager.GetString("AsynchronousOperations_ThereAreNoCurrentAsynchronousOperations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #CCC.
+        /// </summary>
+        internal static string Logging_ColorNotEnabled {
+            get {
+                return ResourceManager.GetString("Logging_ColorNotEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #D64554.
+        /// </summary>
+        internal static string Logging_ColorValidationErrors {
+            get {
+                return ResourceManager.GetString("Logging_ColorValidationErrors", resourceCulture);
             }
         }
         
@@ -259,6 +322,15 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Download logs.
+        /// </summary>
+        internal static string Logging_Table_DownloadLogs {
+            get {
+                return ResourceManager.GetString("Logging_Table_DownloadLogs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Log Levels.
         /// </summary>
         internal static string Logging_Table_LogLevelsHeader {
@@ -277,6 +349,15 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unnamed target.
+        /// </summary>
+        internal static string Logging_Table_UnnamedTarget {
+            get {
+                return ResourceManager.GetString("Logging_Table_UnnamedTarget", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Target not enabled.
         /// </summary>
         internal static string Logging_TargetNotEnabled {
@@ -286,11 +367,65 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There are validation errors for this target.
+        ///   Looks up a localized string similar to There are validation errors for this target so it will not be used..
         /// </summary>
         internal static string Logging_TargetValidationErrors {
             get {
                 return ResourceManager.GetString("Logging_TargetValidationErrors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Canceled.
+        /// </summary>
+        internal static string MFTaskStateCanceled {
+            get {
+                return ResourceManager.GetString("MFTaskStateCanceled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Completed.
+        /// </summary>
+        internal static string MFTaskStateCompleted {
+            get {
+                return ResourceManager.GetString("MFTaskStateCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed.
+        /// </summary>
+        internal static string MFTaskStateFailed {
+            get {
+                return ResourceManager.GetString("MFTaskStateFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Running.
+        /// </summary>
+        internal static string MFTaskStateInProgress {
+            get {
+                return ResourceManager.GetString("MFTaskStateInProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string MFTaskStateNone {
+            get {
+                return ResourceManager.GetString("MFTaskStateNone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Waiting.
+        /// </summary>
+        internal static string MFTaskStateWaiting {
+            get {
+                return ResourceManager.GetString("MFTaskStateWaiting", resourceCulture);
             }
         }
         

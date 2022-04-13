@@ -18,10 +18,12 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\Completed.png" />
+    <None Remove="Resources\DefaultLogDownloadDashboard.html" />
     <None Remove="Resources\Failed.png" />
     <None Remove="Resources\Images\enabled.png" />
     <None Remove="Resources\Images\error.png" />
     <None Remove="Resources\Images\notenabled.png" />
+    <None Remove="Resources\Images\warning.png" />
     <None Remove="Resources\Running.png" />
     <None Remove="Resources\Waiting.png" />
   </ItemGroup>
@@ -32,8 +34,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MFiles.VAF" Version="2.3.623.7" />
-    <PackageReference Include="MFiles.VaultApplications.Logging" Version="22.3.93-prerelease" />
+    <PackageReference Include="MFiles.VAF" Version="2.3.623.8" />
+    <PackageReference Include="MFiles.VaultApplications.Logging" Version="22.4.106-prerelease" />
     <PackageReference Include="MFilesAPI.Extensions" Version="1.0.6" />
   </ItemGroup>
   <ItemGroup>
@@ -45,6 +47,7 @@
     </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\DefaultLogDownloadDashboard.html" />
     <EmbeddedResource Include="Resources\Images\Completed.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
@@ -60,6 +63,7 @@
     <EmbeddedResource Include="Resources\Images\Waiting.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Images\warning.png" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Resources\AsynchronousOperations.Designer.cs">

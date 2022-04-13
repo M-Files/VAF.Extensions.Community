@@ -19,11 +19,14 @@ namespace MFiles.VAF.Extensions
 			= new Dictionary<string, CustomDomainCommand>();
 
 		/// <summary>
-		/// Returns the commands associated with manually running task queue background operations.
+		/// Populates <see cref="TaskQueueRunCommands"/>.
 		/// </summary>
-		/// <returns></returns>
-		public virtual IEnumerable<CustomDomainCommand> GetTaskQueueRunCommands(TaskQueueResolver taskQueueResolver)
+		/// <param name="taskQueueResolver">The resolver to use.  Must not be null.</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="taskQueueResolver"/> is null.</exception>
+		public virtual void PopulateTaskQueueRunCommands(TaskQueueResolver taskQueueResolver)
 		{
+			this.TaskQueueRunCommands.Clear();
+
 			if (null == taskQueueResolver)
 				throw new ArgumentNullException(nameof(taskQueueResolver));
 
@@ -49,7 +52,7 @@ namespace MFiles.VAF.Extensions
 							continue;
 
 						// Add it to the cache.
-							var key = $"{queue.Id}-{processor.Type}";
+						var key = $"{queue.Id}-{processor.Type}";
 						lock (_lock)
 						{
 							// Create the command if we need to.
@@ -57,17 +60,17 @@ namespace MFiles.VAF.Extensions
 							{
 								command = new CustomDomainCommand()
 								{
-									ID = Guid.NewGuid().ToString("N"),
-									ConfirmMessage = showOnDashboardAttribute.RunCommandConfirmationText
+									ID = key,
+									ConfirmMessage = showOnDashboardAttribute?.RunCommandConfirmationText
 										?? ShowOnDashboardAttribute.DefaultRunCommandConfirmationText,
-									DisplayName = showOnDashboardAttribute.RunCommandDisplayText
+									DisplayName = showOnDashboardAttribute?.RunCommandDisplayText
 										?? ShowOnDashboardAttribute.DefaultRunCommandDisplayText,
 									Blocking = true
 								};
 								command.Execute = (c, o) =>
 								{
 									// Cancel future executions?
-									if (showOnDashboardAttribute.RunNowRecalculationType == RunNowRecalculationType.RecalculateFutureExecutions)
+									if ((showOnDashboardAttribute?.RunNowRecalculationType ?? RunNowRecalculationType.LeaveFutureExecutions) == RunNowRecalculationType.RecalculateFutureExecutions)
 									{
 										// Cancel any future executions.
 										this.VaultApplication?.TaskManager?.CancelAllFutureExecutions(queue.Id, processor.Type);
@@ -77,8 +80,8 @@ namespace MFiles.VAF.Extensions
 									this.AddTask(c.Vault, queue.Id, processor.Type);
 
 									// Refresh the dashboard.
-									if (false == string.IsNullOrEmpty(showOnDashboardAttribute.RunCommandSuccessText))
-										o.ShowMessage(showOnDashboardAttribute.RunCommandSuccessText);
+									if (false == string.IsNullOrEmpty(showOnDashboardAttribute?.RunCommandSuccessText))
+										o.ShowMessage(showOnDashboardAttribute?.RunCommandSuccessText);
 									o.RefreshDashboard();
 								};
 								this.TaskQueueRunCommands.Add(key, command);
@@ -90,12 +93,19 @@ namespace MFiles.VAF.Extensions
 						}
 					}
 					catch { }
-
-					// Return the command if we can.
-					if (null != command)
-						yield return command;
 				}
 			}
+		}
+
+		/// <summary>
+		/// Returns the commands associated with manually running task queue background operations.
+		/// </summary>
+		/// <returns></returns>
+		public virtual IEnumerable<CustomDomainCommand> GetTaskQueueRunCommands(TaskQueueResolver taskQueueResolver)
+		{
+			// Make sure that the task queue run commands are up to date.
+			this.PopulateTaskQueueRunCommands(taskQueueResolver);
+			return this.TaskQueueRunCommands.Values;
 		}
 	}
 }

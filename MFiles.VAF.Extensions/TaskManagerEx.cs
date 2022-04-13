@@ -6,7 +6,6 @@ using MFiles.VAF.Extensions.Dashboards;
 using MFiles.VaultApplications.Logging;
 using MFilesAPI;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -47,7 +46,7 @@ namespace MFiles.VAF.Extensions
 		/// <inheritdoc />
 		public new string AddTask(Vault vault, string queueId, string taskType, TaskDirective directive = null, DateTime? activationTime = null)
 		{
-			this.Logger?.Debug($"Adding task to queue {queueId} of type {taskType}.");
+			this.Logger?.Info($"Adding task to queue {queueId} of type {taskType}.");
 			return base.AddTask(vault, queueId, taskType, directive, activationTime);
 		}
 
@@ -187,24 +186,7 @@ namespace MFiles.VAF.Extensions
 			// When the job is finished, re-schedule.
 			switch (e.EventType)
 			{
-				case TaskManagerEventType.TaskJobStarted:
-					// Log out that we started.
-					this.Logger?.Trace($"Starting job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))}");
-					break;
 				case TaskManagerEventType.TaskJobFinished:
-					//Log out that we're done.
-					if(e.JobResult == TaskProcessingJobResult.Fatal)
-					{
-						// Something went badly wrong.
-						this.Logger?.Error
-						(
-							e.Exception,
-							$"Job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))} finished with a fatal result: {e.JobStatus.ErrorMessage}"
-						);
-					}
-					else
-						this.Logger?.Trace($"Job(s) {string.Join(", ", e.Tasks?.Select(t => t.TaskID))} finished ({e.JobResult})");
-
 					// Re-schedule as appropriate.
 					switch (e.JobResult)
 					{
@@ -227,7 +209,7 @@ namespace MFiles.VAF.Extensions
 									continue;
 
 								// Schedule.
-								this.Logger?.Debug($"Re-scheduling {t.TaskType} on {t.QueueID} for {nextExecutionDate.Value}");
+								this.Logger?.Info($"Re-scheduling {t.TaskType} on {t.QueueID} for {nextExecutionDate.Value}");
 								this.RescheduleTask(t.QueueID, t.TaskType, vault: this.Vault, scheduleFor: nextExecutionDate);
 							}
 							break;

@@ -12,6 +12,8 @@ using System.Linq;
 using System.Reflection;
 using MFiles.VAF.AppTasks;
 using MFiles.VAF.Extensions.Dashboards;
+using MFiles.VAF.Configuration.Domain;
+using MFiles.VAF.Configuration.Interfaces.Domain;
 
 namespace MFiles.VAF.Extensions
 {
@@ -31,6 +33,34 @@ namespace MFiles.VAF.Extensions
 			// Return the commands related to the VAF 2.3+ attribute-based approach.
 			foreach (var c in this.TaskManager.GetTaskQueueRunCommands(this.TaskQueueResolver))
 				yield return c;
+
+			// Return the commands associated with downloading logs from the default file target.
+			foreach (var c in this.GetDefaultLogTargetDownloadCommands())
+				yield return c;
+		}
+
+		/// <summary>
+		/// Returns the commands associated with downloading logs from the default file target.
+		/// </summary>
+		/// <returns></returns>
+		public virtual IEnumerable<CustomDomainCommand> GetDefaultLogTargetDownloadCommands()
+		{
+			if (this.AllowUserToSelectLogFiles)
+			{
+				// One to allow them to select which logs...
+				yield return Dashboards.Commands.ShowSelectLogDownloadDashboardCommand.Create();
+
+				// ...and one that actually does the collation/download.
+				yield return Dashboards.Commands.DownloadSelectedLogsDashboardCommand.Create();
+			}
+			else
+			{
+				// If they can only download them all then make sure the item on the domain menu
+				// reflects that.
+				var command = Dashboards.Commands.DownloadSelectedLogsDashboardCommand.Create();
+				command.Locations = new List<ICommandLocation> { new DomainMenuCommandLocation() };
+				yield return command;
+			}
 		}
 
 		/// <summary>

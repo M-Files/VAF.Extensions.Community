@@ -120,6 +120,22 @@
   <data name="AsynchronousOperations_DashboardTitle" xml:space="preserve">
     <value>Asynchronous Operations</value>
   </data>
+  <data name="AsynchronousOperations_Table_ColorCompleted" xml:space="preserve">
+    <value>#08A14E</value>
+    <comment>The (text) color to use for (successfully) completed items.</comment>
+  </data>
+  <data name="AsynchronousOperations_Table_ColorFailed" xml:space="preserve">
+    <value>#D64554</value>
+    <comment>The (text) color to use for failed items.</comment>
+  </data>
+  <data name="AsynchronousOperations_Table_ColorRunning" xml:space="preserve">
+    <value>#79ADE4</value>
+    <comment>The (text) color to use for running items.</comment>
+  </data>
+  <data name="AsynchronousOperations_Table_ColorWaiting" xml:space="preserve">
+    <value>#BFE0F4</value>
+    <comment>The (text) color to use for waiting items.</comment>
+  </data>
   <data name="AsynchronousOperations_Table_CompletedRowTitle" xml:space="preserve">
     <value>Completed.</value>
   </data>
@@ -173,6 +189,9 @@
   <data name="AsynchronousOperations_Table_StartedHeader" xml:space="preserve">
     <value>Started</value>
   </data>
+  <data name="AsynchronousOperations_Table_StatusHeader" xml:space="preserve">
+    <value>Status</value>
+  </data>
   <data name="AsynchronousOperations_Table_TaskHeader" xml:space="preserve">
     <value>Task</value>
   </data>
@@ -183,6 +202,12 @@
   <data name="AsynchronousOperations_ThereAreNoCurrentAsynchronousOperations" xml:space="preserve">
     <value>There are no current asynchronous operations.</value>
   </data>
+  <data name="Logging_ColorNotEnabled" xml:space="preserve">
+    <value>#CCC</value>
+  </data>
+  <data name="Logging_ColorValidationErrors" xml:space="preserve">
+    <value>#D64554</value>
+  </data>
   <data name="Logging_DashboardTitle" xml:space="preserve">
     <value>Logging</value>
   </data>
@@ -192,17 +217,41 @@
   <data name="Logging_NoLogTargetsAreConfigured" xml:space="preserve">
     <value>No log targets are currently configured.</value>
   </data>
+  <data name="Logging_Table_DownloadLogs" xml:space="preserve">
+    <value>Download logs</value>
+  </data>
   <data name="Logging_Table_LogLevelsHeader" xml:space="preserve">
     <value>Log Levels</value>
   </data>
   <data name="Logging_Table_NameHeader" xml:space="preserve">
     <value>Name</value>
   </data>
+  <data name="Logging_Table_UnnamedTarget" xml:space="preserve">
+    <value>Unnamed target</value>
+  </data>
   <data name="Logging_TargetNotEnabled" xml:space="preserve">
     <value>Target not enabled</value>
   </data>
   <data name="Logging_TargetValidationErrors" xml:space="preserve">
-    <value>There are validation errors for this target</value>
+    <value>There are validation errors for this target so it will not be used.</value>
+  </data>
+  <data name="MFTaskStateCanceled" xml:space="preserve">
+    <value>Canceled</value>
+  </data>
+  <data name="MFTaskStateCompleted" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="MFTaskStateFailed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="MFTaskStateInProgress" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="MFTaskStateNone" xml:space="preserve">
+    <value />
+  </data>
+  <data name="MFTaskStateWaiting" xml:space="preserve">
+    <value>Waiting</value>
   </data>
   <data name="TimeOnServer" xml:space="preserve">
     <value>Time on server: {0}</value>

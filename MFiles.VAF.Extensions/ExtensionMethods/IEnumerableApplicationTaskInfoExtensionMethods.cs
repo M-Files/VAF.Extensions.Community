@@ -51,6 +51,7 @@ namespace MFiles.VAF.Extensions
 				(
 					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_TaskHeader.EscapeXmlForDashboard()),
 					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_ScheduledHeader.EscapeXmlForDashboard()),
+					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_StatusHeader.EscapeXmlForDashboard()),
 					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_StartedHeader.EscapeXmlForDashboard()),
 					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_DurationHeader.EscapeXmlForDashboard()),
 					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_DetailsHeader.EscapeXmlForDashboard())
@@ -119,6 +120,7 @@ namespace MFiles.VAF.Extensions
 					case MFilesAPI.MFTaskState.MFTaskStateWaiting:
 						taskInfoCell.Icon = "Resources/Images/Waiting.png";
 						rowTitle = Resources.Dashboard.AsynchronousOperations_Table_WaitingRowTitle.EscapeXmlForDashboard(activation.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"));
+						row.Styles.AddOrUpdate("color", Resources.Dashboard.AsynchronousOperations_Table_ColorWaiting);
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateInProgress:
 						rowTitle = Resources.Dashboard.AsynchronousOperations_Table_RunningRowTitle.EscapeXmlForDashboard();
@@ -129,6 +131,7 @@ namespace MFiles.VAF.Extensions
 									taskInfo.GetElapsedTime().ToDisplayString()
 								);
 						taskInfoCell.Icon = "Resources/Images/Running.png";
+						row.Styles.AddOrUpdate("color", Resources.Dashboard.AsynchronousOperations_Table_ColorRunning);
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateFailed:
 						rowTitle = Resources.Dashboard.AsynchronousOperations_Table_FailedRowTitle.EscapeXmlForDashboard();
@@ -139,6 +142,7 @@ namespace MFiles.VAF.Extensions
 									taskInfo.GetElapsedTime().ToDisplayString()
 								);
 						taskInfoCell.Icon = "Resources/Images/Failed.png";
+						row.Styles.AddOrUpdate("color", Resources.Dashboard.AsynchronousOperations_Table_ColorFailed);
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateCompleted:
 						rowTitle = Resources.Dashboard.AsynchronousOperations_Table_CompletedRowTitle.EscapeXmlForDashboard();
@@ -149,6 +153,7 @@ namespace MFiles.VAF.Extensions
 									taskInfo.GetElapsedTime().ToDisplayString()
 								);
 						taskInfoCell.Icon = "Resources/Images/Completed.png";
+						row.Styles.AddOrUpdate("color", Resources.Dashboard.AsynchronousOperations_Table_ColorCompleted);
 						break;
 					default:
 						break;
@@ -160,23 +165,21 @@ namespace MFiles.VAF.Extensions
 				(
 					taskInfoCell,
 					scheduledCell,
+					new DashboardCustomContent(execution.State.ForDisplay()),
 					startedCell,
 					new DashboardCustomContent(execution.State == MFilesAPI.MFTaskState.MFTaskStateWaiting ? "" : taskInfo?.GetElapsedTime().ToDisplayString()),
 					taskInfo?.AsDashboardContent(removeLineBreaks)
 				);
 
 				// First cells should be as small as possible.
-				row.Cells[0].Styles.AddOrUpdate("width", "1%");
-				row.Cells[0].Styles.AddOrUpdate("white-space", "nowrap");
-				row.Cells[1].Styles.AddOrUpdate("width", "1%");
-				row.Cells[1].Styles.AddOrUpdate("white-space", "nowrap");
-				row.Cells[2].Styles.AddOrUpdate("width", "1%");
-				row.Cells[2].Styles.AddOrUpdate("white-space", "nowrap");
-				row.Cells[3].Styles.AddOrUpdate("width", "1%");
-				row.Cells[3].Styles.AddOrUpdate("white-space", "nowrap");
+				for (var i = 0; i < row.Cells.Count - 1; i++)
+				{
+					row.Cells[i].Styles.AddOrUpdate("width", "1%");
+					row.Cells[i].Styles.AddOrUpdate("white-space", "nowrap");
+				}
 
 				// Last cell should have as much space as possible.
-				row.Cells[4].Styles.AddOrUpdate("width", "100%");
+				row.Cells[row.Cells.Count - 1].Styles.AddOrUpdate("width", "100%");
 			}
 
 			// Create an overview of the statuses.

@@ -9,6 +9,7 @@ using MFiles.VAF.Extensions.Dashboards;
 using MFiles.VaultApplications.Logging.NLog.ExtensionMethods;
 using MFiles.VAF.Extensions.ExtensionMethods;
 using MFilesAPI;
+using MFiles.VAF.Configuration;
 
 namespace MFiles.VAF.Extensions
 {
@@ -259,6 +260,11 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
+		/// Allows the user to choose which log files to select.  If false, all log files are downloaded.
+		/// </summary>
+		protected bool AllowUserToSelectLogFiles { get; set; } = false;
+
+		/// <summary>
 		/// Returns the dashboard content showing logging status.
 		/// </summary>
 		/// <returns>The dashboard content.  Can be null if no logging data is available or configured.</returns>
@@ -293,7 +299,8 @@ namespace MFiles.VAF.Extensions
 				header.AddCells
 				(
 					Resources.Dashboard.Logging_Table_NameHeader,
-					Resources.Dashboard.Logging_Table_LogLevelsHeader
+					Resources.Dashboard.Logging_Table_LogLevelsHeader,
+					""
 				);
 			}
 			table.Styles.Add("background-color", "#f2f2f2");
@@ -304,31 +311,33 @@ namespace MFiles.VAF.Extensions
 			var logTargetConfiguration = loggingConfiguration.GetAllLogTargetConfigurations();
 
 			// Add each in turn to the list.
-			foreach (var config in logTargetConfiguration.OrderByDescending(t => t.Enabled).ThenBy(t => t.Name))
+			foreach (var config in logTargetConfiguration)
 			{
 				// Build up the row.
 				var row = table.AddRow();
 				if(false == config.Enabled)
 				{
 					// Not enabled.
-					row.Styles.Add("text-decoration", "line-through");
+					//row.Styles.Add("text-decoration", "line-through");
+					row.Attributes.Add("title", Resources.Dashboard.Logging_TargetNotEnabled);
+					row.Styles.AddOrUpdate("color", Resources.Dashboard.Logging_ColorNotEnabled);
 				}
 
 				// Sort out the name.
 				{
-					var name = new DashboardCustomContentEx($"{config.Name} ({config.TypeName})");
+					var name = new DashboardCustomContentEx($"{(string.IsNullOrWhiteSpace(config.Name) ? Resources.Dashboard.Logging_Table_UnnamedTarget : config.Name)} ({config.TypeName})");
 
 					if(config.Enabled == false)
 					{
 						name.Icon = "Resources/Images/notenabled.png";
-						row.Attributes.Add("title", Resources.Dashboard.Logging_TargetNotEnabled);
 					}
 					// Validation can take some time to run; let's not incur that cost.
-					//else if(config.GetValidationFindings().Any(f => f.Type == ValidationFindingType.Error || f.Type == ValidationFindingType.Exception))
-					//{
-					//	name.Icon = "Resources/Images/error.png";
-					//	row.Attributes.Add("title", Resources.Dashboard.Logging_TargetValidationErrors);
-					//}
+					else if (config.GetValidationFindings().Any(f => f.Type == ValidationFindingType.Error || f.Type == ValidationFindingType.Exception))
+					{
+						name.Icon = "Resources/Images/error.png";
+						row.Attributes.Add("title", Resources.Dashboard.Logging_TargetValidationErrors);
+						row.Styles.AddOrUpdate("color", Resources.Dashboard.Logging_ColorValidationErrors);
+					}
 					else
 					{
 						name.Icon = "Resources/Images/enabled.png";
@@ -337,6 +346,26 @@ namespace MFiles.VAF.Extensions
 					row.AddCell(name);
 				}
 				row.AddCell($"{config.MinimumLogLevel.ToDisplayString()} to {config.MaximumLogLevel.ToDisplayString()}");
+
+				// If it's the default one then allow downloads.
+				if(config is VaultApplications.Logging.NLog.Targets.DefaultTargetConfiguration)
+				{
+					row.AddCell
+					(
+						new DashboardDomainCommand
+						{
+							DomainCommandID = this.AllowUserToSelectLogFiles
+								? Dashboards.Commands.ShowSelectLogDownloadDashboardCommand.CommandId
+								: Dashboards.Commands.DownloadSelectedLogsDashboardCommand.CommandId,
+							Title = Resources.Dashboard.Logging_Table_DownloadLogs,
+							Style = DashboardCommandStyle.Link
+						}
+					);
+				}
+				else
+				{
+					row.AddCell("");
+				}
 			}
 
 			// Return the panel.
