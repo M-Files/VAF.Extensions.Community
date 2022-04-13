@@ -152,6 +152,7 @@ namespace MFiles.VAF.Extensions
 						new DashboardCustomContent("Location")
 					);
 				}
+				table.MaximumHeight = null; // Allow any height.
 
 				Func<System.Reflection.Assembly, string> getCompanyName = (assembly) =>
 				{

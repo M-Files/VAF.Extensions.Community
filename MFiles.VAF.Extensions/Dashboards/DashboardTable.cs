@@ -251,6 +251,11 @@ namespace MFiles.VAF.Extensions.Dashboards
 		public Dictionary<string, string> TableAttributes { get; }
 			= new Dictionary<string, string>();
 
+		/// <summary>
+		/// The maximum height of the table.
+		/// </summary>
+		public int? MaximumHeight { get; set; } = 200;
+
 		public DashboardTable()
 		{
 			this.TableStyles.Add("width", "100%");
@@ -401,11 +406,16 @@ namespace MFiles.VAF.Extensions.Dashboards
 		/// <inheritdoc />
 		protected override XmlDocumentFragment GenerateXmlDocumentFragment(XmlDocument xml)
 		{
+			// Do we have a max height?
+			var maxHeightCss = this.MaximumHeight.HasValue
+				? $"max-height: {this.MaximumHeight.Value}px; overflow-y: auto;"
+				: "";
+
 			// Create the basic structure of the table.
-			if(false == string.IsNullOrWhiteSpace(this.Title) || (this.Commands?.Count ?? 0) > 0)
+			if (false == string.IsNullOrWhiteSpace(this.Title) || (this.Commands?.Count ?? 0) > 0)
 				// Render out with a title bar.
 				return  DashboardHelper.CreateFragment(xml,
-						"<div class='table-wrapper' style='max-height: 200px; overflow-y: auto;'>"
+						"<div class='table-wrapper' style='" + maxHeightCss + "'>"
 							+ "<div class='title-bar'>"
 								+ "<span class='command-bar'></span>"
 								+ "<span class='title'></span>"
@@ -416,7 +426,7 @@ namespace MFiles.VAF.Extensions.Dashboards
 			else
 				// No title bar.
 				return DashboardHelper.CreateFragment(xml,
-						"<div class='table-wrapper' style='max-height: 200px; overflow-y: auto;'>"
+						"<div class='table-wrapper' style='" + maxHeightCss + "'>"
 							+ "<table>"
 							+ "</table>"
 						+ "</div>");
