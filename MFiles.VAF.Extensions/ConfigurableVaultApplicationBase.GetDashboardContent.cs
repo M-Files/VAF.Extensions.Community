@@ -260,6 +260,11 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
+		/// Allows the user to choose which log files to select.  If false, all log files are downloaded.
+		/// </summary>
+		protected bool AllowUserToSelectLogFiles { get; set; } = false;
+
+		/// <summary>
 		/// Returns the dashboard content showing logging status.
 		/// </summary>
 		/// <returns>The dashboard content.  Can be null if no logging data is available or configured.</returns>
@@ -349,7 +354,9 @@ namespace MFiles.VAF.Extensions
 					(
 						new DashboardDomainCommand
 						{
-							DomainCommandID = Dashboards.Commands.ShowSelectLogDownloadDashboardCommand.CommandId,
+							DomainCommandID = this.AllowUserToSelectLogFiles
+								? Dashboards.Commands.ShowSelectLogDownloadDashboardCommand.CommandId
+								: Dashboards.Commands.DownloadSelectedLogsDashboardCommand.CommandId,
 							Title = Resources.Dashboard.Logging_Table_DownloadLogs,
 							Style = DashboardCommandStyle.Link
 						}
