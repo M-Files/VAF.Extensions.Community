@@ -45,7 +45,7 @@ namespace MFiles.VAF.Extensions
 		{
 			// Sanity.
 			if (false == timespan.HasValue || timespan.Value <= TimeSpan.Zero)
-				return "";
+				return $"0 {Resources.Time.Component_Seconds}";
 
 			// Seconds be easy.
 			if (timespan.Value < TimeSpan.FromSeconds(1))
