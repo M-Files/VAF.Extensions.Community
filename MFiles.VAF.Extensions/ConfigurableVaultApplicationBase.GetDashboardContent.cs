@@ -306,7 +306,7 @@ namespace MFiles.VAF.Extensions
 			var logTargetConfiguration = loggingConfiguration.GetAllLogTargetConfigurations();
 
 			// Add each in turn to the list.
-			foreach (var config in logTargetConfiguration.OrderByDescending(t => t.Enabled).ThenBy(t => t.Name))
+			foreach (var config in logTargetConfiguration)
 			{
 				// Build up the row.
 				var row = table.AddRow();
@@ -315,7 +315,7 @@ namespace MFiles.VAF.Extensions
 					// Not enabled.
 					//row.Styles.Add("text-decoration", "line-through");
 					row.Attributes.Add("title", Resources.Dashboard.Logging_TargetNotEnabled);
-					row.Styles.AddOrUpdate("color", "#DDD");
+					row.Styles.AddOrUpdate("color", Resources.Dashboard.Logging_ColorNotEnabled);
 				}
 
 				// Sort out the name.
@@ -331,7 +331,7 @@ namespace MFiles.VAF.Extensions
 					{
 						name.Icon = "Resources/Images/error.png";
 						row.Attributes.Add("title", Resources.Dashboard.Logging_TargetValidationErrors);
-						row.Styles.AddOrUpdate("color", "#F00");
+						row.Styles.AddOrUpdate("color", Resources.Dashboard.Logging_ColorValidationErrors);
 					}
 					else
 					{

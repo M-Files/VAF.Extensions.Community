@@ -18,10 +18,10 @@ namespace MFiles.VAF.Extensions
 	where TSecureConfiguration : class, new()
 	{
 		/// <inheritdoc />
-		protected override void OnConfigurationUpdated(TSecureConfiguration oldConfiguration, bool updateExternals)
+		protected override void OnConfigurationUpdated(TSecureConfiguration oldConfiguration, bool isValid, bool updateExternals)
 		{
 			// Base implementation is empty, but good practice to call it.
-			base.OnConfigurationUpdated(oldConfiguration, updateExternals);
+			base.OnConfigurationUpdated(oldConfiguration, isValid, updateExternals);
 
 			// Populate the task processing schedule configuration.
 			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(isVaultStartup: false);
@@ -30,7 +30,6 @@ namespace MFiles.VAF.Extensions
 			if (this.Configuration is Configuration.IConfigurationWithLoggingConfiguration configurationWithLogging)
 			{
 				this.Logger?.Debug("Logging configuration updating");
-				base.OnConfigurationUpdated(oldConfiguration, updateExternals);
 				LogManager.UpdateConfiguration(configurationWithLogging?.GetLoggingConfiguration());
 				this.Logger?.Debug("Logging configuration updated");
 			}

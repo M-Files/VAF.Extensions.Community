@@ -168,6 +168,7 @@ namespace MFiles.VAF.Extensions
 					};
 
 					// Should we show the run command?
+					if(showOnDashboardAttribute.ShowRunCommand)
 					{
 						var key = $"{queue}-{processor.Type}";
 						lock (this._lock)

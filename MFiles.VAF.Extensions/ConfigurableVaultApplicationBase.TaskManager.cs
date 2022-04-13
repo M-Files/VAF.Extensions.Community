@@ -70,6 +70,16 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <inheritdoc />
+		protected override void InitializeTaskManager()
+		{
+			// Register all queues, etc.
+			base.InitializeTaskManager();
+
+			// Now populate the run commands.
+			this.TaskManager?.PopulateTaskQueueRunCommands(this.TaskQueueResolver);
+		}
+
+		/// <inheritdoc />
 		public override void Uninstall(Vault vaultSrc)
 		{
 			// For all queues/task-types that are running on a schedule/interval, cancel them now.

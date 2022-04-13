@@ -23,6 +23,7 @@
     <None Remove="Resources\Images\enabled.png" />
     <None Remove="Resources\Images\error.png" />
     <None Remove="Resources\Images\notenabled.png" />
+    <None Remove="Resources\Images\warning.png" />
     <None Remove="Resources\Running.png" />
     <None Remove="Resources\Waiting.png" />
   </ItemGroup>
@@ -62,6 +63,7 @@
     <EmbeddedResource Include="Resources\Images\Waiting.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Images\warning.png" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Resources\AsynchronousOperations.Designer.cs">
