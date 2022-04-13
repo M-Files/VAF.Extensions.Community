@@ -351,7 +351,7 @@ namespace MFiles.VAF.Extensions
 				// If it's the default one then allow downloads.
 				if(config is VaultApplications.Logging.NLog.Targets.DefaultTargetConfiguration)
 				{
-					row.AddCell
+					var cell = row.AddCell
 					(
 						new DashboardDomainCommand
 						{
@@ -362,6 +362,7 @@ namespace MFiles.VAF.Extensions
 							Style = DashboardCommandStyle.Link
 						}
 					);
+					cell.Styles.AddOrUpdate("text-align", "center");
 				}
 				else
 				{
