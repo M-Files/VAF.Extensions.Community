@@ -34,10 +34,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 		/// </summary>
 		/// <returns>The logging path.</returns>
 		public string GetDefaultLogPath()
-		{
-			// Return the logging env var value.
-			return Environment.GetEnvironmentVariable("MFAPPLOGDIR", EnvironmentVariableTarget.Process);
-		}
+			=> MFiles.VaultApplications.Logging.NLog.Targets.DefaultTargetConfiguration.GetDefaultTargetLoggingDirectory();
 
 		/// <summary>
 		/// Gets the root path for all logs of this application,
