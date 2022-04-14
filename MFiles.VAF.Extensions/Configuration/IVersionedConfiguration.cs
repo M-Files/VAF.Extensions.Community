@@ -23,7 +23,7 @@ namespace MFiles.VAF.Extensions.Configuration
 	/// <summary>
 	/// A base class for configuration that implements <see cref="IVersionedConfiguration"/>.
 	/// When <see cref="ConfigurationVersionAttribute"/> is used on a derived class, the version
-	/// data will be loaded from the attribute and <see cref="Version"/> will be populated.
+	/// data will be loaded from the attribute and <see cref="System.Version"/> will be populated.
 	/// </summary>
 	[DataContract]
 	public class VersionedConfigurationBase

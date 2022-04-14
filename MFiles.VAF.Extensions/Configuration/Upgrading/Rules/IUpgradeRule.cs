@@ -18,8 +18,21 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// <remarks>May throw exceptions.</remarks>
 		bool Execute(Vault vault);
 	}
-	public abstract class UpgradeRuleBase<TOptions>
+	public abstract class UpgradeRuleBase
 		: IUpgradeRule
+	{
+		public static Newtonsoft.Json.JsonSerializerSettings DefaultJsonSerializerSettings { get; }
+			= new Newtonsoft.Json.JsonSerializerSettings()
+			{
+				DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore,
+				NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
+			};
+		public static Newtonsoft.Json.Formatting DefaultJsonFormatting { get; } = Newtonsoft.Json.Formatting.Indented;
+
+		public abstract bool Execute(Vault vault);
+	}
+	public abstract class UpgradeRuleBase<TOptions>
+		: UpgradeRuleBase
 		where TOptions : class, IUpgradeRuleOptions
 	{
 		/// <summary>
@@ -38,9 +51,6 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 			this.Options = options ?? throw new ArgumentNullException(nameof(options));
 			this.Logger = LogManager.GetLogger(this.GetType());
 		}
-
-		/// <inheritdoc />
-		public abstract bool Execute(Vault vault);
 	}
 	public interface IUpgradeRuleOptions
 	{
@@ -55,5 +65,36 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 	{
 		/// <inheritdoc />
 		public abstract bool IsValid();
+	}
+	public class UpgradeSingleNVSLocationRuleOptions
+		   : UpgradeRuleOptionsBase
+	{
+		/// <summary>
+		/// A definition of where the values are stored.
+		/// The value will be read, converted, then written to the same location.
+		/// </summary>
+		public ISingleNamedValueItem Source { get; set; }
+
+		/// <inheritdoc />
+		public override bool IsValid()
+		{
+			if (null == this.Source || false == this.Source.IsValid())
+				return false;
+
+			return true;
+		}
+
+		public static UpgradeSingleNVSLocationRuleOptions ForLatestLocation(VaultApplicationBase vaultApplication)
+		{
+			return new UpgradeSingleNVSLocationRuleOptions()
+			{
+				Source = new SingleNamedValueItem
+				(
+					MFNamedValueType.MFSystemAdminConfiguration,
+					vaultApplication?.GetType()?.FullName ?? throw new ArgumentNullException(nameof(vaultApplication)),
+					"configuration"
+				)
+			};
+		}
 	}
 }

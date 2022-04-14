@@ -1,5 +1,4 @@
-﻿using MFiles.VAF.Configuration;
-using MFiles.VAF.Extensions.Configuration;
+﻿using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
 using MFiles.VAF.Extensions.Configuration.Upgrading.Rules;
 using MFilesAPI;
@@ -8,42 +7,23 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 {
+
 	[TestClass]
-	public class SimpleConvertConfigurationTypeUpgradeRuleTests
-		: UpgradeRuleTestBase
+	public class ConvertConfigurationTypeUpgradeRuleTests
+		: ConvertJsonUpgradeRuleTestsBase
 	{
-		public Mock<IConfigurationStorage> GetConfigurationStorageMock(string existingData)
-		{
-			var mock = new Mock<IConfigurationStorage>();
-
-			mock
-				.Setup(m => m.ReadConfigurationData(It.IsAny<Vault>(), It.IsAny<string>(), It.IsAny<string>(), out existingData))
-				.Returns(false == string.IsNullOrWhiteSpace(existingData));
-
-			return mock;
-		}
-		public Mock<IConfigurationStorage> GetConfigurationStorageMock<T>(T existingObject)
-			where T : class, new()
-		{
-			var mock = this.GetConfigurationStorageMock("hello world");
-
-			mock
-				.Setup(m => m.Deserialize<T>(It.IsAny<string>()))
-				.Returns(existingObject);
-
-			return mock;
-		}
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void Constructor_NullOptionsThrows()
 		{
-			new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>(null, (a) => new ConfigurationVersion1());
+			new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>(null, (a) => new ConfigurationVersion1());
 		}
 
 		[TestMethod]
@@ -57,9 +37,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			sourceMock.Object.NamedValueType = MFNamedValueType.MFSystemAdminConfiguration;
 
 			var storageMock = this.GetConfigurationStorageMock("hello world");
-			var instance = new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
+			var instance = new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
 			(
-				new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.UpgradeRuleOptions()
+				new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.UpgradeRuleOptions()
 				{
 					Source = sourceMock.Object
 				},
@@ -79,9 +59,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			sourceMock.Setup(m => m.IsValid()).Returns(true);
 
 			var storageMock = this.GetConfigurationStorageMock((string)null);
-			var instance = new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
+			var instance = new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
 			(
-				new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.UpgradeRuleOptions()
+				new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.UpgradeRuleOptions()
 				{
 					Source = sourceMock.Object
 				},
@@ -99,9 +79,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			sourceMock.Setup(m => m.IsValid()).Returns(true);
 
 			var storageMock = this.GetConfigurationStorageMock(new ConfigurationVersion0() { X = "hello world" });
-			var instance = new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
+			var instance = new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
 			(
-				new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.UpgradeRuleOptions()
+				new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.UpgradeRuleOptions()
 				{
 					Source = sourceMock.Object
 				},
@@ -122,9 +102,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 
 			var storageMock = this.GetConfigurationStorageMock(new ConfigurationVersion0() { X = "hello world" });
 			var calledConvert = false;
-			var instance = new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
+			var instance = new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
 			(
-				new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.UpgradeRuleOptions()
+				new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.UpgradeRuleOptions()
 				{
 					Source = sourceMock.Object
 				},
@@ -152,9 +132,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 
 			var storageMock = this.GetConfigurationStorageMock(new ConfigurationVersion0() { X = "hello world" });
 			var output = new ConfigurationVersion1();
-			var instance = new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
+			var instance = new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
 			(
-				new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.UpgradeRuleOptions()
+				new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.UpgradeRuleOptions()
 				{
 					Source = sourceMock.Object
 				},
@@ -178,9 +158,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			sourceMock.Object.NamedValueType = MFNamedValueType.MFSystemAdminConfiguration;
 
 			var storageMock = this.GetConfigurationStorageMock<ConfigurationVersion1>(new ConfigurationVersion1() { Y = "hello world" });
-			var instance = new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion1, ConfigurationVersion2>
+			var instance = new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion1, ConfigurationVersion2>
 			(
-				new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion1, ConfigurationVersion2>.UpgradeRuleOptions()
+				new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion1, ConfigurationVersion2>.UpgradeRuleOptions()
 				{
 					Source = sourceMock.Object
 				},
@@ -193,7 +173,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			storageMock
 				.Verify
 				(
-					m => m.SaveConfigurationData(It.IsAny<Vault>(), sourceMock.Object.Namespace, "{\r\n  \"Version\": \"2.0\"\r\n}", sourceMock.Object.Name),
+					m => m.SaveConfigurationData(It.IsAny<Vault>(), sourceMock.Object.Namespace, "{\r\n  \"Y\": \"hello world\",\r\n  \"Version\": \"2.0\"\r\n}", sourceMock.Object.Name),
 					Times.Once
 				);
 		}
@@ -209,9 +189,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			sourceMock.Object.NamedValueType = MFNamedValueType.MFSystemAdminConfiguration;
 
 			var storageMock = this.GetConfigurationStorageMock<ConfigurationVersion1>(new ConfigurationVersion2() { Y = "hello world" });
-			var instance = new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion1, ConfigurationVersion2>
+			var instance = new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion1, ConfigurationVersion2>
 			(
-				new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion1, ConfigurationVersion2>.UpgradeRuleOptions()
+				new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion1, ConfigurationVersion2>.UpgradeRuleOptions()
 				{
 					Source = sourceMock.Object
 				},
@@ -224,26 +204,32 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			storageMock
 				.Verify
 				(
-					m => m.SaveConfigurationData(It.IsAny<Vault>(), sourceMock.Object.Namespace, "{\r\n  \"Version\": \"2.0\"\r\n}", sourceMock.Object.Name),
+					m => m.SaveConfigurationData(It.IsAny<Vault>(), sourceMock.Object.Namespace, It.IsAny<string>(), sourceMock.Object.Name),
 					Times.Never
 				);
 		}
 
-		private class ConfigurationVersion0
+		[DataContract]
+		public class ConfigurationVersion0
 			: VersionedConfigurationBase
 		{
+			[DataMember]
 			public string X { get; set; }
 		}
+		[DataContract]
 		[ConfigurationVersion("1.0")]
-		private class ConfigurationVersion1
+		public class ConfigurationVersion1
 			: VersionedConfigurationBase
 		{
+			[DataMember]
 			public string Y { get; set; }
 		}
+		[DataContract]
 		[ConfigurationVersion("2.0")]
-		private class ConfigurationVersion2
+		public class ConfigurationVersion2
 			: ConfigurationVersion1
 		{
+			[DataMember]
 			public string Z { get; set; }
 		}
 	}
