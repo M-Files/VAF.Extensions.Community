@@ -129,10 +129,13 @@ namespace MFiles.VAF.Extensions
 					);
 					break;
 				case MFTaskState.MFTaskStateWaiting:
+					var status = task.Status ?? new TaskProcessingJobStatus();
+					status.Details = remarks;
 					this.CancelWaitingTask
 					(
 						vault ?? this.Vault,
-						task.TaskId
+						task.TaskId,
+						status: status
 					);
 					break;
 				default:

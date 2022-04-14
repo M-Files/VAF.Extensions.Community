@@ -20,6 +20,7 @@ namespace MFiles.VAF.Extensions
 		protected override void StartApplication()
 		{
 			base.StartApplication();
+			//LogManager.EnableLoggingToAttachedDebugger(new AttachedDebuggerLoggingSettings() { LaunchDebugger = true });
 
 			// If we have logging configuration then initialize with that.
 			if (this.Configuration is Configuration.IConfigurationWithLoggingConfiguration configurationWithLogging)

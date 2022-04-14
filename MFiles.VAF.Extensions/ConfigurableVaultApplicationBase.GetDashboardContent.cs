@@ -16,15 +16,25 @@ namespace MFiles.VAF.Extensions
 	public abstract partial class ConfigurableVaultApplicationBase<TSecureConfiguration>
 	{
 		/// <summary>
+		/// The default dashboard refresh interval (in seconds).
+		/// </summary>
+		public const int DefaultDashboardRefreshInterval = 30;
+
+		/// <summary>
+		/// The interval (in seconds) to refresh the dashboard.  If null or <=0, no refresh will be done.
+		/// </summary>
+		public int? DashboardRefreshInterval = DefaultDashboardRefreshInterval;
+
+		/// <summary>
 		/// Creates the status dashboard object that will be populated by <see cref="GetDashboardContent(IConfigurationRequestContext)"/>.
 		/// </summary>
 		/// <param name="refreshIntervalInSeconds"></param>
 		/// <returns></returns>
-		public virtual StatusDashboard CreateStatusDashboard(int refreshIntervalInSeconds = 30)
+		public virtual StatusDashboard CreateStatusDashboard()
 		{
 			return new StatusDashboard()
 			{
-				RefreshInterval = refreshIntervalInSeconds				
+				RefreshInterval = this.DashboardRefreshInterval ?? 0
 			};
 		}
 
@@ -351,7 +361,7 @@ namespace MFiles.VAF.Extensions
 				// If it's the default one then allow downloads.
 				if(config is VaultApplications.Logging.NLog.Targets.DefaultTargetConfiguration)
 				{
-					row.AddCell
+					var cell = row.AddCell
 					(
 						new DashboardDomainCommand
 						{
@@ -362,6 +372,7 @@ namespace MFiles.VAF.Extensions
 							Style = DashboardCommandStyle.Link
 						}
 					);
+					cell.Styles.AddOrUpdate("text-align", "center");
 				}
 				else
 				{

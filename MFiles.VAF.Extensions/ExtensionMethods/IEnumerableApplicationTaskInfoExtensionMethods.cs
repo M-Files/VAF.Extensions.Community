@@ -158,6 +158,9 @@ namespace MFiles.VAF.Extensions
 						taskInfoCell.Icon = "Resources/Images/Completed.png";
 						row.Styles.AddOrUpdate("color", Resources.Dashboard.AsynchronousOperations_Table_ColorCompleted);
 						break;
+					case MFTaskState.MFTaskStateCanceled:
+						taskInfoCell.Icon = "Resources/Images/canceled.png";
+						break;
 					default:
 						break;
 				}
