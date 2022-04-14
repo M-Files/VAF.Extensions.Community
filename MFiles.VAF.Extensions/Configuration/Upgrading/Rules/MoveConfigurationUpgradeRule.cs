@@ -5,7 +5,7 @@ using System.Linq;
 namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 {
 	public class MoveConfigurationUpgradeRule
-		: UpgradeRuleBase<MoveConfigurationUpgradeRule.MoveConfigurationUpgradeRuleOptions>
+		: UpgradeRuleBase<MoveConfigurationUpgradeRule.UpgradeRuleOptions>
 	{
 
 		/// <summary>
@@ -20,7 +20,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// <param name="options">The options defining how to move the configuration.</param>
 		/// <exception cref="ArgumentNullException">If <paramref name="options"/> is null.</exception>
 		/// <exception cref="ArgumentException">If some part of <paramref name="options"/> is invalid.</exception>
-		public MoveConfigurationUpgradeRule(MoveConfigurationUpgradeRuleOptions options)
+		public MoveConfigurationUpgradeRule(UpgradeRuleOptions options)
 			: base(options)
 		{
 			// Sanity.
@@ -76,7 +76,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// <summary>
 		/// Options for <see cref="MoveConfigurationUpgradeRule"/>.
 		/// </summary>
-		public class MoveConfigurationUpgradeRuleOptions
+		public class UpgradeRuleOptions
 			: UpgradeRuleOptionsBase
 		{
 			/// <summary>

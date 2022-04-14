@@ -27,7 +27,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// <param name="namespace">The previously-used namespace for the configuration data.  Used to locate data to read only.</param>
 		/// <param name="name">The previously-used named value name (key) for the configuration data.  Used to locate data to read only.</param>
 		public VAF10ToVAF23UpgradeRule(VaultApplicationBase vaultApplication, string @namespace, string name)
-			: base(new MoveConfigurationUpgradeRuleOptions()
+			: base(new UpgradeRuleOptions()
 			{
 				RemoveMovedValues = true,
 				Source = new SingleNamedValueItem

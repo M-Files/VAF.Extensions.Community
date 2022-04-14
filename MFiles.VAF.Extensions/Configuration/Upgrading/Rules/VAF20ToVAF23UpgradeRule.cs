@@ -27,7 +27,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// <param name="vaultApplication">The vault application that this is running within.</param>
 		/// <param name="configurationNodeName">The name of the (previous) configuration node.  Used to locate data to read only.</param>
 		public VAF20ToVAF23UpgradeRule(VaultApplicationBase vaultApplication, string configurationNodeName)
-			: base(new MoveConfigurationUpgradeRuleOptions()
+			: base(new UpgradeRuleOptions()
 			{
 				RemoveMovedValues = true,
 				Source = new SingleNamedValueItem

@@ -30,7 +30,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		[ExpectedException(typeof(ArgumentException))]
 		public void Constructor_InvalidOptionsThrows_NullSource()
 		{
-			new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.MoveConfigurationUpgradeRuleOptions()
+			new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.UpgradeRuleOptions()
 			{
 				Source = null,
 				Target = this.CreateTargetNamedValueItemMock(true).Object
@@ -41,7 +41,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		[ExpectedException(typeof(ArgumentException))]
 		public void Constructor_InvalidOptionsThrows_InvalidSource()
 		{
-			new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.MoveConfigurationUpgradeRuleOptions()
+			new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.UpgradeRuleOptions()
 			{
 				Source = this.CreateSourceNamedValueItemMock(false).Object,
 				Target = this.CreateTargetNamedValueItemMock(true).Object
@@ -52,7 +52,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		[ExpectedException(typeof(ArgumentException))]
 		public void Constructor_InvalidOptionsThrows_NullTarget()
 		{
-			new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.MoveConfigurationUpgradeRuleOptions()
+			new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.UpgradeRuleOptions()
 			{
 				Source = this.CreateSourceNamedValueItemMock(true).Object,
 				Target = null
@@ -63,7 +63,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		[ExpectedException(typeof(ArgumentException))]
 		public void Constructor_InvalidOptionsThrows_InvalidTarget()
 		{
-			new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.MoveConfigurationUpgradeRuleOptions()
+			new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.UpgradeRuleOptions()
 			{
 				Source = this.CreateSourceNamedValueItemMock(true).Object,
 				Target = this.CreateTargetNamedValueItemMock(false).Object
@@ -73,7 +73,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		[TestMethod]
 		public void Constructor_ValidOptions()
 		{
-			new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.MoveConfigurationUpgradeRuleOptions()
+			new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.UpgradeRuleOptions()
 			{
 				Source = this.CreateSourceNamedValueItemMock(true).Object,
 				Target = this.CreateTargetNamedValueItemMock(true).Object
@@ -90,7 +90,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 				.Returns((NamedValues)null)
 				.Verifiable("Data was not retrieved from NVS.");
 
-			var rule = new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.MoveConfigurationUpgradeRuleOptions()
+			var rule = new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.UpgradeRuleOptions()
 			{
 				Source = this.CreateSourceNamedValueItemMock(true).Object,
 				Target = this.CreateTargetNamedValueItemMock(true).Object
@@ -113,7 +113,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			mock.Setup(m => m.SetNamedValues(It.IsAny<Vault>(), DefaultTargetNVSType, DefaultTargetNamespace, namedValues))
 				.Verifiable("Data was not set in NVS.");
 
-			var rule = new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.MoveConfigurationUpgradeRuleOptions()
+			var rule = new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.UpgradeRuleOptions()
 			{
 				Source = this.CreateSourceNamedValueItemMock(true).Object,
 				Target = this.CreateTargetNamedValueItemMock(true).Object
@@ -132,7 +132,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			mock.Setup(m => m.GetNamedValues(It.IsAny<Vault>(), DefaultSourceNVSType, DefaultSourceNamespace))
 				.Returns(namedValues);
 
-			var rule = new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.MoveConfigurationUpgradeRuleOptions()
+			var rule = new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.UpgradeRuleOptions()
 			{
 				Source = this.CreateSourceNamedValueItemMock(true).Object,
 				Target = this.CreateTargetNamedValueItemMock(true).Object,
@@ -170,7 +170,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 					Assert.AreEqual("hello", names[0]);
 				});
 
-			var rule = new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.MoveConfigurationUpgradeRuleOptions()
+			var rule = new MoveConfigurationUpgradeRuleProxy(new MoveConfigurationUpgradeRule.UpgradeRuleOptions()
 			{
 				Source = this.CreateSourceNamedValueItemMock(true).Object,
 				Target = this.CreateTargetNamedValueItemMock(true).Object,
@@ -197,7 +197,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			: MoveConfigurationUpgradeRule
 		{
 			public Mock<INamedValueStorageManager> NamedValueStorageManagerMock { get; }
-			public MoveConfigurationUpgradeRuleProxy(MoveConfigurationUpgradeRuleOptions options, Mock<INamedValueStorageManager> mock = null) 
+			public MoveConfigurationUpgradeRuleProxy(UpgradeRuleOptions options, Mock<INamedValueStorageManager> mock = null) 
 				: base(options)
 			{
 				this.NamedValueStorageManagerMock = mock ?? new Mock<INamedValueStorageManager>();

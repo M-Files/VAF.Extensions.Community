@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 {
 	[TestClass]
-	public class ConvertConfigurationTypeUpgradeRuleTests
+	public class SimpleConvertConfigurationTypeUpgradeRuleTests
 		: UpgradeRuleTestBase
 	{
 		public Mock<IConfigurationStorage> GetConfigurationStorageMock(string existingData)
@@ -43,7 +43,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void Constructor_NullOptionsThrows()
 		{
-			new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>(null, (a) => new ConfigurationVersion1());
+			new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>(null, (a) => new ConfigurationVersion1());
 		}
 
 		[TestMethod]
@@ -57,9 +57,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			sourceMock.Object.NamedValueType = MFNamedValueType.MFSystemAdminConfiguration;
 
 			var storageMock = this.GetConfigurationStorageMock("hello world");
-			var instance = new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
+			var instance = new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
 			(
-				new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.ConvertConfigurationTypeUpgradeRuleOptions()
+				new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.UpgradeRuleOptions()
 				{
 					Source = sourceMock.Object
 				},
@@ -79,9 +79,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			sourceMock.Setup(m => m.IsValid()).Returns(true);
 
 			var storageMock = this.GetConfigurationStorageMock((string)null);
-			var instance = new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
+			var instance = new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
 			(
-				new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.ConvertConfigurationTypeUpgradeRuleOptions()
+				new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.UpgradeRuleOptions()
 				{
 					Source = sourceMock.Object
 				},
@@ -99,9 +99,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			sourceMock.Setup(m => m.IsValid()).Returns(true);
 
 			var storageMock = this.GetConfigurationStorageMock(new ConfigurationVersion0() { X = "hello world" });
-			var instance = new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
+			var instance = new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
 			(
-				new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.ConvertConfigurationTypeUpgradeRuleOptions()
+				new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.UpgradeRuleOptions()
 				{
 					Source = sourceMock.Object
 				},
@@ -122,9 +122,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 
 			var storageMock = this.GetConfigurationStorageMock(new ConfigurationVersion0() { X = "hello world" });
 			var calledConvert = false;
-			var instance = new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
+			var instance = new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
 			(
-				new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.ConvertConfigurationTypeUpgradeRuleOptions()
+				new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.UpgradeRuleOptions()
 				{
 					Source = sourceMock.Object
 				},
@@ -152,9 +152,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 
 			var storageMock = this.GetConfigurationStorageMock(new ConfigurationVersion0() { X = "hello world" });
 			var output = new ConfigurationVersion1();
-			var instance = new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
+			var instance = new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
 			(
-				new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.ConvertConfigurationTypeUpgradeRuleOptions()
+				new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>.UpgradeRuleOptions()
 				{
 					Source = sourceMock.Object
 				},
@@ -178,9 +178,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			sourceMock.Object.NamedValueType = MFNamedValueType.MFSystemAdminConfiguration;
 
 			var storageMock = this.GetConfigurationStorageMock<ConfigurationVersion1>(new ConfigurationVersion1() { Y = "hello world" });
-			var instance = new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion1, ConfigurationVersion2>
+			var instance = new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion1, ConfigurationVersion2>
 			(
-				new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion1, ConfigurationVersion2>.ConvertConfigurationTypeUpgradeRuleOptions()
+				new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion1, ConfigurationVersion2>.UpgradeRuleOptions()
 				{
 					Source = sourceMock.Object
 				},
@@ -209,9 +209,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			sourceMock.Object.NamedValueType = MFNamedValueType.MFSystemAdminConfiguration;
 
 			var storageMock = this.GetConfigurationStorageMock<ConfigurationVersion1>(new ConfigurationVersion2() { Y = "hello world" });
-			var instance = new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion1, ConfigurationVersion2>
+			var instance = new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion1, ConfigurationVersion2>
 			(
-				new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion1, ConfigurationVersion2>.ConvertConfigurationTypeUpgradeRuleOptions()
+				new SimpleConvertConfigurationTypeUpgradeRule<ConfigurationVersion1, ConfigurationVersion2>.UpgradeRuleOptions()
 				{
 					Source = sourceMock.Object
 				},
