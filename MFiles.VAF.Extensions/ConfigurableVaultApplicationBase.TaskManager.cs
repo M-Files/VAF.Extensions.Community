@@ -75,6 +75,9 @@ namespace MFiles.VAF.Extensions
 			// Register all queues, etc.
 			base.InitializeTaskManager();
 
+			// Register the scheduling queue.
+			this.TaskManager?.RegisterSchedulingQueue();
+
 			// Now populate the run commands.
 			this.TaskManager?.PopulateTaskQueueRunCommands(this.TaskQueueResolver);
 		}
