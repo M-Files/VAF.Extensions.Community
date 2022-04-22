@@ -344,7 +344,7 @@ public class VaultApplication
 
 ## Exposing the background operations on the dashboard
 
-If you inherit from `MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<T>` then background operations will automatically be rendered into the standard VAF dashboard.  If you are rendering your own dashboard content then you can retrieve the `DashboardPanel` containing the background operation content by calling `base.GetBackgroundOperationDashboardContent()`.
+If you inherit from `MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<T>` then background operations will automatically be rendered into the standard VAF dashboard.  If you are rendering your own dashboard content then you can retrieve the `DashboardPanel` containing the background operation content by calling `base.GetAsynchronousOperationDashboardContent()`.
 
 The rendered list will show the background operations' names, their repeat type ("runs on demand" / "runs every x seconds" / "runs according to a schedule") and details on the interval/schedule, as well as their last-run and next-run times.
 
