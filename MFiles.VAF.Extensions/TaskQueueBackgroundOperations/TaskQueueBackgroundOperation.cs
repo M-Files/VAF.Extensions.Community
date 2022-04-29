@@ -11,6 +11,7 @@ using MFiles.VAF.MultiserverMode;
 using System.Collections.Generic;
 using MFiles.VAF.AppTasks;
 using MFiles.VAF.Extensions.Dashboards;
+using MFiles.VaultApplications.Logging;
 
 namespace MFiles.VAF.Extensions
 {
@@ -126,6 +127,8 @@ namespace MFiles.VAF.Extensions
 	public class TaskQueueBackgroundOperation<TSecureConfiguration>
 		where TSecureConfiguration : class, new()
 	{
+		private ILogger Logger { get; }
+
 		/// <summary>
 		/// The task type for this background operation.
 		/// </summary>
@@ -251,7 +254,7 @@ namespace MFiles.VAF.Extensions
 		{
 			// Sanity.
 			if (string.IsNullOrWhiteSpace(name))
-				throw new ArgumentException("The background operation name cannot be null or whitespace.", nameof(name));
+				throw new ArgumentException(Resources.Exceptions.TaskQueueBackgroundOperations.BackgroundOperationMustHaveName, nameof(name));
 
 			// Save parameters.
 			this.CancellationTokenSource = cancellationTokenSource;
@@ -271,6 +274,8 @@ namespace MFiles.VAF.Extensions
 					o.ShowMessage(this.RunCommandSuccessText);
 				o.RefreshDashboard();
 			};
+
+			this.Logger = LogManager.GetLogger(this.GetType());
 		}
 
 		/// <summary>
@@ -298,13 +303,13 @@ namespace MFiles.VAF.Extensions
 				throw new ArgumentOutOfRangeException
 				(
 					nameof(interval),
-					"The timer interval cannot be less than zero."
+					String.Format(Resources.Exceptions.TaskQueueBackgroundOperations.InvalidInterval, interval)
 				);
 
 			// Cancel any existing executions.
 			this.StopRunningAtIntervals();
 
-			// Set up the recurrance data.
+			// Set up the Recurrence data.
 			this.Interval = interval;
 			this.RepeatType = TaskQueueBackgroundOperationRepeatType.Interval;
 
@@ -326,7 +331,7 @@ namespace MFiles.VAF.Extensions
 			// Cancel any existing executions.
 			this.StopRunningAtIntervals();
 
-			// Set up the recurrance data.
+			// Set up the Recurrence data.
 			this.Schedule = schedule;
 			this.RepeatType = TaskQueueBackgroundOperationRepeatType.Schedule;
 
@@ -407,10 +412,13 @@ namespace MFiles.VAF.Extensions
 			}
 			catch (Exception e)
 			{
-				SysUtils.ReportErrorMessageToEventLog
+				this.Logger?.Error
 				(
-					$"Exception cancelling tasks for background operation {this.Name} of type {TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId} on queue {this.BackgroundOperationManager.QueueId}.",
-					e
+					e,
+					Resources.Exceptions.TaskQueueBackgroundOperations.ExceptionCancellingTasks,
+					this.Name,
+					TaskQueueBackgroundOperation<TSecureConfiguration>.TaskTypeId,
+					this.BackgroundOperationManager.QueueId
 				);
 			}
 		}
@@ -425,7 +433,7 @@ namespace MFiles.VAF.Extensions
 			this.RepeatType = TaskQueueBackgroundOperationRepeatType.NotRepeating;
 
 			// Cancel any future executions.
-			this.CancelFutureExecutions("Superseded.");
+			this.CancelFutureExecutions(Resources.Exceptions.TaskQueueBackgroundOperations.CancellationRemarks_BackgroundOperationStopped);
 		}
 
 		/// <summary>

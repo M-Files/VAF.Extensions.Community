@@ -1,0 +1,260 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AsynchronousOperations_DashboardTitle" xml:space="preserve">
+    <value>Asynchronous Operations</value>
+  </data>
+  <data name="AsynchronousOperations_Table_ColorCompleted" xml:space="preserve">
+    <value>#08A14E</value>
+    <comment>The (text) color to use for (successfully) completed items.</comment>
+  </data>
+  <data name="AsynchronousOperations_Table_ColorFailed" xml:space="preserve">
+    <value>#D64554</value>
+    <comment>The (text) color to use for failed items.</comment>
+  </data>
+  <data name="AsynchronousOperations_Table_ColorRunning" xml:space="preserve">
+    <value>#79ADE4</value>
+    <comment>The (text) color to use for running items.</comment>
+  </data>
+  <data name="AsynchronousOperations_Table_ColorWaiting" xml:space="preserve">
+    <value>#BFE0F4</value>
+    <comment>The (text) color to use for waiting items.</comment>
+  </data>
+  <data name="AsynchronousOperations_Table_CompletedRowTitle" xml:space="preserve">
+    <value>Completed.</value>
+  </data>
+  <data name="AsynchronousOperations_Table_CompletedRowTitle_WithTimes" xml:space="preserve">
+    <value>Completed. Started at approximately {0} server time (took {1}).</value>
+    <comment>{0} will be replaced with started time in yyyy-MM-dd HH:mm:ss format. {1} will be replaced with the duration.</comment>
+  </data>
+  <data name="AsynchronousOperations_Table_DetailsHeader" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="AsynchronousOperations_Table_DurationHeader" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+  <data name="AsynchronousOperations_Table_FailedRowTitle" xml:space="preserve">
+    <value>Failed.</value>
+  </data>
+  <data name="AsynchronousOperations_Table_FailedRowTitle_WithTimes" xml:space="preserve">
+    <value>Failed. Started at approximately {0} server time (took {1}).</value>
+    <comment>{0} will be replaced with started time in yyyy-MM-dd HH:mm:ss format. {1} will be replaced with the duration.</comment>
+  </data>
+  <data name="AsynchronousOperations_Table_FilteredListComment" xml:space="preserve">
+    <value>This table shows the most recently-modified {0} of {1} total tasks.</value>
+    <comment>{0} will be replaced with the number of rows that can be shown, and {1} will be replaced with the number of tasks.</comment>
+  </data>
+  <data name="AsynchronousOperations_Table_Footer_AwaitingProcessing" xml:space="preserve">
+    <value>{0} awaiting processing.</value>
+    <comment>{0} will be replaced with the number of tasks in this state.</comment>
+  </data>
+  <data name="AsynchronousOperations_Table_Footer_Completed" xml:space="preserve">
+    <value>{0} completed.</value>
+    <comment>{0} will be replaced with the number of tasks in this state.</comment>
+  </data>
+  <data name="AsynchronousOperations_Table_Footer_Failed" xml:space="preserve">
+    <value>{0} failed.</value>
+    <comment>{0} will be replaced with the number of tasks in this state.</comment>
+  </data>
+  <data name="AsynchronousOperations_Table_Footer_Running" xml:space="preserve">
+    <value>{0} running.</value>
+    <comment>{0} will be replaced with the number of tasks in this state.</comment>
+  </data>
+  <data name="AsynchronousOperations_Table_RunningRowTitle" xml:space="preserve">
+    <value>Running.</value>
+  </data>
+  <data name="AsynchronousOperations_Table_RunningRowTitle_WithTimes" xml:space="preserve">
+    <value>Running. Started at approximately {0} server time (taken {1} so far).</value>
+    <comment>{0} will be replaced with started time in yyyy-MM-dd HH:mm:ss format. {1} will be replaced with the duration.</comment>
+  </data>
+  <data name="AsynchronousOperations_Table_ScheduledHeader" xml:space="preserve">
+    <value>Scheduled</value>
+  </data>
+  <data name="AsynchronousOperations_Table_StartedHeader" xml:space="preserve">
+    <value>Started</value>
+  </data>
+  <data name="AsynchronousOperations_Table_StatusHeader" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="AsynchronousOperations_Table_TaskHeader" xml:space="preserve">
+    <value>Task</value>
+  </data>
+  <data name="AsynchronousOperations_Table_WaitingRowTitle" xml:space="preserve">
+    <value>Waiting.  Will start at approximately {0}.</value>
+    <comment>{0} will be replaced with activation time in yyyy-MM-dd HH:mm:ss format.</comment>
+  </data>
+  <data name="AsynchronousOperations_ThereAreNoCurrentAsynchronousOperations" xml:space="preserve">
+    <value>There are no current asynchronous operations.</value>
+  </data>
+  <data name="Logging_ColorNotEnabled" xml:space="preserve">
+    <value>#CCC</value>
+  </data>
+  <data name="Logging_ColorValidationErrors" xml:space="preserve">
+    <value>#D64554</value>
+  </data>
+  <data name="Logging_DashboardTitle" xml:space="preserve">
+    <value>Logging</value>
+  </data>
+  <data name="Logging_LoggingNotEnabled" xml:space="preserve">
+    <value>Logging is not enabled.</value>
+  </data>
+  <data name="Logging_NoLogTargetsAreConfigured" xml:space="preserve">
+    <value>No log targets are currently configured.</value>
+  </data>
+  <data name="Logging_Table_DownloadLogs" xml:space="preserve">
+    <value>Download logs</value>
+  </data>
+  <data name="Logging_Table_LogLevelsHeader" xml:space="preserve">
+    <value>Log Levels</value>
+  </data>
+  <data name="Logging_Table_NameHeader" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Logging_Table_UnnamedTarget" xml:space="preserve">
+    <value>Unnamed target</value>
+  </data>
+  <data name="Logging_TargetNotEnabled" xml:space="preserve">
+    <value>Target not enabled</value>
+  </data>
+  <data name="Logging_TargetValidationErrors" xml:space="preserve">
+    <value>There are validation errors for this target so it will not be used.</value>
+  </data>
+  <data name="MFTaskStateCanceled" xml:space="preserve">
+    <value>Canceled</value>
+  </data>
+  <data name="MFTaskStateCompleted" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="MFTaskStateFailed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="MFTaskStateInProgress" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="MFTaskStateNone" xml:space="preserve">
+    <value />
+  </data>
+  <data name="MFTaskStateWaiting" xml:space="preserve">
+    <value>Waiting</value>
+  </data>
+  <data name="TimeOnServer" xml:space="preserve">
+    <value>Time on server: {0}</value>
+    <comment>{0} will be replaced with current time in 24-hour format.</comment>
+  </data>
+</root>

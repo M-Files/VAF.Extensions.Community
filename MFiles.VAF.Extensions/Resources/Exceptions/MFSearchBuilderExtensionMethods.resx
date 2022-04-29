@@ -1,0 +1,209 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="CannotResolveAlias_NotFound" xml:space="preserve">
+    <value>Could not resolve the identifier with alias/GUID {0} in the current vault.</value>
+    <comment>{0} will be replaced with the alias that needs resolving.</comment>
+  </data>
+  <data name="CannotResolveAlias_VaultReferenceNull" xml:space="preserve">
+    <value>The search builder or vault reference is null, so the identifier with alias/GUID {0} cannot be resolved.</value>
+    <comment>{0} will be replaced with the alias that needs resolving.</comment>
+  </data>
+  <data name="DataFunctionCallMonthInvalid" xml:space="preserve">
+    <value>The value ({0}) should contain a two-digit month number (e.g. '03').</value>
+    <comment>{0} will be replaced with the supplied value.</comment>
+  </data>
+  <data name="DataFunctionCallMonthOutOfRange" xml:space="preserve">
+    <value>The month value ({0}) should be between 1 and 12, inclusive.</value>
+    <comment>{0} will be replaced with the supplied value.</comment>
+  </data>
+  <data name="DataFunctionCallValueNull" xml:space="preserve">
+    <value>When using a DataFunctionCall, the provided value cannot be null.</value>
+  </data>
+  <data name="DataFunctionCallYearAndMonthInvalid" xml:space="preserve">
+    <value>The value ({0}) is not of the expected format (YYYY-MM).</value>
+    <comment>{0} will be replaced with the supplied value.</comment>
+  </data>
+  <data name="DataFunctionCallYearInvalid" xml:space="preserve">
+    <value>The year must be four digits.</value>
+  </data>
+  <data name="FileSize_Negative" xml:space="preserve">
+    <value>The size parameter must be zero or larger.</value>
+  </data>
+  <data name="HandledDataTypesCannotBeEmpty" xml:space="preserve">
+    <value>Handled data types cannot be empty.</value>
+  </data>
+  <data name="IndirectionLevelPointsToInvalidObjectType" xml:space="preserve">
+    <value>An indirection level references an object type with ID {0}, but this object type could not be found.</value>
+    <comment>{0} will be replaced with the ID of the object type that the property uses.</comment>
+  </data>
+  <data name="IndirectionLevelPointsToValueList" xml:space="preserve">
+    <value>An indirection level references an value list with ID {0}, but this list does not refer to an object type (cannot be used with value lists).</value>
+    <comment>{0} will be replaced with the ID of the value list that the property uses.</comment>
+  </data>
+  <data name="IndirectionLevelPropertyNotFound" xml:space="preserve">
+    <value>An indirection level references a property definition with ID {0}, but this property definition could not be found.</value>
+    <comment>{0} will be replaced with the ID of the property.</comment>
+  </data>
+  <data name="IndirectionLevelPropertyNotOfExpectedType" xml:space="preserve">
+    <value>The indirection level for property {0} does not reference a lookup-style property definition (actual type: {1}).</value>
+    <comment>{0} will be replaced with the ID of the property.  {1} will be replaced with the type of the property.</comment>
+  </data>
+  <data name="ObjectIDs_ConditionTypeInvalid" xml:space="preserve">
+    <value>The condition type {0} is not supported for object Ids.</value>
+    <comment>{0} will be replaced with the unhandled condition type.</comment>
+  </data>
+  <data name="ObjectIDs_ObjectIDMustBeGreaterThanZero" xml:space="preserve">
+    <value>Object Id must be greater than 0.</value>
+  </data>
+  <data name="ObjectIDs_SegmentIndexMustBeZeroOrLarger" xml:space="preserve">
+    <value>The segment index must be zero or larger.</value>
+  </data>
+  <data name="ObjectIDs_SegmentSizeMustBeOneOrLarger" xml:space="preserve">
+    <value>The segment size must be one or larger.</value>
+  </data>
+  <data name="OneOf_CollectionEmpty" xml:space="preserve">
+    <value>The lookup collection does not contain any items.</value>
+  </data>
+  <data name="Permissions_ConditionTypeInvalid" xml:space="preserve">
+    <value>The condition type {0} is not supported for permission-based search conditions.</value>
+    <comment>{0} will be replaced with the unhandled condition type.</comment>
+  </data>
+  <data name="SearchConditionsNull" xml:space="preserve">
+    <value>The search builder's conditions are null.</value>
+  </data>
+  <data name="SegmentedSearch_EndSegmentMustBeGreaterThanZero" xml:space="preserve">
+    <value>The end segment must be greater than zero.</value>
+  </data>
+  <data name="SegmentedSearch_SearchTimeoutMustBeZeroOrLarger" xml:space="preserve">
+    <value>The search timeout must be greater than zero, or zero to indicate an indefinite timeout.</value>
+  </data>
+  <data name="SegmentedSearch_SegmentSizeMustBeGreaterThanZero" xml:space="preserve">
+    <value>The segment size must be greater than zero.</value>
+  </data>
+  <data name="SegmentedSearch_StartSegmentMustBeZeroOrLarger" xml:space="preserve">
+    <value>The starting segment must be zero or larger.</value>
+  </data>
+  <data name="VaultObjectSearchOperationsReferenceNull" xml:space="preserve">
+    <value>The vault's ObjectSearchOperations reference is null.</value>
+  </data>
+  <data name="VaultReferenceNull" xml:space="preserve">
+    <value>The search builder's vault reference is null.</value>
+  </data>
+</root>

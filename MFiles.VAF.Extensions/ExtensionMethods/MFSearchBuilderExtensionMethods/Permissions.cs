@@ -43,7 +43,11 @@ namespace MFiles.VAF.Extensions
 			{
 				throw new ArgumentException
 				(
-					$"The condition type {conditionType} is not supported for permission-based search conditions.",
+					String.Format
+					(
+						Resources.Exceptions.MFSearchBuilderExtensionMethods.Permissions_ConditionTypeInvalid,
+						conditionType
+					),
 					nameof(conditionType)
 				);
 			}

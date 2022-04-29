@@ -40,7 +40,7 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// The current task state.
 		/// </summary>
-		public MFTaskState CurrentTaskState { get; internal set; }
+		public MFTaskState CurrentTaskState { get; set; }
 
 		/// <summary>
 		/// Creates either a <see cref="DashboardProgressBar"/> or <see cref="DashboardCustomContent"/>
@@ -66,13 +66,15 @@ namespace MFiles.VAF.Extensions
 				// Otherwise just show the text.
 				var dashboardCustomContentEx = new DashboardCustomContentEx
 				(
-					new DashboardCustomContent(System.Security.SecurityElement.Escape(this.StatusDetails))
+					new DashboardCustomContent(this.StatusDetails.EscapeXmlForDashboard())
 				);
 				if (removeLineBreaks)
 				{
 					dashboardCustomContentEx.Styles.Add("white-space", "nowrap");
 					dashboardCustomContentEx.Styles.Add("overflow", "hidden");
-					dashboardCustomContentEx.Styles.Add("display", "inline-block");
+					dashboardCustomContentEx.Styles.Add("display", "block");
+					dashboardCustomContentEx.Styles.Add("margin", "0");
+					dashboardCustomContentEx.Styles.Add("padding", "0");
 					dashboardCustomContentEx.Styles.Add("text-overflow", "ellipsis");
 				}
 				return dashboardCustomContentEx;

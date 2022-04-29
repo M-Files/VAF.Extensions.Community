@@ -223,6 +223,11 @@ namespace MFiles.VAF.Extensions.Dashboards
 		: DashboardContentBase
 	{
 		/// <summary>
+		/// The title for the table.
+		/// </summary>
+		public string Title { get; set; }
+
+		/// <summary>
 		/// Commands (links/buttons) to show.
 		/// </summary>
 		public List<DashboardCommand> Commands { get; }
@@ -245,6 +250,11 @@ namespace MFiles.VAF.Extensions.Dashboards
 		/// </summary>
 		public Dictionary<string, string> TableAttributes { get; }
 			= new Dictionary<string, string>();
+
+		/// <summary>
+		/// The maximum height of the table.
+		/// </summary>
+		public int? MaximumHeight { get; set; } = 200;
 
 		public DashboardTable()
 		{
@@ -284,13 +294,20 @@ namespace MFiles.VAF.Extensions.Dashboards
 			XmlElement tableWrapper = (XmlElement)fragment.SelectNodes("div[@class=\"table-wrapper\"]")[0];
 			XmlElement table = (XmlElement)fragment.SelectNodes("//table")[0];
 			XmlElement titleBar = (XmlElement)tableWrapper.SelectNodes("*[@class=\"title-bar\"]")[0];
-			XmlElement cmdBar = (XmlElement)titleBar.SelectNodes("*[@class=\"command-bar\"]")[0];
+			XmlElement cmdBar = (XmlElement)titleBar?.SelectNodes("*[@class=\"command-bar\"]")[0];
+			XmlElement title = (XmlElement)titleBar?.SelectNodes("*[@class=\"title\"]")[0];
+
+			// Append any title.
+			if (null != title && false == string.IsNullOrWhiteSpace(this.Title))
+			{
+				title.InnerText = this.Title.EscapeXmlForDashboard();
+			}
 
 			// Append any commands defined for the item.
-			if (this.Commands != null)
+			if (this.Commands != null && null != cmdBar)
 			{
 				foreach (DashboardCommand cmd in this.Commands)
-					cmdBar.AppendChild(cmd.Generate(xml));
+					cmdBar?.AppendChild(cmd.Generate(xml));
 			}
 
 			// Add the header rows.
@@ -389,15 +406,30 @@ namespace MFiles.VAF.Extensions.Dashboards
 		/// <inheritdoc />
 		protected override XmlDocumentFragment GenerateXmlDocumentFragment(XmlDocument xml)
 		{
+			// Do we have a max height?
+			var maxHeightCss = this.MaximumHeight.HasValue
+				? $"max-height: {this.MaximumHeight.Value}px; overflow-y: auto;"
+				: "";
+
 			// Create the basic structure of the table.
-			return  DashboardHelper.CreateFragment(xml,
-					"<div class='table-wrapper' style='max-height: 200px; overflow-y: auto;'>"
-						+ "<div class='title-bar'>"
-							+ "<span class='command-bar'></span>"
-						+ "</div>"
-						+ "<table>"
-						+ "</table>" 
-					+ "</div>");
+			if (false == string.IsNullOrWhiteSpace(this.Title) || (this.Commands?.Count ?? 0) > 0)
+				// Render out with a title bar.
+				return  DashboardHelper.CreateFragment(xml,
+						"<div class='table-wrapper' style='" + maxHeightCss + "'>"
+							+ "<div class='title-bar'>"
+								+ "<span class='command-bar'></span>"
+								+ "<span class='title'></span>"
+							+ "</div>"
+							+ "<table>"
+							+ "</table>" 
+						+ "</div>");
+			else
+				// No title bar.
+				return DashboardHelper.CreateFragment(xml,
+						"<div class='table-wrapper' style='" + maxHeightCss + "'>"
+							+ "<table>"
+							+ "</table>"
+						+ "</div>");
 		}
 	}
 }

@@ -1,0 +1,272 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta charset="utf-8" />
+    <title>Log File Download Selector</title>
+    <style>
+        html {
+            font-family: "Segoe UI", Verdana, sans-serif;
+        }
+
+        body {
+            margin: 0px;
+            color: #000;
+            font-size: 12px;
+            cursor: default;
+            background: #E5E5E5;
+        }
+
+        #panel {
+            background: white;
+            position: absolute;
+            top: 8px;
+            bottom: 48px;
+            right: 8px;
+            left: 8px;
+            padding: 10px;
+        }
+
+        #scrollPanel {
+            position: absolute;
+            top: 45px;
+            bottom: 0px;
+            right: 0px;
+            left: 0px;
+            overflow: auto;
+            padding: 10px;
+        }
+
+        #title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #000;
+            margin: 10px 0px;
+        }
+
+        button {
+            font-family: "Segoe UI", Verdana, sans-serif;
+            font-size: 12px;
+            background: #E1E1E1;
+            border: 1.3px solid #3A95DD;
+            padding: 6px 40px;
+            color: #000;
+            margin: 0px;
+            cursor: pointer;
+        }
+
+            button:hover {
+                color: #666;
+            }
+
+        #download {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+        }
+
+        #cancel {
+            position: absolute;
+            bottom: 10px;
+            right: 150px;
+        }
+
+        #fileList > div {
+            padding: 4px 12px;
+        }
+    </style>
+    <script>
+
+		/**
+		 * Entry point called when the dashboard is ready.
+		 * @param {MFilesUI.Dashboard} dashboard - The dashboard instance.
+		 */
+        function OnNewDashboard( dashboard ) {
+
+			// Set the window title and size.
+			dashboard.Window.Title = "Download Log Files";
+			dashboard.Window.Resizable = false;
+			dashboard.Window.Width = 540;
+			dashboard.Window.Height = 500;
+
+			// Initialize the download controller.
+			var logFiles = %LOG_FILES_DATA%;
+			var sourceDef = %DOWNLOAD_METHOD%;
+			new DownloadController( dashboard, logFiles, sourceDef.source.read );
+		}
+
+		/**
+		 * Represents a file that can be downloaded. Mirrors LogDownloadDashboard.LogFileInfo.
+		 * @typedef {object} LogFileInfo
+		 * @property {string} relativePath - The relative path of the log file
+		 * @property {number} size - The size of the log file.
+		 */
+
+		 /**
+		  * Represents a vault extension method to call.
+		  * @typedef {object} ExtensionMethodSource
+		  * @property {string} method - The name of the extension method to call.
+		  * @property {string[]} params - The parameters to call the method with.
+		  */
+
+		/**
+		 * Controls log downloads in the dashboard.
+		 * @param {MFilesUI.Dashboard} dashboard - The dashboard instance.
+		 * @param {LogFileInfo[]} logFiles - The log files that can be downloaded.
+		 * @param {ExtensionMethodSource} methodSrc - The extension method source to call to create the download.
+		 */
+        function DownloadController(
+			dashboard,
+			logFiles,
+			methodSrc
+		) {
+
+			/**
+			 * The current dashboard instance.
+			 * @member {MFilesUI.Dashboard}
+			 * */
+			this.dashboard = dashboard;
+
+			/**
+			 * The files available. Injected at runtime.
+			 * @member {LogFileInfo[]}
+			 * */
+			this.logFiles = logFiles;
+
+			/**
+			 * The method source. Injected at runtime.
+			 * @var {ExtensionMethodSource}
+			 * */
+			this.methodSrc = methodSrc;
+
+			// Setup button behavior.
+			var self = this;
+			document.getElementById( "download" ).onclick = function() {
+				self.download();
+			}
+			document.getElementById( "cancel" ).onclick = function() {
+				self.cancel();
+			}
+
+			// Render the list of files.
+			this.renderFileList();
+        }
+
+		/**
+		 * Renders a list of the available log files.
+		 * */
+		DownloadController.prototype.renderFileList = function() {
+
+			// Resolve the container to render the list in.
+			var parent = document.getElementById( "fileList" );
+
+			// Render each file.
+            for( var i = 0; i < this.logFiles.length; i++ ) {
+				this.renderFileCheckbox( parent, this.logFiles[ i ] );
+			}
+        }
+
+		/**
+		 * Renders a check box for a log file.
+		 * @param {HTMLElement} parent - The parent element to append the checkbox to.
+		 * @param {LogFileInfo} file - The file to render the checkbox for.
+		 */
+		DownloadController.prototype.renderFileCheckbox = function( parent, file ) {
+
+			// Create a container element for the file checkbox.
+			var container = document.createElement( "div" );
+
+			// Render the checkbox.
+            var input = document.createElement( "input" );
+            input.type = "checkbox"
+			input.value = file.relativePath;
+			input.name = file.relativePath;
+            container.appendChild( input );
+
+			// Render the label.
+			var label = document.createElement( "label" );
+			label.type = "checkbox"
+			label.for = file.relativePath;
+			container.appendChild( label );
+			var text = document.createTextNode( file.relativePath + ", " + file.size + " bytes" );
+            label.appendChild( text );
+
+			// Add to the parent.
+            parent.appendChild( container );
+        }
+
+		/**
+		 * Resolves the paths of the log files that are currently selected (checked) in the dashboard.
+		 * @returns {string[]} - The relative paths of the files that are selected (checked).
+		 * */
+		DownloadController.prototype.getSelectedFiles = function() {
+
+			// Loop over all inputs.
+			var files = [];
+			var inputs = document.getElementsByTagName( "input" );
+			for( var i = 0; i < inputs.length; i++ ) {
+
+				// Inlcude this input's value if it is a checked checkbox.
+				var input = inputs[ i ];
+				if( input.type == "checkbox" && input.checked ) {
+					files.push( input.value );
+				}
+			}
+
+			return files;
+		}
+
+		/**
+		 * Handles the download button press.
+		 * Downloads the currently selected files.
+		 * */
+		DownloadController.prototype.download = function() {
+
+			// Resolve the log files to download.
+			var files = this.getSelectedFiles()
+
+			// Call the extension method with the list of file names appended to the params.
+			var params = this.methodSrc.params.concat( files );
+			var responseStr = this.dashboard.Vault.ExtensionMethodOperations
+					.ExecuteVaultExtensionMethod( this.methodSrc.method, JSON.stringify( params ) );
+
+			// Process the resonse.
+			if( responseStr ) {
+
+				// Deserialize the response.
+				var response = JSON.parse( responseStr );
+
+				// Add the returned directives to be run when the window is closed.
+				this.dashboard.customData.directives = response.directives;
+			}
+
+			// Close the window.
+			this.dashboard.Window.Close();
+		}
+
+		/**
+		 * Handles a cancel button press.
+		 * */
+		DownloadController.prototype.cancel = function() {
+
+			// Close the window.
+			this.dashboard.Window.Close();
+		}
+
+    </script>
+</head>
+<body>
+    <div id="panel">
+        <div id="header">
+            <div id="title">Select the log files to download:</div>
+        </div>
+        <div id="scrollPanel">
+            <div id="fileList"></div>
+        </div>
+    </div>
+    <div id="buttonBar">
+        <button id="cancel">Cancel</button>
+        <button id="download">Download</button>
+    </div>
+</body>
+</html>

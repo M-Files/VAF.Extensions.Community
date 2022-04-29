@@ -185,7 +185,7 @@ namespace MFiles.VAF.Extensions.Tests.Dashboards
 		public override void Icon_FromResource()
 		{
 			var dashboardContent = this.CreateDashboardContent();
-			dashboardContent.Icon = "/Resources/Completed.png";
+			dashboardContent.Icon = "/Resources/Images/Completed.png";
 			var element = dashboardContent.Generate(new System.Xml.XmlDocument())?.FirstChild;
 
 			// This component does not support icons.

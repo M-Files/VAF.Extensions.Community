@@ -19,7 +19,12 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// There must be at least one item in this collection for the trigger to be active.
 		/// </summary>
 		[DataMember]
-		[JsonConfEditor(Label = "Trigger Days")]
+		[JsonConfEditor
+		(
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_WeeklyTrigger_TriggerDays_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_WeeklyTrigger_TriggerDays_HelpText),
+			ChildName = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_WeeklyTrigger_TriggerDays_ChildName)
+		)]
 		public List<DayOfWeek> TriggerDays { get; set; } = new List<DayOfWeek>();
 
 		/// <summary>
@@ -89,7 +94,11 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			if (null == this.TriggerTimes || this.TriggerTimes.Count == 0)
 				return null;
 
-			return $"Every {string.Join(", ", this.TriggerDays.OrderBy(t => t))} at the following times: {string.Join(", ", this.TriggerTimes.OrderBy(t => t).Select(t => t.ToString()))}.";
+			return Resources.Schedule.Triggers_WeeklyTrigger.EscapeXmlForDashboard
+				(
+					string.Join(", ", this.TriggerDays.OrderBy(t => t)),
+					string.Join(", ", this.TriggerTimes.OrderBy(t => t).Select(t => t.ToString()))
+				);
 		}
 	}
 }

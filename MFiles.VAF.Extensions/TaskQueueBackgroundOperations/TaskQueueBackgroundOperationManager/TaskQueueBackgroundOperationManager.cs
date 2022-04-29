@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using MFiles.VAF.Core;
 using MFiles.VAF.Extensions.ExtensionMethods;
 using MFiles.VAF.AppTasks;
+using MFiles.VaultApplications.Logging;
 
 namespace MFiles.VAF.Extensions
 {
@@ -23,6 +24,8 @@ namespace MFiles.VAF.Extensions
 		/// Lock for <see cref="CurrentServer"/>.
 		/// </summary>
 		private static readonly object _lock = new object();
+
+		private ILogger Logger { get; }
 
 		/// <summary>
 		/// The server that this application is running on.
@@ -59,9 +62,16 @@ namespace MFiles.VAF.Extensions
 		public TaskQueueBackgroundOperation<TSecureConfiguration> GetTaskQueueBackgroundOperationByName(string name)
 		{
 			if (this.BackgroundOperations.ContainsKey(name) == false)
-				throw new ArgumentException(
-					$"No background operation with the name {name} in queue {this.QueueId} exists.",
-					nameof(name));
+				throw new ArgumentException
+				(
+					String.Format
+					(
+						Resources.Exceptions.TaskQueueBackgroundOperations.BackgroundOperationDoesNotExist,
+						name,
+						this.QueueId
+					),
+					nameof(name)
+				);
 
 			// Return the background operation by name
 			return this.BackgroundOperations[name];
@@ -145,7 +155,9 @@ namespace MFiles.VAF.Extensions
 		{
 			// Sanity.
 			if (string.IsNullOrWhiteSpace(queueId))
-				throw new ArgumentException("The queue id cannot be null or whitespace.", nameof(queueId));
+				throw new ArgumentException(Resources.Exceptions.TaskQueueBackgroundOperations.TheQueueIdCannotBeNullOrWhitespace, nameof(queueId));
+
+			this.Logger = LogManager.GetLogger(this.GetType());
 
 			// Assign.
 			this.CancellationTokenSource = cancellationTokenSource;
@@ -200,7 +212,7 @@ namespace MFiles.VAF.Extensions
 			if (null == job.Directive)
 			{
 				// This is an issue.  We have no way to decide what background operation should run it.  Die.
-				SysUtils.ReportErrorToEventLog
+				this.Logger?.Warn
 				(
 					$"Job loaded with no directive (queue: {this.QueueId}, task type: {job.TaskInfo.TaskType}, task id: {job.TaskInfo.TaskID})."
 				);
@@ -211,7 +223,7 @@ namespace MFiles.VAF.Extensions
 			if (string.IsNullOrWhiteSpace(job.Directive.BackgroundOperationName))
 			{
 				// This is an issue.  We have no way to decide what background operation should run it.  Die.
-				SysUtils.ReportErrorToEventLog
+				this.Logger?.Warn
 				(
 					$"Job loaded with no background operation name loaded (queue: {this.QueueId}, task type: {job.TaskInfo.TaskType}, task id: {job.TaskInfo.TaskID})."
 				);
@@ -228,7 +240,7 @@ namespace MFiles.VAF.Extensions
 				if (false == this.BackgroundOperations.TryGetValue(job.Directive.BackgroundOperationName, out bo))
 				{
 					// We have no registered background operation to handle the callback.
-					SysUtils.ReportErrorToEventLog
+					this.Logger?.Warn
 					(
 						$"No background operation found with name {job.Directive.BackgroundOperationName} (queue: {this.QueueId}, task type: {job.TaskInfo.TaskType}, task id: {job.TaskInfo.TaskID})."
 					);

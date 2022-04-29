@@ -86,9 +86,16 @@ namespace MFiles.VAF.Extensions
 			lock (TaskQueueBackgroundOperationManager<TSecureConfiguration>._lock)
 			{
 				if (this.BackgroundOperations.ContainsKey(name))
-					throw new ArgumentException(
-						$"A background operation with the name {name} in queue {this.QueueId} already exists.",
-						nameof(name));
+					throw new ArgumentException
+					(
+						string.Format
+						(
+							Resources.Exceptions.TaskQueueBackgroundOperations.BackgroundOperationAlreadyExistsWithThatName,
+							name,
+							this.QueueId
+						),
+						nameof(name)
+					);
 
 				// Create the background operation.
 				backgroundOperation = new TaskQueueBackgroundOperation<TDirective, TSecureConfiguration>

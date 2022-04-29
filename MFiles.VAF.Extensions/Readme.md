@@ -4,7 +4,7 @@ Please drill into the sub-folders for details on available objects/methods and t
 
 ## ConfigurableVaultApplicationBase<T>
 
-This base class should be used for vault applications that use the VAF Extensions library.  This base class implements various functionality such as generating dashboards for your task processors and background operations:
+This base class should be used for vault applications that use the VAF Extensions library.  This base class implements various functionality such as generating dashboards for your task processors and background operations, and implementing the [logging framework](https://development.m-files.com/Frameworks/Logging/):
 
 ![An image showing a VAF dashboard with a list of background operations and their current status](sample-dashboard.png)
 
@@ -314,3 +314,126 @@ public class Configuration
 	public RandomRecurrenceConfiguration TaskOneSchedule { get; set; } = new RandomRecurrenceConfiguration();
 }
 ```
+
+## Logging
+
+The VAF Extensions library also implements the boilerplate code required to integrate the [M-Files Vault Application Logging Framework](https://developer.m-files.com/Frameworks/Logging/) into your VAF applications.  For this to work your vault application class **must** inherit from `MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<T>`.  Your configuration class must also either inherit from `MFiles.VAF.Extensions.Configuration.ConfigurationBase`, or must implement `MFiles.VAF.Extensions.Configuration.IConfigurationWithLoggingConfiguration`.
+
+To use logging from within your vault application class, simply log using the logger instance:
+
+```
+using MFiles.VAF.Extensions.Dashboards;
+using MFiles.VaultApplications.Logging;
+namespace LoggingExample
+{
+	public class VaultApplication
+		: MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<Configuration>
+	{
+ 
+		[TaskQueue]
+		public const string QueueId = "test.VaultApplication.myQueueId";
+		public const string TaskTypeA = "taskTypeA";
+ 
+		[TaskProcessor(QueueId, TaskTypeA, TransactionMode = TransactionMode.Full)]
+		[ShowOnDashboard("Import data", ShowRunCommand = true)]
+		public void ProcessBackgroundTask(ITaskProcessingJob<TaskDirective> job)
+		{
+			// Log "hello world" to appropriate targets
+			this.Logger?.Info("hello world");
+		}
+ 
+	}
+}
+```
+
+Where you need to log from other classes, create your own logger instance.  Each class should have its own logger.
+
+```
+using MFiles.VaultApplications.Logging;
+namespace LoggingExample
+{
+	public class DocumentProcessor
+	{
+		private ILogger Logger { get; }
+		public DocumentProcessor()
+		{
+			// Instantiate the logger.
+			this.Logger = LogManager.GetLogger(this.GetType());
+		}
+
+		public void ProcessDocument(ObjVerEx o)
+		{
+			// Note the syntax for compatibility with log sensitivity filters.
+			this.Logger?.Trace($"Starting processing {o}");
+
+			try
+			{
+				// TODO: Implement.
+			}
+			catch(Exception e)
+			{
+				// Also log the exceptions.
+				this.Logger?.Error(e, $"Exception processing {o}.");
+			}
+		}
+ 
+	}
+}
+```
+
+## Dashboards
+
+The VAF Extensions library contains some default functionality to create basic [VAF dashboards](https://developer.m-files.com/Frameworks/Vault-Application-Framework/Configuration/Custom-Dashboards/) showing information about your application, any asynchronous operations that are defined, and logging configuration.  Version 22.4 of the extensions library brings some breaking changes aimed to improve the extensibility of this concept.
+
+### Breaking changes in VAF Extensions 22.4
+
+#### Approach
+
+If you wanted to customise the dashboard in previous versions of the VAF Extensions (e.g. to create your own section of content) the you needed to override `GetDashboardContent`.  The primary issue with this was that, if you wanted to include any of the standard content, you had to build the status dashboard in a specific way to ensure that the refresh functionality and the like still worked.  VAF Extensions 22.4 changes the approach needed to allow you more control.
+
+**IT IS STRONGLY RECOMMENDED THAT YOU DO NOT OVERRIDE `GetDashboardContent` ANY MORE**
+
+Instead, you can choose to override `GetStatusDashboardRootItems`.  This method returns the dashboard content that should be placed into the status dashboard, in the order it should be shown.  By default it will return:
+
+1. The application overview (name, version, etc.) details from the underlying VAF implementation (provided by `GetApplicationOverviewDashboardControl`), then
+2. Details on any asynchronous operations that are defined in this application (provided by `GetAsynchronousOperationDashboardControl`), then
+3. Details on logging configuration (provided by `GetLoggingDashboardControl`).
+
+To add an existing item to the end of the dashboard, you could do this:
+
+```csharp
+public override IEnumerable<IDashboardContent> GetStatusDashboardRootItems(IConfigurationRequestcontext context)
+{
+	// Include everything we would by default.
+	foreach(var c in base.GetStatusDashboardRootItems(context) ?? new Enumerable.Empty<IDashboardContent>())
+		yield return c;
+
+	// Add some more content to the bottom.
+	yield return this.GenerateCustomDashboardContent(context); // Not shown, but imagine it does something awesome.
+}
+```
+
+To change the way in which details about your application are shown, but to keep everything else, you could override `GetApplicationOverviewDashboardContent`:
+
+```csharp
+public override IDashboardContent GetApplicationOverviewDashboardContent(IConfigurationRequestContext context)
+{
+	// This replaces the table that includes the application name, version, etc.
+	return new DashboardCustomContent("hello world!");
+}
+```
+Note that all of the other dashboard content is still included in the order it would be normally.
+
+You could even remove a standard section by overriding the appropriate method and returning null:
+
+```csharp
+public override IDashboardContent GetApplicationOverviewDashboardContent(IConfigurationRequestContext context)
+{
+    // This would cause the application overview section to be omitted, but the rest of the dashboard rendered as normal.
+    return null;
+}
+```
+
+#### Method signatures
+
+The dashboard-generation methods now get provided with the configuration request context, so a method with a signature of `IDashboardContent GetAsynchronousOperationDashboardContent()` has changed to `IDashboardContent GetAsynchronousOperationDashboardContent(IConfigurationRequestContext context)`.  If you are overriding these methods then alter the method signature to the new one.

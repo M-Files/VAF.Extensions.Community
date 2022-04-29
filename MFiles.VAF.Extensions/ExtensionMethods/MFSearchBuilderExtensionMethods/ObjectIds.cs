@@ -38,9 +38,9 @@ namespace MFiles.VAF.Extensions
 			if (null == searchBuilder)
 				throw new ArgumentNullException(nameof(searchBuilder));
 			if (segmentIndex < 0)
-				throw new ArgumentOutOfRangeException($"The segment index must be zero or larger.", nameof(segmentIndex));
+				throw new ArgumentOutOfRangeException(Resources.Exceptions.MFSearchBuilderExtensionMethods.ObjectIDs_SegmentIndexMustBeZeroOrLarger, nameof(segmentIndex));
 			if (segmentSize <= 0)
-				throw new ArgumentOutOfRangeException($"The segment size must be one or larger.", nameof(segmentSize));
+				throw new ArgumentOutOfRangeException(Resources.Exceptions.MFSearchBuilderExtensionMethods.ObjectIDs_SegmentSizeMustBeOneOrLarger, nameof(segmentSize));
 
 			// Create the search condition.
 			var searchCondition = new SearchCondition
@@ -82,7 +82,7 @@ namespace MFiles.VAF.Extensions
 			if (null == searchBuilder)
 				throw new ArgumentNullException(nameof(searchBuilder));
 			if (0 >= objectId)
-				throw new ArgumentOutOfRangeException(nameof(objectId), "Object Id must be greater than 0.");
+				throw new ArgumentOutOfRangeException(nameof(objectId), Resources.Exceptions.MFSearchBuilderExtensionMethods.ObjectIDs_ObjectIDMustBeGreaterThanZero);
 
 			// We can only handle certain condition types; throw for others.
 			if (conditionType != MFConditionType.MFConditionTypeEqual
@@ -94,7 +94,11 @@ namespace MFiles.VAF.Extensions
 			{
 				throw new ArgumentException
 				(
-					$"The condition type {conditionType} is not supported for object Ids.",
+					String.Format
+					(
+						Resources.Exceptions.MFSearchBuilderExtensionMethods.ObjectIDs_ConditionTypeInvalid,
+						conditionType
+					),
 					nameof(conditionType)
 				);
 			}

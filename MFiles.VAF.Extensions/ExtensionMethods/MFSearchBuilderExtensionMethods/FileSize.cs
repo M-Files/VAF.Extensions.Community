@@ -32,7 +32,7 @@ namespace MFiles.VAF.Extensions
 			if (null == searchBuilder)
 				throw new ArgumentNullException(nameof(searchBuilder));
 			if (size < 0)
-				throw new ArgumentOutOfRangeException($"The size parameter must be zero or larger.", nameof(size));
+				throw new ArgumentOutOfRangeException(Resources.Exceptions.MFSearchBuilderExtensionMethods.FileSize_Negative, nameof(size));
 
 			// Create the search condition.
 			var searchCondition = new SearchCondition

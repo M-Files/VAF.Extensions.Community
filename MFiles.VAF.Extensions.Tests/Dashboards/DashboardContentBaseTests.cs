@@ -74,13 +74,13 @@ namespace MFiles.VAF.Extensions.Tests.Dashboards
 		public virtual void Icon_FromResource()
 		{
 			var dashboardContent = this.CreateDashboardContent();
-			dashboardContent.Icon = "/Resources/Completed.png";
+			dashboardContent.Icon = "/Resources/Images/Completed.png";
 			var element = dashboardContent.Generate(new System.Xml.XmlDocument())?.FirstChild;
 			Assert.IsNotNull(element);
 			Assert.AreEqual("icon", element.Attributes["class"]?.Value);
 			Assert.IsTrue
 			(
-				new StyleComparisonHelper("background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAGcSURBVHgBlZK/T8JAFMfftVWbaAg4YVzaMKCJonFwMWijMTogooOJiQgkxlE7ulEGJxdYXQryDyA6GAejJg44MbhoYkJ00jgwOFSFnnfHz0hSy3e5d6/3ea9374vgj5y64jQExz5grABGEksiXEIARVz9SRmxi1L7edS+EbPBOJiggZU40IxwPtFRQDxZ0UnHKNgRwmlj+yxGQ57BGdIZkAq2hSaFNS+q5B6veVFflgDxOTuY3z0GhUASvqrfcP/xpAysDqUEDL0qsgGHPQtwPLPH4pfPd7YanEPlEI8muoF371KQfy3Ub4LnODIuicZbnnn2ez6XbAlnn69aH8mYuUbs6u0H36AMl0uHzSKWcF28sD4SIqtEHoXNdHF4CjZkP/RxPXA0vWMJkysUeSHolQmp0P3t20OzyKx73BqmPOBTvhIaLQoIHzSSjSK0gBXMZPKbbIKiHtSIRePQnRJGJK+1rJwJpInRI/ZYM2NEzqM0ak6BJUxI/M/SzjWYqsOEoh6SEGeqGBODoZpHiFdKZOY3InDJcixXbj//Cwo5kyfR+5GMAAAAAElFTkSuQmCC);background-repeat:no-repeat;background-position:0px center;padding-left:20px")
+				new StyleComparisonHelper("background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAACsSURBVHgB7Y/NDYJAEEa/HXXlpFuCHWgJejMGEjoAOtAO7GTABjTKndiBHRhb8AKJcVFMSFQU3Tsv2WTn581kgAYjOjwbFe85R//KFk8HRO0EkDAeUMggmQidLy7B5mA0oJTv3ygLduF7nV6bHd9aOVzGisdKkFw/ZG+7/LRAVDZGdihAw64+T9JWnym/nlIvnuMLlRMyL/a1xj6l3hEaqJNrkWy7il2Fhp/cANlQMAnId1ieAAAAAElFTkSuQmCC);background-repeat:no-repeat;background-position:0px center;padding-left:20px")
 				.TestAgainstString(element.Attributes["style"]?.Value)
 			);
 		}

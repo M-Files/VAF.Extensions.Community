@@ -24,16 +24,24 @@ namespace MFiles.VAF.Extensions
 		public static IDashboardContent AsDashboardContent<TDirective>
 		(
 			this IEnumerable<TaskInfo<TDirective>> applicationTasks,
-			int maximumRowsToShow = 40
+			int maximumRowsToShow = 100
 		)
 			where TDirective : TaskDirective
 		{
 			// Sanity.
 			if (null == applicationTasks || false == applicationTasks.Any())
 				return null;
+
+			// We can only show a certain number.
+			var allTasks = applicationTasks.ToList();
+			var totalTaskCount = allTasks.Count;
+			bool isFiltered = false;
+			if (totalTaskCount > maximumRowsToShow)
+				isFiltered = true;
+
 			var list = applicationTasks
 				.OrderByDescending(e => e.LatestActivity)
-				.ToList();
+				.Take(maximumRowsToShow);
 
 			// Create the table and header row.
 			DashboardTable table = new DashboardTable();
@@ -41,33 +49,20 @@ namespace MFiles.VAF.Extensions
 				var header = table.AddRow(DashboardTableRowType.Header);
 				header.AddCells
 				(
-					new DashboardCustomContent("Task"),
-					new DashboardCustomContent("Scheduled"),
-					new DashboardCustomContent("Duration"),
-					new DashboardCustomContent("Details")
+					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_TaskHeader.EscapeXmlForDashboard()),
+					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_ScheduledHeader.EscapeXmlForDashboard()),
+					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_StatusHeader.EscapeXmlForDashboard()),
+					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_StartedHeader.EscapeXmlForDashboard()),
+					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_DurationHeader.EscapeXmlForDashboard()),
+					new DashboardCustomContent(Resources.Dashboard.AsynchronousOperations_Table_DetailsHeader.EscapeXmlForDashboard())
 				);
 			}
 
-			List<TaskInfo<TDirective>> executionsToShow;
-			bool isFiltered = false;
-			if (list.Count <= maximumRowsToShow)
-				executionsToShow = list;
-			else
-			{
-				isFiltered = true;
-
-				// Show the latest 20 errors, then the rest filled with non-errors.
-				executionsToShow = new List<TaskInfo<TDirective>>
-				(
-					list
-						.Where(e => e.State == MFTaskState.MFTaskStateFailed)
-						.Take(20)
-						.Union(list.Where(e => e.State != MFTaskState.MFTaskStateFailed).Take(maximumRowsToShow - 20))
-				);
-			}
+			// Remove the bottom border so we don't get it doubled on smaller tables.
+			table.TableStyles.AddOrUpdate("border-bottom", "0px");
 
 			// Add a row for each execution to show.
-			foreach (var execution in executionsToShow)
+			foreach (var execution in list)
 			{
 				TaskDirective internalDirective = execution.Directive;
 				{
@@ -85,22 +80,9 @@ namespace MFiles.VAF.Extensions
 					? new TaskInformation()
 					: new TaskInformation(execution.Status.Data);
 
-				// Create the content for the scheduled column (including icon).
-				var taskInfoCell = new DashboardCustomContentEx(System.Security.SecurityElement.Escape(displayName));
-				var scheduledCell = new DashboardCustomContentEx
-					(
-						activation.ToTimeOffset
-						(
-							// If we are waiting for it to start then highlight that.
-							execution.State == MFilesAPI.MFTaskState.MFTaskStateWaiting
-								? FormattingExtensionMethods.DateTimeRepresentationOf.NextRun
-								: FormattingExtensionMethods.DateTimeRepresentationOf.LastRun
-						)
-					);
-
 				// Copy data from the execution if needed.
-				taskInfo.Started = taskInfo.Started ?? execution.ActivationTime;
-				taskInfo.LastActivity = taskInfo.LastActivity ?? execution.Status?.EndedAt ?? execution.Status?.LastUpdatedAt ?? DateTime.UtcNow;
+				taskInfo.Started = taskInfo.Started ?? execution.Status?.ReservedAt;
+				taskInfo.LastActivity = taskInfo.LastActivity ?? execution.Status?.EndedAt ?? execution.Status?.LastUpdatedAt;
 				taskInfo.StatusDetails = taskInfo.StatusDetails ?? execution.Status?.Details;
 				taskInfo.PercentageComplete = taskInfo.PercentageComplete ?? execution.Status?.PercentComplete;
 				if (taskInfo.CurrentTaskState != execution.State)
@@ -112,6 +94,25 @@ namespace MFiles.VAF.Extensions
 					removeLineBreaks = true; // Exceptions are LONG, so format them.
 				}
 
+				// Create the content for the scheduled column (including icon).
+				var taskInfoCell = new DashboardCustomContentEx(displayName.EscapeXmlForDashboard());
+				var scheduledCell = new DashboardCustomContentEx
+					(
+						activation.ToTimeOffset
+						(
+							// If we are waiting for it to start then highlight that.
+							execution.State == MFilesAPI.MFTaskState.MFTaskStateWaiting
+								? FormattingExtensionMethods.DateTimeRepresentationOf.NextRun
+								: FormattingExtensionMethods.DateTimeRepresentationOf.LastRun
+						)
+					);
+				var startedCell = new DashboardCustomContentEx
+				(
+					taskInfo.Started.HasValue
+					? taskInfo.Started.Value.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.LastRun)
+					: ""
+				);
+
 				// Add a row for this execution.
 				var row = table.AddRow();
 
@@ -120,26 +121,45 @@ namespace MFiles.VAF.Extensions
 				switch (execution.State)
 				{
 					case MFilesAPI.MFTaskState.MFTaskStateWaiting:
-						taskInfoCell.Icon = "Resources/Waiting.png";
-						rowTitle = $"Waiting.  Will start at approximately {activation.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")}.";
+						taskInfoCell.Icon = "Resources/Images/Waiting.png";
+						rowTitle = Resources.Dashboard.AsynchronousOperations_Table_WaitingRowTitle.EscapeXmlForDashboard(activation.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"));
+						row.Styles.AddOrUpdate("color", Resources.Dashboard.AsynchronousOperations_Table_ColorWaiting);
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateInProgress:
-						rowTitle = "Running.";
+						rowTitle = Resources.Dashboard.AsynchronousOperations_Table_RunningRowTitle.EscapeXmlForDashboard();
 						if ((taskInfo?.Started.HasValue) ?? false)
-							rowTitle += $" Started at approximately {taskInfo.Started.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")} server-time (taken {taskInfo.GetElapsedTime().ToDisplayString()} so far).";
-						taskInfoCell.Icon = "Resources/Running.png";
+							rowTitle = Resources.Dashboard.AsynchronousOperations_Table_RunningRowTitle_WithTimes.EscapeXmlForDashboard
+								(
+									taskInfo.Started.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"),
+									taskInfo.GetElapsedTime().ToDisplayString()
+								);
+						taskInfoCell.Icon = "Resources/Images/Running.png";
+						row.Styles.AddOrUpdate("color", Resources.Dashboard.AsynchronousOperations_Table_ColorRunning);
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateFailed:
-						rowTitle = "Failed.";
+						rowTitle = Resources.Dashboard.AsynchronousOperations_Table_FailedRowTitle.EscapeXmlForDashboard();
 						if ((taskInfo?.Started.HasValue) ?? false)
-							rowTitle += $" Started at approximately {taskInfo.Started.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")} server-time (took {taskInfo.GetElapsedTime().ToDisplayString()}).";
-						taskInfoCell.Icon = "Resources/Failed.png";
+							rowTitle = Resources.Dashboard.AsynchronousOperations_Table_FailedRowTitle_WithTimes.EscapeXmlForDashboard
+								(
+									taskInfo.Started.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"),
+									taskInfo.GetElapsedTime().ToDisplayString()
+								);
+						taskInfoCell.Icon = "Resources/Images/Failed.png";
+						row.Styles.AddOrUpdate("color", Resources.Dashboard.AsynchronousOperations_Table_ColorFailed);
 						break;
 					case MFilesAPI.MFTaskState.MFTaskStateCompleted:
-						rowTitle = "Completed.";
+						rowTitle = Resources.Dashboard.AsynchronousOperations_Table_CompletedRowTitle.EscapeXmlForDashboard();
 						if ((taskInfo?.Started.HasValue) ?? false)
-							rowTitle += $" Started at approximately {taskInfo.Started.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")} server-time (took {taskInfo.GetElapsedTime().ToDisplayString()}).";
-						taskInfoCell.Icon = "Resources/Completed.png";
+							rowTitle = Resources.Dashboard.AsynchronousOperations_Table_CompletedRowTitle_WithTimes.EscapeXmlForDashboard
+								(
+									taskInfo.Started.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"),
+									taskInfo.GetElapsedTime().ToDisplayString()
+								);
+						taskInfoCell.Icon = "Resources/Images/Completed.png";
+						row.Styles.AddOrUpdate("color", Resources.Dashboard.AsynchronousOperations_Table_ColorCompleted);
+						break;
+					case MFTaskState.MFTaskStateCanceled:
+						taskInfoCell.Icon = "Resources/Images/canceled.png";
 						break;
 					default:
 						break;
@@ -151,24 +171,25 @@ namespace MFiles.VAF.Extensions
 				(
 					taskInfoCell,
 					scheduledCell,
+					new DashboardCustomContent(execution.State.ForDisplay()),
+					startedCell,
 					new DashboardCustomContent(execution.State == MFilesAPI.MFTaskState.MFTaskStateWaiting ? "" : taskInfo?.GetElapsedTime().ToDisplayString()),
 					taskInfo?.AsDashboardContent(removeLineBreaks)
 				);
 
-				// First three cells should be as small as possible.
-				row.Cells[0].Styles.AddOrUpdate("width", "1%");
-				row.Cells[0].Styles.AddOrUpdate("white-space", "nowrap");
-				row.Cells[1].Styles.AddOrUpdate("width", "1%");
-				row.Cells[1].Styles.AddOrUpdate("white-space", "nowrap");
-				row.Cells[2].Styles.AddOrUpdate("width", "1%");
-				row.Cells[2].Styles.AddOrUpdate("white-space", "nowrap");
+				// First cells should be as small as possible.
+				for (var i = 0; i < row.Cells.Count - 1; i++)
+				{
+					row.Cells[i].Styles.AddOrUpdate("width", "1%");
+					row.Cells[i].Styles.AddOrUpdate("white-space", "nowrap");
+				}
 
 				// Last cell should have as much space as possible.
-				row.Cells[3].Styles.AddOrUpdate("width", "100%");
+				row.Cells[row.Cells.Count - 1].Styles.AddOrUpdate("width", "100%");
 			}
 
 			// Create an overview of the statuses.
-			var data = list.GroupBy(e => e.State).ToDictionary(e => e.Key, e => e.Count());
+			var data = allTasks.GroupBy(e => e.State).ToDictionary(e => e.Key, e => e.Count());
 			
 			var overview = new DashboardTable();
 			{
@@ -182,16 +203,19 @@ namespace MFiles.VAF.Extensions
 				// The first cell contains text if this table is filtered, or is empty otherwise.
 				var cell1 = row.AddCell();
 				if (isFiltered)
-					cell1.InnerContent = new DashboardCustomContentEx($"<p style='font-size: 12px'><em>This table shows only {maximumRowsToShow} of {list.Count} tasks.</em></p>");
+					cell1.InnerContent = new DashboardCustomContentEx
+					(
+						$"<p style='font-size: 12px'><em>{Resources.Dashboard.AsynchronousOperations_Table_FilteredListComment.EscapeXmlForDashboard(maximumRowsToShow, totalTaskCount)}</em></p>"
+					);
 
 				// The second cell contains the totals.
 				var cell2 = row.AddCell(new DashboardCustomContentEx
 				(
-					"<span>Totals: </span>"
-					+ $"<span title='{(data.ContainsKey(MFTaskState.MFTaskStateWaiting) ? data[MFTaskState.MFTaskStateWaiting] : 0)} awaiting processing' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Waiting.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateWaiting) ? data[MFTaskState.MFTaskStateWaiting] : 0)}</span>"
-					+ $"<span title='{(data.ContainsKey(MFTaskState.MFTaskStateInProgress) ? data[MFTaskState.MFTaskStateInProgress] : 0)} running' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Running.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateInProgress) ? data[MFTaskState.MFTaskStateInProgress] : 0)}</span>"
-					+ $"<span title='{(data.ContainsKey(MFTaskState.MFTaskStateCompleted) ? data[MFTaskState.MFTaskStateCompleted] : 0)} completed' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Completed.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateCompleted) ? data[MFTaskState.MFTaskStateCompleted] : 0)}</span>"
-					+ $"<span title='{(data.ContainsKey(MFTaskState.MFTaskStateFailed) ? data[MFTaskState.MFTaskStateFailed] : 0)} failed' style=\"display: inline-block; margin: 0px 2px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Failed.png")}); background-repeat: no-repeat; background-position: 0 center; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateFailed) ? data[MFTaskState.MFTaskStateFailed] : 0)}</span>"
+					"<span style=\"display: inline-block; margin: 0px 7px;\">Totals:</span>"
+					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateWaiting, Resources.Dashboard.AsynchronousOperations_Table_Footer_AwaitingProcessing)}' style=\"border-bottom: 1px dashed #CCC; padding: 3px; height: 1.2em; display: inline-block; margin: 0px 4px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Waiting.png")}); background-repeat: no-repeat; background-position: 1px 4px; background-size: 14px; padding-left: 21px\">{(data.ContainsKey(MFTaskState.MFTaskStateWaiting) ? data[MFTaskState.MFTaskStateWaiting] : 0)}</span>"
+					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateInProgress, Resources.Dashboard.AsynchronousOperations_Table_Footer_Running)}' style=\"border-bottom: 1px dashed #CCC; padding: 3px; height: 1.2em; display: inline-block; margin: 0px 4px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Running.png")}); background-repeat: no-repeat; background-position: 3px 4px; background-size: 14px; padding-left: 23px\">{(data.ContainsKey(MFTaskState.MFTaskStateInProgress) ? data[MFTaskState.MFTaskStateInProgress] : 0)}</span>"
+					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateCompleted, Resources.Dashboard.AsynchronousOperations_Table_Footer_Completed)}' style=\"border-bottom: 1px dashed #CCC; padding: 3px; height: 1.2em; display: inline-block; margin: 0px 4px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Completed.png")}); background-repeat: no-repeat; background-position: 1px 4px; background-size: 14px; padding-left: 20px\">{(data.ContainsKey(MFTaskState.MFTaskStateCompleted) ? data[MFTaskState.MFTaskStateCompleted] : 0)}</span>"
+					+ $"<span title='{GetTotalTasksInStateForDisplay(data, MFTaskState.MFTaskStateFailed, Resources.Dashboard.AsynchronousOperations_Table_Footer_Failed)}' style=\"border-bottom: 1px dashed #CCC; padding: 3px; height: 1.2em; display: inline-block; margin: 0px 4px; background-image: url({DashboardHelpersEx.ImageFileToDataUri("Resources/Images/Failed.png")}); background-repeat: no-repeat; background-position: 0px 3px; background-size: 14px; padding-left: 15px; color: {Resources.Dashboard.AsynchronousOperations_Table_ColorFailed}\">{(data.ContainsKey(MFTaskState.MFTaskStateFailed) ? data[MFTaskState.MFTaskStateFailed] : 0)}</span>"
 				));
 				cell2.Styles.AddOrUpdate("text-align", "right");
 			}
@@ -202,6 +226,12 @@ namespace MFiles.VAF.Extensions
 				table,
 				overview
 			};
+		}
+		private static string GetTotalTasksInStateForDisplay(Dictionary<MFTaskState, int> data, MFTaskState state, string resourceString, int defaultValue = default)
+		{
+			return resourceString?
+				.EscapeXmlForDashboard(data.ContainsKey(state) ? data[state] : defaultValue)?
+				.Replace("'", "&#39;");
 		}
 	}
 }

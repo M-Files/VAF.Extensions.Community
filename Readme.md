@@ -18,6 +18,8 @@ This library is available [via nuget](https://www.nuget.org/packages/MFiles.VAF.
 
 ## Using the library
 
+**Ensure that you read documentation in the "MFiles.VAF.Extensions" folder - and others it links to on how to use common functionality.**
+
 The steps required will depend upon which functionality you wish to take into use, but the basic steps include:
 
 1. Open the project to be updated using Visual Studio 2017 or Visual Studio 2019.
@@ -29,6 +31,18 @@ The steps required will depend upon which functionality you wish to take into us
 7. You may also need to add a `using MFiles.VAF.Extensions;` statement to the top of files that wish to use extension methods.  Code examples in this repository should provide you with some guidance.
 
 ## Migrating between versions
+
+# 22.4 onwards
+
+From 22.4, the VAF Extensions library follows a similar versioning format to M-Files itself.  The major version (e.g. 22) indicates the year of release (in this case, 2022), and the minor version number (e.g. 4) indicates the month (in this case, April).  The latter part of the version number is based upon the number of executions of the GitHub publishing workflow and does not reset each month.
+
+Whilst every effort is made to ensure that the public interfaces of the release versions of the VAF Extensions library stay consistent, changes are sometimes made for quality or functionality reasons.  Where possible, older method signatures will be kept available and marked as `Obsolete` for 6 months prior to removal.
+
+Some releases may have a suffix (e.g. `22.3.18-preview`) that indicates that the release is a preview of some kind.  Sometimes this preview string will indicate exactly what is being previewed, other times it will simply flag that the release should be used in production environments.  Note that preview releases are subject to more structural change, and new features or functionality may change between pre-releases.
+
+## Before 22.4
+
+Before version 22.4, version numbers were incremented manually depending on whether there were breaking changes.  The last public release using this naming convention was `1.3.1.3`.
 
 * Major version increments (e.g. 1.x to 2.x) introduce significant breaking changes including new functionality.  Migrating between major versions may require significant code changes depending on your existing code.
 * Minor version increments (e.g. 1.1.x to 1.2.x) are generally additive in nature but may include smaller breaking changes such as the movement of classes between namespaces.  Migrating between minor versions may require small code changes depending on your existing code.

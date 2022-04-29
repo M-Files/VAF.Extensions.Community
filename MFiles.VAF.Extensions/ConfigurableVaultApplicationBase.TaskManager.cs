@@ -12,6 +12,8 @@ using System.Linq;
 using MFiles.VAF.MultiserverMode;
 using MFiles.VAF.AppTasks;
 using MFiles.VAF.Common;
+using MFiles.VaultApplications.Logging;
+using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions
 {
@@ -43,44 +45,41 @@ namespace MFiles.VAF.Extensions
 			=> $"reschedule";
 
 		/// <summary>
-		/// Gets the task manager to use.
+		/// The generic logger for the task manager.
 		/// </summary>
-		/// <returns></returns>
-		protected virtual TaskManagerEx<TSecureConfiguration> GetTaskManager()
-			=> new TaskManagerEx<TSecureConfiguration>
-				(
+		private TaskManagerLogger taskManagerLogger;
+
+		/// <summary>
+		/// Overridden to append the logger to the TaskManager as soon as it is created.
+		/// </summary>
+		/// <returns>A new TaskManager instance.</returns>
+		protected override TaskManager CreateTaskManager()
+		{
+			var taskManager = new TaskManagerEx<TSecureConfiguration>
+			(
 					this,
 					this.GetType().Namespace,
 					this.PermanentVault,
 					GetTransactionRunner()
-				);
+			);
 
-		/// <summary>
-		/// Initializes the newer task manager, and regsiters all queues and processors
-		/// that have been discovered by the <see cref="TaskQueueResolver"/>.
-		/// Should be called after StartOperations(), before StartApplication().
-		/// </summary>
+			// We want to attach logging the second after it is created so we don't miss any events.
+			this.taskManagerLogger = new TaskManagerLogger(taskManager);
+
+			return taskManager;
+		}
+
+		/// <inheritdoc />
 		protected override void InitializeTaskManager()
 		{
-			// Report an error to the event log if queues were declared, but tasks aren't supported.
-			if (AppTasks.TaskManager.IsSupported(PermanentVault))
-			{
-				// Initialize the new task manager, and register the queues from the resolver.
-				this.TaskManager = this.GetTaskManager();
-				this.TaskQueueResolver?.RegisterAll(this.TaskManager);
-				TaskStatusHelper.Attach(this.TaskManager);
+			// Register all queues, etc.
+			base.InitializeTaskManager();
 
-				// Register the scheduling queue.
-				this.TaskManager?.RegisterSchedulingQueue();
-			}
-			else if (this.TaskQueueResolver != null && this.TaskQueueResolver.GetQueues().Length > 0)
-			{
-				// Report an error if task manager is not supported, but queues have been resolved.
-				// If someone tries to declare queues programmatically, the TaskManager should be null,
-				// and therefore throw its own errors.
-				SysUtils.ReportErrorToEventLog(
-						"The application requires support for tasks. Please upgrade to M-Files 20.4 or later.");
-			}
+			// Register the scheduling queue.
+			this.TaskManager?.RegisterSchedulingQueue();
+
+			// Now populate the run commands.
+			this.TaskManager?.PopulateTaskQueueRunCommands(this.TaskQueueResolver);
 		}
 
 		/// <inheritdoc />
@@ -93,14 +92,15 @@ namespace MFiles.VAF.Extensions
 				{
 					try
 					{
+						this.Logger?.Trace($"Cancelling future tasks on queue {key.QueueID} with type {key.TaskType}.");
 						this.TaskManager?.CancelAllFutureExecutions(key.QueueID, key.TaskType, vault: vaultSrc);
 					}
 					catch (Exception e)
 					{
-						SysUtils.ReportErrorMessageToEventLog
+						this.Logger?.Fatal
 						(
-							$"Could not cancel future executions of task type {key.TaskType} on queue {key.QueueID}.",
-							e
+							e,
+							$"Could not cancel future executions of task type {key.TaskType} on queue {key.QueueID}."
 						);
 					}
 				}
@@ -110,5 +110,7 @@ namespace MFiles.VAF.Extensions
 			// Call the base implementation.
 			base.Uninstall(vaultSrc);
 		}
+
 	}
+
 }

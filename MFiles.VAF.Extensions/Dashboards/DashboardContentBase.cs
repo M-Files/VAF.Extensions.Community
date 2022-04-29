@@ -15,13 +15,13 @@ namespace MFiles.VAF.Extensions.Dashboards
 		/// The id of the element. Optional.
 		/// Will appear in the html output, so the item can be referenced.
 		/// </summary>
-		public string ID { get; set; }
+		public virtual string ID { get; set; }
 
 		/// <summary>
 		/// A path to the icon to use for the element (optional).
 		/// Should resolve to a file on either the server or client configurator app.
 		/// </summary>
-		public string Icon { get; set; }
+		public virtual string Icon { get; set; }
 
 		/// <summary>
 		/// Attributes to be rendered onto the top-level element.
@@ -49,7 +49,7 @@ namespace MFiles.VAF.Extensions.Dashboards
 		{
 			var fragment = this.GenerateXmlDocumentFragment(xml);
 			if (null == fragment)
-				throw new ApplicationException($"XML fragment for {this.GetType().Name} was null so cannot be rendered");
+				throw new ApplicationException(String.Format(Resources.Exceptions.Dashboard.XmlFragmentNull, this.GetType().Name));
 
 			var element = fragment.FirstChild as XmlElement;
 			if (null == element)

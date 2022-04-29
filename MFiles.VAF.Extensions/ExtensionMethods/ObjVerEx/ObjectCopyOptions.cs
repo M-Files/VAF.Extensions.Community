@@ -121,7 +121,7 @@ namespace MFiles.VAF.Extensions
 				if (null == propertyValues)
 					throw new ArgumentNullException(nameof(propertyValues));
 				if (null == this.PropertyValue)
-					throw new InvalidOperationException("Property value is null; cannot apply it to the new object");
+					throw new InvalidOperationException(Resources.Exceptions.ObjVerExExtensionMethods.CreateCopy_ObjectCopyOptions_PropertyValueNull);
 
 				// Treat each instruction type differently.
 				switch (this.InstructionType)
@@ -137,7 +137,15 @@ namespace MFiles.VAF.Extensions
 								// Get the existing value and ensure that we can handle the types.
 								var existingValue = propertyValues[index];
 								if (existingValue.TypedValue.DataType != this.PropertyValue.TypedValue.DataType)
-									throw new InvalidOperationException($"Data types are not a match (source: {existingValue.TypedValue.DataType}, instruction: {this.PropertyValue.TypedValue.DataType}");
+									throw new InvalidOperationException
+									(
+										String.Format
+										(
+											Resources.Exceptions.ObjVerExExtensionMethods.CreateCopy_ObjectCopyOptions_InvalidDataType,
+											existingValue.TypedValue.DataType,
+											this.PropertyValue.TypedValue.DataType
+										)
+									);
 
 								switch (existingValue.TypedValue.DataType)
 								{
@@ -148,14 +156,22 @@ namespace MFiles.VAF.Extensions
 										{
 											// We can't deal with unmanaged references (yet?).
 											if (lookup.IsUnmanagedReference())
-												throw new NotImplementedException("Cannot use instruction to populate unmanaged lookup reference.");
+												throw new NotImplementedException(Resources.Exceptions.ObjVerExExtensionMethods.CreateCopy_ObjectCopyOptions_UnmanagedReferences);
 
 											existingValue.AddLookup(lookup.Item, lookup.Version);
 										}
 										break;
 
 									default:
-										throw new NotImplementedException($"Cannot use instruction type {PropertyValueInstructionType.AddValueToProperty} with datatype {existingValue.TypedValue.DataType}.");
+										throw new NotImplementedException
+										(
+											string.Format
+											(
+												Resources.Exceptions.ObjVerExExtensionMethods.CreateCopy_ObjectCopyOptions_UnsupportedDataType,
+												PropertyValueInstructionType.AddValueToProperty,
+												existingValue.TypedValue.DataType
+											)
+										);
 								}
 							}
 							break;
@@ -179,7 +195,14 @@ namespace MFiles.VAF.Extensions
 							break;
 						}
 					default:
-						throw new NotImplementedException($"The instruction type {this.InstructionType} was not handled.");
+						throw new NotImplementedException
+						(
+							string.Format
+							(
+								Resources.Exceptions.ObjVerExExtensionMethods.CreateCopy_ObjectCopyOptions_UnhandledInstructionType, 
+								this.InstructionType
+							)
+						);
 				}
 			}
 		}

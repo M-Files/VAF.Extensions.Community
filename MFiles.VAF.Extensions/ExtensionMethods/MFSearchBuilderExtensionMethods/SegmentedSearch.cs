@@ -47,13 +47,13 @@ namespace MFiles.VAF.Extensions
 			if (objectVersionDelegate == null)
 				throw new ArgumentNullException(nameof(objectVersionDelegate));
 			if (startSegment < 0)
-				throw new ArgumentOutOfRangeException(nameof(startSegment), "value must be greater than or equal to 0");
+				throw new ArgumentOutOfRangeException(nameof(startSegment), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_StartSegmentMustBeZeroOrLarger);
 			if (segmentLimit <= 0)
-				throw new ArgumentOutOfRangeException(nameof(segmentLimit), "value must be greater 0");
+				throw new ArgumentOutOfRangeException(nameof(segmentLimit), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_EndSegmentMustBeGreaterThanZero);
 			if (segmentSize <= 0)
-				throw new ArgumentOutOfRangeException(nameof(segmentSize), "value must be greater than 0");
+				throw new ArgumentOutOfRangeException(nameof(segmentSize), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_SegmentSizeMustBeGreaterThanZero);
 			if (searchTimeoutInSeconds < 0)
-				throw new ArgumentOutOfRangeException(nameof(searchTimeoutInSeconds), "The search timeout must be greater than zero, or zero to indicate an indefinite timeout");
+				throw new ArgumentOutOfRangeException(nameof(searchTimeoutInSeconds), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_SearchTimeoutMustBeZeroOrLarger);
 
 			int DefaultSearchHandler(Vault vault, SearchConditions searchConditions)
 			{
@@ -97,13 +97,13 @@ namespace MFiles.VAF.Extensions
 			if (objVerExDelegate == null)
 				throw new ArgumentNullException(nameof(objVerExDelegate));
 			if (startSegment < 0)
-				throw new ArgumentOutOfRangeException(nameof(startSegment), "value must be greater than or equal to 0");
+				throw new ArgumentOutOfRangeException(nameof(startSegment), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_StartSegmentMustBeZeroOrLarger);
 			if (segmentLimit <= 0)
-				throw new ArgumentOutOfRangeException(nameof(segmentLimit), "value must be greater 0");
+				throw new ArgumentOutOfRangeException(nameof(segmentLimit), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_EndSegmentMustBeGreaterThanZero);
 			if (segmentSize <= 0)
-				throw new ArgumentOutOfRangeException(nameof(segmentSize), "value must be greater than 0");
+				throw new ArgumentOutOfRangeException(nameof(segmentSize), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_SegmentSizeMustBeGreaterThanZero);
 			if (searchTimeoutInSeconds < 0)
-				throw new ArgumentOutOfRangeException(nameof(searchTimeoutInSeconds), "The search timeout must be greater than zero, or zero to indicate an indefinite timeout");
+				throw new ArgumentOutOfRangeException(nameof(searchTimeoutInSeconds), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_SearchTimeoutMustBeZeroOrLarger);
 
 			int DefaultSearchHandler(Vault vault, SearchConditions searchConditions)
 			{
@@ -140,11 +140,11 @@ namespace MFiles.VAF.Extensions
 			if (builder == null)
 				throw new ArgumentNullException(nameof(builder));
 			if (startSegment < 0)
-				throw new ArgumentOutOfRangeException(nameof(startSegment), "value must be greater than or equal to 0");
+				throw new ArgumentOutOfRangeException(nameof(startSegment), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_StartSegmentMustBeZeroOrLarger);
 			if (segmentLimit <= 0)
-				throw new ArgumentOutOfRangeException(nameof(segmentLimit), "value must be greater 0");
+				throw new ArgumentOutOfRangeException(nameof(segmentLimit), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_EndSegmentMustBeGreaterThanZero);
 			if (segmentSize <= 0)
-				throw new ArgumentOutOfRangeException(nameof(segmentSize), "value must be greater than 0");
+				throw new ArgumentOutOfRangeException(nameof(segmentSize), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_SegmentSizeMustBeGreaterThanZero);
 
 			return ForEachSegment(builder,
 				// Note: this method is required because func needs to return the count to be summed by ForEachSegment
@@ -177,11 +177,13 @@ namespace MFiles.VAF.Extensions
 			if (null == func)
 				throw new ArgumentNullException(nameof(func));
 			if (startSegment < 0)
-				throw new ArgumentOutOfRangeException(nameof(startSegment), "The start segment must be greater than or equal to zero.");
+				throw new ArgumentOutOfRangeException(nameof(startSegment), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_StartSegmentMustBeZeroOrLarger);
+			if (segmentLimit <= 0)
+				throw new ArgumentOutOfRangeException(nameof(segmentLimit), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_EndSegmentMustBeGreaterThanZero);
 			if (segmentSize <= 0)
-				throw new ArgumentOutOfRangeException(nameof(segmentSize), "The segment size must be greater than zero.");
+				throw new ArgumentOutOfRangeException(nameof(segmentSize), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_SegmentSizeMustBeGreaterThanZero);
 			if (searchTimeoutInSeconds < 0)
-				throw new ArgumentOutOfRangeException(nameof(searchTimeoutInSeconds), "The search timeout must be greater than zero, or zero to indicate an indefinite timeout");
+				throw new ArgumentOutOfRangeException(nameof(searchTimeoutInSeconds), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_SearchTimeoutMustBeZeroOrLarger);
 
 			// Set our start values.
 			var segment = startSegment;
@@ -259,9 +261,9 @@ namespace MFiles.VAF.Extensions
 			if (null == searchBuilder)
 				throw new ArgumentNullException(nameof(searchBuilder));
 			if (segment <= 0)
-				throw new ArgumentOutOfRangeException(nameof(segment), "The segment must be greater than zero");
+				throw new ArgumentOutOfRangeException(nameof(segment), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_StartSegmentMustBeZeroOrLarger);
 			if (segmentSize <= 0)
-				throw new ArgumentOutOfRangeException(nameof(segmentSize), "The segmentSize must be greater than zero");
+				throw new ArgumentOutOfRangeException(nameof(segmentSize), Resources.Exceptions.MFSearchBuilderExtensionMethods.SegmentedSearch_SegmentSizeMustBeGreaterThanZero);
 
 			// Add a minimum object id condition
 			searchBuilder.ObjectId(segmentSize * segment, MFConditionType.MFConditionTypeGreaterThanOrEqual);
