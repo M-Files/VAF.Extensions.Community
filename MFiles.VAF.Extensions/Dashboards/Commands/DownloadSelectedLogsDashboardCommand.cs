@@ -58,10 +58,10 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 
 			// Provide all files if no specific files were named.
 			if (files.Length == 0)
-				files = ResolveLogFiles().Select(f => f.RelativePath).ToArray();
+				files = ResolveLogFiles(context.Vault).Select(f => f.RelativePath).ToArray();
 			if (files.Length == 0)
 				throw new FileNotFoundException();
-			string rootPath = GetRootLogPathForAllInstances();
+			string rootPath = ResolveRootLogPath(context.Vault);
 
 			// Create a temporary zip file containing the logs in memory,
 			// that we can then push to the user to download.

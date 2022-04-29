@@ -37,7 +37,7 @@ namespace MFiles.VAF.Extensions.Email
 		[DataMember(Order = 2 )]
 		[JsonConfEditor
 		(
-			Label = "Use Local Pickup Folder", 
+			Label = "Pickup Folder", 
 			Hidden = true,
 			ShowWhen = ".parent._children{.key == 'UseLocalPickupFolder' && .value == true }"
 		)]
@@ -52,8 +52,8 @@ namespace MFiles.VAF.Extensions.Email
 		[JsonConfEditor
 		(
 			Label = "Server Address / Host", 
-			Hidden = true,
-			ShowWhen = ".parent._children{.key == 'UseLocalPickupFolder' && .value == false }"
+			Hidden = false,
+			HideWhen = ".parent._children{.key == 'UseLocalPickupFolder' && .value == true }"
 		)]
 		public override string ServerAddress
 		{
@@ -67,8 +67,8 @@ namespace MFiles.VAF.Extensions.Email
 		(
 			Label = "Server Port",
 			HelpText = "Typically 25, 465 or 587", 
-			Hidden = true,
-			ShowWhen = ".parent._children{.key == 'UseLocalPickupFolder' && .value == false }",
+			Hidden = false,
+			HideWhen = ".parent._children{.key == 'UseLocalPickupFolder' && .value == true }",
 			DefaultValue = SmtpConfiguration.DefaultPort
 		)]
 		public override int Port
@@ -82,8 +82,8 @@ namespace MFiles.VAF.Extensions.Email
 		[JsonConfEditor
 		(
 			Label = "Use encrypted connection (SSL/TLS)", 
-			Hidden = true,
-			ShowWhen = ".parent._children{.key == 'UseLocalPickupFolder' && .value == false }",
+			Hidden = false,
+			HideWhen = ".parent._children{.key == 'UseLocalPickupFolder'&& .value == true }",
 			DefaultValue = true
 		)]
 		public override bool UseEncryptedConnection
@@ -97,8 +97,8 @@ namespace MFiles.VAF.Extensions.Email
 		[JsonConfEditor
 		(
 			Label = "SMTP server requires authentication",
-			Hidden = true,
-			ShowWhen = ".parent._children{.key == 'UseLocalPickupFolder' && .value == false }",
+			Hidden = false,
+			HideWhen = ".parent._children{.key == 'UseLocalPickupFolder' && .value == true }",
 			DefaultValue = true
 		)]
 		public override bool RequiresAuthentication

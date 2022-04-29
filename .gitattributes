@@ -1,5 +1,5 @@
 # When more than one pattern matches the path, a later line overrides an earlier line. This overriding is done per attribute.
-*         text=auto
+*         text=auto eol=lf
 
 # Template from https://adaptivepatchwork.com/2012/03/01/mind-the-end-of-your-line/
 # These files are text and should be normalized (convert crlf => lf)

@@ -62,7 +62,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 		)
 		{
 			// Check if there are any logs to download.
-			List<LogFileInfo> logFiles = ResolveLogFiles();
+			List<LogFileInfo> logFiles = ResolveLogFiles(context.Vault);
 			if (logFiles.Count == 0)
 			{
 				// Show a message that there are no files to download and be done.

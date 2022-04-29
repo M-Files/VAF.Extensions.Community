@@ -56,6 +56,27 @@ namespace MFiles.VAF.Extensions
 		{
 			this.Logger = LogManager.GetLogger(this.GetType());
 			this.RecurringOperationConfigurationManager = new RecurringOperationConfigurationManager<TSecureConfiguration>(this);
+
+			// Register this assembly with the logging framework.  Must be done before initialization.
+			VaultApplications
+				.Logging
+				.NLog
+				.NLogLogManager
+				.AssembliesToScanForCustomLayoutRenderers
+				.Add
+				(
+					this.GetType().Assembly.Location
+				);
+			VaultApplications
+				.Logging
+				.Sensitivity
+				.LogSensitivityFilterFactory
+				.DefaultLogSensitivityFilterFactory
+				.Instance
+				.RegisterFiltersInAssembly
+				(
+					this.GetType().Assembly
+				);
 		}
 		private TaskQueueBackgroundOperationManager<TSecureConfiguration> taskQueueBackgroundOperationManager;
 
