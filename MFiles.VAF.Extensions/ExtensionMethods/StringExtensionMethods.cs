@@ -11,7 +11,7 @@ namespace MFiles.VAF.Extensions
 		/// <returns>The escaped string, or null if <paramref name="input"/> is null.</returns>
 		public static string EscapeXmlForDashboard(this string input)
 		{
-			return input.EscapeXmlForDashboard(input, null);
+			return input.EscapeXmlForDashboard(null);
 		}
 
 		/// <summary>
@@ -25,7 +25,9 @@ namespace MFiles.VAF.Extensions
 		{
 			if (null == format)
 				return null;
-			return System.Security.SecurityElement.Escape(String.Format(format, args));
+			return args == null || args.Length == 0
+				? System.Security.SecurityElement.Escape(format)
+				: System.Security.SecurityElement.Escape(String.Format(format, args));
 		}
 	}
 }
