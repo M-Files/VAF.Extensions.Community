@@ -89,17 +89,17 @@ namespace MFiles.VAF.Extensions
 				{
 
 				}
-				this.Logger.Fatal(e, "Exception whilst initializing task manager.");
+				this.Logger?.Fatal(e, "Exception whilst initializing task manager.");
 			}
 			catch(Exception e)
 			{
 				if(e is System.Runtime.InteropServices.COMException && (e?.Message?.IndexOf("(0x80040001)") ?? 0) > -1)
 				{
 					// "Parameter is incorrect".  Could be queue type has been changed.
-					this.Logger.Fatal(e, "Exception whilst initializing task manager (the queue type cannot change between concurrent and sequential after it has been opened).");
+					this.Logger?.Fatal(e, "Exception whilst initializing task manager (the queue type cannot change between concurrent and sequential after it has been opened).");
 					return;
 				}
-				this.Logger.Fatal(e, "Exception whilst initializing task manager.");
+				this.Logger?.Fatal(e, "Exception whilst initializing task manager.");
 				throw;
 			}
 		}
