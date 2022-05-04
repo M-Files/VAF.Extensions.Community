@@ -16,18 +16,22 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		public ILogger Logger { get; private set; }
 
-		/// <inheritdoc />
-		protected override void StartApplication()
+		protected override void InitializeApplication(Vault vault)
 		{
-			base.StartApplication();
-			//LogManager.EnableLoggingToAttachedDebugger(new AttachedDebuggerLoggingSettings() { LaunchDebugger = true });
+			base.InitializeApplication(vault);
 
 			// If we have logging configuration then initialize with that.
 			if (this.Configuration is Configuration.IConfigurationWithLoggingConfiguration configurationWithLogging)
 			{
-				LogManager.Initialize(this.PermanentVault, configurationWithLogging?.GetLoggingConfiguration());
+				LogManager.Initialize(vault, configurationWithLogging?.GetLoggingConfiguration());
 				this.Logger?.Debug("Logging started");
 			}
+		}
+
+		/// <inheritdoc />
+		protected override void StartApplication()
+		{
+			base.StartApplication();
 
 #if DEBUG
 			// If we are debugging then populate the cache of referenced assemblies.

@@ -72,14 +72,36 @@ namespace MFiles.VAF.Extensions
 		/// <inheritdoc />
 		protected override void InitializeTaskManager()
 		{
-			// Register all queues, etc.
-			base.InitializeTaskManager();
+			try
+			{
+				// Register all queues, etc.
+				base.InitializeTaskManager();
 
-			// Register the scheduling queue.
-			this.TaskManager?.RegisterSchedulingQueue();
+				// Register the scheduling queue.
+				this.TaskManager?.RegisterSchedulingQueue();
 
-			// Now populate the run commands.
-			this.TaskManager?.PopulateTaskQueueRunCommands(this.TaskQueueResolver);
+				// Now populate the run commands.
+				this.TaskManager?.PopulateTaskQueueRunCommands(this.TaskQueueResolver);
+			}
+			catch(System.Runtime.InteropServices.COMException e)
+			{
+				if((e?.Message?.IndexOf("(0x80040001)") ?? 0) > -1)
+				{
+
+				}
+				this.Logger.Fatal(e, "Exception whilst initializing task manager.");
+			}
+			catch(Exception e)
+			{
+				if(e is System.Runtime.InteropServices.COMException && (e?.Message?.IndexOf("(0x80040001)") ?? 0) > -1)
+				{
+					// "Parameter is incorrect".  Could be queue type has been changed.
+					this.Logger.Fatal(e, "Exception whilst initializing task manager (the queue type cannot change between concurrent and sequential after it has been opened).");
+					return;
+				}
+				this.Logger.Fatal(e, "Exception whilst initializing task manager.");
+				throw;
+			}
 		}
 
 		/// <inheritdoc />
