@@ -57,6 +57,11 @@ namespace MFiles.VAF.Extensions
 			this.Logger = LogManager.GetLogger(this.GetType());
 			this.RecurringOperationConfigurationManager = new RecurringOperationConfigurationManager<TSecureConfiguration>(this);
 
+			// In unit testing scenarios the assembly location may be null.  Handle it.
+			var assembly = this.GetType()?.Assembly;
+			if (null == assembly?.Location)
+				return;
+
 			// Register this assembly with the logging framework.  Must be done before initialization.
 			VaultApplications
 				.Logging
@@ -65,7 +70,7 @@ namespace MFiles.VAF.Extensions
 				.AssembliesToScanForCustomLayoutRenderers
 				.Add
 				(
-					this.GetType().Assembly.Location
+					assembly.Location
 				);
 			VaultApplications
 				.Logging
@@ -75,7 +80,7 @@ namespace MFiles.VAF.Extensions
 				.Instance
 				.RegisterFiltersInAssembly
 				(
-					this.GetType().Assembly
+					assembly
 				);
 		}
 		private TaskQueueBackgroundOperationManager<TSecureConfiguration> taskQueueBackgroundOperationManager;
