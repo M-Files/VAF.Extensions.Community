@@ -402,10 +402,10 @@ Instead, you can choose to override `GetStatusDashboardRootItems`.  This method 
 To add an existing item to the end of the dashboard, you could do this:
 
 ```csharp
-public override IEnumerable<IDashboardContent> GetStatusDashboardRootItems(IConfigurationRequestcontext context)
+public override IEnumerable<IDashboardContent> GetStatusDashboardRootItems(IConfigurationRequestContext context)
 {
 	// Include everything we would by default.
-	foreach(var c in base.GetStatusDashboardRootItems(context) ?? new Enumerable.Empty<IDashboardContent>())
+	foreach(var c in base.GetStatusDashboardRootItems(context) ?? Enumerable.Empty<IDashboardContent>())
 		yield return c;
 
 	// Add some more content to the bottom.
