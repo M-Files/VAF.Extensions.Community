@@ -127,7 +127,18 @@ namespace MFiles.VAF.Extensions
 			}
 
 		}
-		protected virtual DashboardListItem GenerateDashboardContentForQueueAndTask
+
+		/// <summary>
+		/// Returns a dashboard list item that represents the task processor associated 
+		/// with the <paramref name="queueId"/> and <paramref name="taskType"/>.
+		/// </summary>
+		/// <param name="queueId">The ID of the queue (used in combination with <paramref name="taskType"/> to retrieve the tasks to show).</param>
+		/// <param name="taskType">The type of task (used in combination with <paramref name="queueId"/> to retrieve the tasks to show).</param>
+		/// <param name="displayName">The display name to show, or null to use the <paramref name="taskType"/>.</param>
+		/// <param name="description">The description to show, or null to not show a description.</param>
+		/// <param name="showRunCommand">Whether the "run" command should be shown or not.</param>
+		/// <returns>The list item, or null if nothing should be shown.</returns>
+		public virtual DashboardListItem GenerateDashboardContentForQueueAndTask
 		(
 			string queueId,
 			string taskType,
