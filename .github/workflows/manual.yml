@@ -35,7 +35,7 @@ jobs:
                 $versionSuffix = '-' + ('${{ github.ref_name }}' -replace '[^a-zA-Z0-9]','-')
             }
         }else{
-            $versionSuffix = '-' + '(${{ github.event.inputs.versionSuffix }}' -replace '[^a-zA-Z0-9]','-')
+            $versionSuffix = '-' + ('${{ github.event.inputs.versionSuffix }}' -replace '[^a-zA-Z0-9]','-')
         }
         echo "versionSuffix=$versionSuffix" | Out-File -FilePath $Env:GITHUB_ENV -Append
 
