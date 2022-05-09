@@ -26,7 +26,7 @@ jobs:
     - name: versionSuffix
       shell: pwsh
       run: |
-        If([string]::IsNullOrEmpty('${{ github.event.inputs.versionSuffix }}')
+        If([string]::IsNullOrEmpty('${{ github.event.inputs.versionSuffix }}'))
         {
             $versionSuffix = '${{ github.ref_name }}' -replace '[^a-zA-Z0-9]','-'
             If($versionSuffix -eq 'release')
