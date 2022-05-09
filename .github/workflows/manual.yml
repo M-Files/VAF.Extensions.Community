@@ -42,7 +42,7 @@ jobs:
     - name: Get version number
       shell: pwsh
       run: |
-        $versionNumber = (Get-Date -Format "yy.M.1000.${{ github.run_number }}") + "${{ env.versionSuffix }}"
+        $versionNumber = (Get-Date -Format "yy.M.0.${{ github.run_number }}") + "${{ env.versionSuffix }}"
         echo "versionNumber=$versionNumber" | Out-File -FilePath $Env:GITHUB_ENV -Append
 
     - name: Setup MSBuild path
