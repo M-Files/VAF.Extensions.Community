@@ -27,9 +27,18 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		)
 			: this(options, conversion, null)
 		{
-		}
+        }
 
-		public ConvertConfigurationTypeUpgradeRule
+        public ConvertConfigurationTypeUpgradeRule
+        (
+            VaultApplicationBase vaultApplication,
+            Func<TInput, TOutput> conversion
+        )
+            : this(UpgradeSingleNVSLocationRuleOptions.ForLatestLocation(vaultApplication), conversion)
+        {
+        }
+
+        public ConvertConfigurationTypeUpgradeRule
 		(
 			UpgradeSingleNVSLocationRuleOptions options,
 			Func<TInput, TOutput> conversion
