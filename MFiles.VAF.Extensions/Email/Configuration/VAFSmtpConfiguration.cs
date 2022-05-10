@@ -83,7 +83,7 @@ namespace MFiles.VAF.Extensions.Email
 		(
 			Label = "Use encrypted connection (SSL/TLS)", 
 			Hidden = false,
-			HideWhen = ".parent._children{.key == 'UseLocalPickupFolder'&& .value == true }",
+			HideWhen = ".parent._children{.key == 'UseLocalPickupFolder' && .value == true }",
 			DefaultValue = true
 		)]
 		public override bool UseEncryptedConnection

@@ -198,7 +198,7 @@ namespace MFiles.VAF.Extensions
 				}
 
 				// Add it to the list.
-				list.Items.Add(new DashboardListItemWithNormalWhitespace()
+				list.Items.Add(new DashboardListItemEx()
 				{
 					Title = "Referenced Assemblies",
 					InnerContent = table

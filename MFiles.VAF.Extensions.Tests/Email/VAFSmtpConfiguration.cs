@@ -30,28 +30,29 @@ namespace MFiles.VAF.Extensions.Tests.Email
 	(
 		nameof(Extensions.Email.VAFSmtpConfiguration.ServerAddress),
 		defaultValue: null,
-		hidden: true,
-		showWhen: ".parent._children{.key == 'UseLocalPickupFolder' && .value == false }"
+		hidden: false,
+		hideWhen: ".parent._children{.key == 'UseLocalPickupFolder' && .value == true }"
 	)]
 	[JsonConfEditorRequired
 	(
 		nameof(Extensions.Email.VAFSmtpConfiguration.Port),
 		defaultValue: MFilesAPI.Extensions.Email.SmtpConfiguration.DefaultPort,
-		hidden: true
+		Hidden = false,
+		HideWhen = ".parent._children{.key == 'UseLocalPickupFolder' && .value == true }"
 	)]
 	[JsonConfEditorRequired
 	(
 		nameof(Extensions.Email.VAFSmtpConfiguration.UseEncryptedConnection),
 		defaultValue: true,
-		hidden: true,
-		showWhen: ".parent._children{.key == 'UseLocalPickupFolder' && .value == false }"
+		hidden: false,
+		hideWhen: ".parent._children{.key == 'UseLocalPickupFolder' && .value == true }"
 	)]
 	[JsonConfEditorRequired
 	(
 		nameof(Extensions.Email.VAFSmtpConfiguration.RequiresAuthentication),
 		defaultValue: true,
-		hidden: true,
-		showWhen: ".parent._children{.key == 'UseLocalPickupFolder' && .value == false }"
+		hidden: false,
+		hideWhen: ".parent._children{.key == 'UseLocalPickupFolder' && .value == true }"
 	)]
 	[JsonConfEditorRequired
 	(

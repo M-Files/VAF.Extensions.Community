@@ -23,7 +23,11 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void Constructor_NullOptionsThrows()
 		{
-			new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>(null, (a) => new ConfigurationVersion1());
+			new ConvertConfigurationTypeUpgradeRule<ConfigurationVersion0, ConfigurationVersion1>
+			(
+				(ConvertJsonUpgradeRuleBase.UpgradeRuleOptions)null, 
+				(a) => new ConfigurationVersion1()
+			);
 		}
 
 		[TestMethod]
