@@ -219,6 +219,42 @@ namespace MFiles.VAF.Extensions
 #endif
 
 		/// <summary>
+		/// Returns dashboard items from any <see cref="TaskQueueBackgroundOperationManager"/>
+		/// to be added to <see cref="GetAsynchronousOperationDashboardContent(IConfigurationRequestContext)"/>.
+		/// </summary>
+		/// <param name="context">The context for requesting these items.</param>
+		/// <returns>Any items.</returns>
+		protected virtual IEnumerable<DashboardListItem> GetAsynchronousDashboardListItemsFromBackgroundOperationManager(IConfigurationRequestContext context)
+			=> this
+				.GetType()
+				.GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager<TSecureConfiguration>>(this)
+				.SelectMany(m => m.GetDashboardContent());
+
+		/// <summary>
+		/// Returns dashboard items from the <see cref="TaskManager"/> and <see cref="TaskQueueResolver"/>
+		/// to be added to <see cref="GetAsynchronousOperationDashboardContent(IConfigurationRequestContext)"/>.
+		/// </summary>
+		/// <param name="context">The context for requesting these items.</param>
+		/// <returns>Any items.</returns>
+		protected virtual IEnumerable<DashboardListItem> GetAsynchronousDashboardListItemsFromTaskManager(IConfigurationRequestContext context)
+			=> this.TaskManager?.GetDashboardContent(this.TaskQueueResolver) ?? Enumerable.Empty<DashboardListItem>();
+
+		/// <summary>
+		/// Returns all dashboard items to be displayed <inheritdoc/>
+		/// <see cref="GetAsynchronousOperationDashboardContent(IConfigurationRequestContext)"/>.
+		/// </summary>
+		/// <param name="context">The context for requesting these items.</param>
+		/// <returns>Any items.</returns>
+		/// <remarks>Override this method to add new items.</remarks>
+		protected virtual IEnumerable<DashboardListItem> GetAsynchronousDashboardListItems(IConfigurationRequestContext context)
+		{
+			foreach (var i in this.GetAsynchronousDashboardListItemsFromBackgroundOperationManager(context))
+				yield return i;
+			foreach (var i in this.GetAsynchronousDashboardListItemsFromTaskManager(context))
+				yield return i;
+		}
+
+		/// <summary>
 		/// Returns the dashboard content showing asynchronous operation status.
 		/// </summary>
 		/// <returns>The dashboard content.  Can be null if no background operation managers, background operations or task processors.</returns>
@@ -226,26 +262,7 @@ namespace MFiles.VAF.Extensions
 		{
 			// Declare our list which will go into the panel.
 			var list = new DashboardList();
-
-			// Iterate over all the background operation managers we can find
-			// and add each of their background operations to the list.
-			var taskQueueBackgroundOperationManagers = this
-				.GetType()
-				.GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager<TSecureConfiguration>>(this);
-			foreach (var manager in taskQueueBackgroundOperationManagers.OrderBy(m => m.DashboardSortOrder))
-			{
-				var listItems = manager.GetDashboardContent();
-				if (null == listItems)
-					continue;
-				list.Items.AddRange(listItems);
-			}
-
-			// Get the content from the task queue resolver.
-			{
-				var listItems = this.TaskManager.GetDashboardContent(this.TaskQueueResolver);
-				if (null != listItems)
-					list.Items.AddRange(listItems);
-			}
+			list.Items.AddRange(this.GetAsynchronousDashboardListItems(context));
 
 			// Did we get anything?
 			if (0 == list.Items.Count)
