@@ -75,7 +75,8 @@ namespace MFiles.VAF.Extensions
 				{ TaskManagerEventType.TaskUpdated, LogTaskUpdatedEvent },
 				{ TaskManagerEventType.TaskUpdateFailed, LogTaskUpdateFailedEvent },
 				{ TaskManagerEventType.TaskUpdateSkipped, LogTaskUpdateSkippedEvent },
-				{ TaskManagerEventType.TaskJobFinished, LogTaskJobFinishedEvent }
+				{ TaskManagerEventType.TaskJobFinished, LogTaskJobFinishedEvent },
+				{ TaskManagerEventType.TaskAdded, LogTaskAddedEvent }
 			};
 
 			// Start listening.
@@ -507,6 +508,16 @@ namespace MFiles.VAF.Extensions
 			}
 			else
 				this.logger.Debug("Task job finished. " + GetEventDataString(args));
+		}
+
+		/// <summary>
+		/// Logs <see cref="TaskManagerEventType.TaskAdded"/> events.
+		/// </summary>
+		/// <param name="args">The event arguments.</param>
+		protected virtual void LogTaskAddedEvent(TaskManagerEventArgs args)
+		{
+			// Log the event.
+			this.logger.Trace("Task added. " + GetEventDataString(args));
 		}
 
 		#endregion Task events
