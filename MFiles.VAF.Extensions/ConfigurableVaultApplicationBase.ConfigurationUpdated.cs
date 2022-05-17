@@ -37,46 +37,6 @@ namespace MFiles.VAF.Extensions
 			}
 		}
 
-		/// <summary>
-		/// Gets any rules that should be applied to the configuration.
-		/// These rules may define a change in configuration location (e.g. to migrate older configuration to a newer location),
-		/// or define how to map older configuration structures across to new.
-		/// Rules will be executed in the order that they appear in the list.
-		/// Rules are run when the configuration is loaded.
-		/// </summary>
-		/// <returns>
-		/// The rules to run.
-		/// </returns>
-		protected virtual IEnumerable<Configuration.Upgrading.Rules.IUpgradeRule> GetConfigurationUpgradeRules()
-		{
-			yield break;
-		}
-
-		/// <inheritdoc />
-		/// <remarks>Will run any <see cref="GetConfigurationUpgradeRules"/> at this point.</remarks>
-		protected override void PopulateConfigurationObjects(Vault vault)
-		{
-			// Run any configuration upgrade rules.
-			var rules = this.GetConfigurationUpgradeRules();
-			if (null != rules)
-			{
-				foreach (var rule in rules)
-				{
-					try
-					{
-						rule?.Execute(vault);
-					}
-					catch (Exception ex)
-					{
-						this.Logger?.Error(ex, $"Could not execute configuration migration rule of type {rule?.GetType()?.FullName}");
-					}
-				}
-			}
-
-			// Use the base implementation.
-			base.PopulateConfigurationObjects(vault);
-		}
-
 		/// <inheritdoc />
 		protected override SecureConfigurationManager<TSecureConfiguration> GetConfigurationManager()
 		{

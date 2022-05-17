@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Reflection;
 
 namespace MFiles.VAF.Extensions.Configuration
 {
@@ -13,6 +15,17 @@ namespace MFiles.VAF.Extensions.Configuration
 		public ConfigurationVersionAttribute(string version)
 		{
 			this.Version = Version.Parse(version);
+		}
+	}
+
+	/// <summary>
+	/// Allows a declarative approach to configuration upgrading.
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+	public class ConfigurationUpgradeMethodAttribute: Attribute
+	{
+		public ConfigurationUpgradeMethodAttribute()
+		{
 		}
 	}
 }
