@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MFiles.VAF.Configuration;
+using System;
 using System.Reflection;
 
 namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
@@ -13,18 +14,20 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		(
 			VaultApplicationBase vaultApplication,
 			Version migrateFrom,
-			Version migrateTo
+			Version migrateTo,
+			IConfigurationStorage configurationStorage = null
 		)
-			: base(UpgradeSingleNVSLocationRuleOptions.ForLatestLocation(vaultApplication), migrateFrom, migrateTo)
+			: base(UpgradeSingleNVSLocationRuleOptions.ForLatestLocation(vaultApplication), migrateFrom, migrateTo, configurationStorage)
 		{
 		}
 		public DeclaredConfigurationUpgradeRule
 		(
 			UpgradeRuleOptions options,
 			Version migrateFrom,
-			Version migrateTo
+			Version migrateTo,
+			IConfigurationStorage configurationStorage = null
 		)
-			: base(options, migrateFrom, migrateTo)
+			: base(options, migrateFrom, migrateTo, configurationStorage)
 		{
 		}
 

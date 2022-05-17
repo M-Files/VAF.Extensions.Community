@@ -119,7 +119,6 @@ namespace MFiles.VAF.Extensions.Tests
 
 		[DataContract]
 		public class VersionZero
-			: VAF.Extensions.Configuration.VersionedConfigurationBase
 		{
 			[DataMember]
 			public string Hello { get; set; }
@@ -136,6 +135,7 @@ namespace MFiles.VAF.Extensions.Tests
 			[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
 			public virtual void Upgrade(VersionZero input)
 			{
+				World = input?.Hello;
 			}
 		}
 
@@ -152,6 +152,7 @@ namespace MFiles.VAF.Extensions.Tests
 			{
 				return new VersionOneWithStaticUpgradePath()
 				{
+					World = input?.Hello
 				};
 			}
 		}

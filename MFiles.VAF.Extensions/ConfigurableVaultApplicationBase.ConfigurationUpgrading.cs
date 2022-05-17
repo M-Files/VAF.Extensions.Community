@@ -29,7 +29,7 @@ namespace MFiles.VAF.Extensions
 		/// <see cref="GetConfigurationUpgradeRules"/>, then executes them in order.
 		/// </summary>
 		/// <param name="vault">The vault reference to use to access named-value storage.</param>
-		protected virtual void UpgradeConfiguration(Vault vault)
+		protected internal virtual void UpgradeConfiguration(Vault vault)
 		{
 			try
 			{
@@ -368,7 +368,7 @@ namespace MFiles.VAF.Extensions
 				// This method is okay.
 				identifiedUpgradeMethods.Add
 				(
-					new DeclaredConfigurationUpgradeRule(this, oldTypeVersion, configurationVersion)
+					new DeclaredConfigurationUpgradeRule(this, oldTypeVersion, configurationVersion, this.ConfigurationStorage)
 					{
 						UpgradeToType = configuration,
 						UpgradeFromType = oldType,

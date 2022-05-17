@@ -22,9 +22,11 @@ namespace MFiles.VAF.Extensions.Tests
 		protected IConfigurationStorage GetConfigurationStorage(string configurationData = null)
 		{
 			var storage = new Mock<IConfigurationStorage>();
+
+			// Reading of data.
 			storage
 				.Setup(m => m.ReadConfigurationData(It.IsAny<Vault>(), It.IsAny<string>(), It.IsAny<string>()))
-				.Returns(configurationData);
+				.Returns(() => configurationData);
 			storage
 				.Setup(m => m.ReadConfigurationData(It.IsAny<Vault>(), It.IsAny<string>(), It.IsAny<string>(), out It.Ref<string>.IsAny))
 				.Callback(new readConfigurationDataCallback((Vault v, string @namespace, string @name, out string value) =>
@@ -32,6 +34,14 @@ namespace MFiles.VAF.Extensions.Tests
 					value = configurationData;
 				}))
 				.Returns(configurationData != null);
+
+			// Writing of data.
+			storage
+				.Setup(m => m.SaveConfigurationData(It.IsAny<Vault>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+				.Callback((Vault v, string @namespace, string @data, string @key) =>
+				{
+					configurationData = @data;
+				});
 
 			// Deserialisation.
 			// Note: this isn't a true mock, but we'll assume that Newtonsoft is capable of doing these actions as it makes the method more flexible.
