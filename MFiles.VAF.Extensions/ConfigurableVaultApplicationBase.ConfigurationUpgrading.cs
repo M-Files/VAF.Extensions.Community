@@ -14,14 +14,27 @@ namespace MFiles.VAF.Extensions
 	{
 
 		/// <inheritdoc />
-		/// <remarks>Will run any <see cref="GetConfigurationUpgradeRules"/> at this point.</remarks>
+		/// <remarks>Will call <see cref="UpgradeConfiguration"/> then call the base implementation.</remarks>
 		protected override void PopulateConfigurationObjects(Vault vault)
 		{
 			// Run any configuration upgrade rules.
-			var rules = this.GetConfigurationUpgradeRules(vault);
-			if (null != rules)
+			this.UpgradeConfiguration(vault);
+
+			// Use the base implementation.
+			base.PopulateConfigurationObjects(vault);
+		}
+
+		/// <summary>
+		/// Retrieves appropriate configuration upgrade rules from
+		/// <see cref="GetConfigurationUpgradeRules"/>, then executes them in order.
+		/// </summary>
+		/// <param name="vault">The vault reference to use to access named-value storage.</param>
+		protected virtual void UpgradeConfiguration(Vault vault)
+		{
+			try
 			{
-				foreach (var rule in rules)
+				// Run any configuration upgrade rules.
+				foreach (var rule in this.GetConfigurationUpgradeRules(vault) ?? Enumerable.Empty<IUpgradeRule>())
 				{
 					try
 					{
@@ -33,9 +46,10 @@ namespace MFiles.VAF.Extensions
 					}
 				}
 			}
-
-			// Use the base implementation.
-			base.PopulateConfigurationObjects(vault);
+			catch(Exception e)
+			{
+				this.Logger?.Fatal(e, $"Could not get configuration upgrade rules.");
+			}
 		}
 
 		/// <summary>
@@ -119,7 +133,7 @@ namespace MFiles.VAF.Extensions
 			// Try to find an upgrade process.
 			if(false == this.TryGetConfigurationUpgradePath(upgradeRules.ToList(), currentVersion, configurationVersion, out Stack<DeclaredConfigurationUpgradeRule> upgradePath))
 			{
-				this.Logger?.Warn($"Could not find an upgrade path to {configurationVersion}; configuration upgrade failure.");
+				this.Logger?.Warn($"Could not find an upgrade path from {currentVersion} to {configurationVersion}; configuration upgrade failure.");
 				yield break;
 			}
 
@@ -145,23 +159,27 @@ namespace MFiles.VAF.Extensions
 				throw new ArgumentNullException(nameof(currentVersion));
 			if (null == targetVersion)
 				throw new ArgumentNullException(nameof(targetVersion));
+			if (currentVersion.Equals(targetVersion))
+			{
+				this.Logger?.Debug($"Configuration is already at {targetVersion}; skipping upgrade.");
+				return true;
+			}
 			if (rules.Count == 0)
 				return false;
 			if (false == rules.Any(r => r.MigrateFrom == currentVersion))
+			{
+				this.Logger?.Warn($"There are no rules from {currentVersion}; skipping upgrade.");
 				return false; // No rules from this version.
+			}
 			if (false == rules.Any(r => r.MigrateTo == targetVersion))
+			{
+				this.Logger?.Warn($"There are no rules to {targetVersion}; skipping upgrade.");
 				return false; // No rules to the target version.
+			}
 			if(currentVersion > targetVersion)
 			{
 				this.Logger?.Warn($"Configuration version {currentVersion} is higher than expected target version {targetVersion}.");
 				return false;
-			}
-
-			// Already at the right version?  Die.
-			if (currentVersion == targetVersion)
-			{
-				this.Logger?.Debug($"Configuration is already at {targetVersion}; skipping upgrade.");
-				return true;
 			}
 
 			// If there's a direct rule then return that.
@@ -284,13 +302,6 @@ namespace MFiles.VAF.Extensions
 				.Cast<Configuration.ConfigurationVersionAttribute>()
 				.FirstOrDefault()?
 				.Version ?? VersionZero;
-
-			// If there is no version then die now.
-			if (configurationVersion.Equals(VersionZero))
-			{
-				this.Logger?.Debug($"The configuration type {typeof(TSecureConfiguration)} does not expose a configuration version; skipping upgrade rules.");
-				return false;
-			}
 
 			// Check for upgrade methods.
 			var identifiedUpgradeMethods = new List<DeclaredConfigurationUpgradeRule>();

@@ -72,6 +72,8 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 			if (string.IsNullOrWhiteSpace(input))
 				input = "{}";
 
+			this.Logger?.Info($"Converting configuration version from {this.MigrateFrom} to {this.MigrateTo}.");
+
 			// Get the input object.
 			var inputObj = base.ConfigurationStorage.Deserialize(this.UpgradeFromType, input);
 
