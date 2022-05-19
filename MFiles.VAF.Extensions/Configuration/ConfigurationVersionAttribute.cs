@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MFilesAPI;
+using System;
 using System.Linq;
 using System.Reflection;
 
@@ -12,6 +13,11 @@ namespace MFiles.VAF.Extensions.Configuration
 	public class ConfigurationVersionAttribute : Attribute
 	{
 		public Version Version { get; set; }
+		public bool UsesCustomNVSLocation { get; set; }
+		public string Namespace { get; set; }
+		public string Key { get; set; }
+		public MFNamedValueType NamedValueType { get; set; }
+
 		public ConfigurationVersionAttribute(string version)
 		{
 			this.Version = Version.Parse(version);

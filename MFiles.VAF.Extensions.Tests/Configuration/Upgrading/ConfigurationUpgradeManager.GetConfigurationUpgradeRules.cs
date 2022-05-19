@@ -9,20 +9,16 @@ using MFiles.VAF.Configuration;
 using System.Linq;
 using MFiles.VAF.Extensions.Configuration.Upgrading.Rules;
 
-namespace MFiles.VAF.Extensions.Tests
+namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 {
-	public partial class ConfigurableVaultApplicationBaseTests
-		: TestBaseWithVaultMock
+	public partial class ConfigurationUpgradeManager
 	{
 
 		[TestMethod]
 		public void GetConfigurationUpgradeRules_NoUpgradePathsDefined()
 		{
-			var c = new ConfigurableVaultApplicationBaseProxy<VersionZero>()
-			{
-				ConfigurationStorage = this.GetConfigurationStorage()
-			};
-			Assert.AreEqual(0, c.GetConfigurationUpgradeRules(this.GetVaultMock().Object).Count());
+			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager<VersionZero>(Mock.Of<VaultApplicationBase>());
+			Assert.AreEqual(0, c.GetConfigurationUpgradePath(this.GetVaultMock().Object).Count());
 		}
 
 		[TestMethod]

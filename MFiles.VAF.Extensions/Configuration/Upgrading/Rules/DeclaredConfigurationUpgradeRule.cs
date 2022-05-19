@@ -1,4 +1,5 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VaultApplications.Logging;
 using System;
 using System.Reflection;
 
@@ -8,26 +9,25 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 	/// An upgrade rule that has been declared via attributes.
 	/// </summary>
 	public class DeclaredConfigurationUpgradeRule
-		: ConvertJsonUpgradeRuleBase
+		: SingleNamedValueItemUpgradeRuleBase
 	{
-		public DeclaredConfigurationUpgradeRule
-		(
-			VaultApplicationBase vaultApplication,
-			Version migrateFrom,
-			Version migrateTo,
-			IConfigurationStorage configurationStorage = null
-		)
-			: base(UpgradeSingleNVSLocationRuleOptions.ForLatestLocation(vaultApplication), migrateFrom, migrateTo, configurationStorage)
+		/// <summary>
+		/// The logger for this class.
+		/// </summary>
+		private ILogger Logger { get; } = LogManager.GetLogger<DeclaredConfigurationUpgradeRule>();
+
+		public DeclaredConfigurationUpgradeRule(VaultApplicationBase vaultApplication)
+			: base(vaultApplication)
 		{
 		}
-		public DeclaredConfigurationUpgradeRule
-		(
-			UpgradeRuleOptions options,
-			Version migrateFrom,
-			Version migrateTo,
-			IConfigurationStorage configurationStorage = null
-		)
-			: base(options, migrateFrom, migrateTo, configurationStorage)
+
+		public DeclaredConfigurationUpgradeRule(ISingleNamedValueItem readFromAndWriteTo)
+			: base(readFromAndWriteTo)
+		{
+		}
+
+		public DeclaredConfigurationUpgradeRule(ISingleNamedValueItem readFrom, ISingleNamedValueItem writeTo)
+			: base(readFrom, writeTo)
 		{
 		}
 
@@ -65,20 +65,15 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 				this.Logger?.Fatal($"Cannot upgrade configuration as upgrade method is null.");
 				throw new InvalidOperationException("Cannot upgrade configuration as upgrade method is null.");
 			}
-			if (null == base.ConfigurationStorage)
-			{
-				this.Logger?.Fatal($"Cannot upgrade configuration as configuration storage instance is null.");
-				throw new InvalidOperationException("Cannot upgrade configuration as configuration storage instance is null");
-			}
 
 			// Handle empty data.
 			if (string.IsNullOrWhiteSpace(input))
 				input = "{}";
 
-			this.Logger?.Info($"Converting configuration version from {this.MigrateFrom} to {this.MigrateTo}.");
+			this.Logger?.Info($"Converting configuration version from {this.MigrateFromVersion} to {this.MigrateToVersion}.");
 
 			// Get the input object.
-			var inputObj = base.ConfigurationStorage.Deserialize(this.UpgradeFromType, input);
+			var inputObj = base.JsonConvert.Deserialize(input);
 
 			// Convert it.
 			object outputObj = null;
@@ -102,7 +97,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 			}
 
 			// Deserialise back.
-			return base.ConfigurationStorage.Serialize(outputObj);
+			return base.JsonConvert.Serialize(outputObj);
 
 		}
 	}

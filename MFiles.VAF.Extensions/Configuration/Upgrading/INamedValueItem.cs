@@ -150,6 +150,73 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		/// </summary>
 		string Name { get; set; }
 	}
+	public static class ISingleNamedValueItemExtensionMethods
+	{
+		public static bool TryRead(this ISingleNamedValueItem namedValueItem, Vault vault, INamedValueStorageManager namedValueStorageManager, IJsonConvert jsonConvert, out string data)
+		{
+			data = null;
+
+			// Sanity.
+			if (null == vault)
+				throw new ArgumentNullException(nameof(vault));
+			if (null == namedValueStorageManager)
+				throw new ArgumentNullException(nameof(namedValueStorageManager));
+			if (null == jsonConvert)
+				throw new ArgumentNullException(nameof(jsonConvert));
+			if (null == namedValueItem)
+				return false;
+
+			// Attempt to retrieve the data from NVS.
+			var namedValues = namedValueStorageManager.GetNamedValues(vault, namedValueItem.NamedValueType, namedValueItem.Namespace);
+			if (null == namedValues || false == namedValues.Names.Cast<string>().Contains(namedValueItem.Name))
+				return false;
+
+			// Read the data.
+			data = namedValues[namedValueItem.Name]?.ToString();
+			return false == string.IsNullOrWhiteSpace(data);
+		}
+
+		public static bool TryRead<TOutputType>
+		(
+			this ISingleNamedValueItem namedValueItem, 
+			Vault vault, 
+			INamedValueStorageManager namedValueStorageManager, 
+			IJsonConvert jsonConvert, 
+			out string data,
+			out Version version,
+			out TOutputType output
+		)
+			where TOutputType : VersionedConfigurationBase
+		{
+
+			data = null;
+			version = null;
+			output = null;
+
+			// Use the other overload.
+			if (false == namedValueItem.TryRead(vault, namedValueStorageManager, jsonConvert, out data))
+				return false;
+
+			// Deserialize the object
+			output = jsonConvert.Deserialize<TOutputType>(data);
+
+			// If we can, grab the version.
+			version = output?.Version ?? new Version("0.0");
+
+			// Did we get it?
+			return output != default;
+		}
+
+		public static bool TryRead
+		(
+			this ISingleNamedValueItem namedValueItem,
+			Vault vault,
+			INamedValueStorageManager namedValueStorageManager,
+			IJsonConvert jsonConvert,
+			out string data,
+			out Version version
+		) => namedValueItem.TryRead<VersionedConfigurationBase>(vault, namedValueStorageManager, jsonConvert, out data, out version, out _);
+	}
 
 	/// <summary>
 	/// Represents a single named item within a namespace.
@@ -157,6 +224,20 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 	public class SingleNamedValueItem
 		: NamedValueItemBase, ISingleNamedValueItem
 	{
+		/// <summary>
+		/// Returns a <see cref="SingleNamedValueItem"/> instance pointing at the location used by the latest VAF release.
+		/// </summary>
+		/// <param name="vaultApplication"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentNullException"></exception>
+		public static SingleNamedValueItem ForLatestVAFVersion(VaultApplicationBase vaultApplication) =>
+			new SingleNamedValueItem
+				(
+					MFNamedValueType.MFSystemAdminConfiguration,
+					vaultApplication?.GetType()?.FullName ?? throw new ArgumentNullException(nameof(vaultApplication)),
+					"configuration"
+				);
+
 		/// <summary>
 		/// Creates a reference to a single named item (<paramref name="name"/>) within a given namespace.
 		/// </summary>

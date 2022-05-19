@@ -9,9 +9,9 @@ using MFiles.VAF.Configuration;
 using System.Linq;
 using MFiles.VAF.Extensions.Configuration.Upgrading.Rules;
 
-namespace MFiles.VAF.Extensions.Tests
+namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 {
-	public partial class ConfigurableVaultApplicationBaseTests
+	public partial class ConfigurationUpgradeManager
 		: TestBaseWithVaultMock
 	{
 

@@ -18,33 +18,18 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// </summary>
 		public const string TargetNamedValueName = "configuration";
 
-		/// <summary>
-		/// Creates a rule to move the configuration for <paramref name="vaultApplication"/>
-		/// from the location used in VAF 2.0 to the location used in VAF 2.3.
-		/// In VAF 2.0 the name of the node in the configuration tree was used as the named value name (key),
-		/// so must be provided in <paramref name="configurationNodeName"/>.
-		/// </summary>
-		/// <param name="vaultApplication">The vault application that this is running within.</param>
-		/// <param name="configurationNodeName">The name of the (previous) configuration node.  Used to locate data to read only.</param>
 		public VAF20ToVAF23UpgradeRule(VaultApplicationBase vaultApplication, string configurationNodeName)
-			: base(new UpgradeRuleOptions()
-			{
-				RemoveMovedValues = true,
-				Source = new SingleNamedValueItem
+			: base
+			(
+				new SingleNamedValueItem
 				(
-					MFNamedValueType.MFConfigurationValue, 
+					MFNamedValueType.MFConfigurationValue,
 					SourceNamespaceLocation,
 					configurationNodeName
 				),
-				Target = new SingleNamedValueItem
-				(
-					MFNamedValueType.MFSystemAdminConfiguration,
-					vaultApplication.GetType().FullName,
-					TargetNamedValueName
-				)
-			})
+				SingleNamedValueItem.ForLatestVAFVersion(vaultApplication)
+			)
 		{
-
 		}
 	}
 }
