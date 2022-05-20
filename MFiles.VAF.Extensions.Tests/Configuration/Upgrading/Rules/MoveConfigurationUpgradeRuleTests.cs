@@ -125,12 +125,12 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		public void Execute_SetsValuesAndReturnsTrue()
 		{
 			var namedValues = new NamedValues();
-			namedValues["conf"] = "hello world";
+			namedValues["config"] = "{}";
 			var mock = new Mock<INamedValueStorageManager>();
 			mock.Setup(m => m.GetNamedValues(It.IsAny<Vault>(), DefaultSourceNVSType, DefaultSourceNamespace))
 				.Returns(namedValues)
 				.Verifiable("Data was not retrieved from NVS.");
-			mock.Setup(m => m.SetNamedValues(It.IsAny<Vault>(), DefaultTargetNVSType, DefaultTargetNamespace, namedValues))
+			mock.Setup(m => m.SetNamedValues(It.IsAny<Vault>(), DefaultSourceNVSType, DefaultSourceNamespace, namedValues))
 				.Verifiable("Data was not set in NVS.");
 
 			var rule = new MoveConfigurationUpgradeRuleProxy
@@ -148,52 +148,19 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		}
 
 		[TestMethod]
-		public void Execute_DoesNotRemoveSourceValues()
-		{
-			var namedValues = new NamedValues();
-			var mock = new Mock<INamedValueStorageManager>();
-			mock.Setup(m => m.GetNamedValues(It.IsAny<Vault>(), DefaultSourceNVSType, DefaultSourceNamespace))
-				.Returns(namedValues);
-
-			var rule = new MoveConfigurationUpgradeRuleProxy
-			(
-				this.CreateSingleNamedValueItemMock(true).Object,
-				this.CreateSingleNamedValueItemMock(true).Object,
-				new Version("0.0"),
-				new Version("0.0"),
-				mock
-			);
-
-			Assert.IsTrue(rule.Execute(Mock.Of<Vault>()));
-
-			mock.Verify();
-			mock.Verify
-			(
-				m => m.RemoveNamedValues
-				(
-					It.IsAny<Vault>(),
-					It.IsAny<MFNamedValueType>(),
-					It.IsAny<string>(),
-					It.IsAny<string[]>()
-				),
-				Times.Never
-			);
-		}
-
-		[TestMethod]
 		public void Execute_DoesRemoveSourceValues()
 		{
 			var namedValues = new NamedValues();
-			namedValues["hello"] = "world";
+			namedValues["config"] = "{}";
 			var mock = new Mock<INamedValueStorageManager>();
 			mock.Setup(m => m.GetNamedValues(It.IsAny<Vault>(), DefaultSourceNVSType, DefaultSourceNamespace))
-				.Returns(namedValues);
+				.Returns(() => namedValues);
 			mock.Setup(m => m.RemoveNamedValues(It.IsAny<Vault>(), DefaultSourceNVSType, DefaultSourceNamespace, It.IsAny<string[]>()))
 				.Callback((Vault vault, MFNamedValueType type, string @namespace, string[] names) =>
 				{
 					Assert.AreEqual(1, names.Length);
-					Assert.AreEqual("hello", names[0]);
-				});
+					Assert.AreEqual("config", names[0]);
+				}).Verifiable();
 
 			var rule = new MoveConfigurationUpgradeRuleProxy
 			(
@@ -207,17 +174,6 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			Assert.IsTrue(rule.Execute(Mock.Of<Vault>()));
 
 			mock.Verify();
-			mock.Verify
-			(
-				m => m.RemoveNamedValues
-				(
-					It.IsAny<Vault>(),
-					It.IsAny<MFNamedValueType>(),
-					It.IsAny<string>(),
-					It.IsAny<string[]>()
-				),
-				Times.Once
-			);
 		}
 
 		public class MoveConfigurationUpgradeRuleProxy

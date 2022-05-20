@@ -151,9 +151,14 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 				this.Logger?.Debug($"Attempting to update configuration in NVS.");
 				{
 					// Update the named values.
-					var namedValues = this.NamedValueStorageManager.GetNamedValues(vault, this.ReadFrom.NamedValueType, this.ReadFrom.Namespace);
-					namedValues[this.WriteTo?.Name ?? this.ReadFrom.Name] = newData;
 					this.Logger?.Trace("Writing new configuration...");
+					var namedValues = this.NamedValueStorageManager.GetNamedValues
+					(
+						vault,
+						this.WriteTo?.NamedValueType ?? this.ReadFrom.NamedValueType,
+						this.WriteTo?.Namespace ?? this.ReadFrom.Namespace
+					);
+					namedValues[this.WriteTo?.Name ?? this.ReadFrom.Name] = newData;
 					this.NamedValueStorageManager.SetNamedValues
 					(
 						vault,
@@ -166,15 +171,13 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 				// Remove the old data.
 				{
 					// Update the named values.
-					var namedValues = this.NamedValueStorageManager.GetNamedValues(vault, this.ReadFrom.NamedValueType, this.ReadFrom.Namespace);
-					namedValues[this.ReadFrom.Name] = null;
 					this.Logger?.Trace("Removing old configuration...");
-					this.NamedValueStorageManager.SetNamedValues
+					this.NamedValueStorageManager.RemoveNamedValues
 					(
 						vault,
 						this.ReadFrom.NamedValueType,
 						this.ReadFrom.Namespace,
-						namedValues
+						new[] { this.ReadFrom.Name }
 					);
 				}
 

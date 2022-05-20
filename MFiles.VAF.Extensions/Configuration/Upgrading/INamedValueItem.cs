@@ -115,7 +115,10 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 
 		/// <inheritdoc />
 		public override NamedValues GetNamedValues(INamedValueStorageManager manager, Vault vault)
-			=> manager.GetNamedValues(vault, this.NamedValueType, this.Namespace);
+		{
+			manager = manager ?? throw new ArgumentNullException(nameof(manager));
+			return manager.GetNamedValues(vault, this.NamedValueType, this.Namespace);
+		}
 
 		/// <inheritdoc />
 		public override bool IsValid()
@@ -123,7 +126,10 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 
 		/// <inheritdoc />
 		public override void SetNamedValues(INamedValueStorageManager manager, Vault vault, NamedValues namedValues)
-			=> manager.SetNamedValues(vault, this.NamedValueType, this.Namespace, namedValues);
+		{
+			manager = manager ?? throw new ArgumentNullException(nameof(manager));
+			manager.SetNamedValues(vault, this.NamedValueType, this.Namespace, namedValues);
+		}
 	}
 
 	public interface ISingleNamedValueItem
