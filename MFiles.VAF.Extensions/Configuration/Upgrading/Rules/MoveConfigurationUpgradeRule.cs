@@ -8,8 +8,8 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 	public class MoveConfigurationUpgradeRule
 		: SingleNamedValueItemUpgradeRuleBase
 	{
-		public MoveConfigurationUpgradeRule(ISingleNamedValueItem readFrom, ISingleNamedValueItem writeTo)
-			: base(readFrom, writeTo)
+		public MoveConfigurationUpgradeRule(ISingleNamedValueItem readFrom, ISingleNamedValueItem writeTo, Version migrateFromVersion, Version migrateToVersion)
+			: base(readFrom, writeTo, migrateFromVersion, migrateToVersion)
 		{
 		}
 

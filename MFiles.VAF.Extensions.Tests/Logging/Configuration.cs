@@ -18,7 +18,7 @@ namespace MFiles.VAF.Extensions.Tests.Logging
 			(
 				configuration,
 				Newtonsoft.Json.Formatting.None,
-				MFiles.VAF.Extensions.Configuration.Upgrading.Rules.SingleNamedValueItemUpgradeRuleBase.DefaultJsonSerializerSettings
+				NewtonsoftJsonConvert.DefaultJsonSerializerSettings
 			);
 			Assert.AreEqual("{}", newString);
 		}
@@ -30,7 +30,7 @@ namespace MFiles.VAF.Extensions.Tests.Logging
 			(
 				configuration,
 				Newtonsoft.Json.Formatting.None,
-				MFiles.VAF.Extensions.Configuration.Upgrading.Rules.SingleNamedValueItemUpgradeRuleBase.DefaultJsonSerializerSettings
+				NewtonsoftJsonConvert.DefaultJsonSerializerSettings
 			);
 			Assert.AreEqual("{\"Version\":\"1.0\"}", newString);
 		}

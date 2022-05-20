@@ -33,20 +33,22 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		public virtual bool IsValid()
 			=> true;
 
-		public SingleNamedValueItemUpgradeRuleBase(VaultApplicationBase vaultApplication)
-			: this(SingleNamedValueItem.ForLatestVAFVersion(vaultApplication))
+		public SingleNamedValueItemUpgradeRuleBase(VaultApplicationBase vaultApplication, Version migrateFromVersion, Version migrateToVersion)
+			: this(SingleNamedValueItem.ForLatestVAFVersion(vaultApplication), migrateFromVersion, migrateToVersion)
 		{
 		}
 
-		public SingleNamedValueItemUpgradeRuleBase(ISingleNamedValueItem readFromAndWriteTo)
-			: this(readFromAndWriteTo, null)
+		public SingleNamedValueItemUpgradeRuleBase(ISingleNamedValueItem readFromAndWriteTo, Version migrateFromVersion, Version migrateToVersion)
+			: this(readFromAndWriteTo, null, migrateFromVersion, migrateToVersion)
 		{
 		}
 
-		public SingleNamedValueItemUpgradeRuleBase(ISingleNamedValueItem readFrom, ISingleNamedValueItem writeTo)
+		public SingleNamedValueItemUpgradeRuleBase(ISingleNamedValueItem readFrom, ISingleNamedValueItem writeTo, Version migrateFromVersion, Version migrateToVersion)
 		{
 			this.ReadFrom = readFrom ?? throw new ArgumentNullException(nameof(readFrom));
 			this.WriteTo = writeTo; // Allow nulls; we'll fall back to the readfrom location.
+			this.MigrateFromVersion = migrateFromVersion ?? throw new ArgumentNullException(nameof(migrateFromVersion));
+			this.MigrateToVersion = migrateToVersion ?? throw new ArgumentNullException(nameof(migrateToVersion));
 		}
 
 		/// <summary>
@@ -198,37 +200,37 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		public override bool IsValid()
 			=> base.IsValid() && (this.Options?.IsValid() ?? true);
 
-		public SingleNamedValueItemUpgradeRuleBase(VaultApplicationBase vaultApplication)
-			: base(vaultApplication)
+		public SingleNamedValueItemUpgradeRuleBase(VaultApplicationBase vaultApplication, Version migrateFromVersion, Version migrateToVersion)
+			: base(vaultApplication, migrateFromVersion, migrateToVersion)
 		{
 		}
 
-		public SingleNamedValueItemUpgradeRuleBase(ISingleNamedValueItem readFromAndWriteTo)
-			: base(readFromAndWriteTo)
+		public SingleNamedValueItemUpgradeRuleBase(ISingleNamedValueItem readFromAndWriteTo, Version migrateFromVersion, Version migrateToVersion)
+			: base(readFromAndWriteTo, migrateFromVersion, migrateToVersion)
 		{
 		}
 
-		public SingleNamedValueItemUpgradeRuleBase(ISingleNamedValueItem readFrom, ISingleNamedValueItem writeTo)
-			: base(readFrom, writeTo)
+		public SingleNamedValueItemUpgradeRuleBase(ISingleNamedValueItem readFrom, ISingleNamedValueItem writeTo, Version migrateFromVersion, Version migrateToVersion)
+			: base(readFrom, writeTo, migrateFromVersion, migrateToVersion)
 		{
 		}
 
-		public SingleNamedValueItemUpgradeRuleBase(TOptions options, VaultApplicationBase vaultApplication)
-			: base(vaultApplication)
-		{
-			// Sanity.
-			this.Options = options ?? throw new ArgumentNullException(nameof(options));
-		}
-
-		public SingleNamedValueItemUpgradeRuleBase(TOptions options, ISingleNamedValueItem readFromAndWriteTo)
-			: base(readFromAndWriteTo)
+		public SingleNamedValueItemUpgradeRuleBase(TOptions options, VaultApplicationBase vaultApplication, Version migrateFromVersion, Version migrateToVersion)
+			: base(vaultApplication, migrateFromVersion, migrateToVersion)
 		{
 			// Sanity.
 			this.Options = options ?? throw new ArgumentNullException(nameof(options));
 		}
 
-		public SingleNamedValueItemUpgradeRuleBase(TOptions options, ISingleNamedValueItem readFrom, ISingleNamedValueItem writeTo)
-			: base(readFrom, writeTo)
+		public SingleNamedValueItemUpgradeRuleBase(TOptions options, ISingleNamedValueItem readFromAndWriteTo, Version migrateFromVersion, Version migrateToVersion)
+			: base(readFromAndWriteTo, migrateFromVersion, migrateToVersion)
+		{
+			// Sanity.
+			this.Options = options ?? throw new ArgumentNullException(nameof(options));
+		}
+
+		public SingleNamedValueItemUpgradeRuleBase(TOptions options, ISingleNamedValueItem readFrom, ISingleNamedValueItem writeTo, Version migrateFromVersion, Version migrateToVersion)
+			: base(readFrom, writeTo, migrateFromVersion, migrateToVersion)
 		{
 			// Sanity.
 			this.Options = options ?? throw new ArgumentNullException(nameof(options));

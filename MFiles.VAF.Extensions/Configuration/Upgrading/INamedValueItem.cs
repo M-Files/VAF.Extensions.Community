@@ -24,14 +24,6 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		/// </summary>
 		/// <returns><see langword="true"/> if the source is considered valid and can be used.</returns>
 		bool IsValid();
-	}
-
-	/// <summary>
-	/// Defines an item in Named Value Storage that can be read.
-	/// </summary>
-	public interface ISourceNamedValueItem
-		: INamedValueItem
-	{
 		/// <summary>
 		/// Retrieves the item(s) from Named Value Storage.
 		/// </summary>
@@ -47,14 +39,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		/// <param name="vault">The vault to read the data from.</param>
 		/// <param name="namedValueNames">The item(s) within this namespace to remove.</param>
 		void RemoveNamedValues(INamedValueStorageManager manager, Vault vault, params string[] namedValueNames);
-	}
-
-	/// <summary>
-	/// Defines an item in Named Value Storage that can be written to.
-	/// </summary>
-	public interface ITargetNamedValueItem
-		: INamedValueItem
-	{
+		
 		/// <summary>
 		/// Writes the item(s) to Named Value Storage.
 		/// </summary>
@@ -107,7 +92,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 	}
 
 	public interface IEntireNamespaceNamedValueItem
-		: ISourceNamedValueItem, ITargetNamedValueItem
+		: INamedValueItem
 	{
 
 	}
@@ -142,7 +127,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 	}
 
 	public interface ISingleNamedValueItem
-		: ISourceNamedValueItem, ITargetNamedValueItem
+		: INamedValueItem
 	{
 
 		/// <summary>

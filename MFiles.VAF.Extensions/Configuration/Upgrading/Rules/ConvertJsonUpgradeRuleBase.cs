@@ -23,20 +23,20 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		protected Func<TConvertFrom, TConvertTo> ConversionFunction { get; set; }
 
 
-		public ConvertJsonUpgradeRule(Func<TConvertFrom, TConvertTo> conversionFunction, VaultApplicationBase vaultApplication)
-			: base(vaultApplication)
+		public ConvertJsonUpgradeRule(Func<TConvertFrom, TConvertTo> conversionFunction, VaultApplicationBase vaultApplication, Version migrateFromVersion, Version migrateToVersion)
+			: base(vaultApplication, migrateFromVersion, migrateToVersion)
 		{
 			this.ConversionFunction = conversionFunction ?? throw new ArgumentNullException(nameof(conversionFunction));
 		}
 
-		public ConvertJsonUpgradeRule(Func<TConvertFrom, TConvertTo> conversionFunction, ISingleNamedValueItem readFromAndWriteTo)
-			: base(readFromAndWriteTo)
+		public ConvertJsonUpgradeRule(Func<TConvertFrom, TConvertTo> conversionFunction, ISingleNamedValueItem readFromAndWriteTo, Version migrateFromVersion, Version migrateToVersion)
+			: base(readFromAndWriteTo, migrateFromVersion, migrateToVersion)
 		{
 			this.ConversionFunction = conversionFunction ?? throw new ArgumentNullException(nameof(conversionFunction));
 		}
 
-		public ConvertJsonUpgradeRule(Func<TConvertFrom, TConvertTo> conversionFunction, ISingleNamedValueItem readFrom, ISingleNamedValueItem writeTo)
-			: base(readFrom, writeTo)
+		public ConvertJsonUpgradeRule(Func<TConvertFrom, TConvertTo> conversionFunction, ISingleNamedValueItem readFrom, ISingleNamedValueItem writeTo, Version migrateFromVersion, Version migrateToVersion)
+			: base(readFrom, writeTo, migrateFromVersion, migrateToVersion)
 		{
 			this.ConversionFunction = conversionFunction ?? throw new ArgumentNullException(nameof(conversionFunction));
 		}
@@ -55,18 +55,18 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// </summary>
 		private ILogger Logger { get; } = LogManager.GetLogger<ConvertJsonUpgradeRuleBase<TConvertFrom, TConvertTo>>();
 
-		protected ConvertJsonUpgradeRuleBase(VaultApplicationBase vaultApplication)
-			: base(vaultApplication)
+		protected ConvertJsonUpgradeRuleBase(VaultApplicationBase vaultApplication, Version migrateFromVersion, Version migrateToVersion)
+			: base(vaultApplication, migrateFromVersion, migrateToVersion)
 		{
 		}
 
-		protected ConvertJsonUpgradeRuleBase(ISingleNamedValueItem readFromAndWriteTo)
-			: base(readFromAndWriteTo)
+		protected ConvertJsonUpgradeRuleBase(ISingleNamedValueItem readFromAndWriteTo, Version migrateFromVersion, Version migrateToVersion)
+			: base(readFromAndWriteTo, migrateFromVersion, migrateToVersion)
 		{
 		}
 
-		protected ConvertJsonUpgradeRuleBase(ISingleNamedValueItem readFrom, ISingleNamedValueItem writeTo)
-			: base(readFrom, writeTo)
+		protected ConvertJsonUpgradeRuleBase(ISingleNamedValueItem readFrom, ISingleNamedValueItem writeTo, Version migrateFromVersion, Version migrateToVersion)
+			: base(readFrom, writeTo, migrateFromVersion, migrateToVersion)
 		{
 		}
 

@@ -16,19 +16,22 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// </summary>
 		private ILogger Logger { get; } = LogManager.GetLogger<DeclaredConfigurationUpgradeRule>();
 
-		public DeclaredConfigurationUpgradeRule(VaultApplicationBase vaultApplication)
-			: base(vaultApplication)
+		public DeclaredConfigurationUpgradeRule(VaultApplicationBase vaultApplication, Version migrateFromVersion, Version migrateToVersion, MethodInfo methodInfo)
+			: base(vaultApplication, migrateFromVersion, migrateToVersion)
 		{
+			this.MethodInfo = methodInfo ?? throw new ArgumentNullException(nameof(methodInfo));
 		}
 
-		public DeclaredConfigurationUpgradeRule(ISingleNamedValueItem readFromAndWriteTo)
-			: base(readFromAndWriteTo)
+		public DeclaredConfigurationUpgradeRule(ISingleNamedValueItem readFromAndWriteTo, Version migrateFromVersion, Version migrateToVersion, MethodInfo methodInfo)
+			: base(readFromAndWriteTo, migrateFromVersion, migrateToVersion)
 		{
+			this.MethodInfo = methodInfo ?? throw new ArgumentNullException(nameof(methodInfo));
 		}
 
-		public DeclaredConfigurationUpgradeRule(ISingleNamedValueItem readFrom, ISingleNamedValueItem writeTo)
-			: base(readFrom, writeTo)
+		public DeclaredConfigurationUpgradeRule(ISingleNamedValueItem readFrom, ISingleNamedValueItem writeTo, Version migrateFromVersion, Version migrateToVersion, MethodInfo methodInfo)
+			: base(readFrom, writeTo, migrateFromVersion, migrateToVersion)
 		{
+			this.MethodInfo = methodInfo ?? throw new ArgumentNullException(nameof(methodInfo));
 		}
 
 		/// <summary>
@@ -73,7 +76,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 			this.Logger?.Info($"Converting configuration version from {this.MigrateFromVersion} to {this.MigrateToVersion}.");
 
 			// Get the input object.
-			var inputObj = base.JsonConvert.Deserialize(input);
+			var inputObj = base.JsonConvert.Deserialize(input, this.UpgradeFromType);
 
 			// Convert it.
 			object outputObj = null;

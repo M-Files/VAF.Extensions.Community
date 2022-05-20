@@ -2,6 +2,7 @@
 using MFiles.VAF.Extensions.Configuration.Upgrading.Rules;
 using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 {
@@ -21,8 +22,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			var sourceNamespace = "MySourceNamespace";
 			var keyName = "config";
 
-			var instance = new VAF10ToVAF23UpgradeRule(vaultApplication, sourceNamespace, keyName);
-			var source = instance.Options.Source as SingleNamedValueItem;
+			var instance = new VAF10ToVAF23UpgradeRule(vaultApplication, sourceNamespace, keyName, new Version("0.0"), new Version("0.0"));
+			var source = instance.ReadFrom as SingleNamedValueItem;
 			Assert.IsNotNull(source, "The source is not a single named value item.");
 			Assert.AreEqual(MFNamedValueType.MFConfigurationValue, source.NamedValueType);
 			Assert.AreEqual(sourceNamespace, source.Namespace);
@@ -36,8 +37,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			var sourceNamespace = "MySourceNamespace";
 			var keyName = "Hello World";
 
-			var instance = new VAF10ToVAF23UpgradeRule(vaultApplication, sourceNamespace, keyName);
-			var source = instance.Options.Target as SingleNamedValueItem;
+			var instance = new VAF10ToVAF23UpgradeRule(vaultApplication, sourceNamespace, keyName, new Version("0.0"), new Version("0.0"));
+			var source = instance.WriteTo as SingleNamedValueItem;
 			Assert.IsNotNull(source, "The target is not a single named value item.");
 			Assert.AreEqual(MFNamedValueType.MFSystemAdminConfiguration, source.NamedValueType);
 			Assert.AreEqual("MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules.VAF10ToVAF23UpgradeRuleTests+VaultApplicationProxy", source.Namespace);

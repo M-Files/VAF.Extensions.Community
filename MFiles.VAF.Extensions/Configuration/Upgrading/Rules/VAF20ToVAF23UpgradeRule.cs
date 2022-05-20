@@ -1,4 +1,5 @@
 ﻿using MFilesAPI;
+using System;
 
 namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 {
@@ -18,7 +19,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// </summary>
 		public const string TargetNamedValueName = "configuration";
 
-		public VAF20ToVAF23UpgradeRule(VaultApplicationBase vaultApplication, string configurationNodeName)
+		public VAF20ToVAF23UpgradeRule(VaultApplicationBase vaultApplication, string configurationNodeName, Version migrateFromVersion, Version migrateToVersion)
 			: base
 			(
 				new SingleNamedValueItem
@@ -27,7 +28,9 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 					SourceNamespaceLocation,
 					configurationNodeName
 				),
-				SingleNamedValueItem.ForLatestVAFVersion(vaultApplication)
+				SingleNamedValueItem.ForLatestVAFVersion(vaultApplication),
+				migrateFromVersion,
+				migrateToVersion
 			)
 		{
 		}

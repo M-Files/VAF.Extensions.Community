@@ -12,14 +12,16 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		protected const MFNamedValueType DefaultTargetNVSType = MFNamedValueType.MFSystemAdminConfiguration;
 		protected const string DefaultTargetNamespace = "Target.Namespace";
 
-		public Mock<ISourceNamedValueItem> CreateSourceNamedValueItemMock
+		public Mock<ISingleNamedValueItem> CreateSingleNamedValueItemMock
 		(
 			bool isValid,
 			MFNamedValueType sourceNVSType = DefaultSourceNVSType,
-			string sourceNamespace = DefaultSourceNamespace
+			string sourceNamespace = DefaultSourceNamespace,
+			MFNamedValueType targetNVSType = DefaultTargetNVSType,
+			string targetNamespace = DefaultTargetNamespace
 		)
 		{
-			var mock = new Mock<ISourceNamedValueItem>();
+			var mock = new Mock<ISingleNamedValueItem>();
 			mock.Setup(m => m.IsValid()).Returns(isValid);
 			mock.Setup(m => m.GetNamedValues(It.IsAny<INamedValueStorageManager>(), It.IsAny<Vault>()))
 				.Returns((INamedValueStorageManager manager, Vault vault) =>
@@ -31,17 +33,6 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 				{
 					manager?.RemoveNamedValues(vault, sourceNVSType, sourceNamespace, names);
 				});
-			return mock;
-		}
-		public Mock<ITargetNamedValueItem> CreateTargetNamedValueItemMock
-		(
-			bool isValid,
-			MFNamedValueType targetNVSType = DefaultTargetNVSType,
-			string targetNamespace = DefaultTargetNamespace
-		)
-		{
-			var mock = new Mock<ITargetNamedValueItem>();
-			mock.Setup(m => m.IsValid()).Returns(isValid);
 			mock.Setup(m => m.SetNamedValues(It.IsAny<INamedValueStorageManager>(), It.IsAny<Vault>(), It.IsAny<NamedValues>()))
 				.Callback((INamedValueStorageManager manager, Vault vault, NamedValues nv) =>
 				{

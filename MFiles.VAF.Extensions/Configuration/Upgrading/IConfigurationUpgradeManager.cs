@@ -29,7 +29,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		/// The NamedValueStorageManager used to interact with named value storage.
 		/// </summary>
 		/// <remarks>Typically an instance of <see cref="NamedValueStorageManager"/>.</remarks>
-		protected INamedValueStorageManager NamedValueStorageManager { get; } = new VaultNamedValueStorageManager();
+		public INamedValueStorageManager NamedValueStorageManager { get; set; } = new VaultNamedValueStorageManager();
 
 		/// <summary>
 		/// The vault application that instantiated this upgrade manager.
@@ -121,16 +121,19 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 			foreach(var rule in upgradeRules.OrderByDescending(r => r.MigrateToVersion))
 			{
 				// Try and read the data from the "write to" location.
-				if(false == rule.TryRead(rule.WriteTo ?? rule.ReadFrom, vault, out string data, out Version version))
+				if (false == rule.TryRead(rule.WriteTo ?? rule.ReadFrom, vault, out string data, out Version version))
 				{
 					// This rule needs to be run.
 					upgradePath.Push(rule);
 				}
-				
-				// This rule needs to be run if the version is not correct.
-				if(version < rule.MigrateToVersion)
+				else
 				{
-					upgradePath.Push(rule);
+					// This rule needs to be run if the version is not correct.
+					version = version ?? new Version("0.0");
+					if (version < rule.MigrateToVersion)
+					{
+						upgradePath.Push(rule);
+					}
 				}
 
 				// This rule DOES NOT need to run, so stop.
@@ -377,11 +380,11 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				// This method is okay.
 				identifiedUpgradeMethods.Add
 				(
-					new DeclaredConfigurationUpgradeRule(readFrom, writeTo)
+					new DeclaredConfigurationUpgradeRule(readFrom, writeTo, oldTypeVersion, configurationVersion, method)
 					{
 						UpgradeToType = configuration,
 						UpgradeFromType = oldType,
-						MethodInfo = method
+						NamedValueStorageManager = this.NamedValueStorageManager
 					}
 				);
 				this.Logger?.Debug($"Adding {configuration.FullName}.{method.Name} as an upgrade path from {oldTypeVersion} to {configurationVersion}");
@@ -399,7 +402,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 			}
 
 			// Copy out the ones we found.
-			upgradeRules = identifiedUpgradeMethods;
+			upgradeRules = identifiedUpgradeMethods.OrderBy(m => m.MigrateToVersion);
 
 			// We have something?!
 			this.Logger?.Trace($"{upgradeRules.Count()} upgrade rules identified in total.");

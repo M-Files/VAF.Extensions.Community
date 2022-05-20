@@ -16,7 +16,7 @@ namespace MFiles.VAF.Extensions.Configuration
 		public bool UsesCustomNVSLocation { get; set; }
 		public string Namespace { get; set; }
 		public string Key { get; set; }
-		public MFNamedValueType NamedValueType { get; set; }
+		public MFNamedValueType NamedValueType { get; set; } = MFNamedValueType.MFSystemAdminConfiguration;
 
 		public ConfigurationVersionAttribute(string version)
 		{
