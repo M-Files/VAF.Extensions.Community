@@ -49,6 +49,11 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 			this.WriteTo = writeTo; // Allow nulls; we'll fall back to the readfrom location.
 			this.MigrateFromVersion = migrateFromVersion ?? throw new ArgumentNullException(nameof(migrateFromVersion));
 			this.MigrateToVersion = migrateToVersion ?? throw new ArgumentNullException(nameof(migrateToVersion));
+
+			if (null != this.ReadFrom && false == this.ReadFrom.IsValid())
+				throw new ArgumentException("The named value location is invalid.", nameof(readFrom));
+			if (null != this.WriteTo && false == this.WriteTo.IsValid())
+				throw new ArgumentException("The named value location is invalid.", nameof(writeTo));
 		}
 
 		/// <summary>

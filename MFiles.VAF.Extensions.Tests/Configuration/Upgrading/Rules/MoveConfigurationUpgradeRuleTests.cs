@@ -27,8 +27,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void Constructor_NullWriteToThrows()
+		// Consumers should instead use the read value if this is null.
+		public void Constructor_NullWriteToDoesNotThrow()
 		{
 			new MoveConfigurationUpgradeRuleProxy(this.CreateSingleNamedValueItemMock(true).Object, null, new Version("0.0"), new Version("0.0"));
 		}
