@@ -43,7 +43,9 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 
 		/// <inheritdoc />
 		protected override TConvertTo Convert(TConvertFrom upgradeFrom)
-			=> this.ConversionFunction(upgradeFrom);
+			=> null == this.ConversionFunction
+			? throw new InvalidOperationException($"{this.GetType().FullName}.{nameof(this.JsonConvert)} cannot be null.")
+			: this.ConversionFunction(upgradeFrom);
 	}
 	public abstract class ConvertJsonUpgradeRuleBase<TConvertFrom, TConvertTo>
 		: SingleNamedValueItemUpgradeRuleBase
@@ -76,6 +78,8 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 			// Sanity.
 			if (null == input)
 				return "{}";
+			if (null == this.JsonConvert)
+				throw new InvalidOperationException($"{this.GetType().FullName}.{nameof(this.JsonConvert)} cannot be null.");
 
 			// Parse the old version, convert, then serialize the new one!
 			this.Logger?.Trace($"Attempting to deserialize content to {typeof(TConvertFrom)}.");

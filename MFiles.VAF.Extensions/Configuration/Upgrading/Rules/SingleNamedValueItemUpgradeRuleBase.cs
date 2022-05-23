@@ -135,7 +135,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 						}
 						else if (obj.Value<string>("Version") != this.MigrateToVersion.ToString())
 						{
-							this.Logger?.Warn($"Converted JSON data contained a version of {obj.Value<string>("Version")}, but {this.MigrateToVersion.ToString()} was expected; updating automatically.");
+							this.Logger?.Warn($"Converted JSON data contained a version of {obj.Value<string>("Version")}, but {this.MigrateToVersion} was expected; updating automatically.");
 							obj["Version"] = this.MigrateToVersion.ToString();
 							newData = this.JsonConvert.Serialize(obj);
 						}
@@ -148,42 +148,42 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 				}
 
 				// Save the new data to storage.
+				var type = this.WriteTo?.NamedValueType ?? this.ReadFrom.NamedValueType;
+				var @namespace = this.WriteTo?.Namespace ?? this.ReadFrom.Namespace;
+				var name = this.WriteTo?.Name ?? this.ReadFrom.Name;
+
 				this.Logger?.Debug($"Attempting to update configuration in NVS.");
 				{
 					// Update the named values.
-					this.Logger?.Trace("Writing new configuration...");
-					var namedValues = this.NamedValueStorageManager.GetNamedValues
-					(
-						vault,
-						this.WriteTo?.NamedValueType ?? this.ReadFrom.NamedValueType,
-						this.WriteTo?.Namespace ?? this.ReadFrom.Namespace
-					);
-					namedValues[this.WriteTo?.Name ?? this.ReadFrom.Name] = newData;
-					this.NamedValueStorageManager.SetNamedValues
-					(
-						vault,
-						this.WriteTo?.NamedValueType ?? this.ReadFrom.NamedValueType,
-						this.WriteTo?.Namespace ?? this.ReadFrom.Namespace,
-						namedValues
-					);
+					this.Logger?.Trace($"Writing new configuration in {@namespace}.{name} ({type})...");
+					var namedValues = this.NamedValueStorageManager.GetNamedValues(vault, type, @namespace) ?? new NamedValues();
+					namedValues[name] = newData;
+					this.NamedValueStorageManager.SetNamedValues(vault, type, @namespace, namedValues);
 				}
 
 				// Remove the old data.
 				{
-					// Update the named values.
-					this.Logger?.Trace("Removing old configuration...");
-					this.NamedValueStorageManager.RemoveNamedValues
-					(
-						vault,
-						this.ReadFrom.NamedValueType,
-						this.ReadFrom.Namespace,
-						new[] { this.ReadFrom.Name }
-					);
+					// Only remove the data if we're moving places.
+					if (this.WriteTo != null && (
+						this.WriteTo.Namespace != this.ReadFrom.Namespace
+						|| this.WriteTo.NamedValueType != this.ReadFrom.NamedValueType
+						|| this.WriteTo.Name != this.ReadFrom.Name
+						))
+					{
+						// Update the named values.
+						this.Logger?.Trace($"Removing old configuration from {this.ReadFrom.Namespace}.{this.ReadFrom.Name} ({this.ReadFrom.NamedValueType})...");
+						this.NamedValueStorageManager.RemoveNamedValues
+						(
+							vault,
+							this.ReadFrom.NamedValueType,
+							this.ReadFrom.Namespace,
+							new[] { this.ReadFrom.Name }
+						);
+					}
 				}
 
 				// Done!
 				this.Logger?.Info($"Converted configuration from version {this.MigrateFromVersion} to version {this.MigrateToVersion}.");
-				this.Logger?.Trace($"Successfully converted configuration in {this.ReadFrom} from version {this.MigrateFromVersion} to version {this.MigrateToVersion}.");
 
 			}
 			catch (Exception e)

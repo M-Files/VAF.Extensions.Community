@@ -164,8 +164,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 
 			var rule = new MoveConfigurationUpgradeRuleProxy
 			(
-				this.CreateSingleNamedValueItemMock(true).Object,
-				this.CreateSingleNamedValueItemMock(true).Object,
+				this.CreateSingleNamedValueItemMock(true, DefaultSourceNVSType, DefaultSourceNamespace).Object,
+				this.CreateSingleNamedValueItemMock(true, DefaultTargetNVSType, DefaultTargetNamespace).Object,
 				new Version("0.0"),
 				new Version("0.0"),
 				mock

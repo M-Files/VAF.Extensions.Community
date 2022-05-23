@@ -46,6 +46,9 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		{
 			try
 			{
+				// Clear anything we've previously scanned.
+				this.CheckedConfigurationUpgradeTypes.Clear();
+
 				// Run any configuration upgrade rules.
 				foreach (var rule in this.GetConfigurationUpgradePath(vault) ?? Enumerable.Empty<IUpgradeRule>())
 				{
@@ -135,9 +138,6 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 						upgradePath.Push(rule);
 					}
 				}
-
-				// This rule DOES NOT need to run, so stop.
-				break;
 			}
 
 			// Okay, we can run (note: may be no rules to run, but that's fine).

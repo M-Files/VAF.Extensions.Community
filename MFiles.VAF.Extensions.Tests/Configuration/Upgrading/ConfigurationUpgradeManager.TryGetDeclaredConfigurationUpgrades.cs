@@ -36,6 +36,18 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		}
 
 		[TestMethod]
+		public void TryGetDeclaredConfigurationUpgrades_ZeroToOneUpgradeWithInstanceUpgradePath_WithoutConfigurationAttribute()
+		{
+			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager<VersionOneWithoutConfigurationAttributeInstanceUpgradePath>(Mock.Of<VaultApplicationBase>());
+			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades(out var configurationVersion, out var rules));
+			Assert.AreEqual("1.0", configurationVersion?.ToString());
+			Assert.AreEqual(1, rules.Count());
+			Assert.AreEqual(typeof(VersionZeroWithoutConfigurationAttribute), rules.ElementAt(0).UpgradeFromType);
+			Assert.AreEqual("0.0", rules.ElementAt(0).MigrateFromVersion?.ToString());
+			Assert.AreEqual(typeof(VersionOneWithoutConfigurationAttributeInstanceUpgradePath), rules.ElementAt(0).UpgradeToType);
+		}
+
+		[TestMethod]
 		public void TryGetDeclaredConfigurationUpgrades_ZeroToOneWithStaticUpgradePath()
 		{
 			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager<VersionOneWithStaticUpgradePath>(Mock.Of<VaultApplicationBase>());
@@ -90,18 +102,40 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		}
 
 		[DataContract]
+		public class VersionZeroWithoutConfigurationAttribute
+		{
+			[DataMember]
+			public string Hello { get; set; }
+		}
+
+		[DataContract]
+		[Extensions.Configuration.ConfigurationVersion("1.0")]
+		public class VersionOneWithoutConfigurationAttributeInstanceUpgradePath
+			: VAF.Extensions.Configuration.VersionedConfigurationBase
+		{
+			[DataMember]
+			public string World { get; set; }
+
+			[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
+			public virtual void Upgrade(VersionZeroWithoutConfigurationAttribute input)
+			{
+				World = input?.Hello;
+			}
+		}
+
+		// This represents an old VAF 1.0-style configuration.
+		[DataContract]
 		[Extensions.Configuration.ConfigurationVersion
 		(
 			"0.0",
-			UsesCustomNVSLocation = true, 
-			Namespace = "Castle.Proxies.VaultApplicationBaseProxy", 
+			UsesCustomNVSLocation = true,
+			Namespace = "Castle.Proxies.VaultApplicationBaseProxy",
 			Key = "config",
 			NamedValueType = MFNamedValueType.MFConfigurationValue
 		)]
 		public class VersionZero
+			: VersionZeroWithoutConfigurationAttribute
 		{
-			[DataMember]
-			public string Hello { get; set; }
 		}
 
 		[DataContract]
