@@ -14,47 +14,18 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 {
 	public partial class ConfigurationUpgradeManager
 	{
+		/// <summary>
+		/// Unlike on the "newest" set of tests, the upgrade manager will inherently find all
+		/// the upgrade methods when defined on the older configuration classes.
+		/// </summary>
 		[TestMethod]
-		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnOldest_NoUpgradePathsDefined()
+		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnOldest_AllUpgradePathsIdentified()
 		{
-			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager<VersionZeroWithoutConfigurationAttribute>(Mock.Of<VaultApplicationBase>());
-			Assert.AreEqual(false, c.TryGetDeclaredConfigurationUpgrades(out var configurationVersion, out var rules));
-			Assert.AreEqual("0.0", configurationVersion?.ToString());
-			Assert.AreEqual(0, rules.Count());
-		}
-
-		[TestMethod]
-		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnOldest_ZeroToOneWithStaticUpgradePath()
-		{
-			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager<VersionOneWithStaticUpgradePath>(Mock.Of<VaultApplicationBase>());
-			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades(out var configurationVersion, out var rules));
-			Assert.AreEqual("1.0", configurationVersion?.ToString());
-			Assert.AreEqual(1, rules.Count());
-			Assert.AreEqual(typeof(VersionZeroWithoutConfigurationAttribute), rules.ElementAt(0).UpgradeFromType);
-			Assert.AreEqual(typeof(VersionOneWithStaticUpgradePath), rules.ElementAt(0).UpgradeToType);
-		}
-
-		[TestMethod]
-		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnOldest_ZeroToTwoUpgradeWithInstanceUpgradePath()
-		{
-			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager<VersionTwoWithStaticUpgradePath>(Mock.Of<VaultApplicationBase>());
-			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades(out var configurationVersion, out var rules));
-			Assert.AreEqual("2.0", configurationVersion?.ToString());
-			Assert.AreEqual(2, rules.Count());
-			Assert.AreEqual(typeof(VersionZeroWithoutConfigurationAttribute), rules.ElementAt(0).UpgradeFromType);
-			Assert.AreEqual(typeof(VersionOneWithStaticUpgradePath), rules.ElementAt(0).UpgradeToType);
-			Assert.AreEqual(typeof(VersionOneWithStaticUpgradePath), rules.ElementAt(1).UpgradeFromType);
-			Assert.AreEqual(typeof(VersionTwoWithStaticUpgradePath), rules.ElementAt(1).UpgradeToType);
-		}
-
-		[TestMethod]
-		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnOldest_ZeroToThreeUpgradeWithInstanceUpgradePath()
-		{
-			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager<VersionThreeWithStaticUpgradePath>(Mock.Of<VaultApplicationBase>());
-			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades(out var configurationVersion, out var rules));
+			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades<VersionThreeWithStaticUpgradePath>(out var configurationVersion, out var rules));
 			Assert.AreEqual("3.0", configurationVersion?.ToString());
 			Assert.AreEqual(3, rules.Count());
-			Assert.AreEqual(typeof(DivideByZeroException), rules.ElementAt(0).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionZeroWithoutConfigurationAttribute), rules.ElementAt(0).UpgradeFromType);
 			Assert.AreEqual(typeof(VersionOneWithStaticUpgradePath), rules.ElementAt(0).UpgradeToType);
 			Assert.AreEqual(typeof(VersionOneWithStaticUpgradePath), rules.ElementAt(1).UpgradeFromType);
 			Assert.AreEqual(typeof(VersionTwoWithStaticUpgradePath), rules.ElementAt(1).UpgradeToType);
@@ -62,32 +33,18 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 			Assert.AreEqual(typeof(VersionThreeWithStaticUpgradePath), rules.ElementAt(2).UpgradeToType);
 		}
 
-		/// <summary>
-		/// We have a rule that goes from 2->1 and also from 1->2.
-		/// Only one should be returned.
-		/// </summary>
 		[TestMethod]
 		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnOldest_CyclicUpgradeRule()
 		{
-			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager<CyclicUpgradeRule2>(Mock.Of<VaultApplicationBase>());
-			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades(out var configurationVersion, out var rules));
-			Assert.AreEqual("2.0", configurationVersion?.ToString());
-			Assert.AreEqual(1, rules.Count());
-			Assert.AreEqual(typeof(CyclicUpgradeRule1), rules.ElementAt(0).UpgradeFromType);
-			Assert.AreEqual(typeof(CyclicUpgradeRule2), rules.ElementAt(0).UpgradeToType);
+			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			Assert.AreEqual(false, c.TryGetDeclaredConfigurationUpgrades<CyclicUpgradeRule2>(out var configurationVersion, out var rules));
 		}
 
-		/// <summary>
-		/// We have a rule that goes from 2->1 and also from 1->2.
-		/// Only one should be returned.
-		/// </summary>
 		[TestMethod]
 		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnOldest_CyclicUpgradeRule_Same()
 		{
-			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager<CyclicUpgradeRule_Same>(Mock.Of<VaultApplicationBase>());
-			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades(out var configurationVersion, out var rules));
-			Assert.AreEqual("2.0", configurationVersion?.ToString());
-			Assert.AreEqual(0, rules.Count());
+			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			Assert.AreEqual(false, c.TryGetDeclaredConfigurationUpgrades<CyclicUpgradeRule_Same>(out var configurationVersion, out var rules));
 		}
 
 		public class UpgradeOnOldest
@@ -136,9 +93,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 				public string World { get; set; }
 
 				[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
-				public static VersionTwoWithStaticUpgradePath Upgrade(VersionOneWithStaticUpgradePath input)
+				public static VersionThreeWithStaticUpgradePath Upgrade(VersionTwoWithStaticUpgradePath input)
 				{
-					return new VersionTwoWithStaticUpgradePath()
+					return new VersionThreeWithStaticUpgradePath()
 					{
 						World = input?.World
 					};
@@ -152,15 +109,6 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 			{
 				[DataMember]
 				public string World { get; set; }
-
-				[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
-				public static VersionThreeWithStaticUpgradePath Upgrade(VersionTwoWithStaticUpgradePath input)
-				{
-					return new VersionThreeWithStaticUpgradePath()
-					{
-						World = input?.World
-					};
-				}
 			}
 
 			[DataContract]

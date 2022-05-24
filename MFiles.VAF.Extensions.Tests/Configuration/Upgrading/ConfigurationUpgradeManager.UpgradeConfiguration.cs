@@ -82,11 +82,11 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		{
 			var vault = this.GetVaultMock().Object;
 			var managerMock = this.GetNamedValueStorageManagerMock();
-			var c = new ConfigurationUpgradeManager<VersionOneWithInstanceUpgradePath>(Mock.Of<VaultApplicationBase>())
+			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
 			{
 				NamedValueStorageManager = managerMock.Object
 			};
-			c.UpgradeConfiguration(vault);
+			c.UpgradeConfiguration<VersionOneWithInstanceUpgradePath>(vault);
 
 			// Attempt to retrieve the data.
 			Assert.AreEqual(null, managerMock.Object.GetValue(vault, MFNamedValueType.MFConfigurationValue, "Castle.Proxies.VaultApplicationBaseProxy", "config"));
@@ -105,11 +105,11 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 				"Castle.Proxies.VaultApplicationBaseProxy",
 				this.CreateNamedValues("config", Newtonsoft.Json.JsonConvert.SerializeObject(source))
 			);
-			var c = new ConfigurationUpgradeManager<VersionOneWithInstanceUpgradePath>(Mock.Of<VaultApplicationBase>())
+			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
 			{
 				NamedValueStorageManager = managerMock.Object
 			};
-			c.UpgradeConfiguration(vault);
+			c.UpgradeConfiguration<VersionOneWithInstanceUpgradePath>(vault);
 
 			// Attempt to retrieve the data.
 			Assert.AreEqual

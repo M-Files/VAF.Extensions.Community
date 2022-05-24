@@ -16,14 +16,13 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		/// Upgrades the configuration in the vault.
 		/// </summary>
 		/// <param name="vault">The vault reference to use to access named-value storage.</param>
-		void UpgradeConfiguration(Vault vault);
+		void UpgradeConfiguration<TSecureConfiguration>(Vault vault);
 
 	}
-	internal class ConfigurationUpgradeManager<TConfiguration>
+	internal class ConfigurationUpgradeManager
 		: IConfigurationUpgradeManager
-		where TConfiguration : class, new()
 	{
-		private ILogger Logger { get; } = LogManager.GetLogger(typeof(ConfigurationUpgradeManager<TConfiguration>));
+		private ILogger Logger { get; } = LogManager.GetLogger(typeof(ConfigurationUpgradeManager));
 
 		/// <summary>
 		/// The NamedValueStorageManager used to interact with named value storage.
@@ -42,7 +41,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		}
 
 		/// <inheritdoc />
-		public void UpgradeConfiguration(Vault vault)
+		public void UpgradeConfiguration<TSecureConfiguration>(Vault vault)
 		{
 			try
 			{
@@ -50,7 +49,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				this.CheckedConfigurationUpgradeTypes.Clear();
 
 				// Run any configuration upgrade rules.
-				foreach (var rule in this.GetConfigurationUpgradePath(vault) ?? Enumerable.Empty<IUpgradeRule>())
+				foreach (var rule in this.GetConfigurationUpgradePath<TSecureConfiguration>(vault) ?? Enumerable.Empty<IUpgradeRule>())
 				{
 					try
 					{
@@ -80,14 +79,14 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		/// The rules to run.
 		/// </returns>
 		/// <remarks>The default implementation uses [ConfigurationUpgradeMethod] attributes to design an upgrade path.</remarks>
-		protected internal virtual IEnumerable<IUpgradeRule> GetConfigurationUpgradePath(Vault vault)
+		protected internal virtual IEnumerable<IUpgradeRule> GetConfigurationUpgradePath<TSecureConfiguration>(Vault vault)
 		{
 			// Sanity.
 			if (null == vault)
 				throw new ArgumentNullException(nameof(vault));
 
 			// Get all the declared configuration upgrades.
-			if (false == this.TryGetDeclaredConfigurationUpgrades(out Version configurationVersion, out IEnumerable<DeclaredConfigurationUpgradeRule> declaredUpgradeRules))
+			if (false == this.TryGetDeclaredConfigurationUpgrades<TSecureConfiguration>(out Version configurationVersion, out IEnumerable<DeclaredConfigurationUpgradeRule> declaredUpgradeRules))
 			{
 				this.Logger?.Debug($"No upgrade rules were returned, so no configuration upgrade attempted.");
 				yield break; // Could not find any, so die.
@@ -261,11 +260,11 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		/// <param name="configurationVersion">The version number on <see cref="configuration"/>.</param>
 		/// <param name="upgradeRules">All upgrade methods declared by <see cref="configuration"/> and any referenced classes.</param>
 		/// <returns>All upgrade rules that have been declared, regardless of whether they need to be run.</returns>
-		protected internal virtual bool TryGetDeclaredConfigurationUpgrades
+		protected internal virtual bool TryGetDeclaredConfigurationUpgrades<TSecureConfiguration>
 		(
 			out Version configurationVersion,
 			out IEnumerable<DeclaredConfigurationUpgradeRule> upgradeRules
-		) => this.TryGetDeclaredConfigurationUpgrades(typeof(TConfiguration), out configurationVersion, out upgradeRules);
+		) => this.TryGetDeclaredConfigurationUpgrades(typeof(TSecureConfiguration), out configurationVersion, out upgradeRules);
 
 		/// <summary>
 		/// Returns any configuration upgrades that have been declared via <see cref="ConfigurationUpgradeMethodAttribute"/> attributes.
@@ -431,6 +430,20 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 						out IEnumerable<DeclaredConfigurationUpgradeRule> mi
 					))
 						identifiedUpgradeMethods.AddRange(mi);
+				}
+			}
+
+			// Validate the rules.
+			{
+				var multipleUpgradeRules = identifiedUpgradeMethods
+					.GroupBy(m => new Tuple<Version, Version>(m.MigrateFromVersion, m.MigrateToVersion))
+					.Where(m => m.Count() > 1)
+					.ToList();
+				if (multipleUpgradeRules.Any())
+				{
+					var errorMessage = $"Multiple upgrade rules are defined between configuration versions: {string.Join(", ", multipleUpgradeRules.Select(m => $"{m.Key.Item1}-{m.Key.Item2} ({m.Count()} rules)"))}.";
+					this.Logger?.Error(errorMessage);
+					return false;
 				}
 			}
 
