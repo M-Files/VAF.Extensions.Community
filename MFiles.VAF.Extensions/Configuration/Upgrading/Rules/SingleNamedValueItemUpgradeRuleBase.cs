@@ -171,7 +171,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 						))
 					{
 						// Update the named values.
-						this.Logger?.Trace($"Removing old configuration from {this.ReadFrom.Namespace}.{this.ReadFrom.Name} ({this.ReadFrom.NamedValueType})...");
+						this.Logger?.Debug($"Removing old configuration from {this.ReadFrom.Namespace}.{this.ReadFrom.Name} ({this.ReadFrom.NamedValueType})...");
 						this.NamedValueStorageManager.RemoveNamedValues
 						(
 							vault,

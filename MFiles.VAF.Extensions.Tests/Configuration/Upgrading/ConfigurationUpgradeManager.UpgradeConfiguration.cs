@@ -10,6 +10,7 @@ using MFiles.VAF.Extensions.Configuration.Upgrading.Rules;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
 using System.Collections.Generic;
 using System;
+using static MFiles.VAF.Extensions.Tests.Configuration.Upgrading.ConfigurationUpgradeManager.UpgradeOnNewest;
 
 namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 {

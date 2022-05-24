@@ -8,15 +8,14 @@ using System.Runtime.Serialization;
 using MFiles.VAF.Configuration;
 using System.Linq;
 using MFiles.VAF.Extensions.Configuration.Upgrading.Rules;
+using static MFiles.VAF.Extensions.Tests.Configuration.Upgrading.ConfigurationUpgradeManager.UpgradeOnNewest;
 
 namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 {
 	public partial class ConfigurationUpgradeManager
 	{
-		private object upgradeRules;
-
 		[TestMethod]
-		public void TryGetDeclaredConfigurationUpgrades_NoUpgradePathsDefined()
+		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnNewest_NoUpgradePathsDefined()
 		{
 			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager<VersionZero>(Mock.Of<VaultApplicationBase>());
 			Assert.AreEqual(false, c.TryGetDeclaredConfigurationUpgrades(out var configurationVersion, out var rules));
@@ -25,7 +24,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		}
 
 		[TestMethod]
-		public void TryGetDeclaredConfigurationUpgrades_ZeroToOneUpgradeWithInstanceUpgradePath()
+		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnNewest_ZeroToOneUpgradeWithInstanceUpgradePath()
 		{
 			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager<VersionOneWithInstanceUpgradePath>(Mock.Of<VaultApplicationBase>());
 			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades(out var configurationVersion, out var rules));
@@ -36,7 +35,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		}
 
 		[TestMethod]
-		public void TryGetDeclaredConfigurationUpgrades_ZeroToOneUpgradeWithInstanceUpgradePath_WithoutConfigurationAttribute()
+		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnNewest_ZeroToOneUpgradeWithInstanceUpgradePath_WithoutConfigurationAttribute()
 		{
 			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager<VersionOneWithoutConfigurationAttributeInstanceUpgradePath>(Mock.Of<VaultApplicationBase>());
 			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades(out var configurationVersion, out var rules));
@@ -48,7 +47,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		}
 
 		[TestMethod]
-		public void TryGetDeclaredConfigurationUpgrades_ZeroToOneWithStaticUpgradePath()
+		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnNewest_ZeroToOneWithStaticUpgradePath()
 		{
 			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager<VersionOneWithStaticUpgradePath>(Mock.Of<VaultApplicationBase>());
 			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades(out var configurationVersion, out var rules));
@@ -59,7 +58,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		}
 
 		[TestMethod]
-		public void TryGetDeclaredConfigurationUpgrades_ZeroToTwoUpgradeWithInstanceUpgradePath()
+		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnNewest_ZeroToTwoUpgradeWithInstanceUpgradePath()
 		{
 			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager<VersionTwoWithInstanceUpgradePath>(Mock.Of<VaultApplicationBase>());
 			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades(out var configurationVersion, out var rules));
@@ -72,7 +71,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		}
 
 		[TestMethod]
-		public void TryGetDeclaredConfigurationUpgrades_ZeroToThreeUpgradeWithInstanceUpgradePath()
+		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnNewest_ZeroToThreeUpgradeWithInstanceUpgradePath()
 		{
 			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager<VersionThreeWithInstanceUpgradePath>(Mock.Of<VaultApplicationBase>());
 			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades(out var configurationVersion, out var rules));
@@ -91,7 +90,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		/// Only one should be returned.
 		/// </summary>
 		[TestMethod]
-		public void TryGetDeclaredConfigurationUpgrades_CyclicUpgradeRule()
+		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnNewest_CyclicUpgradeRule()
 		{
 			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager<CyclicUpgradeRule2>(Mock.Of<VaultApplicationBase>());
 			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades(out var configurationVersion, out var rules));
@@ -101,124 +100,129 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 			Assert.AreEqual(typeof(CyclicUpgradeRule2), rules.ElementAt(0).UpgradeToType);
 		}
 
-		[DataContract]
-		public class VersionZeroWithoutConfigurationAttribute
+		public class UpgradeOnNewest
 		{
-			[DataMember]
-			public string Hello { get; set; }
-		}
 
-		[DataContract]
-		[Extensions.Configuration.ConfigurationVersion("1.0")]
-		public class VersionOneWithoutConfigurationAttributeInstanceUpgradePath
-			: VAF.Extensions.Configuration.VersionedConfigurationBase
-		{
-			[DataMember]
-			public string World { get; set; }
-
-			[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
-			public virtual void Upgrade(VersionZeroWithoutConfigurationAttribute input)
+			[DataContract]
+			public class VersionZeroWithoutConfigurationAttribute
 			{
-				World = input?.Hello;
+				[DataMember]
+				public string Hello { get; set; }
 			}
-		}
 
-		// This represents an old VAF 1.0-style configuration.
-		[DataContract]
-		[Extensions.Configuration.ConfigurationVersion
-		(
-			"0.0",
-			UsesCustomNVSLocation = true,
-			Namespace = "Castle.Proxies.VaultApplicationBaseProxy",
-			Key = "config",
-			NamedValueType = MFNamedValueType.MFConfigurationValue
-		)]
-		public class VersionZero
-			: VersionZeroWithoutConfigurationAttribute
-		{
-		}
-
-		[DataContract]
-		[Extensions.Configuration.ConfigurationVersion("1.0")]
-		public class VersionOneWithInstanceUpgradePath
-			: VAF.Extensions.Configuration.VersionedConfigurationBase
-		{
-			[DataMember]
-			public string World { get; set; }
-
-			[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
-			public virtual void Upgrade(VersionZero input)
+			[DataContract]
+			[Extensions.Configuration.ConfigurationVersion("1.0")]
+			public class VersionOneWithoutConfigurationAttributeInstanceUpgradePath
+				: VAF.Extensions.Configuration.VersionedConfigurationBase
 			{
-				World = input?.Hello;
-			}
-		}
+				[DataMember]
+				public string World { get; set; }
 
-		[DataContract]
-		[Extensions.Configuration.ConfigurationVersion("1.0")]
-		public class VersionOneWithStaticUpgradePath
-			: VAF.Extensions.Configuration.VersionedConfigurationBase
-		{
-			[DataMember]
-			public string World { get; set; }
-
-			[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
-			public static VersionOneWithStaticUpgradePath Upgrade(VersionZero input)
-			{
-				return new VersionOneWithStaticUpgradePath()
+				[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
+				public virtual void Upgrade(VersionZeroWithoutConfigurationAttribute input)
 				{
-					World = input?.Hello
-				};
+					World = input?.Hello;
+				}
 			}
-		}
 
-		[DataContract]
-		[Extensions.Configuration.ConfigurationVersion("2.0")]
-		public class VersionTwoWithInstanceUpgradePath
-			: VAF.Extensions.Configuration.VersionedConfigurationBase
-		{
-			[DataMember]
-			public string World { get; set; }
-
-			[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
-			public virtual void Upgrade(VersionOneWithInstanceUpgradePath input)
+			// This represents an old VAF 1.0-style configuration.
+			[DataContract]
+			[Extensions.Configuration.ConfigurationVersion
+			(
+				"0.0",
+				UsesCustomNVSLocation = true,
+				Namespace = "Castle.Proxies.VaultApplicationBaseProxy",
+				Key = "config",
+				NamedValueType = MFNamedValueType.MFConfigurationValue
+			)]
+			public class VersionZero
+				: VersionZeroWithoutConfigurationAttribute
 			{
 			}
-		}
 
-		[DataContract]
-		[Extensions.Configuration.ConfigurationVersion("3.0")]
-		public class VersionThreeWithInstanceUpgradePath
-			: VAF.Extensions.Configuration.VersionedConfigurationBase
-		{
-			[DataMember]
-			public string World { get; set; }
-
-			[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
-			public virtual void Upgrade(VersionTwoWithInstanceUpgradePath input)
+			[DataContract]
+			[Extensions.Configuration.ConfigurationVersion("1.0")]
+			public class VersionOneWithInstanceUpgradePath
+				: VAF.Extensions.Configuration.VersionedConfigurationBase
 			{
-			}
-		}
+				[DataMember]
+				public string World { get; set; }
 
-		[DataContract]
-		[Extensions.Configuration.ConfigurationVersion("1.0")]
-		public class CyclicUpgradeRule1
-			: VAF.Extensions.Configuration.VersionedConfigurationBase
-		{
-			[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
-			public virtual void Upgrade(CyclicUpgradeRule2 input)
-			{
+				[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
+				public virtual void Upgrade(VersionZero input)
+				{
+					World = input?.Hello;
+				}
 			}
-		}
 
-		[DataContract]
-		[Extensions.Configuration.ConfigurationVersion("2.0")]
-		public class CyclicUpgradeRule2
-			: VAF.Extensions.Configuration.VersionedConfigurationBase
-		{
-			[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
-			public virtual void Upgrade(CyclicUpgradeRule1 input)
+			[DataContract]
+			[Extensions.Configuration.ConfigurationVersion("1.0")]
+			public class VersionOneWithStaticUpgradePath
+				: VAF.Extensions.Configuration.VersionedConfigurationBase
 			{
+				[DataMember]
+				public string World { get; set; }
+
+				[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
+				public static VersionOneWithStaticUpgradePath Upgrade(VersionZero input)
+				{
+					return new VersionOneWithStaticUpgradePath()
+					{
+						World = input?.Hello
+					};
+				}
 			}
+
+			[DataContract]
+			[Extensions.Configuration.ConfigurationVersion("2.0")]
+			public class VersionTwoWithInstanceUpgradePath
+				: VAF.Extensions.Configuration.VersionedConfigurationBase
+			{
+				[DataMember]
+				public string World { get; set; }
+
+				[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
+				public virtual void Upgrade(VersionOneWithInstanceUpgradePath input)
+				{
+				}
+			}
+
+			[DataContract]
+			[Extensions.Configuration.ConfigurationVersion("3.0")]
+			public class VersionThreeWithInstanceUpgradePath
+				: VAF.Extensions.Configuration.VersionedConfigurationBase
+			{
+				[DataMember]
+				public string World { get; set; }
+
+				[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
+				public virtual void Upgrade(VersionTwoWithInstanceUpgradePath input)
+				{
+				}
+			}
+
+			[DataContract]
+			[Extensions.Configuration.ConfigurationVersion("1.0")]
+			public class CyclicUpgradeRule1
+				: VAF.Extensions.Configuration.VersionedConfigurationBase
+			{
+				[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
+				public virtual void Upgrade(CyclicUpgradeRule2 input)
+				{
+				}
+			}
+
+			[DataContract]
+			[Extensions.Configuration.ConfigurationVersion("2.0")]
+			public class CyclicUpgradeRule2
+				: VAF.Extensions.Configuration.VersionedConfigurationBase
+			{
+				[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
+				public virtual void Upgrade(CyclicUpgradeRule1 input)
+				{
+				}
+			}
+
 		}
 	}
 }

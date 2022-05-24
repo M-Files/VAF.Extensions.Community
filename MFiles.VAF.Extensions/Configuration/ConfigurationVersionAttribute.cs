@@ -17,6 +17,7 @@ namespace MFiles.VAF.Extensions.Configuration
 		public string Namespace { get; set; }
 		public string Key { get; set; }
 		public MFNamedValueType NamedValueType { get; set; } = MFNamedValueType.MFSystemAdminConfiguration;
+		public Type PreviousVersionType { get; set; } 
 
 		public ConfigurationVersionAttribute(string version)
 		{

@@ -100,6 +100,8 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				yield break;
 			}
 
+			this.Logger?.Debug($"There are {upgradePath.Count} upgrade rules to run to get the configuration from version {upgradePath.Min(r => r.MigrateFromVersion) ?? configurationVersion} to {configurationVersion}.");
+
 			// Return the associated upgrade rules.
 			foreach (var rule in upgradePath)
 				yield return rule;
@@ -291,7 +293,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 			}
 			if (this.CheckedConfigurationUpgradeTypes.Contains(configuration))
 			{
-				this.Logger?.Warn($"Configuration type provided to {nameof(TryGetDeclaredConfigurationUpgrades)} was already checked.  This could indicate a cyclic configuration upgrade definition.  Skipping.");
+				this.Logger?.Warn($"Configuration ({configuration}) type provided to {nameof(TryGetDeclaredConfigurationUpgrades)} was already checked.  This could indicate a cyclic configuration upgrade definition.  Skipping.");
 				return false;
 			}
 			this.CheckedConfigurationUpgradeTypes.Add(configuration);
@@ -316,14 +318,6 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 					continue;
 				}
 
-				// If it's static then it should return the current type.
-				if (method.IsStatic && method.ReturnType != configuration)
-				{
-					// Return type is incorrect.
-					this.Logger?.Error($"Skipping {configuration.FullName}.{method.Name} as the return type was not {configuration.FullName}.");
-					continue;
-				}
-
 				// If it's not static then it should return void.
 				if (!method.IsStatic && method.ReturnType != typeof(void))
 				{
@@ -333,7 +327,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				}
 
 				// The method should take one parameter.  This parameter is the type we're upgrading from.
-				Type oldType = null;
+				Type parameterType = null;
 				{
 					var methodParameters = method.GetParameters();
 					if ((methodParameters?.Length ?? 0) != 1)
@@ -348,28 +342,35 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 						this.Logger?.Error($"Skipping {configuration.FullName}.{method.Name} as parameter was defined as 'out'.");
 						continue;
 					}
-					oldType = methodParameters[0].ParameterType;
+					parameterType = methodParameters[0].ParameterType;
 				}
 
-				// Get the data about the old type.
-				var oldTypeConfigurationVersionAttribute = oldType
+				// If the parameter type is the same as the configuration,
+				// then it's an "upgrade to" method and it RETURNS the new type.
+				// So use that instead.
+				if(parameterType == configuration)
+				{
+					parameterType = method.ReturnType;
+				}
+
+				// Get the data about the other type.
+				var parameterTypeConfigurationVersionAttribute = parameterType
 					.GetCustomAttributes(false)?
 					.Where(a => a is Configuration.ConfigurationVersionAttribute)
 					.Cast<Configuration.ConfigurationVersionAttribute>()
 					.FirstOrDefault();
-				var oldTypeVersion = oldTypeConfigurationVersionAttribute?.Version ?? VersionZero;
+				var parameterTypeVersion = parameterTypeConfigurationVersionAttribute?.Version ?? VersionZero;
 
-				// The target version must be greater than the version we're upgrading from!.
-				if (oldTypeVersion >= configurationVersion)
+				// If the versions are the same then skip.
+				if(parameterTypeVersion == configurationVersion)
 				{
-					// Should take a single parameter which is the type of the older version.
-					this.Logger?.Error($"Skipping {configuration.FullName}.{method.Name} as it defines an upgrade from {oldTypeVersion} to {configurationVersion} (target configuration version must be higher).");
+					this.Logger?.Error($"Skipping upgrade marked by {configuration.FullName}.{method.Name} as it points to a class with the same version number ({parameterTypeVersion}).");
 					continue;
 				}
 
-				// Where should we read from? (this comes from the oldest configuration attribute.
-				var readFrom = (oldTypeConfigurationVersionAttribute?.UsesCustomNVSLocation ?? false)
-					? new SingleNamedValueItem(oldTypeConfigurationVersionAttribute.NamedValueType, oldTypeConfigurationVersionAttribute.Namespace, oldTypeConfigurationVersionAttribute.Key)
+				// Where should we read from? (this comes from the oldest configuration attribute).
+				var readFrom = (parameterTypeConfigurationVersionAttribute?.UsesCustomNVSLocation ?? false)
+					? new SingleNamedValueItem(parameterTypeConfigurationVersionAttribute.NamedValueType, parameterTypeConfigurationVersionAttribute.Namespace, parameterTypeConfigurationVersionAttribute.Key)
 					: SingleNamedValueItem.ForLatestVAFVersion(this.VaultApplication);
 
 				// Where should we write to? (this comes from the newest configuration attribute)
@@ -377,23 +378,55 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 					? new SingleNamedValueItem(configurationVersionAttribute.NamedValueType, configurationVersionAttribute.Namespace, configurationVersionAttribute.Key)
 					: SingleNamedValueItem.ForLatestVAFVersion(this.VaultApplication);
 
+				// Is this an "upgrade from" or "upgrade to" method?
+				var upgradeFrom = parameterTypeVersion < configurationVersion;
+
 				// This method is okay.
 				identifiedUpgradeMethods.Add
 				(
-					new DeclaredConfigurationUpgradeRule(readFrom, writeTo, oldTypeVersion, configurationVersion, method)
-					{
-						UpgradeToType = configuration,
-						UpgradeFromType = oldType,
-						NamedValueStorageManager = this.NamedValueStorageManager
-					}
+					upgradeFrom
+						? new DeclaredConfigurationUpgradeRule(readFrom, writeTo, parameterTypeVersion, configurationVersion, method)
+						{
+							UpgradeToType = configuration,
+							UpgradeFromType = parameterType,
+							NamedValueStorageManager = this.NamedValueStorageManager
+						}
+						: new DeclaredConfigurationUpgradeRule(writeTo, readFrom, configurationVersion, parameterTypeVersion, method)
+						{
+							UpgradeToType = parameterType,
+							UpgradeFromType = configuration,
+							NamedValueStorageManager = this.NamedValueStorageManager
+						}
 				);
-				this.Logger?.Debug($"Adding {configuration.FullName}.{method.Name} as an upgrade path from {oldTypeVersion} to {configurationVersion}");
+				this.Logger?.Debug($"Adding {configuration.FullName}.{method.Name} as an upgrade path from {(upgradeFrom ? parameterTypeVersion : configurationVersion)} to {(upgradeFrom ? configurationVersion : parameterTypeVersion)}");
 
 				// Add in upgrade methods on the related type, if we can.
 				{
+					if (parameterType != configuration && false == this.CheckedConfigurationUpgradeTypes.Contains(parameterType))
+					{
+						if (this.TryGetDeclaredConfigurationUpgrades
+						(
+							parameterType,
+							out Version v,
+							out IEnumerable<DeclaredConfigurationUpgradeRule> mi
+						))
+							identifiedUpgradeMethods.AddRange(mi);
+					}
+				}
+			}
+
+			// Add in upgrade methods on the previous type, if we can.
+			if(null != configurationVersionAttribute?.PreviousVersionType && false == this.CheckedConfigurationUpgradeTypes.Contains(configurationVersionAttribute?.PreviousVersionType))
+			{
+				if (configurationVersionAttribute.PreviousVersionType == configuration)
+				{
+					this.Logger?.Error($"{configuration.FullName} indicates the previous type to be itself.");
+				}
+				else
+				{
 					if (this.TryGetDeclaredConfigurationUpgrades
 					(
-						oldType,
+						configurationVersionAttribute.PreviousVersionType,
 						out Version v,
 						out IEnumerable<DeclaredConfigurationUpgradeRule> mi
 					))
