@@ -4,6 +4,7 @@ using MFiles.VAF.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using MFiles.VAF.Configuration.Domain;
 using MFiles.VAF.Extensions.Dashboards;
 using MFiles.VaultApplications.Logging.NLog.ExtensionMethods;
@@ -28,8 +29,7 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// Creates the status dashboard object that will be populated by <see cref="GetDashboardContent(IConfigurationRequestContext)"/>.
 		/// </summary>
-		/// <param name="refreshIntervalInSeconds"></param>
-		/// <returns></returns>
+		/// <returns>The status dashboard into which the dashboard content will be populated.</returns>
 		public virtual StatusDashboard CreateStatusDashboard()
 		{
 			return new StatusDashboard()
@@ -77,8 +77,8 @@ namespace MFiles.VAF.Extensions
 
 		/// <inheritdoc />
 		/// <remarks>
-		/// Calls <see cref="CreateStatusDashboard(int)"/> to create the dashboard,
-		/// then <see cref="GetDashboardContentForStatusDashboard(IConfigurationRequestContext)"/> to get the items to display,
+		/// Calls <see cref="CreateStatusDashboard()"/> to create the dashboard,
+		/// then <see cref="GetStatusDashboardRootItems(IConfigurationRequestContext)"/> to get the items to display,
 		/// then returns <see cref="StatusDashboard.ToString()"/>.
 		/// </remarks>
 		public override string GetDashboardContent(IConfigurationRequestContext context)
@@ -113,8 +113,8 @@ namespace MFiles.VAF.Extensions
 						.Distinct()?
 						.OrderBy(a => a.GetName().Name)?
 						.ToList();
-					this.Logger?.Info($"{this.referencedAssemblies.Count} assemblies loaded.");
-					foreach (var a in this.referencedAssemblies)
+					this.Logger?.Info($"{(this.referencedAssemblies?.Count ?? 0)} assemblies loaded.");
+					foreach (var a in this.referencedAssemblies ?? Enumerable.Empty<Assembly>())
 					{
 						this.Logger?.Trace($"Assembly {a.FullName} is referenced from {a.Location}");
 					}
@@ -136,10 +136,13 @@ namespace MFiles.VAF.Extensions
 				yield return assembly;
 
 			// If we loaded it from somewhere other than the GAC then return its referenced items.
-			if(false == assembly.GlobalAssemblyCache)
-				foreach (var referencedAssembly in assembly.GetReferencedAssemblies())
-					foreach (var x in this.GetReferencedAssemblies(referencedAssembly))
-						yield return x;
+			if (null == assembly)
+				yield break;
+			if (false != assembly.GlobalAssemblyCache)
+				yield break;
+			foreach (var referencedAssembly in assembly.GetReferencedAssemblies())
+			foreach (var x in this.GetReferencedAssemblies(referencedAssembly))
+				yield return x;
 		}
 		public virtual IDashboardContent GetDevelopmentDashboardData(IConfigurationRequestContext context)
 		{
@@ -172,8 +175,8 @@ namespace MFiles.VAF.Extensions
 						if(false == string.IsNullOrWhiteSpace(info.CompanyName))
 							return info.CompanyName;
 						var attributes = assembly.GetCustomAttributes(typeof(System.Reflection.AssemblyCompanyAttribute), false);
-						if (null != attributes && attributes.Length > 0)
-							return (attributes.FirstOrDefault() as System.Reflection.AssemblyCompanyAttribute).Company;
+						if (attributes.Length > 0 && attributes[0] is System.Reflection.AssemblyCompanyAttribute companyAttribute)
+							return companyAttribute.Company;
 					}
 					catch
 					{
@@ -240,7 +243,9 @@ namespace MFiles.VAF.Extensions
 			=> this.TaskManager?.GetDashboardContent(this.TaskQueueResolver) ?? Enumerable.Empty<DashboardListItem>();
 
 		/// <summary>
-		/// Returns all dashboard items to be displayed <inheritdoc/>
+		/// Returns all dashboard items to be displayed.
+		/// Calls <see cref="GetAsynchronousDashboardListItemsFromBackgroundOperationManager"/>
+		/// and then <see cref="GetAsynchronousDashboardListItemsFromTaskManager"/>.
 		/// <see cref="GetAsynchronousOperationDashboardContent(IConfigurationRequestContext)"/>.
 		/// </summary>
 		/// <param name="context">The context for requesting these items.</param>

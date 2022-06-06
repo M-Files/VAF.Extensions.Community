@@ -76,7 +76,8 @@ namespace MFiles.VAF.Extensions
 				{ TaskManagerEventType.TaskUpdateFailed, LogTaskUpdateFailedEvent },
 				{ TaskManagerEventType.TaskUpdateSkipped, LogTaskUpdateSkippedEvent },
 				{ TaskManagerEventType.TaskJobFinished, LogTaskJobFinishedEvent },
-				{ TaskManagerEventType.TaskAdded, LogTaskAddedEvent }
+				{ TaskManagerEventType.TaskAdded, LogTaskAddedEvent },
+				{ TaskManagerEventType.WaitingTasksCanceled, LogWaitingTasksCanceledEvent }
 			};
 
 			// Start listening.
@@ -438,6 +439,16 @@ namespace MFiles.VAF.Extensions
 		#endregion Broadcast events
 
 		#region Task events
+
+		/// <summary>
+		/// Logs <see cref="TaskManagerEventType.TaskJobStarted"/> events.
+		/// </summary>
+		/// <param name="args">The event arguments.</param>
+		protected virtual void LogWaitingTasksCanceledEvent(TaskManagerEventArgs args)
+		{
+			// Log the event.
+			this.logger.Debug("Waiting tasks canceled. " + GetEventDataString(args));
+		}
 
 		/// <summary>
 		/// Logs <see cref="TaskManagerEventType.TaskJobStarted"/> events.
