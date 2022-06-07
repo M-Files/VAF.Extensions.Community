@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\DefaultLogDownloadDashboard.html" />
+    <EmbeddedResource Include="Resources\DisplayLatestLogEntries.html" />
     <EmbeddedResource Include="Resources\Images\canceled.png" />
     <EmbeddedResource Include="Resources\Images\Completed.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>

@@ -61,6 +61,10 @@ namespace MFiles.VAF.Extensions
 				command.Locations = new List<ICommandLocation> { new DomainMenuCommandLocation() };
 				yield return command;
 			}
+			
+			// Allow the user to see the latest log entries.
+			yield return Dashboards.Commands.ShowLatestLogEntriesDashboardCommand.Create();
+			yield return Dashboards.Commands.RetrieveLatestLogEntriesCommand.Create();
 		}
 
 		/// <summary>

@@ -349,6 +349,15 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Latest entries.
+        /// </summary>
+        internal static string Logging_Table_ShowLatestLogEntries {
+            get {
+                return ResourceManager.GetString("Logging_Table_ShowLatestLogEntries", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unnamed target.
         /// </summary>
         internal static string Logging_Table_UnnamedTarget {

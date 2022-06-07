@@ -1,0 +1,427 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta charset="utf-8" />
+    <title>Recent Log Entries</title>
+    <style>
+        html {
+            font-family: "Segoe UI", Verdana, sans-serif;
+        }
+
+        body {
+            margin: 0px;
+            color: #000;
+            font-size: 12px;
+            cursor: default;
+            background: #E5E5E5;
+        }
+
+        #panel {
+            background: white;
+            position: absolute;
+            top: 8px;
+            bottom: 48px;
+            right: 8px;
+            left: 8px;
+            padding: 10px;
+        }
+
+        #scrollPanel {
+            position: absolute;
+            top: 135px;
+            bottom: 0px;
+            right: 0px;
+            left: 0px;
+            overflow: auto;
+            padding: 10px;
+        }
+        
+        #maximumNumberOfLogEntries, #refreshTimeout {
+            width: 3em;
+        }
+        
+        #options > form > div{
+            padding: 4px;
+        }
+
+        #title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #000;
+            margin: 10px 0px;
+        }
+
+        button {
+            font-family: "Segoe UI", Verdana, sans-serif;
+            font-size: 12px;
+            background: #E1E1E1;
+            border: 1.3px solid #3A95DD;
+            padding: 6px 40px;
+            color: #000;
+            margin: 0px;
+            cursor: pointer;
+        }
+
+            button:hover {
+                color: #666;
+            }
+
+        #refresh {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+        }
+
+        #close {
+            position: absolute;
+            bottom: 10px;
+            right: 150px;
+        }
+        
+        table{
+            border-collapse: collapse;
+            border: 1px solid #CCC;
+            width: 100%;
+        }
+        
+        th{
+            text-align: left;
+        }
+        th, td{
+            padding: 3px 5px;
+            border: 1px solid #CCC;
+            vertical-align: top;
+            white-space:  pre;
+        }
+        .message{
+            font-family: Consolas, monospace;
+        }
+        
+        tr.error td, tr.fatal td{
+            color: red;
+        }
+
+    </style>
+    <script>
+
+        console = console || {
+            log: function () { },
+            error: function () { }
+        };
+
+		/**
+		 * Entry point called when the dashboard is ready.
+		 * @param {MFilesUI.Dashboard} dashboard - The dashboard instance.
+		 */
+        function OnNewDashboard( dashboard ) {
+
+			// Set the window title and size.
+			dashboard.Window.Title = "Recent Log Entries";
+			dashboard.Window.Resizable = true;
+			dashboard.Window.Width = 840;
+			dashboard.Window.Height = 700;
+
+			// Initialize the download controller.
+			var sourceDef = %RETRIEVELOGENTRIES_METHOD%;
+            new DownloadController( dashboard, sourceDef.source.read );
+		}
+
+		/**
+		 * Represents a file that can be downloaded. Mirrors LogDownloadDashboard.LogFileInfo.
+		 * @typedef {object} LogFileInfo
+		 * @property {string} relativePath - The relative path of the log file
+		 * @property {number} size - The size of the log file.
+		 */
+
+		 /**
+		  * Represents a vault extension method to call.
+		  * @typedef {object} ExtensionMethodSource
+		  * @property {string} method - The name of the extension method to call.
+		  * @property {string[]} params - The parameters to call the method with.
+		  */
+
+		/**
+		 * Controls log downloads in the dashboard.
+		 * @param {MFilesUI.Dashboard} dashboard - The dashboard instance.
+		 * @param {LogFileInfo[]} logFiles - The log files that can be downloaded.
+		 * @param {ExtensionMethodSource} methodSrc - The extension method source to call to create the download.
+		 */
+        function DownloadController(
+			dashboard,
+			methodSrc
+        )
+        {
+            var self = this;
+
+			/**
+			 * The current dashboard instance.
+			 * @member {MFilesUI.Dashboard}
+			 * */
+            self.dashboard = dashboard;
+
+			/**
+			 * The method source. Injected at runtime.
+			 * @var {ExtensionMethodSource}
+			 * */
+            self.methodSrc = methodSrc;
+
+            var createTableCellWithContent = function (content, classes)
+            {
+                var cell = document.createElement("td");
+                cell.appendChild(document.createTextNode(content));
+                if (classes && classes.length)
+                    for (var i = 0; i < classes.length; i++)
+                        cell.classList.add(classes[i]);
+                //console.log(cell);
+                return cell;
+            }
+
+            /**
+             * Renders a list of log events.
+             * */
+            self.renderLogEvents = function (logEntries)
+            {
+
+                // Remove any existing log entries.
+                var tbody = document.getElementById("logEntries");
+                tbody.textContent = "";
+
+                // Create new ones.
+                //console.log(logEntries);
+                for (var i = 0; i < logEntries.entries.length; i++)
+                {
+                    var entry = logEntries.entries[i];
+                    console.log(entry["Message"]);
+                    var tr = document.createElement("tr");
+                    tr.appendChild(createTableCellWithContent(entry["DateTime"]));
+                    tr.appendChild(createTableCellWithContent(entry["ApplicationVersion"]));
+                    tr.appendChild(createTableCellWithContent(entry["Logger"]));
+                    tr.appendChild(createTableCellWithContent(entry["LogContext"]));
+                    tr.appendChild(createTableCellWithContent(entry["LogLevel"]));
+                    tr.appendChild(createTableCellWithContent(entry["Message"], ["message"]));
+                    tr.classList.add(entry["LogLevel"].toLowerCase());
+                    tbody.appendChild(tr);
+                }
+
+                // // Resolve the container to render the list in.
+                // var parent = document.getElementById( "fileList" );
+                //
+                // // Render each file.
+                // for( var i = 0; i < this.logFiles.length; i++ ) {
+                // 	this.renderFileCheckbox( parent, this.logFiles[ i ] );
+                // }
+            }
+
+            /**
+             * Handles the refresh button press.
+             * */
+            self.refresh = function ()
+            {
+                // Get the configured number and validate. 
+                var maximumNumberOfLogEntries = parseInt(document.getElementById("maximumNumberOfLogEntries").value);
+                if (isNaN(maximumNumberOfLogEntries))
+                {
+                    maximumNumberOfLogEntries = 20;
+                    document.getElementById("maximumNumberOfLogEntries").value = maximumNumberOfLogEntries;
+                }
+                if (maximumNumberOfLogEntries <= 0)
+                    maximumNumberOfLogEntries = 1;
+                if (maximumNumberOfLogEntries > 100)
+                    maximumNumberOfLogEntries = 100;
+
+                // Get the log levels to show.
+                var logLevels = [];
+                var logLevelElements = document.getElementsByClassName("logLevel");
+                for (var i = 0; i < logLevelElements.length; i++)
+                {
+                    var logLevelElement = logLevelElements[i];
+                    if (logLevelElement.type == "checkbox" && logLevelElement.checked)
+                    {
+                        logLevels.push(logLevelElement.value);
+                    }
+                }
+
+                // Call the extension method with the data of what to retrieve.
+                var params = self.methodSrc.params.concat([JSON.stringify({
+                    "maximumNumberOfLogEntries": maximumNumberOfLogEntries,
+                    "logLevels": logLevels
+                })]);
+                self.dashboard
+                    .Vault
+                    .Async
+                    .ExtensionMethodOperations
+                    .ExecuteVaultExtensionMethod
+                    (
+                        self.methodSrc.method,
+                        JSON.stringify(params),
+                        function (responseStr)
+                        {
+                            // Deserialize the response and validate.
+                            var response = JSON.parse(responseStr);
+                            if (!response.directives)
+                            {
+                                alert("Invalid response.")
+                                return;
+                            }
+                            if (response.exception)
+                            {
+                                console.error(response.exception);
+                                alert(response.exception);
+                                return;
+                            }
+
+                            // Find the update dashboard content directive.
+                            for (var i = 0; i < response.directives.length; i++)
+                            {
+                                var directive = response.directives[i];
+                                if (!directive || directive.type != "UpdateDashboardContent")
+                                    continue;
+
+                                // Parse out the content and render it.
+                                self.renderLogEvents(JSON.parse(directive.content));
+
+                            }
+
+                            // If we're set to auto-refresh then schedule a refresh.
+                            var autoRefreshElement = document.getElementById("automaticallyRefresh");
+                            if (autoRefreshElement.type == "checkbox" && autoRefreshElement.checked)
+                            {
+                                // Get the number of seconds to wait.
+                                var refreshTimeout = parseInt(document.getElementById("refreshTimeout").value);
+                                if (false == isNaN(refreshTimeout))
+                                {
+                                    refreshTimeout = 10;
+                                    document.getElementById("refreshTimeout").value = refreshTimeout;
+                                }
+
+                                // If we have a valid refresh timeout then set it.
+                                if (refreshTimeout > 0)
+                                {
+                                    console.log("Refreshing in " + refreshTimeout + "s");
+                                    setTimeout(self.refresh, refreshTimeout * 1000);
+                                }
+                            }
+
+                        },
+                        function (err)
+                        {
+                            alert(err);
+                        }
+                    );
+            }
+
+            /**
+             * Handles a close button press.
+             * */
+            self.close = function ()
+            {
+                // Close the window.
+                self.dashboard.Window.Close();
+            }
+
+			// Setup button behavior.
+			document.getElementById( "refresh" ).onclick = function() {
+				self.refresh();
+			}
+			document.getElementById( "close" ).onclick = function() {
+				self.close();
+			}
+
+			// Render the latest log events.
+            self.refresh();
+        }
+
+		///**
+		// * Renders a single log event.
+		// * @param {HTMLElement} parent - The parent element to append the checkbox to.
+		// * @param {LogFileInfo} file - The file to render the checkbox for.
+		// */
+		//DownloadController.prototype.renderLogEvents = function( parent, file ) {
+
+		//	// Create a container element for the file checkbox.
+		//	var container = document.createElement( "div" );
+
+		//	// Render the checkbox.
+  //          var input = document.createElement( "input" );
+  //          input.type = "checkbox"
+		//	input.value = file.relativePath;
+		//	input.name = file.relativePath;
+  //          container.appendChild( input );
+
+		//	// Render the label.
+		//	var label = document.createElement( "label" );
+		//	label.type = "checkbox"
+		//	label.for = file.relativePath;
+		//	container.appendChild( label );
+		//	var text = document.createTextNode( file.relativePath + ", " + file.size + " bytes" );
+  //          label.appendChild( text );
+
+		//	// Add to the parent.
+  //          parent.appendChild( container );
+  //      }
+
+
+    </script>
+</head>
+<body>
+    <div id="panel">
+        <div id="header">
+            <div id="title">Log entries:</div>
+        </div>
+        <div id="options">
+            <form>
+                <div>
+                    <label for="maximumNumberOfLogEntries">Maximum number of log entries to show:</label>
+                    <input type="number" id="maximumNumberOfLogEntries" value="20" min="1" max="100" />
+                </div>
+                <div>
+                    <input type="checkbox" id="automaticallyRefresh" value="1" checked="checked" />
+                    <label for="automaticallyRefresh">Automatically refresh</label>
+                    every
+                    <input type="number" id="refreshTimeout" value="10" min="5" max="1000" />
+                    <label for="refreshTimeout">seconds.</label>
+                </div>
+                <div>
+                    Show log levels:
+                    <input type="checkbox" class="logLevel" id="logLevel-trace" value="trace" checked="checked" />
+                    <label for="logLevel-trace">Trace</label>
+                    <input type="checkbox" class="logLevel" id="logLevel-debug" value="debug" checked="checked" />
+                    <label for="logLevel-debug">Debug</label>
+                    <input type="checkbox" class="logLevel" id="logLevel-info" value="info" checked="checked" />
+                    <label for="logLevel-info">Info</label>
+                    <input type="checkbox" class="logLevel" id="logLevel-warning" value="warn" checked="checked" />
+                    <label for="logLevel-warning">Warning</label>
+                    <input type="checkbox" class="logLevel" id="logLevel-error" value="error" checked="checked" />
+                    <label for="logLevel-error">Error</label>
+                    <input type="checkbox" class="logLevel" id="logLevel-fatal" value="fatal" checked="checked" />
+                    <label for="logLevel-fatal">Fatal</label>
+                </div>
+            </form>
+        </div>
+        <div id="scrollPanel">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date/time</th>
+                        <th>Application Version</th>
+                        <th>Logger</th>
+                        <th>Context</th>
+                        <th>Level</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody id="logEntries">
+                    <tr>
+                        <td colspan="6" class="loading">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="buttonBar">
+        <button id="close">Close</button>
+        <button id="refresh">Refresh</button>
+    </div>
+</body>
+</html>
