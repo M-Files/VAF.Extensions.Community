@@ -17,6 +17,14 @@
             background: #E5E5E5;
         }
 
+        input{
+            border: 1px solid #666;
+            padding: 2px;
+        }
+        input.number {
+            text-align: right;
+        }
+
         #panel {
             background: white;
             position: absolute;
@@ -29,7 +37,7 @@
 
         #scrollPanel {
             position: absolute;
-            top: 135px;
+            top: 115px;
             bottom: 0px;
             right: 0px;
             left: 0px;
@@ -41,15 +49,22 @@
             width: 3em;
         }
         
-        #options > form > div{
-            padding: 4px;
+        #options{
+            border: 1px solid #666;
+            border-radius: 5px;
+            position: relative;
+            padding: 5px 10px;
+        }
+        #options .title{
+            position: absolute;
+            left: 20px;
+            top: -0.5em;
+            background-color: white;
+            padding: 0px 10px;
         }
 
-        #title {
-            font-size: 14px;
-            font-weight: 500;
-            color: #000;
-            margin: 10px 0px;
+        #options > form > div{
+            padding: 4px;
         }
 
         button {
@@ -100,6 +115,10 @@
         
         tr.error td, tr.fatal td{
             color: red;
+        }
+
+        body.unstructured #scrollPanel thead {
+            display: none;
         }
 
     </style>
@@ -182,25 +201,45 @@
              * */
             self.renderLogEvents = function (logEntries)
             {
+                // Set the CSS class.
+                if (!logEntries.structuredEntries)
+                {
+                    document.body.classList.add("unstructured");
+                } else
+                {
+                    document.body.classList.remove("unstructured");
+                }
 
                 // Remove any existing log entries.
                 var tbody = document.getElementById("logEntries");
                 tbody.textContent = "";
 
                 // Create new ones.
-                //console.log(logEntries);
                 for (var i = 0; i < logEntries.entries.length; i++)
                 {
                     var entry = logEntries.entries[i];
-                    console.log(entry["Message"]);
+                    console.log(entry);
                     var tr = document.createElement("tr");
-                    tr.appendChild(createTableCellWithContent(entry["DateTime"]));
-                    tr.appendChild(createTableCellWithContent(entry["ApplicationVersion"]));
-                    tr.appendChild(createTableCellWithContent(entry["Logger"]));
-                    tr.appendChild(createTableCellWithContent(entry["LogContext"]));
-                    tr.appendChild(createTableCellWithContent(entry["LogLevel"]));
-                    tr.appendChild(createTableCellWithContent(entry["Message"], ["message"]));
-                    tr.classList.add(entry["LogLevel"].toLowerCase());
+
+                    // If we support structured events then we can split out the data.
+                    if (logEntries.structuredEntries)
+                    {
+                        tr.appendChild(createTableCellWithContent(entry["DateTime"]));
+                        tr.appendChild(createTableCellWithContent(entry["ApplicationVersion"]));
+                        tr.appendChild(createTableCellWithContent(entry["Logger"]));
+                        tr.appendChild(createTableCellWithContent(entry["LogContext"]));
+                        tr.appendChild(createTableCellWithContent(entry["LogLevel"]));
+                        tr.appendChild(createTableCellWithContent(entry["Message"], ["message"]));
+                        tr.classList.add(entry["LogLevel"].toLowerCase());
+                    }
+                    else
+                    {
+                        // One long cell.
+                        var cell = createTableCellWithContent(entry[0], ["message"]);
+                        cell.colSpan = 6;
+                        tr.appendChild(cell);
+                    }
+
                     tbody.appendChild(tr);
                 }
 
@@ -227,8 +266,9 @@
                 }
                 if (maximumNumberOfLogEntries <= 0)
                     maximumNumberOfLogEntries = 1;
-                if (maximumNumberOfLogEntries > 100)
-                    maximumNumberOfLogEntries = 100;
+                if (maximumNumberOfLogEntries > 200)
+                    maximumNumberOfLogEntries = 200;
+                document.getElementById("maximumNumberOfLogEntries").value = maximumNumberOfLogEntries;
 
                 // Get the log levels to show.
                 var logLevels = [];
@@ -289,9 +329,14 @@
                             {
                                 // Get the number of seconds to wait.
                                 var refreshTimeout = parseInt(document.getElementById("refreshTimeout").value);
-                                if (false == isNaN(refreshTimeout))
+                                if (isNaN(refreshTimeout))
                                 {
                                     refreshTimeout = 10;
+                                    document.getElementById("refreshTimeout").value = refreshTimeout;
+                                }
+                                if (refreshTimeout < 5)
+                                {
+                                    refreshTimeout = 5;
                                     document.getElementById("refreshTimeout").value = refreshTimeout;
                                 }
 
@@ -321,55 +366,33 @@
             }
 
 			// Setup button behavior.
-			document.getElementById( "refresh" ).onclick = function() {
-				self.refresh();
-			}
-			document.getElementById( "close" ).onclick = function() {
-				self.close();
-			}
+            document.getElementById("refresh").addEventListener("click", function ()
+            {
+                self.refresh();
+            }, false);
+            document.getElementById("close").addEventListener("click", function ()
+            {
+                self.close();
+            }, false);
+
+            // React when the options change.
+            var elements = document.getElementById("options").getElementsByTagName("input");
+            for (var i = 0; i < elements.length; i++)
+            {
+                elements[i].addEventListener("change", self.refresh, false);
+            }
 
 			// Render the latest log events.
             self.refresh();
         }
-
-		///**
-		// * Renders a single log event.
-		// * @param {HTMLElement} parent - The parent element to append the checkbox to.
-		// * @param {LogFileInfo} file - The file to render the checkbox for.
-		// */
-		//DownloadController.prototype.renderLogEvents = function( parent, file ) {
-
-		//	// Create a container element for the file checkbox.
-		//	var container = document.createElement( "div" );
-
-		//	// Render the checkbox.
-  //          var input = document.createElement( "input" );
-  //          input.type = "checkbox"
-		//	input.value = file.relativePath;
-		//	input.name = file.relativePath;
-  //          container.appendChild( input );
-
-		//	// Render the label.
-		//	var label = document.createElement( "label" );
-		//	label.type = "checkbox"
-		//	label.for = file.relativePath;
-		//	container.appendChild( label );
-		//	var text = document.createTextNode( file.relativePath + ", " + file.size + " bytes" );
-  //          label.appendChild( text );
-
-		//	// Add to the parent.
-  //          parent.appendChild( container );
-  //      }
 
 
     </script>
 </head>
 <body>
     <div id="panel">
-        <div id="header">
-            <div id="title">Log entries:</div>
-        </div>
         <div id="options">
+            <div class="title">Options</div>
             <form>
                 <div>
                     <label for="maximumNumberOfLogEntries">Maximum number of log entries to show:</label>

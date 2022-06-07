@@ -173,6 +173,19 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 						!File.Exists(fullPath))
 						throw new FileNotFoundException();
 
+					// Do we have a default layout?  If so then we can parse the content.
+					{
+						logEntries.StructuredEntries = true; // Default to assuming we CAN parse the data.
+						var defaultLoggingConfiguration = LogManager.Current.Configuration.GetAllLogTargetConfigurations()
+							.FirstOrDefault(c => c is VaultApplications.Logging.NLog.Targets.DefaultTargetConfiguration)
+							as VaultApplications.Logging.NLog.Targets.DefaultTargetConfiguration;
+
+						// If it is not using the default layout then we can't parse it.
+						if(false == string.IsNullOrEmpty(defaultLoggingConfiguration?.Advanced?.Layout)
+							&& defaultLoggingConfiguration?.Advanced?.Layout != "${longdate}\t(v${application-version})\t${logger}\t${log-context}\t${level}:\t${message}${onexception:${newline}${exception:format=ToString:innerformat=ToString:separator=\r\n}}")
+							logEntries.StructuredEntries = false;
+					}
+
 					// Read the file.
 					{
 						var reader = new ReverseLineReader(fullPath);
@@ -520,8 +533,8 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 					this.maximumNumberOfLogEntries = value;
 					if (this.maximumNumberOfLogEntries <= 0)
 						this.maximumNumberOfLogEntries = 1;
-					if (this.maximumNumberOfLogEntries > 100)
-						this.maximumNumberOfLogEntries = 100;
+					if (this.maximumNumberOfLogEntries > 200)
+						this.maximumNumberOfLogEntries = 200;
 				}
 			}
 			[DataMember(Name = "logLevels")]
@@ -584,7 +597,6 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			/// <returns></returns>
 			public static bool IsFullLine(string input) => ParseLineRegularExpression.IsMatch(input);
 
-			[IgnoreDataMember]
 			public string FullLine
 			{
 				get => fullLine;
@@ -625,6 +637,9 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 
 			[DataMember(Name = "exception")]
 			public string Exception { get; set; }
+
+			[DataMember(Name = "structuredEntries")]
+			public bool StructuredEntries { get; set; }
 		}
 	}
 }
