@@ -50,7 +50,7 @@
         }
         
         #options{
-            border: 1px solid #666;
+            border: 1px solid #CCC;
             border-radius: 5px;
             position: relative;
             padding: 5px 10px;
@@ -58,7 +58,7 @@
         #options .title{
             position: absolute;
             left: 20px;
-            top: -0.5em;
+            top: -0.7em;
             background-color: white;
             padding: 0px 10px;
         }
@@ -121,6 +121,10 @@
             display: none;
         }
 
+        .loading{
+            text-align: center;
+        }
+
     </style>
     <script>
 
@@ -138,7 +142,7 @@
 			// Set the window title and size.
 			dashboard.Window.Title = "Recent Log Entries";
 			dashboard.Window.Resizable = true;
-			dashboard.Window.Width = 840;
+			dashboard.Window.Width = 900;
 			dashboard.Window.Height = 700;
 
 			// Initialize the download controller.
@@ -185,6 +189,7 @@
 			 * */
             self.methodSrc = methodSrc;
 
+            // Helper method for creating a table cell and setting the CSS classes.
             var createTableCellWithContent = function (content, classes)
             {
                 var cell = document.createElement("td");
@@ -347,7 +352,7 @@
                                 var refreshTimeout = parseInt(document.getElementById("refreshTimeout").value);
                                 if (isNaN(refreshTimeout))
                                 {
-                                    refreshTimeout = 10;
+                                    refreshTimeout = 30;
                                     document.getElementById("refreshTimeout").value = refreshTimeout;
                                 }
                                 if (refreshTimeout < 5)
@@ -414,16 +419,16 @@
                     <input type="checkbox" id="automaticallyRefresh" value="1" checked="checked" />
                     <label for="automaticallyRefresh">Automatically refresh</label>
                     every
-                    <input type="number" id="refreshTimeout" value="10" min="5" max="1000" />
+                    <input type="number" id="refreshTimeout" value="30" min="5" max="1000" />
                     <label for="refreshTimeout">seconds.</label>
                 </div>
                 <div>
                     Show log levels:
-                    <input type="checkbox" class="logLevel" id="logLevel-trace" value="trace" checked="checked" />
+                    <input type="checkbox" class="logLevel" id="logLevel-trace" value="trace" />
                     <label for="logLevel-trace">Trace</label>
-                    <input type="checkbox" class="logLevel" id="logLevel-debug" value="debug" checked="checked" />
+                    <input type="checkbox" class="logLevel" id="logLevel-debug" value="debug" />
                     <label for="logLevel-debug">Debug</label>
-                    <input type="checkbox" class="logLevel" id="logLevel-info" value="info" checked="checked" />
+                    <input type="checkbox" class="logLevel" id="logLevel-info" value="info" />
                     <label for="logLevel-info">Info</label>
                     <input type="checkbox" class="logLevel" id="logLevel-warning" value="warn" checked="checked" />
                     <label for="logLevel-warning">Warning</label>

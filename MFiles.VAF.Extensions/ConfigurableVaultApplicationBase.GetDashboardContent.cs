@@ -365,20 +365,19 @@ namespace MFiles.VAF.Extensions
 					(
 						new DashboardContentCollection()
 						{
-							new DashboardDomainCommand
+							new DashboardDomainCommandEx
 							{
 								DomainCommandID = this.AllowUserToSelectLogFiles
 									? Dashboards.Commands.ShowSelectLogDownloadDashboardCommand.CommandId
 									: Dashboards.Commands.DownloadSelectedLogsDashboardCommand.CommandId,
 								Title = Resources.Dashboard.Logging_Table_DownloadLogs,
-								Style = DashboardCommandStyle.Link
+								Icon = "Resources/Images/Download.png"
 							},
-							new DashboardCustomContentEx("<br />"),
-							new DashboardDomainCommand
+							new DashboardDomainCommandEx
 							{
 								DomainCommandID = Dashboards.Commands.ShowLatestLogEntriesDashboardCommand.CommandId,
 								Title = Resources.Dashboard.Logging_Table_ShowLatestLogEntries,
-								Style = DashboardCommandStyle.Link
+								Icon = "Resources/Images/viewlogs.png"
 							}
 						}
 					);
