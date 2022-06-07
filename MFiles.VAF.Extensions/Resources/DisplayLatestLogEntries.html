@@ -218,7 +218,7 @@
                 for (var i = 0; i < logEntries.entries.length; i++)
                 {
                     var entry = logEntries.entries[i];
-                    console.log(entry);
+                    //console.log(entry);
                     var tr = document.createElement("tr");
 
                     // If we support structured events then we can split out the data.
@@ -252,11 +252,21 @@
                 // }
             }
 
+            var timeouts = [];
+
             /**
              * Handles the refresh button press.
              * */
             self.refresh = function ()
             {
+                // Clear any timeouts.
+                for (var i = 0; i < timeouts.length; i++)
+                {
+                    console.log("Clearing timeout " + timeouts[i]);
+                    clearTimeout(timeouts[i]);
+                }
+                timeouts = [];
+
                 // Get the configured number and validate. 
                 var maximumNumberOfLogEntries = parseInt(document.getElementById("maximumNumberOfLogEntries").value);
                 if (isNaN(maximumNumberOfLogEntries))
@@ -322,7 +332,13 @@
                                 self.renderLogEvents(JSON.parse(directive.content));
 
                             }
-
+                        },
+                        function (err)
+                        {
+                            alert(err);
+                        },
+                        function ()
+                        {
                             // If we're set to auto-refresh then schedule a refresh.
                             var autoRefreshElement = document.getElementById("automaticallyRefresh");
                             if (autoRefreshElement.type == "checkbox" && autoRefreshElement.checked)
@@ -344,14 +360,10 @@
                                 if (refreshTimeout > 0)
                                 {
                                     console.log("Refreshing in " + refreshTimeout + "s");
-                                    setTimeout(self.refresh, refreshTimeout * 1000);
+                                    timeouts.push(setTimeout(self.refresh, refreshTimeout * 1000));
                                 }
-                            }
 
-                        },
-                        function (err)
-                        {
-                            alert(err);
+                            }
                         }
                     );
             }
