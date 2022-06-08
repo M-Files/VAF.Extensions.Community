@@ -157,21 +157,13 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			var logEntries = new LogEntries();
 
 			// Find the latest log file.
-			var latestLogFile = this.ResolveLogFiles(context.Vault).OrderByDescending(f => f.LastWrite).FirstOrDefault();
-			if (null != latestLogFile)
+			var logFiles = this.ResolveLogFiles(context.Vault)?.OrderByDescending(f => f.LastWrite)?.ToList() ?? new List<LogFileInfo>();
+			if (logFiles.Any())
 			{
 				// We have data, so let's extract what we need.
 				try
 				{
 					string rootPath = ResolveRootLogPath(context.Vault);
-
-					// Sanity and safety check.
-					// All paths must be inside the log folder.
-					var fullPath = Path.GetFullPath(Path.Combine(rootPath, latestLogFile.RelativePath));
-					if (!fullPath.StartsWith(rootPath) ||
-						Path.GetExtension(fullPath).ToLower() != ".log" ||
-						!File.Exists(fullPath))
-						throw new FileNotFoundException();
 
 					// Do we have a default layout?  If so then we can parse the content.
 					{
@@ -181,44 +173,58 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 							as VaultApplications.Logging.NLog.Targets.DefaultTargetConfiguration;
 
 						// If it is not using the default layout then we can't parse it.
-						if(false == string.IsNullOrEmpty(defaultLoggingConfiguration?.Advanced?.Layout)
+						if (false == string.IsNullOrEmpty(defaultLoggingConfiguration?.Advanced?.Layout)
 							&& defaultLoggingConfiguration?.Advanced?.Layout != "${longdate}\t(v${application-version})\t${logger}\t${log-context}\t${level}:\t${message}${onexception:${newline}${exception:format=ToString:innerformat=ToString:separator=\r\n}}")
 							logEntries.StructuredEntries = false;
 					}
 
-					// Read the file.
+					foreach(var logFile in logFiles)
 					{
-						var reader = new ReverseLineReader(fullPath);
-						var i = 0;
-						var logEntry = new LogEntry();
-						foreach(var line in reader)
+						// Only read a certain number of entries.
+						if (logEntries.Entries.Count >= requestParameters.MaximumNumberOfLogEntries)
+							break;
+
+						// Sanity and safety check.
+						// All paths must be inside the log folder.
+						var fullPath = Path.GetFullPath(Path.Combine(rootPath, logFile.RelativePath));
+						if (!fullPath.StartsWith(rootPath) ||
+							Path.GetExtension(fullPath).ToLower() != ".log" ||
+							!File.Exists(fullPath))
+							throw new FileNotFoundException();
+
+						// Read the file.
 						{
-							// Add the line to the log entry.
-							logEntry.FullLine = line + Environment.NewLine + logEntry.FullLine;
-
-							// If it is not yet a full line then keep going.
-							if(false == LogEntry.IsFullLine(logEntry.FullLine))
-							{ 
-								continue; // Keep going until we get the log line.
-							}
-
-							// Does the log entry meet our search criteria?
-							if (false == requestParameters.ShouldBeShown(logEntry))
+							var reader = new ReverseLineReader(fullPath);
+							var logEntry = new LogEntry();
+							foreach (var line in reader)
 							{
+								// Add the line to the log entry.
+								logEntry.FullLine = line + Environment.NewLine + logEntry.FullLine;
+
+								// If it is not yet a full line then keep going.
+								if (false == LogEntry.IsFullLine(logEntry.FullLine))
+								{
+									continue; // Keep going until we get the log line.
+								}
+
+								// Does the log entry meet our search criteria?
+								if (false == requestParameters.ShouldBeShown(logEntry))
+								{
+									logEntry = new LogEntry();
+									continue;
+								}
+
+								// Add the log entry.
+								logEntries.Entries.Add(logEntry);
+
+								// Only read a certain number of entries.
+								if (logEntries.Entries.Count >= requestParameters.MaximumNumberOfLogEntries)
+									break;
+
+								// Start creating a new one.
 								logEntry = new LogEntry();
-								continue;
 							}
 
-							// Only read a certain number of lines.
-							i++;
-							if (i > requestParameters.MaximumNumberOfLogEntries)
-								break;
-
-							// Add the log entry.
-							logEntries.Entries.Add(logEntry);
-
-							// Start creating a new one.
-							logEntry = new LogEntry();
 						}
 					}
 				}
