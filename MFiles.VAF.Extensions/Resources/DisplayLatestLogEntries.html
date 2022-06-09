@@ -216,8 +216,8 @@
                 }
 
                 // Remove any existing log entries.
-                var tbody = document.getElementById("logEntries");
-                tbody.textContent = "";
+                var table = document.getElementById("logEntries");
+                var tbody = document.createElement("tbody");
 
                 // If there are no items then deal with it.
                 if (logEntries.entries.length == 0)
@@ -229,6 +229,8 @@
                     cell.colSpan = 6;
                     cell.classList.add("no-entries");
                     tr.appendChild(cell);
+                    tbody.appendChild(tr);
+                    table.replaceChild(tbody, table.getElementsByTagName("tbody")[0]);
                     return;
                 }
 
@@ -259,6 +261,9 @@
 
                     tbody.appendChild(tr);
                 }
+
+                table.replaceChild(tbody, table.getElementsByTagName("tbody")[0]);
+
             }
 
             var timeouts = [];
@@ -302,10 +307,10 @@
                 }
 
                 // Clear down the current table.
-                var tbody = document.getElementById("logEntries");
-                tbody.textContent = "";
+                var table = document.getElementById("logEntries");
 
                 // Add in the "loading" cell.
+                var tbody = document.createElement("tbody");
                 var tr = document.createElement("tr");
                 var cell = document.createElement("td");
                 cell.innerText = "Loading...";
@@ -313,6 +318,7 @@
                 cell.classList.add("loading");
                 tr.appendChild(cell);
                 tbody.appendChild(tr);
+                table.replaceChild(tbody, table.getElementsByTagName("tbody")[0]);
 
                 // Call the extension method with the data of what to retrieve.
                 var params = self.methodSrc.params.concat([JSON.stringify({
@@ -457,7 +463,7 @@
             </form>
         </div>
         <div id="scrollPanel">
-            <table>
+            <table id="logEntries">
                 <thead>
                     <tr>
                         <th>Date/time</th>
@@ -468,7 +474,7 @@
                         <th>Message</th>
                     </tr>
                 </thead>
-                <tbody id="logEntries">
+                <tbody>
                     <tr>
                         <td colspan="6" class="loading">Loading...</td>
                     </tr>
