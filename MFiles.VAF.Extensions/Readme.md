@@ -8,6 +8,12 @@ This base class should be used for vault applications that use the VAF Extension
 
 ![An image showing a VAF dashboard with a list of background operations and their current status](sample-dashboard.png)
 
+### Controlling configuration upgrades
+
+When using the `ConfigurableVaultApplicationBase<T>` class, changes to the structure of the configuration type (T) provided can cause issues with your application starting.  For example: if a class previously defines a property as a string but is changed to be an integer, the deserialization of any held configuration will fail and the application will not start.
+
+This library supports the ability for you to [programmatically control the upgrade process](Configuration/Upgrading) so that the application can convert any old configuration across to the new structures and continue loading.  More information is available in the [dedicated readme page](Configuration/Upgrading/Readme.md).
+
 ### Using the TaskQueueBackgroundOperationManager
 
 The [TaskQueueBackgroundOperationManager](TaskQueueBackgroundOperations/TaskQueueBackgroundOperationManager) is a drop-in replacement for the old `BackgroundOperationManager` from previous VAF releases.  This updated manager is fully compatible with [M-Files Multi-Server Mode](https://developer.m-files.com/Frameworks/Vault-Application-Framework/Multi-Server-Mode/) by utilising task queues behind the scenes.  The manager allows creation of both [background operations that recur on an interval](TaskQueueBackgroundOperations/TaskQueueBackgroundOperationManager#creating-a-recurring-background-operation) and also [background operations that run on a more complex schedule](TaskQueueBackgroundOperations/TaskQueueBackgroundOperationManager#creating-a-background-operation-that-runs-on-a-schedule).
