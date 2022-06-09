@@ -156,6 +156,17 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			// Create the data to send.
 			var logEntries = new LogEntries();
 
+			// If we have no filters then we should die now.
+			if(requestParameters.LogLevels.Count == 0)
+			{
+				// Nothing will ever match; let's not dig through the files.
+				clientOps.Directives.Add(new VAF.Configuration.Domain.ClientDirective.UpdateDashboardContent()
+				{
+					Content = JsonConvert.SerializeObject(logEntries)
+				});
+				return;
+			}
+
 			// Find the latest log file.
 			var logFiles = this.ResolveLogFiles(context.Vault)?.OrderByDescending(f => f.LastWrite)?.ToList() ?? new List<LogFileInfo>();
 			if (logFiles.Any())
