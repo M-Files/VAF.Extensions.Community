@@ -1,6 +1,6 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VaultApplications.Logging;
 using MFiles.VaultApplications.Logging.Configuration;
-using MFiles.VaultApplications.Logging.NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,5 +44,28 @@ namespace MFiles.VAF.Extensions.Configuration
 		/// <inheritdoc />
 		public ILoggingConfiguration GetLoggingConfiguration()
 			=> this.Logging;
+	}
+
+	[DataContract]
+	public class NLogLoggingConfiguration
+		: VaultApplications.Logging.NLog.NLogLoggingConfiguration
+	{
+		/// <inheritdoc />
+		public override IEnumerable<VaultApplications.Logging.NLog.NLogLoggingExclusionRule> GetAllLoggingExclusionRules()
+		{
+			// Include any other exclusion rules.
+			foreach (var r in base.GetAllLoggingExclusionRules() ?? Enumerable.Empty<VaultApplications.Logging.NLog.NLogLoggingExclusionRule>())
+				yield return r;
+
+			// If we're set to exclude internal messages then also exclude this library.
+			if (false == (this.Advanced?.RenderInternalLogMessages ?? false))
+			{
+				yield return new VaultApplications.Logging.NLog.NLogLoggingExclusionRule()
+				{
+					LoggerName = "MFiles.VAF.Extensions.*",
+					MinimumLogLevelOverride = LogLevel.Fatal
+				};
+			}
+		}
 	}
 }
