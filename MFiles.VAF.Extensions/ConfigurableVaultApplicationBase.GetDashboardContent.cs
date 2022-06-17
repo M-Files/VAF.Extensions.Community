@@ -276,6 +276,16 @@ namespace MFiles.VAF.Extensions
 		protected bool AllowUserToSelectLogFiles { get; set; } = false;
 
 		/// <summary>
+		/// Allows log file download via the dashboard.
+		/// </summary>
+		protected bool AllowDashboardLogFileDownload { get; set; } = true;
+
+		/// <summary>
+		/// Allows admins to view recent log entries via the dashboard.
+		/// </summary>
+		protected bool AllowDashboardLogEntryViewing { get; set; } = true;
+
+		/// <summary>
 		/// Returns the dashboard content showing logging status.
 		/// </summary>
 		/// <returns>The dashboard content.  Can be null if no logging data is available or configured.</returns>
@@ -361,26 +371,31 @@ namespace MFiles.VAF.Extensions
 				// If it's the default one then allow downloads.
 				if(config is VaultApplications.Logging.NLog.Targets.DefaultTargetConfiguration)
 				{
-					var cell = row.AddCell
-					(
-						new DashboardContentCollection()
+					// Add whatever buttons, according to app configuration.
+					var buttons = new DashboardContentCollection();
+					if (this.AllowDashboardLogFileDownload)
+					{
+						buttons.Add(new DashboardDomainCommandEx
 						{
-							new DashboardDomainCommandEx
-							{
-								DomainCommandID = this.AllowUserToSelectLogFiles
+							DomainCommandID = this.AllowUserToSelectLogFiles
 									? Dashboards.Commands.ShowSelectLogDownloadDashboardCommand.CommandId
 									: Dashboards.Commands.DownloadSelectedLogsDashboardCommand.CommandId,
-								Title = Resources.Dashboard.Logging_Table_DownloadLogs,
-								Icon = "Resources/Images/Download.png"
-							},
-							new DashboardDomainCommandEx
-							{
-								DomainCommandID = Dashboards.Commands.ShowLatestLogEntriesDashboardCommand.CommandId,
-								Title = Resources.Dashboard.Logging_Table_ShowLatestLogEntries,
-								Icon = "Resources/Images/viewlogs.png"
-							}
-						}
-					);
+							Title = Resources.Dashboard.Logging_Table_DownloadLogs,
+							Icon = "Resources/Images/Download.png"
+						});
+					}
+					if (this.AllowDashboardLogEntryViewing)
+					{
+						buttons.Add(new DashboardDomainCommandEx
+						{
+							DomainCommandID = Dashboards.Commands.ShowLatestLogEntriesDashboardCommand.CommandId,
+							Title = Resources.Dashboard.Logging_Table_ShowLatestLogEntries,
+							Icon = "Resources/Images/viewlogs.png"
+						});
+					}
+
+					// Add the buttons to the cell
+					var cell = row.AddCell(buttons);
 					cell.Styles.AddOrUpdate("text-align", "right");
 				}
 				else
