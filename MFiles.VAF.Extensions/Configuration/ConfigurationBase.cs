@@ -57,12 +57,12 @@ namespace MFiles.VAF.Extensions.Configuration
 			foreach (var r in base.GetAllLoggingExclusionRules() ?? Enumerable.Empty<VaultApplications.Logging.NLog.NLogLoggingExclusionRule>())
 				yield return r;
 
-			// If we're set to exclude internal messages then also exclude this library.
+			// If we're set to exclude internal messages then also exclude the task manager ex (spammy).
 			if (false == (this.Advanced?.RenderInternalLogMessages ?? false))
 			{
 				yield return new VaultApplications.Logging.NLog.NLogLoggingExclusionRule()
 				{
-					LoggerName = "MFiles.VAF.Extensions.*",
+					LoggerName = "MFiles.VAF.Extensions.TaskManagerEx*",
 					MinimumLogLevelOverride = LogLevel.Fatal
 				};
 			}
