@@ -214,17 +214,22 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 								// Add the line to the log entry.
 								logEntry.FullLine = line + Environment.NewLine + logEntry.FullLine;
 
-								// If it is not yet a full line then keep going.
-								if (false == LogEntry.IsFullLine(logEntry.FullLine))
+								// If we are dealing with structured entries then we can analyse them further.
+								if (logEntries.StructuredEntries)
 								{
-									continue; // Keep going until we get the log line.
-								}
 
-								// Does the log entry meet our search criteria?
-								if (false == requestParameters.ShouldBeShown(logEntry))
-								{
-									logEntry = new LogEntry();
-									continue;
+									// If it is not yet a full line then keep going.
+									if (false == LogEntry.IsFullLine(logEntry.FullLine))
+									{
+										continue; // Keep going until we get the log line.
+									}
+
+									// Does the log entry meet our search criteria?
+									if (false == requestParameters.ShouldBeShown(logEntry))
+									{
+										logEntry = new LogEntry();
+										continue;
+									}
 								}
 
 								// Add the log entry.
@@ -592,7 +597,6 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 					| RegexOptions.CultureInvariant
 					| RegexOptions.Compiled
 			);
-			private string fullLine;
 
 			public DateTime? DateTime
 			{
@@ -616,20 +620,28 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			/// <returns></returns>
 			public static bool IsFullLine(string input) => ParseLineRegularExpression.IsMatch(input);
 
+			private static string fullLineKey = "FullLine";
 			public string FullLine
 			{
-				get => fullLine;
+				get
+				{
+					if (false == this.ContainsKey(fullLineKey))
+						this.Add(fullLineKey, null);
+					return this[fullLineKey];
+				}
 				set
 				{
-					fullLine = value;
+					this[fullLineKey] = value;
 					this.PopulateFromFullLine();
 				}
 			}
 
 			protected virtual void PopulateFromFullLine()
 			{
-				this.Clear();
-				if (null == this.FullLine)
+				foreach (var key in this.Keys)
+					if (key != fullLineKey)
+						this.Remove(key);
+				if (string.IsNullOrWhiteSpace(this.FullLine))
 					return;
 				var match = ParseLineRegularExpression.Match(this.FullLine);
 				if (!match.Success)

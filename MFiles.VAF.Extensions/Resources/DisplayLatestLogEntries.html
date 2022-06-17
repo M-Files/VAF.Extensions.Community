@@ -267,8 +267,9 @@
                     }
                     else
                     {
+                        console.log(entry)
                         // One long cell.
-                        var cell = createTableCellWithContent(entry[0], ["message"]);
+                        var cell = createTableCellWithContent(entry["FullLine"]);
                         cell.colSpan = 6;
                         tr.appendChild(cell);
                     }
