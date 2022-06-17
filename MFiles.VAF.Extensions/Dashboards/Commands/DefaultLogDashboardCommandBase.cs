@@ -29,6 +29,18 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			/// </summary>
 			[DataMember(Name = "size")]
 			public long Size { get; set; }
+
+			/// <summary>
+			/// When the log file was created.
+			/// </summary>
+			[DataMember(Name = "created")]
+			public DateTime Created { get; set; }
+
+			/// <summary>
+			/// When the log file was last written to.
+			/// </summary>
+			[DataMember(Name = "lastWrite")]
+			public DateTime LastWrite { get; set; }
 		}
 
 		/// <summary>
@@ -92,6 +104,8 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 				{
 					Size = file.Length,
 					RelativePath = filePath.Substring(rootPath.Length).Trim('\\'),
+					Created = file.CreationTimeUtc,
+					LastWrite = file.LastWriteTimeUtc
 				};
 				files.Add(fileInfo);
 			}

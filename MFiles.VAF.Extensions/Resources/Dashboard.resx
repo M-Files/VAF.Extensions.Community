@@ -218,7 +218,7 @@
     <value>No log targets are currently configured.</value>
   </data>
   <data name="Logging_Table_DownloadLogs" xml:space="preserve">
-    <value>Download logs</value>
+    <value>Download</value>
   </data>
   <data name="Logging_Table_LogLevelsHeader" xml:space="preserve">
     <value>Log Levels</value>
@@ -256,5 +256,8 @@
   <data name="TimeOnServer" xml:space="preserve">
     <value>Time on server: {0}</value>
     <comment>{0} will be replaced with current time in 24-hour format.</comment>
+  </data>
+  <data name="Logging_Table_ShowLatestLogEntries" xml:space="preserve">
+    <value>View latest</value>
   </data>
 </root>

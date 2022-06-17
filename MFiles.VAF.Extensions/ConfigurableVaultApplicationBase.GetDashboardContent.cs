@@ -363,16 +363,25 @@ namespace MFiles.VAF.Extensions
 				{
 					var cell = row.AddCell
 					(
-						new DashboardDomainCommand
+						new DashboardContentCollection()
 						{
-							DomainCommandID = this.AllowUserToSelectLogFiles
-								? Dashboards.Commands.ShowSelectLogDownloadDashboardCommand.CommandId
-								: Dashboards.Commands.DownloadSelectedLogsDashboardCommand.CommandId,
-							Title = Resources.Dashboard.Logging_Table_DownloadLogs,
-							Style = DashboardCommandStyle.Link
+							new DashboardDomainCommandEx
+							{
+								DomainCommandID = this.AllowUserToSelectLogFiles
+									? Dashboards.Commands.ShowSelectLogDownloadDashboardCommand.CommandId
+									: Dashboards.Commands.DownloadSelectedLogsDashboardCommand.CommandId,
+								Title = Resources.Dashboard.Logging_Table_DownloadLogs,
+								Icon = "Resources/Images/Download.png"
+							},
+							new DashboardDomainCommandEx
+							{
+								DomainCommandID = Dashboards.Commands.ShowLatestLogEntriesDashboardCommand.CommandId,
+								Title = Resources.Dashboard.Logging_Table_ShowLatestLogEntries,
+								Icon = "Resources/Images/viewlogs.png"
+							}
 						}
 					);
-					cell.Styles.AddOrUpdate("text-align", "center");
+					cell.Styles.AddOrUpdate("text-align", "right");
 				}
 				else
 				{

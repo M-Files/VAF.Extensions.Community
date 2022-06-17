@@ -322,7 +322,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Download logs.
+        ///   Looks up a localized string similar to Download.
         /// </summary>
         internal static string Logging_Table_DownloadLogs {
             get {
@@ -345,6 +345,15 @@ namespace MFiles.VAF.Extensions.Resources {
         internal static string Logging_Table_NameHeader {
             get {
                 return ResourceManager.GetString("Logging_Table_NameHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to View latest.
+        /// </summary>
+        internal static string Logging_Table_ShowLatestLogEntries {
+            get {
+                return ResourceManager.GetString("Logging_Table_ShowLatestLogEntries", resourceCulture);
             }
         }
         

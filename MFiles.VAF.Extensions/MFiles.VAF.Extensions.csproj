@@ -21,12 +21,17 @@
     <None Remove="Resources\DefaultLogDownloadDashboard.html" />
     <None Remove="Resources\Failed.png" />
     <None Remove="Resources\Images\canceled.png" />
+    <None Remove="Resources\Images\download.png" />
     <None Remove="Resources\Images\enabled.png" />
     <None Remove="Resources\Images\error.png" />
     <None Remove="Resources\Images\notenabled.png" />
+    <None Remove="Resources\Images\viewlogs.png" />
     <None Remove="Resources\Images\warning.png" />
     <None Remove="Resources\Running.png" />
     <None Remove="Resources\Waiting.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Images\viewlogs.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\lib\Resources\logo.png">
@@ -49,10 +54,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\DefaultLogDownloadDashboard.html" />
+    <EmbeddedResource Include="Resources\DisplayLatestLogEntries.html" />
     <EmbeddedResource Include="Resources\Images\canceled.png" />
     <EmbeddedResource Include="Resources\Images\Completed.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Images\Download.png" />
     <EmbeddedResource Include="Resources\Images\enabled.png" />
     <EmbeddedResource Include="Resources\Images\error.png" />
     <EmbeddedResource Include="Resources\Images\Failed.png">
