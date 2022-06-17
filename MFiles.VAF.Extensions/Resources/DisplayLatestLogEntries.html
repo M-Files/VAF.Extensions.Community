@@ -37,7 +37,7 @@
 
         #scrollPanel {
             position: absolute;
-            top: 115px;
+            top: 110px;
             bottom: 0px;
             right: 0px;
             left: 0px;
@@ -119,6 +119,20 @@
 
         body.unstructured #scrollPanel thead {
             display: none;
+        }
+        #unstructured {
+            display: none;
+            padding: 5px 15px;
+            padding-left: 30px;
+            background-image: url(%IMG_WARNING_DATAURI%);
+            background-repeat: no-repeat;
+            background-position: 7px center;
+            border: 1px solid orange;
+            background-color: lightGoldenrodYellow;
+            margin-bottom: 10px;
+        }
+        body.unstructured #unstructured{
+            display: block;
         }
 
         .loading, .no-entries {
@@ -463,6 +477,9 @@
             </form>
         </div>
         <div id="scrollPanel">
+            <div id="unstructured">
+                The logger is not using the default log layout, so structured formatting cannot be applied.
+            </div>
             <table id="logEntries">
                 <thead>
                     <tr>

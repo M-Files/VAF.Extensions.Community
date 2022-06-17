@@ -100,7 +100,9 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			var downloadMethod = clientOps.Manager.CreateCommandMethodSource(
 					clientOps.DefaultNodeLocation, RetrieveLatestLogEntriesCommand.CommandId);
 			string downloadMethodJson = JsonConvert.SerializeObject(downloadMethod);
-			string dashboard = template.Replace("%RETRIEVELOGENTRIES_METHOD%", downloadMethodJson);
+			string dashboard = template
+				.Replace("%RETRIEVELOGENTRIES_METHOD%", downloadMethodJson)
+				.Replace("%IMG_WARNING_DATAURI%", DashboardHelpersEx.ImageFileToDataUri("Resources/Images/warning.png"));
 
 			// Show the dashboard.
 			clientOps.Directives.Add(new VAF.Configuration.Domain.ClientDirective.ShowModalDashboard { Content = dashboard });

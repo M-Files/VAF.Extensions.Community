@@ -381,7 +381,7 @@ namespace MFiles.VAF.Extensions
 							}
 						}
 					);
-					cell.Styles.AddOrUpdate("text-align", "center");
+					cell.Styles.AddOrUpdate("text-align", "right");
 				}
 				else
 				{
