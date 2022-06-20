@@ -471,6 +471,17 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
+		/// Logs <see cref="TaskManagerEventType.TaskUpdateFailed"/> events.
+		/// </summary>
+		/// <param name="args">The event arguments.</param>
+		protected virtual void LogTaskUpdateFailedEvent(TaskManagerEventArgs args)
+		{
+			// Log the event.
+			this.logger.Warn(args.Exception,
+					"Failed to update job status. " + GetEventDataString(args));
+		}
+
+		/// <summary>
 		/// Logs <see cref="TaskManagerEventType.WaitingTasksCanceled"/> events.
 		/// </summary>
 		/// <param name="args">The event arguments.</param>
