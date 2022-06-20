@@ -74,6 +74,7 @@ namespace MFiles.VAF.Extensions
 				{ TaskManagerEventType.TaskJobRestarted, LogTaskJobRestartedEvent },
 				{ TaskManagerEventType.TaskUpdated, LogTaskUpdatedEvent },
 				{ TaskManagerEventType.TaskUpdateFailed, LogTaskUpdateFailedEvent },
+				{ TaskManagerEventType.WaitingTasksCanceled, LogWaitingTasksCanceledEvent },
 				{ TaskManagerEventType.TaskUpdateSkipped, LogTaskUpdateSkippedEvent },
 				{ TaskManagerEventType.TaskJobFinished, LogTaskJobFinishedEvent },
 				{ TaskManagerEventType.TaskAdded, LogTaskAddedEvent }
@@ -470,14 +471,14 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
-		/// Logs <see cref="TaskManagerEventType.TaskUpdateFailed"/> events.
+		/// Logs <see cref="TaskManagerEventType.WaitingTasksCanceled"/> events.
 		/// </summary>
 		/// <param name="args">The event arguments.</param>
-		protected virtual void LogTaskUpdateFailedEvent(TaskManagerEventArgs args)
+		protected virtual void LogWaitingTasksCanceledEvent(TaskManagerEventArgs args)
 		{
 			// Log the event.
 			this.logger.Warn(args.Exception,
-					"Failed to update job status. " + GetEventDataString(args));
+					"Job canceled. " + GetEventDataString(args));
 		}
 
 		/// <summary>
