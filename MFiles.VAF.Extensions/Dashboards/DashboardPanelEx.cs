@@ -90,31 +90,6 @@ namespace MFiles.VAF.Extensions.Dashboards
 
 		/// <inheritdoc />
 		protected override XmlDocumentFragment GenerateXmlDocumentFragment(XmlDocument xml)
-		{
-			var fragment = this.DashboardPanel.Generate(xml);
-
-			// Get a handle on the various elements.
-			XmlElement panel = (XmlElement)fragment.SelectNodes("*[@class=\"panel\"]")[0];
-
-			// Add the attributes.
-			foreach (var key in this.Attributes.Keys)
-			{
-				// Can't have style here.
-				if (key == "style")
-					continue;
-				var attr = xml.CreateAttribute(key);
-				attr.Value = this.Attributes[key];
-				panel.Attributes.Append(attr);
-			}
-
-			// Add the style.
-			{
-				var attr = xml.CreateAttribute("style");
-				attr.Value = $"{this.GetCssStyles() ?? ""} {panel.GetAttribute("style") ?? ""}";
-				panel.Attributes.Append(attr);
-			}
-
-			return fragment;
-		}
+			=> this.DashboardPanel?.Generate(xml);
 	}
 }

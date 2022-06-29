@@ -58,9 +58,57 @@ namespace MFiles.VAF.Extensions.Dashboards
 				element = fragment.FirstChild as XmlElement;
 			}
 
+			// Add the id, if defined.
+			this.ApplyID(xml, element);
+
+			// Add the attributes.
+			this.ApplyAttributes(xml, element);
+
+			// Add the style.
+			this.ApplyStyles(xml, element);
+
+			// Render the icon.
+			this.RenderIconTo(element);
+
+			return fragment;
+		}
+
+		/// <summary>
+		/// Sets the attribute named "id" on <paramref name="element"/>
+		/// to the value in <see cref="DashboardContentBase.ID"/>.
+		/// </summary>
+		/// <param name="xml">The XML document that <paramref name="element"/> comes from.</param>
+		/// <param name="element">The element to alter.</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="xml"/> or <paramref name="element"/> are null.</exception>
+		protected virtual void ApplyID(XmlDocument xml, XmlElement element)
+		{
+			// Sanity.
+			if (null == element)
+				throw new ArgumentNullException(nameof(xml));
+			if (null == element)
+				throw new ArgumentNullException(nameof(element));
+
 			// Add the id if defined.
 			if (!String.IsNullOrWhiteSpace(this.ID))
 				element.SetAttribute("id", this.ID);
+		}
+
+		/// <summary>
+		/// Sets any attributes defined in <see cref="DashboardContentBase.Attributes"/> 
+		/// to <paramref name="element"/>.
+		/// </summary>
+		/// <param name="xml">The XML document that <paramref name="element"/> comes from.</param>
+		/// <param name="element">The element to alter.</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="xml"/> or <paramref name="element"/> are null.</exception>
+		protected virtual void ApplyAttributes(XmlDocument xml, XmlElement element)
+		{
+			// Sanity.
+			if (null == element)
+				throw new ArgumentNullException(nameof(xml));
+			if (null == element)
+				throw new ArgumentNullException(nameof(element));
+			if (null == this.Attributes)
+				return;
 
 			// Add the attributes.
 			foreach (var key in this.Attributes.Keys)
@@ -70,25 +118,33 @@ namespace MFiles.VAF.Extensions.Dashboards
 					continue;
 				var attr = xml.CreateAttribute(key);
 				attr.Value = this.Attributes[key];
-				element.Attributes.Append(attr);
+				element.Attributes?.Append(attr);
 			}
+		}
 
-			// Render the icon.
-			this.RenderIconTo(element);
+		/// <summary>
+		/// Sets any styles defined in <see cref="DashboardContentBase.Styles"/> 
+		/// to <paramref name="element"/>.
+		/// </summary>
+		/// <param name="xml">The XML document that <paramref name="element"/> comes from.</param>
+		/// <param name="element">The element to alter.</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="xml"/> or <paramref name="element"/> are null.</exception>
+		protected virtual void ApplyStyles(XmlDocument xml, XmlElement element)
+		{
+			// Sanity.
+			if (null == element)
+				throw new ArgumentNullException(nameof(xml));
+			if (null == element)
+				throw new ArgumentNullException(nameof(element));
 
-			// Add the style.
-			{
-				var attr = xml.CreateAttribute("style");
-				attr.Value = $"{this.GetCssStyles() ?? ""};{element.GetAttribute("style") ?? ""}".Trim();
-				if (attr.Value?.StartsWith(";") ?? false)
-					attr.Value = attr.Value.Substring(1);
-				if (attr.Value?.EndsWith(";") ?? false)
-					attr.Value = attr.Value.Substring(0, attr.Value.Length - 1);
-				if (attr.Value.Length > 0)
-					element.Attributes.Append(attr);
-			}
-
-			return fragment;
+			var attr = xml.CreateAttribute("style");
+			attr.Value = $"{this.GetCssStyles() ?? ""};{element.GetAttribute("style") ?? ""}".Trim();
+			if (attr.Value?.StartsWith(";") ?? false)
+				attr.Value = attr.Value.Substring(1);
+			if (attr.Value?.EndsWith(";") ?? false)
+				attr.Value = attr.Value.Substring(0, attr.Value.Length - 1);
+			if (attr.Value.Length > 0)
+				element.Attributes?.Append(attr);
 		}
 
 		/// <summary>

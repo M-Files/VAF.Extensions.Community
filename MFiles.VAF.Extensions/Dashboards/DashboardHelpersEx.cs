@@ -17,10 +17,15 @@ namespace MFiles.VAF.Extensions.Dashboards
 		/// <returns>A value that can be used as an icon source.</returns>
 		public static string ImageFileToDataUri(string iconUri)
 		{
-			// Resolve the icon uri. If the icon is a file, convert it to a data-uri,
-			// otherwise assume the specified icon is a path that will resolve on the client
-			// (just wrap in quotes).
-			if (System.IO.File.Exists(iconUri))
+			// Sanity.
+			if(string.IsNullOrWhiteSpace(iconUri))
+				return string.Empty;
+
+			// If it starts with http/https then assume remote and reference it.
+			if (iconUri.StartsWith("http:") || iconUri.StartsWith("https:"))
+				return iconUri;
+			// If it exists on the disk then load that and convert to base64.
+			else if (System.IO.File.Exists(iconUri))
 				return DashboardHelper.ImageFileToDataUri(iconUri);
 			else
 			{
