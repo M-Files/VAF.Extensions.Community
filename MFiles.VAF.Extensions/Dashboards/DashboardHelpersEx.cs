@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,7 +16,7 @@ namespace MFiles.VAF.Extensions.Dashboards
 		/// </summary>
 		/// <param name="iconUri">The icon URI.</param>
 		/// <returns>A value that can be used as an icon source.</returns>
-		public static string ImageFileToDataUri(string iconUri)
+		public static string ImageFileToDataUri(string iconUri, Assembly assembly = null)
 		{
 			// Sanity.
 			if(string.IsNullOrWhiteSpace(iconUri))
@@ -29,8 +30,13 @@ namespace MFiles.VAF.Extensions.Dashboards
 				return DashboardHelper.ImageFileToDataUri(iconUri);
 			else
 			{
+
+				// Default to the calling assembly.
+				assembly = assembly ?? Assembly.GetCallingAssembly() ?? Assembly.GetExecutingAssembly();
+				if (null == assembly)
+					return String.Empty;
+
 				// Is it in a resource?
-				var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 				foreach (var resource in assembly.GetManifestResourceNames())
 				{
 					// TODO: Is this good enough?
@@ -61,6 +67,10 @@ namespace MFiles.VAF.Extensions.Dashboards
 
 					}
 				}
+
+				// If we're not in the executing assembly then check that.
+				if (assembly != Assembly.GetExecutingAssembly())
+					return ImageFileToDataUri(iconUri, Assembly.GetExecutingAssembly());
 
 				return String.Format("'{0}'", iconUri);
 			}
