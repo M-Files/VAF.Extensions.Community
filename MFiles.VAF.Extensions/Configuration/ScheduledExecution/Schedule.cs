@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions.ScheduledExecution
 {
+
 	/// <summary>
 	/// Represents a schedule in which a job should be re-run.
 	/// </summary>
@@ -45,20 +46,33 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		)]
 		public bool? RunOnVaultStartup { get; set; }
 
+		// There should be a custom one which uses https://docs.microsoft.com/en-us/dotnet/api/system.timezoneinfo.getsystemtimezones?view=net-6.0.
+		[DataMember]
+		public TriggerTimeType TriggerTimeType { get; set; } = TriggerTimeType.Default;
+
 		/// <summary>
 		/// Gets the next execution datetime for this trigger.
 		/// </summary>
 		/// <param name="after">The time after which the schedule should run.  Defaults to now (i.e. next-run time) if not provided.</param>
 		/// <returns>The next execution time.</returns>
-		public DateTime? GetNextExecution(DateTime? after = null)
+		public DateTimeOffset? GetNextExecution(DateTime? after = null)
 		{
 			// If we are not enabled then die.
 			if (false == this.Enabled)
 				return null;
-			
+
+			// What type of time are we using?
+			TimeZoneInfo timeZoneInfo = TimeZoneInfo.Local;
+			switch(this.TriggerTimeType)
+			{
+				case TriggerTimeType.Utc:
+					timeZoneInfo = TimeZoneInfo.Utc;
+					break;
+			}
+
 			// Get the next execution date from the triggers.
 			return this.Triggers?
-				.Select(t => t.GetNextExecution(after))
+				.Select(t => t.GetNextExecution(after, timeZoneInfo))
 				.Where(d => d.HasValue)
 				.OrderBy(d => d)
 				.FirstOrDefault();

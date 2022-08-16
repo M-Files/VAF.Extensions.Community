@@ -49,6 +49,27 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 
 		[TestMethod]
 		[DynamicData(nameof(GetNextExecutionData), DynamicDataSourceType.Method)]
+		public void GetNextExecution_UTC
+		(
+			IEnumerable<TriggerBase> triggers,
+			DateTime? after,
+			DateTime? expected
+		)
+		{
+			var execution = new Schedule()
+			{
+				Enabled = true,
+				Triggers = triggers
+						.Select(t => new Trigger(t))
+						.Where(t => t != null)
+						.ToList(),
+				TriggerTimeType = TriggerTimeType.Utc
+			}.GetNextExecution(after);
+			Assert.AreEqual(expected?.ToUniversalTime(), execution?.ToUniversalTime());
+		}
+
+		[TestMethod]
+		[DynamicData(nameof(GetNextExecutionData), DynamicDataSourceType.Method)]
 		public void GetNextExecution_NotEnabled
 		(
 			IEnumerable<TriggerBase> triggers,
@@ -68,7 +89,8 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 					Triggers = triggers
 						.Select(t => new Trigger(t))
 						.Where(t => t != null)
-						.ToList()
+						.ToList(),
+					TriggerTimeType = TriggerTimeType.Utc
 				}.GetNextExecution(after)
 			);
 		}

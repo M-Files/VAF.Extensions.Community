@@ -36,7 +36,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		}
 
 		/// <inheritdoc />
-		public override DateTime? GetNextExecution(DateTime? after = null)
+		public override DateTimeOffset? GetNextExecution(DateTime? after = null, TimeZoneInfo timeZoneInfo = null)
 		{
 			// Sanity.
 			if (
@@ -47,7 +47,10 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				return null;
 
 			// When should we start looking?
-			after = (after ?? DateTime.UtcNow).ToLocalTime();
+			after = (after ?? DateTime.UtcNow).ToUniversalTime();
+
+			// Convert the time into the timezone we're after.
+			after = TimeZoneInfo.ConvertTime(after.Value, timeZoneInfo ?? TimeZoneInfo.Local);
 
 			// Get the next execution time (this will not find run times today).
 			return this.TriggerDays
@@ -55,6 +58,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				.SelectMany(d => this.TriggerTimes.Select(t => d.Add(t)))
 				.Where(d => d > after.Value)
 				.OrderBy(d => d)
+				.Select(d => d.ToUniversalTime())
 				.FirstOrDefault();
 		}
 

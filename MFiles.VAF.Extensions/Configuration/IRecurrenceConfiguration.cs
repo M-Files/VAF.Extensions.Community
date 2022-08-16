@@ -11,12 +11,12 @@ namespace MFiles.VAF.Extensions
 		/// <example>&lt;p&gt;Runs every 10 minutes.&lt;/p&gt;</example>
 		string ToDashboardDisplayString();
 
-		/// <summary>
-		/// Returns the next time the recurrence should run.
-		/// </summary>
-		/// <param name="after">The current execution time, or null to use the current time.</param>
-		/// <returns>The next-run time.  May be null if there are no valid next-run times.</returns>
-		DateTime? GetNextExecution(DateTime? after = null);
+        /// <summary>
+        /// Returns the next time the recurrence should run.
+        /// </summary>
+        /// <param name="after">The current execution time, or null to use the current time.</param>
+        /// <returns>The next-run time.  May be null if there are no valid next-run times.</returns>
+        DateTimeOffset? GetNextExecution(DateTime? after = null);
 
 		/// <summary>
 		/// Whether the processor should run on vault startup (in addition to any other schedule or interval).

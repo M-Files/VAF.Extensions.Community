@@ -25,14 +25,11 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 			DateTime? expected
 		)
 		{
-			Assert.AreEqual
-			(
-				expected,
-				new DailyTrigger()
-				{
-					TriggerTimes = triggerTimes.ToList()
-				}.GetNextExecution(after)
-			);
+			var execution = new DailyTrigger()
+			{
+				TriggerTimes = triggerTimes.ToList()
+			}.GetNextExecution(after);
+			Assert.AreEqual(expected?.ToUniversalTime(), execution?.ToUniversalTime());
 		}
 
 		public static IEnumerable<object[]> GetNextExecutionData()

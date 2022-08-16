@@ -29,7 +29,7 @@ namespace MFiles.VAF.Extensions
 		)]
 		public bool? RunOnVaultStartup { get; set; } = true;
 
-		public DateTime? GetNextExecution(DateTime? after = null)
+		public DateTimeOffset? GetNextExecution(DateTime? after = null)
 		{
 			return (after?.ToUniversalTime() ?? DateTime.UtcNow).Add(this.Interval);
 		}
