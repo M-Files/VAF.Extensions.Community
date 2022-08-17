@@ -51,7 +51,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			{
 				ID = CommandId,
 				DisplayName = Resources.Dashboard.Logging_Table_ShowLatestLogEntries,
-				Locations = new List<ICommandLocation> { new DomainMenuCommandLocation() }
+				Locations = new List<ICommandLocation> { }
 			};
 			command.Execute = command.ShowLogEntriesDashboard;
 			return command;
