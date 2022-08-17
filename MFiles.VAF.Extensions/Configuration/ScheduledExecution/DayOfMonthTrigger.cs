@@ -187,7 +187,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		}
 
 		/// <inheritdoc />
-		public override string ToString()
+		public override string ToString(TriggerTimeType triggerTimeType, TimeZoneInfo customTimeZone)
 		{
 			// Sanity.
 			if (null == this.TriggerDays || this.TriggerDays.Count == 0)
@@ -195,10 +195,19 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			if (null == this.TriggerTimes || this.TriggerTimes.Count == 0)
 				return null;
 
+			// Append the time zone if we can.
+			var times = string.Join(", ", this.TriggerTimes.OrderBy(t => t).Select(t => t.ToString()));
+			if (customTimeZone != null)
+				if (customTimeZone == TimeZoneInfo.Local)
+					times += " (server time)";
+				else if (customTimeZone == TimeZoneInfo.Utc)
+					times += " (UTC)";
+				else
+					times += $" ({customTimeZone.DisplayName})";
 			return Resources.Schedule.Triggers_DayOfMonthTrigger.EscapeXmlForDashboard
 				(
 					string.Join(", ", this.TriggerDays.OrderBy(t => t)),
-					string.Join(", ", this.TriggerTimes.OrderBy(t => t).Select(t => t.ToString()))
+					times
 				);
 		}
 	}

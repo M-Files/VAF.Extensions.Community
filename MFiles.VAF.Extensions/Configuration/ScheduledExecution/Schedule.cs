@@ -53,10 +53,10 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		[DataMember]
 		[JsonConfEditor
 		(
-			DefaultValue = TriggerTimeType.Default
+			DefaultValue = TriggerTimeType.ServerTime
 		)]
-		public TriggerTimeType TriggerTimeType { get; set; } = TriggerTimeType.Default;
-		public bool ShouldSerializeTriggerTimeType() => this.TriggerTimeType != TriggerTimeType.Default;
+		public TriggerTimeType TriggerTimeType { get; set; } = TriggerTimeType.ServerTime;
+		public bool ShouldSerializeTriggerTimeType() => this.TriggerTimeType != TriggerTimeType.ServerTime;
 
 		[DataMember]
 		[JsonConfEditor
@@ -127,11 +127,29 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				? $"<p>{Resources.Schedule.Repeats_Intro_RunsWhenVaultStarts.EscapeXmlForDashboard()}"
 				: $"<p>{Resources.Schedule.Repeats_Intro_DoesNotRunWhenVaultStarts.EscapeXmlForDashboard()}";
 
+			// Get the timezone.
+			var timeZoneInfo = TimeZoneInfo.Local;
+			if (this.TriggerTimeType == TriggerTimeType.Utc)
+			{
+				timeZoneInfo = TimeZoneInfo.Utc;
+			}
+			if (this.TriggerTimeType == TriggerTimeType.Custom)
+			{
+				try
+				{
+					timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(this.TriggerTimeCustomTimeZone);
+				}
+				catch
+				{
+					this.Logger?.Warn($"Could not convert {this.TriggerTimeCustomTimeZone} to a time zone.");
+				}
+			}
+
 			// Output the triggers as a HTML list.
 			output += "<ul>";
 			foreach (var trigger in this.Triggers)
 			{
-				var triggerOutput = trigger.ToString();
+				var triggerOutput = trigger.ToString(this.TriggerTimeType, timeZoneInfo);
 				if (string.IsNullOrWhiteSpace(triggerOutput))
 					continue;
 				output += $"<li>{triggerOutput}</li>";

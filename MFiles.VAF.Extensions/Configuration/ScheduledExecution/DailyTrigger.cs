@@ -71,13 +71,22 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		}
 
 		/// <inheritdoc />
-		public override string ToString()
+		public virtual string ToString(TriggerTimeType triggerTimeType, TimeZoneInfo customTimeZone)
 		{
 			// Sanity.
 			if (null == this.TriggerTimes || this.TriggerTimes.Count == 0)
 				return null;
 
-			return Resources.Schedule.Triggers_DailyTrigger.EscapeXmlForDashboard(string.Join(", ", this.TriggerTimes.OrderBy(t => t).Select(t => t.ToString())));
+			// Append the time zone if we can.
+			var times = string.Join(", ", this.TriggerTimes.OrderBy(t => t).Select(t => t.ToString()));
+			if (customTimeZone != null)
+				if (customTimeZone == TimeZoneInfo.Local)
+					times += " (server time)";
+				else if (customTimeZone == TimeZoneInfo.Utc)
+					times += " (UTC)";
+				else
+					times += $" ({customTimeZone.DisplayName})";
+			return Resources.Schedule.Triggers_DailyTrigger.EscapeXmlForDashboard(times);
 		}
 
 		/// <summary>

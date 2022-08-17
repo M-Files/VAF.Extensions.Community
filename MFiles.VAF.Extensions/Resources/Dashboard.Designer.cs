@@ -115,7 +115,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Completed. Started at approximately {0} server time (took {1})..
+        ///   Looks up a localized string similar to Completed. Started at approximately {0} (took {1})..
         /// </summary>
         internal static string AsynchronousOperations_Table_CompletedRowTitle_WithTimes {
             get {
@@ -151,7 +151,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed. Started at approximately {0} server time (took {1})..
+        ///   Looks up a localized string similar to Failed. Started at approximately {0} (took {1})..
         /// </summary>
         internal static string AsynchronousOperations_Table_FailedRowTitle_WithTimes {
             get {
@@ -214,7 +214,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Running. Started at approximately {0} server time (taken {1} so far)..
+        ///   Looks up a localized string similar to Running. Started at approximately {0} (taken {1} so far)..
         /// </summary>
         internal static string AsynchronousOperations_Table_RunningRowTitle_WithTimes {
             get {

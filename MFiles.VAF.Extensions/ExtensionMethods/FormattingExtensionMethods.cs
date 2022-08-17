@@ -121,9 +121,9 @@ namespace MFiles.VAF.Extensions
 		/// <param name="value">The value to represent.</param>
 		/// <param name="representation">Whether the value is supposed to be last-run (past) or next-run (future).</param>
 		/// <returns>A string in English stating when it should run.</returns>
-		public static string ToTimeOffset(this DateTime value, DateTimeRepresentationOf representation)
+		public static string ToTimeOffset(this DateTime value, DateTimeRepresentationOf representation, TimeZoneInfo timeZoneInfo = null)
 		{
-			return ((DateTime?)value).ToTimeOffset(representation);
+			return ((DateTime?)value).ToTimeOffset(representation, timeZoneInfo);
 		}
 
 		/// <summary>
@@ -134,7 +134,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="value">The value to represent.</param>
 		/// <param name="representation">Whether the value is supposed to be last-run (past) or next-run (future).</param>
 		/// <returns>A string in English stating when it should run.</returns>
-		public static string ToTimeOffset(this DateTime? value, DateTimeRepresentationOf representation)
+		public static string ToTimeOffset(this DateTime? value, DateTimeRepresentationOf representation, TimeZoneInfo timeZoneInfo = null)
 		{
 			// No value?
 			if (null == value)
@@ -142,9 +142,12 @@ namespace MFiles.VAF.Extensions
 					? Resources.Time.NotRunSinceLastVaultStart.EscapeXmlForDashboard()
 					: Resources.Time.NotScheduled.EscapeXmlForDashboard();
 
+			// Ensure we have a timezone.
+			timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
+
 			// Find the difference between the scheduled time and now.
 			var universalValue = value.Value.ToUniversalTime();
-			var localTime = universalValue.ToLocalTime();
+			var localTime = TimeZoneInfo.ConvertTimeFromUtc(universalValue, timeZoneInfo); // universalValue.ToLocalTime();
 			var diff = universalValue.Subtract(DateTime.UtcNow);
 			var isInPast = diff < TimeSpan.Zero;
 			if (Math.Abs(diff.TotalSeconds) <= 10)

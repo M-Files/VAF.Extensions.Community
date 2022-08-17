@@ -140,7 +140,7 @@
     <value>Completed.</value>
   </data>
   <data name="AsynchronousOperations_Table_CompletedRowTitle_WithTimes" xml:space="preserve">
-    <value>Completed. Started at approximately {0} server time (took {1}).</value>
+    <value>Completed. Started at approximately {0} (took {1}).</value>
     <comment>{0} will be replaced with started time in yyyy-MM-dd HH:mm:ss format. {1} will be replaced with the duration.</comment>
   </data>
   <data name="AsynchronousOperations_Table_DetailsHeader" xml:space="preserve">
@@ -153,7 +153,7 @@
     <value>Failed.</value>
   </data>
   <data name="AsynchronousOperations_Table_FailedRowTitle_WithTimes" xml:space="preserve">
-    <value>Failed. Started at approximately {0} server time (took {1}).</value>
+    <value>Failed. Started at approximately {0} (took {1}).</value>
     <comment>{0} will be replaced with started time in yyyy-MM-dd HH:mm:ss format. {1} will be replaced with the duration.</comment>
   </data>
   <data name="AsynchronousOperations_Table_FilteredListComment" xml:space="preserve">
@@ -180,7 +180,7 @@
     <value>Running.</value>
   </data>
   <data name="AsynchronousOperations_Table_RunningRowTitle_WithTimes" xml:space="preserve">
-    <value>Running. Started at approximately {0} server time (taken {1} so far).</value>
+    <value>Running. Started at approximately {0} (taken {1} so far).</value>
     <comment>{0} will be replaced with started time in yyyy-MM-dd HH:mm:ss format. {1} will be replaced with the duration.</comment>
   </data>
   <data name="AsynchronousOperations_Table_ScheduledHeader" xml:space="preserve">

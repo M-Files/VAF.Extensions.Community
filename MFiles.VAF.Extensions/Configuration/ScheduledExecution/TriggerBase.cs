@@ -3,7 +3,6 @@ using System;
 using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions.ScheduledExecution
-
 {
 	/// <summary>
 	/// Class used for configuration purposes.
@@ -69,16 +68,16 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		}
 
 		/// <inheritdoc />
-		public override string ToString()
+		public virtual string ToString(TriggerTimeType triggerTimeType, TimeZoneInfo customTimeZone)
 		{
 			switch (this.Type)
 			{
 				case ScheduleTriggerType.Daily:
-					return this.DailyTriggerConfiguration?.ToString();
+					return this.DailyTriggerConfiguration?.ToString(triggerTimeType, customTimeZone);
 				case ScheduleTriggerType.Weekly:
-					return this.WeeklyTriggerConfiguration?.ToString();
+					return this.WeeklyTriggerConfiguration?.ToString(triggerTimeType, customTimeZone);
 				case ScheduleTriggerType.Monthly:
-					return this.DayOfMonthTriggerConfiguration?.ToString();
+					return this.DayOfMonthTriggerConfiguration?.ToString(triggerTimeType, customTimeZone);
 				default:
 					return null;
 			}
