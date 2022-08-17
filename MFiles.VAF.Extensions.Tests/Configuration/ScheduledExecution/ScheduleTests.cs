@@ -48,8 +48,8 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 		}
 
 		[TestMethod]
-		[DynamicData(nameof(GetNextExecutionData), DynamicDataSourceType.Method)]
-		public void GetNextExecution_UTC
+		[DynamicData(nameof(GetNextExecutionData_Finnish), DynamicDataSourceType.Method)]
+		public void GetNextExecution_Finnish
 		(
 			IEnumerable<TriggerBase> triggers,
 			DateTime? after,
@@ -63,7 +63,8 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 						.Select(t => new Trigger(t))
 						.Where(t => t != null)
 						.ToList(),
-				TriggerTimeType = TriggerTimeType.Utc
+				TriggerTimeType = TriggerTimeType.Custom,
+				TriggerTimeCustomTimeZone = "FLE Standard Time"
 			}.GetNextExecution(after);
 			Assert.AreEqual(expected?.ToUniversalTime(), execution?.ToUniversalTime());
 		}
@@ -143,7 +144,7 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 				(DateTime?)null
 			};
 
-			// Trigger at exact current time returns next day.
+			// Trigger at exact current time returns now.
 			yield return new object[]
 			{
 				new TriggerBase[]
@@ -156,7 +157,94 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 					}
 				},
 				new DateTime(2021, 03, 17, 17, 00, 00), // Wednesday @ 1am
-				new DateTime(2021, 03, 18, 17, 00, 00)
+				new DateTime(2021, 03, 17, 17, 00, 00)
+			};
+		}
+
+		/// <summary>
+		/// This is the same data as <see cref="GetNextExecutionData"/>, but the
+		/// trigger times are expected to be in Finnish timezone (UTC+2), so the resulting
+		/// times should be accordingly offset.
+		/// </summary>
+		/// <returns></returns>
+		public static IEnumerable<object[]> GetNextExecutionData_Finnish()
+		{
+			// Single trigger.
+			yield return new object[]
+			{
+				new TriggerBase[]
+				{
+					new DailyTrigger(){
+						TriggerTimes = new List<TimeSpan>()
+						{
+							new TimeSpan(17, 0, 0)
+						}.ToList()
+					}
+				},
+				new DateTime(2021, 03, 17, 01, 00, 00, DateTimeKind.Utc), // Wednesday @ 1am
+				new DateTime(2021, 03, 17, 15, 00, 00, DateTimeKind.Utc), // Wednesday @ 5pm
+			};
+
+			// Multiple triggers returns earliest.
+			yield return new object[]
+			{
+				new TriggerBase[]
+				{
+					new DailyTrigger(){
+						TriggerTimes = new List<TimeSpan>()
+						{
+							new TimeSpan(17, 0, 0)
+						}.ToList()
+					},
+					new DailyTrigger(){
+						TriggerTimes = new List<TimeSpan>()
+						{
+							new TimeSpan(12, 0, 0)
+						}.ToList()
+					}
+				},
+				new DateTime(2021, 03, 17, 01, 00, 00, DateTimeKind.Utc), // Wednesday @ 1am
+				new DateTime(2021, 03, 17, 10, 00, 00, DateTimeKind.Utc), // Wednesday @ 10am
+			};
+
+			// No triggers = null.
+			yield return new object[]
+			{
+				new TriggerBase[0],
+				new DateTime(2021, 03, 17, 01, 00, 00, DateTimeKind.Utc), // Wednesday @ 1am
+				(DateTime?)null
+			};
+
+			// Trigger at exact current time returns now.
+			yield return new object[]
+			{
+				new TriggerBase[]
+				{
+					new DailyTrigger(){
+						TriggerTimes = new List<TimeSpan>()
+						{
+							new TimeSpan(17, 0, 0)
+						}.ToList()
+					}
+				},
+				new DateTime(2021, 03, 17, 15, 00, 00, DateTimeKind.Utc),
+				new DateTime(2021, 03, 17, 15, 00, 00, DateTimeKind.Utc)
+			};
+
+			// Trigger at one minute past current time returns next day.
+			yield return new object[]
+			{
+				new TriggerBase[]
+				{
+					new DailyTrigger(){
+						TriggerTimes = new List<TimeSpan>()
+						{
+							new TimeSpan(17, 0, 0)
+						}.ToList()
+					}
+				},
+				new DateTime(2021, 03, 17, 15, 01, 00, DateTimeKind.Utc),
+				new DateTime(2021, 03, 18, 15, 00, 00, DateTimeKind.Utc)
 			};
 		}
 

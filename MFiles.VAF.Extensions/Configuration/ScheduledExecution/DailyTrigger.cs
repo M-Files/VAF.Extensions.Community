@@ -44,7 +44,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				return null;
 
 			// When should we start looking?
-			after = (after ?? DateTime.UtcNow).ToUniversalTime();
+			timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
 
 			// Get the next execution time.
 			return this.TriggerTimes
@@ -52,11 +52,16 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				(
 					t =>
 					{
-						var output = new DateTimeOffset(after.Value, (timeZoneInfo ?? TimeZoneInfo.Local).GetUtcOffset(after.Value));
-						if (output.TimeOfDay < t)
-							output = output.Date.Add(t); // Time is yet to come today.
+						// Convert the "after" time to the time in the given timezone.
+						after = TimeZoneInfo.ConvertTimeFromUtc((after ?? DateTime.UtcNow).ToUniversalTime(), timeZoneInfo);
+
+						// Set up the next execution time which is at midnight in the correct timezone.
+						var output = new DateTimeOffset(after.Value.Date, timeZoneInfo.GetUtcOffset(after.Value.Date));
+
+						if (after.Value.TimeOfDay <= t)
+							output = output.Add(t); // Time is yet to come today (or is now).
 						else
-							output = output.Date.AddDays(1).Add(t); // Time has passed - return tomorrow.
+							output = output.AddDays(1).Add(t); // Time has passed - return tomorrow.
 						return output;
 					}
 				)

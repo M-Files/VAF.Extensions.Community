@@ -1,4 +1,6 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VAF.Extensions.Configuration.ScheduledExecution;
+using MFiles.VaultApplications.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +16,8 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 	public class Schedule
 		: IRecurrenceConfiguration
 	{
+		private ILogger Logger { get; } = LogManager.GetLogger(typeof(Schedule));
+
 		/// <summary>
 		/// Whether the schedule is currently enabled or not.
 		/// </summary>
@@ -46,9 +50,24 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		)]
 		public bool? RunOnVaultStartup { get; set; }
 
-		// There should be a custom one which uses https://docs.microsoft.com/en-us/dotnet/api/system.timezoneinfo.getsystemtimezones?view=net-6.0.
 		[DataMember]
+		[JsonConfEditor
+		(
+			DefaultValue = TriggerTimeType.Default
+		)]
 		public TriggerTimeType TriggerTimeType { get; set; } = TriggerTimeType.Default;
+		public bool ShouldSerializeTriggerTimeType() => this.TriggerTimeType != TriggerTimeType.Default;
+
+		[DataMember]
+		[JsonConfEditor
+		(
+			TypeEditor = "options",
+			Hidden = true,
+			ShowWhen = ".parent._children{.key == 'TriggerTimeType' && .value == 'Custom' }"
+		)]
+		[ValueOptions(typeof(TimeZoneStableValueOptionsProvider))]
+		public string TriggerTimeCustomTimeZone { get; set; }
+		public bool ShouldSerializeTriggerTimeCustomTimeZone() => !string.IsNullOrWhiteSpace(this.TriggerTimeCustomTimeZone);
 
 		/// <summary>
 		/// Gets the next execution datetime for this trigger.
@@ -67,6 +86,17 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			{
 				case TriggerTimeType.Utc:
 					timeZoneInfo = TimeZoneInfo.Utc;
+					break;
+				case TriggerTimeType.Custom:
+					try
+					{
+						timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(this.TriggerTimeCustomTimeZone);
+					}
+					catch
+					{
+						this.Logger?.Warn($"Could not convert '{this.TriggerTimeCustomTimeZone}' to a time zone.  Reverting to local.");
+						timeZoneInfo = TimeZoneInfo.Local;
+					}
 					break;
 			}
 
