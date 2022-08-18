@@ -192,6 +192,18 @@
   <data name="Schedule_Triggers_Label" xml:space="preserve">
     <value>Triggers</value>
   </data>
+  <data name="Schedule_TriggerTimeCustomTimeZone_HelpText" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Schedule_TriggerTimeCustomTimeZone_Label" xml:space="preserve">
+    <value>Custom Time Zone</value>
+  </data>
+  <data name="Schedule_TriggerTimeType_HelpText" xml:space="preserve">
+    <value>Triggers are defined as a time (e.g. 5am); choose here whether this time refers to the time on the server, the time in UTC, or the time in a specified timezone.</value>
+  </data>
+  <data name="Schedule_TriggerTimeType_Label" xml:space="preserve">
+    <value>Trigger Time Type</value>
+  </data>
   <data name="Schedule_UnrepresentableDateHandling_LastDayOfMonth" xml:space="preserve">
     <value>Use closest representable last day of month</value>
   </data>
@@ -209,5 +221,14 @@
   </data>
   <data name="TimeSpanEx_Interval" xml:space="preserve">
     <value>Interval</value>
+  </data>
+  <data name="TriggerTimeType_Custom" xml:space="preserve">
+    <value>The trigger times should be interpreted as whatever custom time zone is configured.</value>
+  </data>
+  <data name="TriggerTimeType_ServerTime" xml:space="preserve">
+    <value>The trigger times should be interpreted in whatever time zone the server is configured in.  This is the default.</value>
+  </data>
+  <data name="TriggerTimeType_Utc" xml:space="preserve">
+    <value>The trigger times should be interpreted as UTC.</value>
   </data>
 </root>

@@ -53,6 +53,8 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		[DataMember]
 		[JsonConfEditor
 		(
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_TriggerTimeType_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_TriggerTimeType_HelpText),
 			DefaultValue = TriggerTimeType.ServerTime
 		)]
 		public TriggerTimeType TriggerTimeType { get; set; } = TriggerTimeType.ServerTime;
@@ -61,13 +63,15 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		[DataMember]
 		[JsonConfEditor
 		(
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_TriggerTimeCustomTimeZone_Label),
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_TriggerTimeCustomTimeZone_HelpText),
 			TypeEditor = "options",
 			Hidden = true,
 			ShowWhen = ".parent._children{.key == 'TriggerTimeType' && .value == 'Custom' }"
 		)]
 		[ValueOptions(typeof(TimeZoneStableValueOptionsProvider))]
-		public string TriggerTimeCustomTimeZone { get; set; }
-		public bool ShouldSerializeTriggerTimeCustomTimeZone() => !string.IsNullOrWhiteSpace(this.TriggerTimeCustomTimeZone);
+		public string TriggerTimeCustomTimeZone { get; set; } = "UTC";
+		public bool ShouldSerializeTriggerTimeCustomTimeZone() => !string.IsNullOrWhiteSpace(this.TriggerTimeCustomTimeZone) && this.TriggerTimeCustomTimeZone != "UTC";
 
 		/// <summary>
 		/// Gets the next execution datetime for this trigger.

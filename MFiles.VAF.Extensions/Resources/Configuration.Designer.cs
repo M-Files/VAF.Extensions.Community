@@ -250,6 +250,42 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Schedule_TriggerTimeCustomTimeZone_HelpText {
+            get {
+                return ResourceManager.GetString("Schedule_TriggerTimeCustomTimeZone_HelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Custom Time Zone.
+        /// </summary>
+        internal static string Schedule_TriggerTimeCustomTimeZone_Label {
+            get {
+                return ResourceManager.GetString("Schedule_TriggerTimeCustomTimeZone_Label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Triggers are defined as a time (e.g. 5am); choose here whether this time refers to the time on the server, the time in UTC, or the time in a specified timezone..
+        /// </summary>
+        internal static string Schedule_TriggerTimeType_HelpText {
+            get {
+                return ResourceManager.GetString("Schedule_TriggerTimeType_HelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trigger Time Type.
+        /// </summary>
+        internal static string Schedule_TriggerTimeType_Label {
+            get {
+                return ResourceManager.GetString("Schedule_TriggerTimeType_Label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Use closest representable last day of month.
         /// </summary>
         internal static string Schedule_UnrepresentableDateHandling_LastDayOfMonth {
@@ -336,6 +372,33 @@ namespace MFiles.VAF.Extensions.Resources {
         internal static string TimeSpanEx_Interval {
             get {
                 return ResourceManager.GetString("TimeSpanEx_Interval", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The trigger times should be interpreted as whatever custom time zone is configured..
+        /// </summary>
+        internal static string TriggerTimeType_Custom {
+            get {
+                return ResourceManager.GetString("TriggerTimeType_Custom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The trigger times should be interpreted in whatever time zone the server is configured in.  This is the default..
+        /// </summary>
+        internal static string TriggerTimeType_ServerTime {
+            get {
+                return ResourceManager.GetString("TriggerTimeType_ServerTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The trigger times should be interpreted as UTC..
+        /// </summary>
+        internal static string TriggerTimeType_Utc {
+            get {
+                return ResourceManager.GetString("TriggerTimeType_Utc", resourceCulture);
             }
         }
     }
