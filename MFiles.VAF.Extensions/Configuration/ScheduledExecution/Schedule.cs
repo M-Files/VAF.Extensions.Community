@@ -67,7 +67,8 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.Schedule_TriggerTimeCustomTimeZone_HelpText),
 			TypeEditor = "options",
 			Hidden = true,
-			ShowWhen = ".parent._children{.key == 'TriggerTimeType' && .value == 'Custom' }"
+			ShowWhen = ".parent._children{.key == 'TriggerTimeType' && .value == 'Custom' }",
+			DefaultValue = "UTC"
 		)]
 		[ValueOptions(typeof(TimeZoneStableValueOptionsProvider))]
 		public string TriggerTimeCustomTimeZone { get; set; } = "UTC";
