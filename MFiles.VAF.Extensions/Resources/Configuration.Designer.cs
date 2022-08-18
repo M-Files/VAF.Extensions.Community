@@ -376,7 +376,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The trigger times should be interpreted as whatever custom time zone is configured..
+        ///   Looks up a localized string similar to Custom.
         /// </summary>
         internal static string TriggerTimeType_Custom {
             get {
@@ -385,7 +385,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The trigger times should be interpreted in whatever time zone the server is configured in.  This is the default..
+        ///   Looks up a localized string similar to The server time zone.
         /// </summary>
         internal static string TriggerTimeType_ServerTime {
             get {
@@ -394,7 +394,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The trigger times should be interpreted as UTC..
+        ///   Looks up a localized string similar to Co-ordinated Universal Time (UTC).
         /// </summary>
         internal static string TriggerTimeType_Utc {
             get {

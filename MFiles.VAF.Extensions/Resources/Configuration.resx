@@ -223,12 +223,12 @@
     <value>Interval</value>
   </data>
   <data name="TriggerTimeType_Custom" xml:space="preserve">
-    <value>The trigger times should be interpreted as whatever custom time zone is configured.</value>
+    <value>Custom</value>
   </data>
   <data name="TriggerTimeType_ServerTime" xml:space="preserve">
-    <value>The trigger times should be interpreted in whatever time zone the server is configured in.  This is the default.</value>
+    <value>The server time zone</value>
   </data>
   <data name="TriggerTimeType_Utc" xml:space="preserve">
-    <value>The trigger times should be interpreted as UTC.</value>
+    <value>Co-ordinated Universal Time (UTC)</value>
   </data>
 </root>
