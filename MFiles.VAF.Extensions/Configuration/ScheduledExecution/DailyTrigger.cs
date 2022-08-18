@@ -61,7 +61,19 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 						if (after.Value.TimeOfDay <= t)
 							output = output.Add(t); // Time is yet to come today (or is now).
 						else
-							output = output.AddDays(1).Add(t); // Time has passed - return tomorrow.
+						{
+							// If the next day has gone to/from DST then we need to deal with it.
+							var oldoffset = timeZoneInfo.GetUtcOffset(output);
+							output = output.AddDays(1);
+							var newoffset = timeZoneInfo.GetUtcOffset(output);
+							if(oldoffset != newoffset)
+							{
+								output = output.Subtract(newoffset - oldoffset);
+							}
+
+							// Add on the correct time, now for the subsequent day.
+							output = output.Add(t);
+						}
 						return output;
 					}
 				)
