@@ -15,6 +15,8 @@
     <PackageIconUrl />
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Configurations>Debug;Release;DebugNoDeployment</Configurations>
+    <PackageReadmeFile>nuget-readme.md</PackageReadmeFile>
+    <PackageReleaseNotes></PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\Completed.png" />
@@ -194,6 +196,12 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Time.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="nuget-readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
   <Target Name="CleanNugetPackages" BeforeTargets="Build">
     <ItemGroup>
