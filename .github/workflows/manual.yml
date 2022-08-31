@@ -21,7 +21,9 @@ jobs:
 
     
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
     - name: versionSuffix
       shell: pwsh
@@ -45,13 +47,23 @@ jobs:
         $versionNumber = (Get-Date -Format "yy.M.0.${{ github.run_number }}") + "${{ env.versionSuffix }}"
         echo "versionNumber=$versionNumber" | Out-File -FilePath $Env:GITHUB_ENV -Append
 
+    - name: Write release notes
+      shell: pwsh
+      run: |
+        $lastTag = git describe --tags --abbrev=0
+        $cmd = "git log --pretty=""format:%H %s"" --max-count=50 --no-merges $lastTag..@"
+        $changes = cmd /c $cmd
+        Add-Content -Path "release-notes.txt" -Value "Version ${{ env.versionNumber }}" -NoNewline
+        Add-Content -Path "release-notes.txt" -Value ""
+        Add-Content -Path "release-notes.txt" -Value $changes
+
     - name: Setup MSBuild path
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@v1.1
 
     - name: Setup dot net
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 3.1.101
+        dotnet-version: 6.0.x
       
     - name: Create nuget package
       run: dotnet pack ./MFiles.VAF.Extensions/MFiles.VAF.Extensions.csproj --configuration Release -p:Version=${{ env.versionNumber }}
