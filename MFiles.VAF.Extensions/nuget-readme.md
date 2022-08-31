@@ -14,3 +14,5 @@ Releases follow a naming format based upon the M-Files versioning; releases are 
  * `22.7.0.13-test-feature-1` - this release was made in July 2022 from a specific feateure branch.  This release will contain in-development functionality and should only be used when needing to test the specific feature being developed.  Significant breaking changes may still be made when this functionality progresses to preview or release builds.
 
  Any problems can be logged as [issues against the repository](https://github.com/M-Files/VAF.Extensions.Community/issues), or discussed on the [M-Files Community](https://community.m-files.com).
+
+## Commits in this release
