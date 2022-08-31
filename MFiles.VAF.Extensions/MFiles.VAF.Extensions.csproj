@@ -197,10 +197,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Update="nuget-readme.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
+    <None Include="nuget-readme.md" Pack="true" PackagePath="" />
   </ItemGroup>
   <Target Name="CleanNugetPackages" BeforeTargets="Build">
     <ItemGroup>
