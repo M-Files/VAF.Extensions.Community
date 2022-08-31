@@ -54,7 +54,7 @@ jobs:
         $cmd = "git log --pretty=""format:%h %an %s"" --max-count=50 --no-merges $lastTag..@"
         $changes = cmd /c $cmd
         Add-Content -Path "release-notes.txt" -Value "Version ${{ env.versionNumber }}" -NoNewline
-        Add-Content -Path "release-notes.txt" -Value "`r`n`r`n" -NoNewline
+        Add-Content -Path "release-notes.txt" -Value "`r`n`r`n`r`n" -NoNewline
         Add-Content -Path "release-notes.txt" -Value $changes
 
     - name: Setup MSBuild path
