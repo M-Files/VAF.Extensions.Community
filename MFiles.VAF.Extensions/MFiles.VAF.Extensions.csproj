@@ -15,7 +15,7 @@
     <PackageIconUrl />
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Configurations>Debug;Release;DebugNoDeployment</Configurations>
-    <PackageReadmeFile>MFiles.VAFExtensions\nuget-readme.md</PackageReadmeFile>
+    <PackageReadmeFile>nuget-readme.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\Completed.png" />
