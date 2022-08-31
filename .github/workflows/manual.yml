@@ -59,6 +59,8 @@ jobs:
 
     - name: Setup MSBuild path
       uses: microsoft/setup-msbuild@v1.1
+      with:
+        vs-version: '[17.0)'
 
     - name: Setup dot net
       uses: actions/setup-dotnet@v2
