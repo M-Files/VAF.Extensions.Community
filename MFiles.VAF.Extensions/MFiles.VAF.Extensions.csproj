@@ -15,7 +15,8 @@
     <PackageIconUrl />
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Configurations>Debug;Release;DebugNoDeployment</Configurations>
-    <PackageReadmeFile>nuget-readme.md</PackageReadmeFile>
+	  <!-- the pack process in github needs this "broken" path -->
+    <PackageReadmeFile>MFiles.VAFExtensions\nuget-readme.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\Completed.png" />
@@ -197,7 +198,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="nuget-readme.md" Pack="true" PackagePath="" />
+    <None Include="nuget-readme.md" Pack="True" PackagePath="\" />
   </ItemGroup>
   <Target Name="CleanNugetPackages" BeforeTargets="Build">
     <ItemGroup>
@@ -206,8 +207,8 @@
     <Delete Files="@(FilesToDelete)" />
   </Target>
 <Target Name="PreparePackageReleaseNotesFromFile" BeforeTargets="GenerateNuspec">
-  <ReadLinesFromFile File="../release-notes.txt" >
-    <Output TaskParameter="Lines" ItemName="ReleaseNoteLines"/>
+  <ReadLinesFromFile File="../release-notes.txt">
+    <Output TaskParameter="Lines" ItemName="ReleaseNoteLines" />
   </ReadLinesFromFile>
   <PropertyGroup>
     <PackageReleaseNotes>@(ReleaseNoteLines, '%0a')</PackageReleaseNotes>
