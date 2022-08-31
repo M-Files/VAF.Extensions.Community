@@ -53,9 +53,9 @@ jobs:
         $lastTag = git describe --tags --abbrev=0
         $cmd = "git log --pretty=""format:%h %an %s"" --max-count=50 --no-merges $lastTag..@"
         $changes = cmd /c $cmd
-        Add-Content -Path "MFiles.VAF.Extensions\nuget-readme.md" -Value " ($lastTag)" -NoNewline
-        Add-Content -Path "MFiles.VAF.Extensions\nuget-readme.md" -Value "`r`n`r`n" -NoNewline
-        Add-Content -Path "MFiles.VAF.Extensions\nuget-readme.md" -Value $changes -NoNewline
+        Add-Content -Path "release-notes.txt" -Value "Version ${{ env.versionSuffix }}" -NoNewline
+        Add-Content -Path "release-notes.txt" -Value "`r`n`r`n" -NoNewline
+        Add-Content -Path "release-notes.txt" -Value $changes -NoNewline
 
     - name: Setup MSBuild path
       uses: microsoft/setup-msbuild@v1.0.2
