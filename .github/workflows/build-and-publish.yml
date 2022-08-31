@@ -36,10 +36,10 @@ jobs:
       shell: pwsh
       run: |
         $lastTag = git describe --tags --abbrev=0
-        $cmd = "git log --pretty=""format:%h %an %s"" --max-count=50 --no-merges $lastTag..@"
+        $cmd = "git log --pretty=""format:%H %s"" --max-count=50 --no-merges $lastTag..@"
         $changes = cmd /c $cmd
         Add-Content -Path "release-notes.txt" -Value "Version ${{ env.versionNumber }}" -NoNewline
-        Add-Content -Path "release-notes.txt" -Value "`r`n`r`n`r`n" -NoNewline
+        Add-Content -Path "release-notes.txt" -Value ""
         Add-Content -Path "release-notes.txt" -Value $changes
 
     - name: Setup MSBuild path
