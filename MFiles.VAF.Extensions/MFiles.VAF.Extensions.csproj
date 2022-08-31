@@ -15,7 +15,6 @@
     <PackageIconUrl />
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Configurations>Debug;Release;DebugNoDeployment</Configurations>
-	  <!-- the pack process in github needs this "broken" path -->
     <PackageReadmeFile>MFiles.VAFExtensions\nuget-readme.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
