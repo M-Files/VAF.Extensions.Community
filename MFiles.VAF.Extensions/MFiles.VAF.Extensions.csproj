@@ -206,7 +206,7 @@
     <Delete Files="@(FilesToDelete)" />
   </Target>
 <Target Name="PreparePackageReleaseNotesFromFile" BeforeTargets="GenerateNuspec">
-  <ReadLinesFromFile File="../release-notes.txt">
+  <ReadLinesFromFile File="../release-notes.md">
     <Output TaskParameter="Lines" ItemName="ReleaseNoteLines" />
   </ReadLinesFromFile>
   <PropertyGroup>
