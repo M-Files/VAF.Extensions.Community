@@ -45,7 +45,7 @@ jobs:
       shell: pwsh
       run: |
         $lastTag = git describe --tags --abbrev=0
-        $cmd = "git log --pretty=""format:%nhttps://github.com/M-Files/VAF.Extensions.Community/commit/%n%B"" --max-count=50 --no-merges $lastTag..@"
+        $cmd = "git log --pretty=""format:%nhttps://github.com/M-Files/VAF.Extensions.Community/commit/%H%n%B"" --max-count=50 --no-merges $lastTag..@"
         $changes = cmd /c $cmd
         Add-Content -Path "release-notes.txt" -Value "Release notes for ${{ env.versionNumber }}"
         Add-Content -Path "release-notes.txt" -Value "`r`n"
