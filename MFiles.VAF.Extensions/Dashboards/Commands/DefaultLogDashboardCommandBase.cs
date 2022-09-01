@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Common;
 using MFiles.VAF.Configuration.AdminConfigurations;
+using MFiles.VaultApplications.Logging;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,8 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 	public abstract class DefaultLogDashboardCommandBase
 		: CustomDomainCommand
 	{
+		private ILogger Logger { get; set; } = LogManager.GetLogger(typeof(DefaultLogDashboardCommandBase));
+
 		/// <summary>
 		/// View model for file information in the download dashboard.
 		/// </summary>
@@ -95,19 +98,26 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 
 			// Collect all log files.
 			var files = new List<LogFileInfo>();
-			foreach (string filePath in Directory.GetFiles(rootPath, "*.log", SearchOption.AllDirectories))
+			try
 			{
-				// Include info about this log file.
-				var file = new FileInfo(filePath);
-				file.Refresh();  // Seeing stale sizes in cloud.
-				var fileInfo = new LogFileInfo
+				foreach (string filePath in Directory.GetFiles(rootPath, "*.log", SearchOption.AllDirectories))
 				{
-					Size = file.Length,
-					RelativePath = filePath.Substring(rootPath.Length).Trim('\\'),
-					Created = file.CreationTimeUtc,
-					LastWrite = file.LastWriteTimeUtc
-				};
-				files.Add(fileInfo);
+					// Include info about this log file.
+					var file = new FileInfo(filePath);
+					file.Refresh();  // Seeing stale sizes in cloud.
+					var fileInfo = new LogFileInfo
+					{
+						Size = file.Length,
+						RelativePath = filePath.Substring(rootPath.Length).Trim('\\'),
+						Created = file.CreationTimeUtc,
+						LastWrite = file.LastWriteTimeUtc
+					};
+					files.Add(fileInfo);
+				}
+			}
+			catch(Exception e)
+			{
+				this.Logger?.Warn(e, $"Exception retrieving log files.");
 			}
 			return files;
 		}
