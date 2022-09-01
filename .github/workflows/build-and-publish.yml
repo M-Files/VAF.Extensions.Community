@@ -3,13 +3,6 @@ name: Build and publish
 on:
   push:
     branches: [ prerelease, release ]
-  workflow_dispatch:
-    # Inputs the workflow accepts.
-    inputs:
-     versionSuffix:
-        description: 'Version suffix'
-        required: false
-        default: ''
     
 jobs:
   build:
