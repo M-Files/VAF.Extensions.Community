@@ -17,29 +17,33 @@ jobs:
     - name: versionSuffix
       shell: pwsh
       run: |
-        If('${{ github.ref_name }}' -eq 'release')
+        If([string]::IsNullOrEmpty('${{ github.event.inputs.versionSuffix }}'))
         {
-          echo "versionSuffix=" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+            If('${{ github.ref_name }}' -eq 'release')
+            {
+                $versionSuffix = ''
+            }else{
+                $versionSuffix = '-' + ('${{ github.ref_name }}' -replace '[^a-zA-Z0-9]','-')
+            }
+        }else{
+            $versionSuffix = '-' + ('${{ github.event.inputs.versionSuffix }}' -replace '[^a-zA-Z0-9]','-')
         }
-        else
-        {
-          echo "versionSuffix=-preview" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
-        }
+        echo "versionSuffix=$versionSuffix" | Out-File -FilePath $Env:GITHUB_ENV -Append
 
     - name: Get version number
       shell: pwsh
       run: |
-        $versionNumber = Get-Date -Format "yy.M.${{ github.run_number }}${{ env.versionSuffix }}"
-        echo "versionNumber=$versionNumber" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+        $versionNumber = Get-Date -Format "yy.M.${{ github.run_number }}"
+        echo "versionNumber=$versionNumber${{ env.versionSuffix }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
 
     - name: Write release notes
       shell: pwsh
       run: |
         $lastTag = git describe --tags --abbrev=0
-        $cmd = "git log --pretty=""format:%H %s"" --max-count=50 --no-merges $lastTag..@"
+        $cmd = "git log --pretty=""format:%nhttps://github.com/M-Files/VAF.Extensions.Community/commit/%H%n%B"" --max-count=50 --no-merges $lastTag..@"
         $changes = cmd /c $cmd
-        Add-Content -Path "release-notes.txt" -Value "Version ${{ env.versionNumber }}" -NoNewline
-        Add-Content -Path "release-notes.txt" -Value ""
+        Add-Content -Path "release-notes.txt" -Value "Release notes for ${{ env.versionNumber }}"
+        Add-Content -Path "release-notes.txt" -Value "`r`n"
         Add-Content -Path "release-notes.txt" -Value $changes
 
     - name: Setup MSBuild path
