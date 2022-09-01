@@ -197,7 +197,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="nuget-readme.txt" Pack="True" PackagePath="\" />
+    <None Include="nuget-readme.md" Pack="True" PackagePath="\" />
   </ItemGroup>
   <Target Name="CleanNugetPackages" BeforeTargets="Build">
     <ItemGroup>
@@ -206,7 +206,7 @@
     <Delete Files="@(FilesToDelete)" />
   </Target>
 <Target Name="PreparePackageReleaseNotesFromFile" BeforeTargets="GenerateNuspec">
-  <ReadLinesFromFile File="../release-notes.md">
+  <ReadLinesFromFile File="../release-notes.txt">
     <Output TaskParameter="Lines" ItemName="ReleaseNoteLines" />
   </ReadLinesFromFile>
   <PropertyGroup>
