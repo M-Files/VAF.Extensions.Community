@@ -338,7 +338,7 @@ namespace MFiles.VAF.Extensions
 			// Run (which will set up the next iteration).
 			var nextRun = this.Schedule?.GetNextExecution();
 			if(nextRun.HasValue)
-				this.RunOnce(runAt: nextRun.Value, directive: directive);
+				this.RunOnce(runAt: nextRun.Value.UtcDateTime, directive: directive);
 		}
 
 		/// <summary>

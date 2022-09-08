@@ -134,7 +134,7 @@ namespace MFiles.VAF.Extensions
 					}
 
 					// Does it have any configuration instructions?
-						IRecurrenceConfiguration recurrenceConfiguration = null;
+					IRecurrenceConfiguration recurrenceConfiguration = null;
 					if (this
 						.VaultApplication?
 						.RecurringOperationConfigurationManager?
@@ -191,7 +191,7 @@ namespace MFiles.VAF.Extensions
 					(
 						htmlString
 						+ executions?
-							.AsDashboardContent()?
+							.AsDashboardContent(recurrenceConfiguration)?
 							.ToXmlString()
 					);
 

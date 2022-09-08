@@ -61,7 +61,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to At {0} server time..
+        ///   Looks up a localized string similar to At {0}..
         /// </summary>
         internal static string AtSpecificTime {
             get {
@@ -70,7 +70,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to At {0} server time on {1}..
+        ///   Looks up a localized string similar to At {0} on {1}..
         /// </summary>
         internal static string AtSpecificTimeOnDate {
             get {
@@ -79,7 +79,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to At {0} server time on {1} (in {2})..
+        ///   Looks up a localized string similar to At {0} on {1} (in {2})..
         /// </summary>
         internal static string AtSpecificTimeOnDateWithDifference {
             get {
@@ -88,7 +88,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to At {0} server time (in {1})..
+        ///   Looks up a localized string similar to At {0} (in {1})..
         /// </summary>
         internal static string AtSpecificTimeWithDifference {
             get {

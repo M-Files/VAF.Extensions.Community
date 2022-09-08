@@ -53,7 +53,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="queueId">The queue ID</param>
 		/// <param name="taskType">The task type ID</param>
 		/// <returns>The datetime it should run, or null if not available.</returns>
-		public DateTime? GetNextTaskProcessorExecution(string queueId, string taskType, DateTime? after = null)
+		public DateTimeOffset? GetNextTaskProcessorExecution(string queueId, string taskType, DateTime? after = null)
 		{
 			return this.TryGetValue(queueId, taskType, out IRecurrenceConfiguration recurringOperation)
 				? recurringOperation.GetNextExecution(after)
@@ -170,7 +170,7 @@ namespace MFiles.VAF.Extensions
 				}
 
 				// If we don't have a schedule then stop.
-				nextExecution = nextExecution ?? schedule?.GetNextExecution();
+				nextExecution = nextExecution ?? schedule?.GetNextExecution()?.UtcDateTime;
 				if (false == nextExecution.HasValue)
 				{
 					this.Logger?.Debug($"Processor for queue {tuple.Item1.QueueID} of type {tuple.Item1.TaskType} has no next-execution returned.  It will not be scheduled to run.");

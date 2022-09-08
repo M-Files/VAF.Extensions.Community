@@ -3,7 +3,6 @@ using System;
 using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions.ScheduledExecution
-
 {
 	/// <summary>
 	/// Class used for configuration purposes.
@@ -53,32 +52,32 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			= new DayOfMonthTrigger();
 
 		/// <inheritdoc />
-		public override DateTime? GetNextExecution(DateTime? after = null)
+		public override DateTimeOffset? GetNextExecution(DateTime? after = null, TimeZoneInfo timeZoneInfo = null)
 		{
 			switch (this.Type)
 			{
 				case ScheduleTriggerType.Daily:
-					return this.DailyTriggerConfiguration?.GetNextExecution(after);
+					return this.DailyTriggerConfiguration?.GetNextExecution(after, timeZoneInfo);
 				case ScheduleTriggerType.Weekly:
-					return this.WeeklyTriggerConfiguration?.GetNextExecution(after);
+					return this.WeeklyTriggerConfiguration?.GetNextExecution(after, timeZoneInfo);
 				case ScheduleTriggerType.Monthly:
-					return this.DayOfMonthTriggerConfiguration?.GetNextExecution(after);
+					return this.DayOfMonthTriggerConfiguration?.GetNextExecution(after, timeZoneInfo);
 				default:
 					return null;
 			}
 		}
 
 		/// <inheritdoc />
-		public override string ToString()
+		public virtual string ToString(TriggerTimeType triggerTimeType, TimeZoneInfo customTimeZone)
 		{
 			switch (this.Type)
 			{
 				case ScheduleTriggerType.Daily:
-					return this.DailyTriggerConfiguration?.ToString();
+					return this.DailyTriggerConfiguration?.ToString(triggerTimeType, customTimeZone);
 				case ScheduleTriggerType.Weekly:
-					return this.WeeklyTriggerConfiguration?.ToString();
+					return this.WeeklyTriggerConfiguration?.ToString(triggerTimeType, customTimeZone);
 				case ScheduleTriggerType.Monthly:
-					return this.DayOfMonthTriggerConfiguration?.ToString();
+					return this.DayOfMonthTriggerConfiguration?.ToString(triggerTimeType, customTimeZone);
 				default:
 					return null;
 			}
@@ -135,7 +134,8 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// Gets the next execution datetime for this trigger.
 		/// </summary>
 		/// <param name="after">The time after which the schedule should run.  Defaults to now (i.e. next-run time) if not provided.</param>
+		/// <param name="timeZoneInfo">The time zone which any triggers should be assumed to be in.</param>
 		/// <returns>The next execution time.</returns>
-		public abstract DateTime? GetNextExecution(DateTime? after = null);
+		public abstract DateTimeOffset? GetNextExecution(DateTime? after = null, TimeZoneInfo timeZoneInfo = null);
 	}
 }

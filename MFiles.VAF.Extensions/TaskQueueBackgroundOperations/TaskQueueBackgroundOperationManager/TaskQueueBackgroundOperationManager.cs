@@ -262,7 +262,7 @@ namespace MFiles.VAF.Extensions
 				case TaskQueueBackgroundOperationRepeatType.Schedule:
 
 					// Get the next execution time from the schedule.
-					nextRun = bo.Schedule?.GetNextExecution(DateTime.Now);
+					nextRun = bo.Schedule?.GetNextExecution(DateTime.Now)?.UtcDateTime;
 					break;
 			}
 
