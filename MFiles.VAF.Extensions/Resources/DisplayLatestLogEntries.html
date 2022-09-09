@@ -270,7 +270,15 @@
                         tr.appendChild(createTableCellWithContent(entry["LogContext"]));
                         tr.appendChild(createTableCellWithContent(entry["LogLevel"]));
                         tr.appendChild(createTableCellWithContent(entry["Message"], ["message"]));
-                        tr.classList.add(entry["LogLevel"].toLowerCase());
+                        try
+                        {
+                            if ((entry["LogLevel"] + "").length != 0)
+                                tr.classList.add(entry["LogLevel"].toLowerCase());
+                        } catch (e)
+                        {
+                            console.log("Could not add css class of '" + entry["LogLevel"] + "' to row.")
+                        }
+
                     }
                     else
                     {
