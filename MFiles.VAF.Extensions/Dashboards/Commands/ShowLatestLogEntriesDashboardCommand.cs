@@ -122,6 +122,13 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 		/// </summary>
 		public static string CommandId = "__RetrieveLatestLogEntries";
 
+		/// <summary>
+		/// The maximum number of lines to scan to try to retrieve data.
+		/// Setting this to a larger number may mean that it takes longer to retrieve data,
+		/// possibly timing out.
+		/// </summary>
+		public int MaximumLinesToScan { get; set; } = 10000;
+
 		private RetrieveLatestLogEntriesCommand() { }
 
 		public static RetrieveLatestLogEntriesCommand Create()
@@ -190,12 +197,18 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 							&& defaultLoggingConfiguration?.Advanced?.Layout != "${longdate}\t(v${application-version})\t${logger}\t${log-context}\t${level}:\t${message}${onexception:${newline}${exception:format=ToString:innerformat=ToString:separator=\r\n}}")
 							logEntries.StructuredEntries = false;
 					}
+					var linesRead = 0;
 
 					foreach(var logFile in logFiles)
 					{
 						// Only read a certain number of entries.
-						if (logEntries.Entries.Count >= requestParameters.MaximumNumberOfLogEntries)
+						if (
+							logEntries.Entries.Count >= requestParameters.MaximumNumberOfLogEntries
+							|| linesRead > this.MaximumLinesToScan)
+						{
+							logEntries.ReachedMaximumLinesToScan = linesRead > this.MaximumLinesToScan;
 							break;
+						}
 
 						// Sanity and safety check.
 						// All paths must be inside the log folder.
@@ -211,8 +224,12 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 							var logEntry = new LogEntry();
 							foreach (var line in reader)
 							{
+								linesRead++;
+								if (linesRead > this.MaximumLinesToScan)
+									break;
+
 								// Add the line to the log entry.
-								logEntry.FullLine = line + Environment.NewLine + logEntry.FullLine;
+								logEntry.PopulateFromFullLine(line + Environment.NewLine + logEntry.FullLine);
 
 								// If we are dealing with structured entries then we can analyse them further.
 								if (logEntries.StructuredEntries)
@@ -629,29 +646,27 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 						this.Add(fullLineKey, null);
 					return this[fullLineKey];
 				}
-				set
-				{
-					this[fullLineKey] = value;
-					this.PopulateFromFullLine();
-				}
 			}
 
-			protected virtual void PopulateFromFullLine()
+			public virtual bool PopulateFromFullLine(string fullLine)
 			{
+				this[fullLineKey] = fullLine;
+				
 				foreach (var key in this.Keys)
 					if (key != fullLineKey)
 						this.Remove(key);
 				if (string.IsNullOrWhiteSpace(this.FullLine))
-					return;
+					return false;
 				var match = ParseLineRegularExpression.Match(this.FullLine);
 				if (!match.Success)
-					return;
+					return false;
 
 				// Add each in turn.
 				foreach (var name in ParseLineRegularExpression.GetGroupNames())
 				{
 					this.Add(name, match.Groups[name].Value);
 				}
+				return true;
 			}
 
 			public override string ToString()
@@ -671,6 +686,9 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 
 			[DataMember(Name = "structuredEntries")]
 			public bool StructuredEntries { get; set; }
+
+			[DataMember(Name = "reachedMaximumLinesToScan")]
+			public bool ReachedMaximumLinesToScan { get; set; }
 		}
 	}
 }
