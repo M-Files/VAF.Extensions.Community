@@ -58,7 +58,7 @@ namespace MFiles.VAF.Extensions
 				// If they can only download them all then make sure the item on the domain menu
 				// reflects that.
 				var command = Dashboards.Commands.DownloadSelectedLogsDashboardCommand.Create();
-				command.Locations = new List<ICommandLocation> { new DomainMenuCommandLocation() };
+				command.Locations = new List<ICommandLocation> { };
 				yield return command;
 			}
 			
