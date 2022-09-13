@@ -210,7 +210,7 @@ namespace MFiles.VAF.Extensions
 
 								// Schedule.
 								this.Logger?.Info($"Re-scheduling {t.TaskType} on {t.QueueID} for {nextExecutionDate.Value}");
-								this.RescheduleTask(t.QueueID, t.TaskType, vault: this.Vault, scheduleFor: nextExecutionDate);
+								this.RescheduleTask(t.QueueID, t.TaskType, vault: this.Vault, scheduleFor: nextExecutionDate?.UtcDateTime);
 							}
 							break;
 					}

@@ -3,6 +3,7 @@ using MFiles.VAF.Configuration;
 using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Extensions.Dashboards;
 using MFiles.VAF.Extensions.ExtensionMethods;
+using MFiles.VAF.Extensions.ScheduledExecution;
 using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
 using System;
@@ -24,6 +25,7 @@ namespace MFiles.VAF.Extensions
 		public static IDashboardContent AsDashboardContent<TDirective>
 		(
 			this IEnumerable<TaskInfo<TDirective>> applicationTasks,
+			IRecurrenceConfiguration recurrenceConfiguration = null,
 			int maximumRowsToShow = 100
 		)
 			where TDirective : TaskDirective
@@ -31,6 +33,34 @@ namespace MFiles.VAF.Extensions
 			// Sanity.
 			if (null == applicationTasks || false == applicationTasks.Any())
 				return null;
+
+			// What is the timezone to display data in?
+			TimeZoneInfo timeZone = TimeZoneInfo.Local;
+			{
+				if (recurrenceConfiguration is Schedule schedule)
+				{
+					if (schedule.TriggerTimeType == TriggerTimeType.Utc)
+						timeZone = TimeZoneInfo.Utc;
+					if (schedule.TriggerTimeType == TriggerTimeType.Custom)
+					{
+						try { timeZone = TimeZoneInfo.FindSystemTimeZoneById(schedule.TriggerTimeCustomTimeZone); }
+						catch { }
+					}
+				}
+				if (recurrenceConfiguration is Frequency frequency)
+				{
+					if (frequency.RecurrenceType == RecurrenceType.Schedule)
+					{
+						if (frequency.Schedule?.TriggerTimeType == TriggerTimeType.Utc)
+							timeZone = TimeZoneInfo.Utc;
+						if (frequency.Schedule?.TriggerTimeType == TriggerTimeType.Custom)
+						{
+							try { timeZone = TimeZoneInfo.FindSystemTimeZoneById(frequency.Schedule?.TriggerTimeCustomTimeZone); }
+							catch { }
+						}
+					}
+				}
+			}
 
 			// We can only show a certain number.
 			var allTasks = applicationTasks.ToList();
@@ -103,13 +133,14 @@ namespace MFiles.VAF.Extensions
 							// If we are waiting for it to start then highlight that.
 							execution.State == MFilesAPI.MFTaskState.MFTaskStateWaiting
 								? FormattingExtensionMethods.DateTimeRepresentationOf.NextRun
-								: FormattingExtensionMethods.DateTimeRepresentationOf.LastRun
+								: FormattingExtensionMethods.DateTimeRepresentationOf.LastRun,
+							timeZone
 						)
 					);
 				var startedCell = new DashboardCustomContentEx
 				(
 					taskInfo.Started.HasValue
-					? taskInfo.Started.Value.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.LastRun)
+					? taskInfo.Started.Value.ToTimeOffset(FormattingExtensionMethods.DateTimeRepresentationOf.LastRun, timeZone)
 					: ""
 				);
 

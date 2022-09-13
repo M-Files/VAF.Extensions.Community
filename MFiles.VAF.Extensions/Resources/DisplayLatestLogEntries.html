@@ -120,7 +120,7 @@
         body.unstructured #scrollPanel thead {
             display: none;
         }
-        #unstructured {
+        #unstructured, #reachedMaximum {
             display: none;
             padding: 5px 15px;
             padding-left: 30px;
@@ -131,10 +131,10 @@
             background-color: lightGoldenrodYellow;
             margin-bottom: 10px;
         }
-        body.unstructured #unstructured{
+        body.unstructured #unstructured,
+            body.reachedMaximum #reachedMaximum {
             display: block;
         }
-
         .loading, .no-entries {
             text-align: center;
         }
@@ -228,6 +228,13 @@
                 {
                     document.body.classList.remove("unstructured");
                 }
+                if (logEntries.reachedMaximumLinesToScan)
+                {
+                    document.body.classList.add("reachedMaximum");
+                } else
+                {
+                    document.body.classList.remove("reachedMaximum");
+                }
 
                 // Remove any existing log entries.
                 var table = document.getElementById("logEntries");
@@ -263,7 +270,15 @@
                         tr.appendChild(createTableCellWithContent(entry["LogContext"]));
                         tr.appendChild(createTableCellWithContent(entry["LogLevel"]));
                         tr.appendChild(createTableCellWithContent(entry["Message"], ["message"]));
-                        tr.classList.add(entry["LogLevel"].toLowerCase());
+                        try
+                        {
+                            if ((entry["LogLevel"] + "").length != 0)
+                                tr.classList.add(entry["LogLevel"].toLowerCase());
+                        } catch (e)
+                        {
+                            console.log("Could not add css class of '" + entry["LogLevel"] + "' to row.")
+                        }
+
                     }
                     else
                     {
@@ -480,6 +495,9 @@
         <div id="scrollPanel">
             <div id="unstructured">
                 The logger is not using the default log layout, so structured formatting cannot be applied.
+            </div>
+            <div id="reachedMaximum">
+                The maximum number of lines to scan was reached; download the logs for more detailed analysis.
             </div>
             <table id="logEntries">
                 <thead>

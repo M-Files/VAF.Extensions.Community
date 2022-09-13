@@ -1,9 +1,5 @@
-# This is a basic workflow that is manually triggered
+name: Manual
 
-name: Manual publish
-
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
 on:
   workflow_dispatch:
     # Inputs the workflow accepts.
@@ -12,13 +8,11 @@ on:
         description: 'Version suffix'
         required: false
         default: ''
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+    
 jobs:
   build:
     timeout-minutes: 10
-    runs-on: 'windows-2019'
-
+    runs-on: 'windows-2022'
     
     steps:
     - uses: actions/checkout@v3
@@ -44,21 +38,22 @@ jobs:
     - name: Get version number
       shell: pwsh
       run: |
-        $versionNumber = (Get-Date -Format "yy.M.0.${{ github.run_number }}") + "${{ env.versionSuffix }}"
-        echo "versionNumber=$versionNumber" | Out-File -FilePath $Env:GITHUB_ENV -Append
+        $versionNumber = Get-Date -Format "yy.M.${{ github.run_number }}"
+        echo "versionNumber=$versionNumber${{ env.versionSuffix }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
 
     - name: Write release notes
       shell: pwsh
       run: |
         $lastTag = git describe --tags --abbrev=0
-        $cmd = "git log --pretty=""format:%H %s"" --max-count=50 --no-merges $lastTag..@"
+        $cmd = "git log --pretty=""format:%nhttps://github.com/M-Files/VAF.Extensions.Community/commit/%H%n%B"" --max-count=50 --date-order --no-merges $lastTag..@"
         $changes = cmd /c $cmd
-        Add-Content -Path "release-notes.txt" -Value "Version ${{ env.versionNumber }}" -NoNewline
-        Add-Content -Path "release-notes.txt" -Value ""
+        Add-Content -Path "release-notes.txt" -Value "Changes included in ${{ env.versionNumber }}"
         Add-Content -Path "release-notes.txt" -Value $changes
 
     - name: Setup MSBuild path
       uses: microsoft/setup-msbuild@v1.1
+      with:
+        vs-version: '[17.0,)'
 
     - name: Setup dot net
       uses: actions/setup-dotnet@v2
@@ -68,5 +63,31 @@ jobs:
     - name: Create nuget package
       run: dotnet pack ./MFiles.VAF.Extensions/MFiles.VAF.Extensions.csproj --configuration Release -p:Version=${{ env.versionNumber }}
 
+# Tests cannot be run as MFAPI is not installed.
+#    - name: Test
+#      run: dotnet test --no-restore --verbosity normal
+
     - name: Push with dotnet
       run: dotnet nuget push ./MFiles.VAF.Extensions/bin/Release/MFiles.VAF.Extensions.${{ env.versionNumber }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      
+    - name: Create release
+      id: createRelease
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.versionNumber }}
+        release_name: ${{ env.versionNumber }}
+        draft: false
+        prerelease: ${{ github.ref_name == 'prerelease' }}
+
+    - name: Upload asset
+      id: uploadAsset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.createRelease.outputs.upload_url }}
+        asset_path: ./MFiles.VAF.Extensions/bin/Release/MFiles.VAF.Extensions.${{ env.versionNumber }}.nupkg
+        asset_name: MFiles.VAF.Extensions.nupkg
+        asset_content_type: application/zip

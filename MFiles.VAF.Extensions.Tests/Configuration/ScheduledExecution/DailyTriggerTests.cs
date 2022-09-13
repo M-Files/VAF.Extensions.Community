@@ -25,14 +25,11 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 			DateTime? expected
 		)
 		{
-			Assert.AreEqual
-			(
-				expected,
-				new DailyTrigger()
-				{
-					TriggerTimes = triggerTimes.ToList()
-				}.GetNextExecution(after)
-			);
+			var execution = new DailyTrigger()
+			{
+				TriggerTimes = triggerTimes.ToList()
+			}.GetNextExecution(after);
+			Assert.AreEqual(expected?.ToUniversalTime(), execution?.ToUniversalTime());
 		}
 
 		public static IEnumerable<object[]> GetNextExecutionData()
@@ -85,11 +82,19 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 				(DateTime?)null
 			};
 
-			// Exact current time returns next day.
+			// Exact current time now.
 			yield return new object[]
 			{
 				new []{ new TimeSpan(17, 0, 0) },
 				new DateTime(2021, 03, 17, 17, 00, 00), // Wednesday @ 6pm
+				new DateTime(2021, 03, 17, 17, 00, 00), // Thursday @ midnight
+			};
+
+			// One minute past returns next day.
+			yield return new object[]
+			{
+				new []{ new TimeSpan(17, 0, 0) },
+				new DateTime(2021, 03, 17, 17, 01, 00), // Wednesday @ 6pm
 				new DateTime(2021, 03, 18, 17, 00, 00), // Thursday @ midnight
 			};
 		}

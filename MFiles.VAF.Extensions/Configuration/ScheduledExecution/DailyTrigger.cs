@@ -35,7 +35,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		}
 
 		/// <inheritdoc />
-		public override DateTime? GetNextExecution(DateTime? after = null)
+		public override DateTimeOffset? GetNextExecution(DateTime? after = null, TimeZoneInfo timeZoneInfo = null)
 		{
 			// Sanity.
 			if (
@@ -44,28 +44,61 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				return null;
 
 			// When should we start looking?
-			after = (after ?? DateTime.UtcNow).ToLocalTime();
+			timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
 
 			// Get the next execution time.
 			return this.TriggerTimes
-				.Select(
+				.Select
+				(
 					t =>
-						after.Value.TimeOfDay < t
-							? after.Value.Date.Add(t) // Time is yet to come today.
-							: after.Value.Date.AddDays(1).Add(t) // Time has passed - return tomorrow.
+					{
+						// Convert the "after" time to the time in the given timezone.
+						after = TimeZoneInfo.ConvertTimeFromUtc((after ?? DateTime.UtcNow).ToUniversalTime(), timeZoneInfo);
+
+						// Set up the next execution time which is at midnight in the correct timezone.
+						var output = new DateTimeOffset(after.Value.Date, timeZoneInfo.GetUtcOffset(after.Value.Date));
+
+						if (after.Value.TimeOfDay <= t)
+							output = output.Add(t); // Time is yet to come today (or is now).
+						else
+						{
+							// If the next day has gone to/from DST then we need to deal with it.
+							var oldoffset = timeZoneInfo.GetUtcOffset(output);
+							output = output.AddDays(1);
+							var newoffset = timeZoneInfo.GetUtcOffset(output);
+							if(oldoffset != newoffset)
+							{
+								output = output.Subtract(newoffset - oldoffset);
+							}
+
+							// Add on the correct time, now for the subsequent day.
+							output = output.Add(t);
+						}
+						return output;
+					}
 				)
 				.OrderBy(d => d)
+				.Select(d => d.ToUniversalTime())
 				.FirstOrDefault();
 		}
 
 		/// <inheritdoc />
-		public override string ToString()
+		public virtual string ToString(TriggerTimeType triggerTimeType, TimeZoneInfo customTimeZone)
 		{
 			// Sanity.
 			if (null == this.TriggerTimes || this.TriggerTimes.Count == 0)
 				return null;
 
-			return Resources.Schedule.Triggers_DailyTrigger.EscapeXmlForDashboard(string.Join(", ", this.TriggerTimes.OrderBy(t => t).Select(t => t.ToString())));
+			// Append the time zone if we can.
+			var times = string.Join(", ", this.TriggerTimes.OrderBy(t => t).Select(t => t.ToString()));
+			if (customTimeZone != null)
+				if (customTimeZone == TimeZoneInfo.Local)
+					times += " (server time)";
+				else if (customTimeZone == TimeZoneInfo.Utc)
+					times += " (UTC)";
+				else
+					times += $" ({customTimeZone.DisplayName})";
+			return Resources.Schedule.Triggers_DailyTrigger.EscapeXmlForDashboard(times);
 		}
 
 		/// <summary>
