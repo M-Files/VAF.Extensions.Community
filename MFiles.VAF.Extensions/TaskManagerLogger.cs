@@ -488,7 +488,7 @@ namespace MFiles.VAF.Extensions
 		protected virtual void LogWaitingTasksCanceledEvent(TaskManagerEventArgs args)
 		{
 			// Log the event.
-			this.logger.Warn(args.Exception,
+			this.logger.Debug(args.Exception,
 					"Job canceled. " + GetEventDataString(args));
 		}
 
