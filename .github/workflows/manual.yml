@@ -27,19 +27,15 @@ jobs:
         {
             $versionSuffix = '${{ github.ref_name }}'
         }
+        $versionSuffix = '-' + ($versionSuffix -replace '[^a-zA-Z0-9]','-')
 
-        If($versionSuffix -eq 'release')
+        If($versionSuffix -eq '-release')
         {
             $versionSuffix = ''
         }
-        else
+        If(('-', '-master', '-main') -eq $versionSuffix)
         {
-            If($versionSuffix -eq '' || $versionSuffix -eq 'master' || $versionSuffix -eq 'main')
-            {
-                $versionSuffix = '-prerelease'
-            }else{
-                $versionSuffix = '-' + ($versionSuffix -replace '[^a-zA-Z0-9]','-')
-            }
+            $versionSuffix = '-prerelease'
         }
         echo "versionSuffix=$versionSuffix" | Out-File -FilePath $Env:GITHUB_ENV -Append
 
