@@ -292,12 +292,8 @@ namespace MFiles.VAF.Extensions
 		public virtual IDashboardContent GetLoggingDashboardContent(IConfigurationRequestContext context)
 		{
 			// If we don't have any logging configuration then return null.
-			if (!(this.Configuration is Configuration.IConfigurationWithLoggingConfiguration configurationWithLogging))
-				return null;
-
-			// Get the logging configuration.
-			var loggingConfiguration = configurationWithLogging?.GetLoggingConfiguration();
-			if (null == loggingConfiguration)
+			var loggingConfiguration = this.GetLoggingConfiguration();
+			if (loggingConfiguration == null)
 				return null;
 
 			// If logging is not enabled then return a simple panel.
