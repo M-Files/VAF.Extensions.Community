@@ -22,16 +22,24 @@ jobs:
     - name: versionSuffix
       shell: pwsh
       run: |
-        If([string]::IsNullOrEmpty('${{ github.event.inputs.versionSuffix }}'))
+        $versionSuffix = '${{ github.event.inputs.versionSuffix }}'
+        If([string]::IsNullOrEmpty($versionSuffix))
         {
-            If('${{ github.ref_name }}' -eq 'release')
+            $versionSuffix = '${{ github.ref_name }}'
+        }
+
+        If($versionSuffix -eq 'release')
+        {
+            $versionSuffix = ''
+        }
+        else
+        {
+            If($versionSuffix -eq '' || $versionSuffix -eq 'master' || $versionSuffix -eq 'main')
             {
-                $versionSuffix = ''
+                $versionSuffix = '-prerelease'
             }else{
-                $versionSuffix = '-' + ('${{ github.ref_name }}' -replace '[^a-zA-Z0-9]','-')
+                $versionSuffix = '-' + ($versionSuffix -replace '[^a-zA-Z0-9]','-')
             }
-        }else{
-            $versionSuffix = '-' + ('${{ github.event.inputs.versionSuffix }}' -replace '[^a-zA-Z0-9]','-')
         }
         echo "versionSuffix=$versionSuffix" | Out-File -FilePath $Env:GITHUB_ENV -Append
 
