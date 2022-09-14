@@ -28,7 +28,12 @@ jobs:
             {
                 $versionSuffix = ''
             }else{
-                $versionSuffix = '-' + ('${{ github.ref_name }}' -replace '[^a-zA-Z0-9]','-')
+                If('${{ github.ref_name }}' -eq '' || '${{ github.ref_name }}' -eq 'master' || '${{ github.ref_name }}' -eq 'main')
+                {
+                    $versionSuffix = '-prerelease'
+                }else{
+                    $versionSuffix = '-' + ('${{ github.ref_name }}' -replace '[^a-zA-Z0-9]','-')
+                }
             }
         }else{
             $versionSuffix = '-' + ('${{ github.event.inputs.versionSuffix }}' -replace '[^a-zA-Z0-9]','-')
