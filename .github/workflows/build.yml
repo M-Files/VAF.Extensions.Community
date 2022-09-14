@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [ master, main ]
-#  pull_request:
-#    branches: [ master, main ]
+    branches: [ master, main ] # Build on main/master branch
+  pull_request:
+    branches: [ master, main ] # Build on PR/MR that target main/master
 
 jobs:
   build:
