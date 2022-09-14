@@ -27,12 +27,12 @@ namespace MFiles.VAF.Extensions
 			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(isVaultStartup: false);
 
 			// If we have logging configuration then set it up.
-			if (this.Configuration is Configuration.IConfigurationWithLoggingConfiguration configurationWithLogging)
-			{
-				this.Logger?.Debug("Logging configuration updating");
-				LogManager.UpdateConfiguration(configurationWithLogging?.GetLoggingConfiguration());
-				this.Logger?.Debug("Logging configuration updated");
-			}
+			var loggingConfiguration = this.GetLoggingConfiguration();
+			this.Logger?.Debug("Logging configuration updating");
+
+			// This can be called even when null, and we may need to clear the existing configuration
+			LogManager.UpdateConfiguration(loggingConfiguration);
+			this.Logger?.Debug("Logging configuration updated");
 		}
 
 		/// <inheritdoc />

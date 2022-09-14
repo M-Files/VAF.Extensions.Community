@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Configuration;
 using MFiles.VaultApplications.Logging;
+using MFiles.VaultApplications.Logging.Configuration;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
@@ -21,11 +22,22 @@ namespace MFiles.VAF.Extensions
 			base.InitializeApplication(vault);
 
 			// If we have logging configuration then initialize with that.
-			if (this.Configuration is Configuration.IConfigurationWithLoggingConfiguration configurationWithLogging)
+			var loggingConfiguration = this.GetLoggingConfiguration();
+			if (loggingConfiguration != null)
 			{
-				LogManager.Initialize(vault, configurationWithLogging?.GetLoggingConfiguration());
+				LogManager.Initialize(vault, loggingConfiguration);
 				this.Logger?.Debug("Logging started");
 			}
+		}
+
+		protected virtual ILoggingConfiguration GetLoggingConfiguration()
+		{
+			if (this.Configuration is Configuration.IConfigurationWithLoggingConfiguration configurationWithLogging)
+			{
+				return configurationWithLogging?.GetLoggingConfiguration();
+			}
+
+			return null;
 		}
 
 		/// <inheritdoc />
@@ -58,9 +70,10 @@ namespace MFiles.VAF.Extensions
 				yield return finding;
 
 			// If we have logging configuration then use that.
-			if (this.Configuration is Configuration.IConfigurationWithLoggingConfiguration configurationWithLogging)
+			var loggingConfiguration = this.GetLoggingConfiguration();
+			if (loggingConfiguration != null)
 			{
-				foreach (var finding in configurationWithLogging?.GetLoggingConfiguration()?.GetValidationFindings() ?? new ValidationFinding[0])
+				foreach (var finding in loggingConfiguration.GetValidationFindings() ?? new ValidationFinding[0])
 					yield return finding;
 			}
 		}
