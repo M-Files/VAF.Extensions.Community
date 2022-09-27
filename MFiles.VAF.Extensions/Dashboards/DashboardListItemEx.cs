@@ -3,12 +3,17 @@ using System.Xml;
 
 namespace MFiles.VAF.Extensions.Dashboards
 {
-	/// <summary>
-	/// Renders a <see cref="DashboardListItem"/>, but sets the "style" attribute to remove the "white-space: pre-line"
-	/// which is included by default in the standard stylesheet (and makes things look odd).
-	/// </summary>
-	internal class DashboardListItemWithNormalWhitespace : DashboardListItem
+	public class DashboardListItemEx : DashboardListItem
 	{
+		/// <summary>
+		/// If set, may be used to order the list items prior to rendering.
+		/// </summary>
+		public int? Order { get; set; }
+
+		/// <summary>
+		/// If true, ensures that the "white-space" CSS value is set to normal.
+		/// </summary>
+		public bool SetWhitespaceToNormal { get; set; } = true;
 
 		/// <inheritdoc />
 		public override XmlDocumentFragment Generate(XmlDocument xml)

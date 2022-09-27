@@ -172,7 +172,9 @@ namespace MFiles.VAF.Extensions
 					}
 
 					//Check if this might be a TimeSpanEx
-					if (jToken[nameof(TimeSpanEx.Interval)] != null)
+					if (jToken[nameof(TimeSpanEx.Hours)] != null
+						|| jToken[nameof(TimeSpanEx.Minutes)] != null
+						|| jToken[nameof(TimeSpanEx.Seconds)] != null)
 					{
 						output.RecurrenceType = RecurrenceType.Interval;
 						output.Interval = new TimeSpanEx();

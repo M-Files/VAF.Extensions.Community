@@ -5,13 +5,13 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace MFiles.VAF.Extensions.Tests.Dashboards
 {
 	[TestClass]
-	public class DashboardListItemWithNormalWhitespaceTests
+	public class DashboardListItemExTests
 	{
 		[TestMethod]
 		public void WhiteSpaceExplicitlySet()
 		{
 			var innerContent = new DashboardCustomContent("<p>hello world.</p>");
-			var content = new DashboardListItemWithNormalWhitespace()
+			var content = new DashboardListItemEx()
 			{
 				InnerContent = innerContent
 			};

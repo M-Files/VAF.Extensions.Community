@@ -116,9 +116,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 
 			Frequency expected = new Frequency()
 			{
-				Interval = new TimeSpanEx()
+				Interval = new TimeSpanEx(new TimeSpan(1, 2, 3))
 				{
-					Interval = new TimeSpan(1, 2, 3),
 					RunOnVaultStartup = true
 				},
 				RecurrenceType = RecurrenceType.Interval
@@ -138,9 +137,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 
 			Frequency expected = new Frequency()
 			{
-				Interval = new TimeSpanEx()
+				Interval = new TimeSpanEx(new TimeSpan(1, 2, 3))
 				{
-					Interval = new TimeSpan(1, 2, 3),
 					RunOnVaultStartup = false
 				},
 				RecurrenceType = RecurrenceType.Interval
@@ -318,9 +316,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		[TestMethod]
 		public void DeserializesTimeSpanExWrapper()
 		{
-			var timeSpanEx = new TimeSpanEx()
+			var timeSpanEx = new TimeSpanEx(new TimeSpan(1, 2, 3))
 			{
-				Interval = new TimeSpan(1, 2, 3),
 				RunOnVaultStartup = false
 			};
 			var oldWrapper = new TimeSpanExWrapper()

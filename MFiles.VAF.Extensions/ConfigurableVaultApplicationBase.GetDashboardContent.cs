@@ -4,6 +4,7 @@ using MFiles.VAF.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using MFiles.VAF.Configuration.Domain;
 using MFiles.VAF.Extensions.Dashboards;
 using MFiles.VaultApplications.Logging.NLog.ExtensionMethods;
@@ -28,8 +29,7 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// Creates the status dashboard object that will be populated by <see cref="GetDashboardContent(IConfigurationRequestContext)"/>.
 		/// </summary>
-		/// <param name="refreshIntervalInSeconds"></param>
-		/// <returns></returns>
+		/// <returns>The status dashboard into which the dashboard content will be populated.</returns>
 		public virtual StatusDashboard CreateStatusDashboard()
 		{
 			return new StatusDashboard()
@@ -77,8 +77,8 @@ namespace MFiles.VAF.Extensions
 
 		/// <inheritdoc />
 		/// <remarks>
-		/// Calls <see cref="CreateStatusDashboard(int)"/> to create the dashboard,
-		/// then <see cref="GetDashboardContentForStatusDashboard(IConfigurationRequestContext)"/> to get the items to display,
+		/// Calls <see cref="CreateStatusDashboard()"/> to create the dashboard,
+		/// then <see cref="GetStatusDashboardRootItems(IConfigurationRequestContext)"/> to get the items to display,
 		/// then returns <see cref="StatusDashboard.ToString()"/>.
 		/// </remarks>
 		public override string GetDashboardContent(IConfigurationRequestContext context)
@@ -113,8 +113,8 @@ namespace MFiles.VAF.Extensions
 						.Distinct()?
 						.OrderBy(a => a.GetName().Name)?
 						.ToList();
-					this.Logger?.Info($"{this.referencedAssemblies.Count} assemblies loaded.");
-					foreach (var a in this.referencedAssemblies)
+					this.Logger?.Info($"{(this.referencedAssemblies?.Count ?? 0)} assemblies loaded.");
+					foreach (var a in this.referencedAssemblies ?? Enumerable.Empty<Assembly>())
 					{
 						this.Logger?.Trace($"Assembly {a.FullName} is referenced from {a.Location}");
 					}
@@ -136,10 +136,13 @@ namespace MFiles.VAF.Extensions
 				yield return assembly;
 
 			// If we loaded it from somewhere other than the GAC then return its referenced items.
-			if(false == assembly.GlobalAssemblyCache)
-				foreach (var referencedAssembly in assembly.GetReferencedAssemblies())
-					foreach (var x in this.GetReferencedAssemblies(referencedAssembly))
-						yield return x;
+			if (null == assembly)
+				yield break;
+			if (false != assembly.GlobalAssemblyCache)
+				yield break;
+			foreach (var referencedAssembly in assembly.GetReferencedAssemblies())
+			foreach (var x in this.GetReferencedAssemblies(referencedAssembly))
+				yield return x;
 		}
 		public virtual IDashboardContent GetDevelopmentDashboardData(IConfigurationRequestContext context)
 		{
@@ -172,8 +175,8 @@ namespace MFiles.VAF.Extensions
 						if(false == string.IsNullOrWhiteSpace(info.CompanyName))
 							return info.CompanyName;
 						var attributes = assembly.GetCustomAttributes(typeof(System.Reflection.AssemblyCompanyAttribute), false);
-						if (null != attributes && attributes.Length > 0)
-							return (attributes.FirstOrDefault() as System.Reflection.AssemblyCompanyAttribute).Company;
+						if (attributes.Length > 0 && attributes[0] is System.Reflection.AssemblyCompanyAttribute companyAttribute)
+							return companyAttribute.Company;
 					}
 					catch
 					{
@@ -198,7 +201,7 @@ namespace MFiles.VAF.Extensions
 				}
 
 				// Add it to the list.
-				list.Items.Add(new DashboardListItemWithNormalWhitespace()
+				list.Items.Add(new DashboardListItemEx()
 				{
 					Title = "Referenced Assemblies",
 					InnerContent = table
@@ -219,6 +222,44 @@ namespace MFiles.VAF.Extensions
 #endif
 
 		/// <summary>
+		/// Returns dashboard items from any <see cref="TaskQueueBackgroundOperationManager"/>
+		/// to be added to <see cref="GetAsynchronousOperationDashboardContent(IConfigurationRequestContext)"/>.
+		/// </summary>
+		/// <param name="context">The context for requesting these items.</param>
+		/// <returns>Any items.</returns>
+		protected virtual IEnumerable<DashboardListItem> GetAsynchronousDashboardListItemsFromBackgroundOperationManager(IConfigurationRequestContext context)
+			=> this
+				.GetType()
+				.GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager<TSecureConfiguration>>(this)
+				.SelectMany(m => m.GetDashboardContent());
+
+		/// <summary>
+		/// Returns dashboard items from the <see cref="TaskManager"/> and <see cref="TaskQueueResolver"/>
+		/// to be added to <see cref="GetAsynchronousOperationDashboardContent(IConfigurationRequestContext)"/>.
+		/// </summary>
+		/// <param name="context">The context for requesting these items.</param>
+		/// <returns>Any items.</returns>
+		protected virtual IEnumerable<DashboardListItem> GetAsynchronousDashboardListItemsFromTaskManager(IConfigurationRequestContext context)
+			=> this.TaskManager?.GetDashboardContent(this.TaskQueueResolver) ?? Enumerable.Empty<DashboardListItem>();
+
+		/// <summary>
+		/// Returns all dashboard items to be displayed.
+		/// Calls <see cref="GetAsynchronousDashboardListItemsFromBackgroundOperationManager"/>
+		/// and then <see cref="GetAsynchronousDashboardListItemsFromTaskManager"/>.
+		/// <see cref="GetAsynchronousOperationDashboardContent(IConfigurationRequestContext)"/>.
+		/// </summary>
+		/// <param name="context">The context for requesting these items.</param>
+		/// <returns>Any items.</returns>
+		/// <remarks>Override this method to add new items.</remarks>
+		protected virtual IEnumerable<DashboardListItem> GetAsynchronousDashboardListItems(IConfigurationRequestContext context)
+		{
+			foreach (var i in this.GetAsynchronousDashboardListItemsFromBackgroundOperationManager(context))
+				yield return i;
+			foreach (var i in this.GetAsynchronousDashboardListItemsFromTaskManager(context))
+				yield return i;
+		}
+
+		/// <summary>
 		/// Returns the dashboard content showing asynchronous operation status.
 		/// </summary>
 		/// <returns>The dashboard content.  Can be null if no background operation managers, background operations or task processors.</returns>
@@ -226,26 +267,7 @@ namespace MFiles.VAF.Extensions
 		{
 			// Declare our list which will go into the panel.
 			var list = new DashboardList();
-
-			// Iterate over all the background operation managers we can find
-			// and add each of their background operations to the list.
-			var taskQueueBackgroundOperationManagers = this
-				.GetType()
-				.GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager<TSecureConfiguration>>(this);
-			foreach (var manager in taskQueueBackgroundOperationManagers.OrderBy(m => m.DashboardSortOrder))
-			{
-				var listItems = manager.GetDashboardContent();
-				if (null == listItems)
-					continue;
-				list.Items.AddRange(listItems);
-			}
-
-			// Get the content from the task queue resolver.
-			{
-				var listItems = this.TaskManager.GetDashboardContent(this.TaskQueueResolver);
-				if (null != listItems)
-					list.Items.AddRange(listItems);
-			}
+			list.Items.AddRange(this.GetAsynchronousDashboardListItems(context));
 
 			// Did we get anything?
 			if (0 == list.Items.Count)

@@ -77,7 +77,8 @@ namespace MFiles.VAF.Extensions
 				{ TaskManagerEventType.WaitingTasksCanceled, LogWaitingTasksCanceledEvent },
 				{ TaskManagerEventType.TaskUpdateSkipped, LogTaskUpdateSkippedEvent },
 				{ TaskManagerEventType.TaskJobFinished, LogTaskJobFinishedEvent },
-				{ TaskManagerEventType.TaskAdded, LogTaskAddedEvent }
+				{ TaskManagerEventType.TaskAdded, LogTaskAddedEvent },
+				{ TaskManagerEventType.WaitingTasksCanceled, LogWaitingTasksCanceledEvent }
 			};
 
 			// Start listening.

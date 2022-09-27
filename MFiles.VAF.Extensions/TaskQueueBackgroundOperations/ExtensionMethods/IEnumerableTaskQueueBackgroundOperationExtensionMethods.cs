@@ -72,7 +72,7 @@ namespace MFiles.VAF.Extensions
 				var isScheduled = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateWaiting);
 
 				// Create the (basic) list item.
-				var listItem = new DashboardListItemWithNormalWhitespace()
+				var listItem = new DashboardListItemEx()
 				{
 					Title = bgo.Name,
 					StatusSummary = new DomainStatusSummary()

@@ -325,7 +325,7 @@ namespace MFiles.VAF.Extensions
 						if (null == value)
 							continue;
 						if (value.GetType() == typeof(TimeSpan))
-							value = new TimeSpanEx() { Interval = (TimeSpan)value };
+							value = new TimeSpanEx((TimeSpan)value);
 
 						// Validate that the value is a recurring operation.
 						if (!typeof(IRecurrenceConfiguration).IsAssignableFrom(value.GetType()))
@@ -391,7 +391,7 @@ namespace MFiles.VAF.Extensions
 						if (null == value)
 							continue;
 						if (value.GetType() == typeof(TimeSpan))
-							value = new TimeSpanEx() { Interval = (TimeSpan)value };
+							value = new TimeSpanEx((TimeSpan)value);
 
 						// Validate the type.
 						if (!typeof(IRecurrenceConfiguration).IsAssignableFrom(value.GetType()))

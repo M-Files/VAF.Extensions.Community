@@ -26,7 +26,7 @@ namespace MFiles.VAF.Extensions
 		/// Returns some dashboard content that shows the background operations and their current status.
 		/// </summary>
 		/// <returns>The dashboard content.</returns>
-		public IEnumerable<DashboardListItem> GetDashboardContent(TaskQueueResolver taskQueueResolver)
+		public virtual IEnumerable<DashboardListItem> GetDashboardContent(TaskQueueResolver taskQueueResolver)
 		{
 			if (null == taskQueueResolver)
 				yield break;
@@ -113,25 +113,63 @@ namespace MFiles.VAF.Extensions
 					var showOnDashboardAttribute = methodInfo.GetCustomAttributes(typeof(ShowOnDashboardAttribute), true)?
 						.FirstOrDefault() as ShowOnDashboardAttribute;
 
-					// Show the description?
-					var htmlString = "";
-					if (false == string.IsNullOrWhiteSpace(showOnDashboardAttribute?.Description))
-					{
-						htmlString += new DashboardCustomContent($"<p><em>{showOnDashboardAttribute?.Description.EscapeXmlForDashboard()}</em></p>").ToXmlString();
-					}
+					// Generate the dashboard content.
+					yield return this.GenerateDashboardContentForQueueAndTask
+					(
+						queue,
+						processor.Type,
+						showOnDashboardAttribute?.Name,
+						showOnDashboardAttribute?.Description,
+						showOnDashboardAttribute?.ShowRunCommand ?? false
+					);
 
-					// If we are running degraded then highlight that.
-					if (showDegraded)
-					{
-						htmlString += "<p style='background-color: red; font-weight: bold; color: white; padding: 5px 10px;'>";
-						htmlString += String.Format
-						(
-							Resources.AsynchronousOperations.DegradedQueueDashboardNotice,
-							waitingTasks,
-							DegradedDashboardThreshold
-						).EscapeXmlForDashboard();
-						htmlString += "</p>";
-					}
+				}
+			}
+
+		}
+
+		/// <summary>
+		/// Returns a dashboard list item that represents the task processor associated 
+		/// with the <paramref name="queueId"/> and <paramref name="taskType"/>.
+		/// </summary>
+		/// <param name="queueId">The ID of the queue (used in combination with <paramref name="taskType"/> to retrieve the tasks to show).</param>
+		/// <param name="taskType">The type of task (used in combination with <paramref name="queueId"/> to retrieve the tasks to show).</param>
+		/// <param name="displayName">The display name to show, or null to use the <paramref name="taskType"/>.</param>
+		/// <param name="description">The description to show, or null to not show a description.</param>
+		/// <param name="showRunCommand">Whether the "run" command should be shown or not.</param>
+		/// <returns>The list item, or null if nothing should be shown.</returns>
+		public virtual DashboardListItem GenerateDashboardContentForQueueAndTask
+		(
+			string queueId,
+			string taskType,
+			string displayName = null,
+			string description = null,
+			bool showRunCommand = false
+		)
+		{
+			// Get the number of items in the queue.
+			var waitingTasks = this.GetTaskCountInQueue(queueId, MFTaskState.MFTaskStateWaiting);
+			var showDegraded = waitingTasks > DegradedDashboardThreshold;
+
+			// Show the description?
+			var htmlString = "";
+			if (false == string.IsNullOrWhiteSpace(description))
+			{
+				htmlString += new DashboardCustomContent($"<p><em>{description.EscapeXmlForDashboard()}</em></p>").ToXmlString();
+			}
+
+			// If we are running degraded then highlight that.
+			if (showDegraded)
+			{
+				htmlString += "<p style='background-color: red; font-weight: bold; color: white; padding: 5px 10px;'>";
+				htmlString += String.Format
+				(
+					Resources.AsynchronousOperations.DegradedQueueDashboardNotice,
+					waitingTasks,
+					DegradedDashboardThreshold
+				).EscapeXmlForDashboard();
+				htmlString += "</p>";
+			}
 
 					// Does it have any configuration instructions?
 					IRecurrenceConfiguration recurrenceConfiguration = null;
@@ -147,44 +185,45 @@ namespace MFiles.VAF.Extensions
 						htmlString += $"<p>{Resources.AsynchronousOperations.RepeatType_RunsOnDemandOnly.EscapeXmlForDashboard()}<br /></p>";
 					}
 
-					// Get known executions (prior, running and future).
-					var executions = showDegraded
-						? this.GetExecutions<TaskDirective>(queue, processor.Type, MFTaskState.MFTaskStateInProgress)
-						: this.GetAllExecutions<TaskDirective>(queue,processor.Type)
-						.ToList();
-					var isRunning = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateInProgress);
-					var isScheduled = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateWaiting);
+			// Get known executions (prior, running and future).
+			var executions = showDegraded
+				? this.GetExecutions<TaskDirective>(queueId, taskType, MFTaskState.MFTaskStateInProgress)
+				: this.GetAllExecutions<TaskDirective>(queueId, taskType)
+				.ToList();
+			var isRunning = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateInProgress);
+			var isScheduled = executions.Any(e => e.State == MFilesAPI.MFTaskState.MFTaskStateWaiting);
 
-					// Create the (basic) list item.
-					var listItem = new DashboardListItemWithNormalWhitespace()
-					{
-						Title = showOnDashboardAttribute?.Name ?? processor.Type,
-						StatusSummary = new DomainStatusSummary()
-						{
-							Label = isRunning || showDegraded
-							? Resources.AsynchronousOperations.Status_Running
-							: isScheduled ? Resources.AsynchronousOperations.Status_Scheduled : Resources.AsynchronousOperations.Status_Stopped
-						}
-					};
+			// Create the (basic) list item.
+			var listItem = new DashboardListItemEx()
+			{
+				ID = $"{queueId}-{taskType}",
+				Title = string.IsNullOrWhiteSpace(displayName) ? taskType : displayName,
+				StatusSummary = new DomainStatusSummary()
+				{
+					Label = isRunning || showDegraded
+					? Resources.AsynchronousOperations.Status_Running
+					: isScheduled ? Resources.AsynchronousOperations.Status_Scheduled : Resources.AsynchronousOperations.Status_Stopped
+				}
+			};
 
-					// Should we show the run command?
-					if(showOnDashboardAttribute?.ShowRunCommand ?? false)
+			// Should we show the run command?
+			if (showRunCommand)
+			{
+				var key = $"{queueId}-{taskType}";
+				lock (this._lock)
+				{
+					if (this.TaskQueueRunCommands.ContainsKey(key))
 					{
-						var key = $"{queue}-{processor.Type}";
-						lock (this._lock)
+						var cmd = new DashboardDomainCommand
 						{
-							if (this.TaskQueueRunCommands.ContainsKey(key))
-							{
-								var cmd = new DashboardDomainCommand
-								{
-									DomainCommandID = this.TaskQueueRunCommands[key].ID,
-									Title = this.TaskQueueRunCommands[key].DisplayName,
-									Style = DashboardCommandStyle.Link
-								};
-								listItem.Commands.Add(cmd);
-							}
-						}
+							DomainCommandID = this.TaskQueueRunCommands[key].ID,
+							Title = this.TaskQueueRunCommands[key].DisplayName,
+							Style = DashboardCommandStyle.Link
+						};
+						listItem.Commands.Add(cmd);
 					}
+				}
+			}
 
 					// Set the list item content.
 					listItem.InnerContent = new DashboardCustomContent
@@ -195,12 +234,7 @@ namespace MFiles.VAF.Extensions
 							.ToXmlString()
 					);
 
-					// Add the list item.
-					yield return listItem;
-
-				}
-			}
-
+			return listItem;
 		}
 	}
 }

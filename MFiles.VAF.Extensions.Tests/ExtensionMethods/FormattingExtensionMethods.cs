@@ -24,9 +24,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods
 		[TestMethod]
 		public void ToDashboardDisplayString_RunOnStartup_False()
 		{
-			var interval = new TimeSpanEx()
+			var interval = new TimeSpanEx(new TimeSpan(1, 30, 32))
 			{
-				Interval = new TimeSpan(1, 30, 32),
 				RunOnVaultStartup = false
 			};
 			Assert.AreEqual
@@ -39,9 +38,8 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods
 		[TestMethod]
 		public void ToDashboardDisplayString_RunOnStartup_True()
 		{
-			var interval = new TimeSpanEx()
+			var interval = new TimeSpanEx(new TimeSpan(1, 30, 32))
 			{
-				Interval = new TimeSpan(1, 30, 32),
 				RunOnVaultStartup = true
 			};
 			Assert.AreEqual
