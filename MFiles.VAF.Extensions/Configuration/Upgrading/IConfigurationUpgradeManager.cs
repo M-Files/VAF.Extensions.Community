@@ -128,7 +128,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 			}
 		}
 
-		protected virtual bool AreEqual(JObject a, JObject b)
+		protected internal virtual bool AreEqual(JObject a, JObject b)
 		{
 			// Simple.
 			if (a == null && b == null)
@@ -168,7 +168,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 							var bPropertyValueJArray = (JArray)bPropertyValue;
 							if (aPropertyValueJArray.Count != bPropertyValueJArray.Count)
 								return false;
-							// TODO: This needs to be better.
+							// Does this need to be better?
 							if (false == (aPropertyValueJArray.ToString() == bPropertyValueJArray.ToString()))
 								return false;
 						}
