@@ -69,17 +69,8 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 
 				// If the serialization has changed then update the saved data.
 				{
-					var parameterTypeConfigurationVersionAttribute = typeof(TSecureConfiguration)
-						.GetCustomAttributes(false)?
-						.Where(a => a is Configuration.ConfigurationVersionAttribute)
-						.Cast<Configuration.ConfigurationVersionAttribute>()
-						.FirstOrDefault();
-					var parameterTypeVersion = parameterTypeConfigurationVersionAttribute?.Version ?? VersionZero;
-
-					// Where should we read from? (this comes from the oldest configuration attribute).
-					var readFrom = (parameterTypeConfigurationVersionAttribute?.UsesCustomNVSLocation ?? false)
-						? new SingleNamedValueItem(parameterTypeConfigurationVersionAttribute.NamedValueType, parameterTypeConfigurationVersionAttribute.Namespace, parameterTypeConfigurationVersionAttribute.Key)
-						: SingleNamedValueItem.ForLatestVAFVersion(this.VaultApplication);
+					// Where should we read from?
+					var readFrom = typeof(TSecureConfiguration).GetConfigurationLocation(this.VaultApplication);
 
 					// Ensure the data is formatted properly.
 					this.EnsureLatestSerializationSettings<TSecureConfiguration>(vault, readFrom);
@@ -363,7 +354,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		/// <summary>
 		/// A representation of "no version".
 		/// </summary>
-		private static readonly Version VersionZero = new Version("0.0");
+		public static readonly Version VersionZero = new Version("0.0");
 
 		/// <summary>
 		/// The configuration upgrade types that have been already checked.
@@ -470,12 +461,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				}
 
 				// Get the data about the other type.
-				var parameterTypeConfigurationVersionAttribute = parameterType
-					.GetCustomAttributes(false)?
-					.Where(a => a is Configuration.ConfigurationVersionAttribute)
-					.Cast<Configuration.ConfigurationVersionAttribute>()
-					.FirstOrDefault();
-				var parameterTypeVersion = parameterTypeConfigurationVersionAttribute?.Version ?? VersionZero;
+				var readFrom = parameterType.GetConfigurationLocation(this.VaultApplication, out Version parameterTypeVersion);
 
 				// If the versions are the same then skip.
 				if(parameterTypeVersion == configurationVersion)
@@ -483,11 +469,6 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 					this.Logger?.Error($"Skipping upgrade marked by {configuration.FullName}.{method.Name} as it points to a class with the same version number ({parameterTypeVersion}).");
 					continue;
 				}
-
-				// Where should we read from? (this comes from the oldest configuration attribute).
-				var readFrom = (parameterTypeConfigurationVersionAttribute?.UsesCustomNVSLocation ?? false)
-					? new SingleNamedValueItem(parameterTypeConfigurationVersionAttribute.NamedValueType, parameterTypeConfigurationVersionAttribute.Namespace, parameterTypeConfigurationVersionAttribute.Key)
-					: SingleNamedValueItem.ForLatestVAFVersion(this.VaultApplication);
 
 				// Where should we write to? (this comes from the newest configuration attribute)
 				var writeTo = (configurationVersionAttribute?.UsesCustomNVSLocation ?? false)
