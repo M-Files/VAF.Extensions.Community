@@ -1,6 +1,7 @@
 ﻿using MFiles.VAF.Extensions.Configuration.Upgrading.Rules;
 using MFiles.VaultApplications.Logging;
 using MFilesAPI;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,11 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		/// </summary>
 		/// <remarks>Typically an instance of <see cref="NamedValueStorageManager"/>.</remarks>
 		public INamedValueStorageManager NamedValueStorageManager { get; set; } = new VaultNamedValueStorageManager();
+
+		/// <summary>
+		/// The converter to serialize/deserialize JSON.
+		/// </summary>
+		public IJsonConvert JsonConvert { get; set; } = new NewtonsoftJsonConvert();
 
 		/// <summary>
 		/// The vault application that instantiated this upgrade manager.
@@ -60,11 +66,122 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 						this.Logger?.Error(ex, $"Could not execute configuration migration rule of type {rule?.GetType()?.FullName}");
 					}
 				}
+
+				// If the serialization has changed then update the saved data.
+				{
+					var parameterTypeConfigurationVersionAttribute = typeof(TSecureConfiguration)
+						.GetCustomAttributes(false)?
+						.Where(a => a is Configuration.ConfigurationVersionAttribute)
+						.Cast<Configuration.ConfigurationVersionAttribute>()
+						.FirstOrDefault();
+					var parameterTypeVersion = parameterTypeConfigurationVersionAttribute?.Version ?? VersionZero;
+
+					// Where should we read from? (this comes from the oldest configuration attribute).
+					var readFrom = (parameterTypeConfigurationVersionAttribute?.UsesCustomNVSLocation ?? false)
+						? new SingleNamedValueItem(parameterTypeConfigurationVersionAttribute.NamedValueType, parameterTypeConfigurationVersionAttribute.Namespace, parameterTypeConfigurationVersionAttribute.Key)
+						: SingleNamedValueItem.ForLatestVAFVersion(this.VaultApplication);
+
+					// Ensure the data is formatted properly.
+					this.EnsureLatestSerializationSettings<TSecureConfiguration>(vault, readFrom);
+				}
+
+
 			}
 			catch (Exception e)
 			{
 				this.Logger?.Fatal(e, $"Could not get configuration upgrade rules.");
 			}
+		}
+
+		/// <summary>
+		/// Used to ensure that the value in <paramref name="location"/> is serialised according to the current settings.
+		/// For example: if a TimeSpanEx used to hold a location as a string, but now holds it as hour/minute/second properties,
+		/// this method will ensure that the previous data is loaded, parsed, and saved back with the hour/minute/data properties.
+		/// </summary>
+		/// <typeparam name="TSecureConfiguration">The type of configuration to load.</typeparam>
+		/// <param name="vault">The vault to load the data from.</param>
+		/// <param name="location">The item within Named Value Storage to read/write.</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="vault"/> or <paramref name="location"/> are <see langword="null"/>.</exception>
+		protected virtual void EnsureLatestSerializationSettings<TSecureConfiguration>(Vault vault, ISingleNamedValueItem location)
+		{
+			// Sanity.
+			if (null == vault)
+				throw new ArgumentNullException(nameof(vault));
+			if (null == location)
+				throw new ArgumentNullException(nameof(location));
+
+			// Read the data.
+			var existingData = this
+				.NamedValueStorageManager
+				.GetValue(vault, location.NamedValueType, location.Namespace, location.Name, "{}");
+
+			// Go through a serialize/deserialize loop to check that serialization hasn't changed.
+			var newData = this.JsonConvert.Serialize
+			(
+				this.JsonConvert.Deserialize<TSecureConfiguration>(existingData)
+			);
+
+			// If serialization has changed then force updating the new version.
+			if (false == this.AreEqual(JObject.Parse(existingData), JObject.Parse(newData)))
+			{
+				this.NamedValueStorageManager.SetValue(vault, location.NamedValueType, location.Namespace, location.Name, newData);
+			}
+		}
+
+		protected virtual bool AreEqual(JObject a, JObject b)
+		{
+			// Simple.
+			if (a == null && b == null)
+				return true;
+			if (a == null || b == null)
+				return false;
+
+			// Compare property names.  Ignore comments.
+			var aProperties = a.Properties().Select(p => p.Name).Where(n => !n.EndsWith("-Comment")).ToArray();
+			var bProperties = b.Properties().Select(p => p.Name).Where(n => !n.EndsWith("-Comment")).ToArray();
+			if (aProperties.Length != bProperties.Length)
+				return false;
+
+			// Check each in turn.
+			foreach(var propertyName in aProperties)
+			{
+				// Sanity.
+				var aPropertyValue = a[propertyName];
+				var bPropertyValue = b[propertyName];
+				if (aPropertyValue == null && bPropertyValue == null)
+					return true;
+				if (aPropertyValue == null || bPropertyValue == null)
+					return false;
+				if (a.Type != b.Type)
+					return false;
+				
+				// Check each type.
+				switch(aPropertyValue.Type)
+				{
+					case JTokenType.Object:
+						if (false == this.AreEqual((JObject)aPropertyValue, (JObject)bPropertyValue))
+							return false;
+						break;
+					case JTokenType.Array:
+						{
+							var aPropertyValueJArray = (JArray)aPropertyValue;
+							var bPropertyValueJArray = (JArray)bPropertyValue;
+							if (aPropertyValueJArray.Count != bPropertyValueJArray.Count)
+								return false;
+							// TODO: This needs to be better.
+							if (false == (aPropertyValueJArray.ToString() == bPropertyValueJArray.ToString()))
+								return false;
+						}
+						break;
+					default:
+						if (false == (aPropertyValue.ToString() == bPropertyValue.ToString()))
+							return false;
+						break;
+				}
+			}
+
+			// Everything was the same.
+			return true;
 		}
 
 		/// <summary>
@@ -381,23 +498,24 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				var upgradeFrom = parameterTypeVersion < configurationVersion;
 
 				// This method is okay.
-				identifiedUpgradeMethods.Add
-				(
-					upgradeFrom
-						? new DeclaredConfigurationUpgradeRule(readFrom, writeTo, parameterTypeVersion, configurationVersion, method)
-						{
-							UpgradeToType = configuration,
-							UpgradeFromType = parameterType,
-							NamedValueStorageManager = this.NamedValueStorageManager
-						}
-						: new DeclaredConfigurationUpgradeRule(writeTo, readFrom, configurationVersion, parameterTypeVersion, method)
-						{
-							UpgradeToType = parameterType,
-							UpgradeFromType = configuration,
-							NamedValueStorageManager = this.NamedValueStorageManager
-						}
-				);
-				this.Logger?.Debug($"Adding {configuration.FullName}.{method.Name} as an upgrade path from {(upgradeFrom ? parameterTypeVersion : configurationVersion)} to {(upgradeFrom ? configurationVersion : parameterTypeVersion)}");
+				{
+					var rule = upgradeFrom
+							? new DeclaredConfigurationUpgradeRule(readFrom, writeTo, parameterTypeVersion, configurationVersion, method)
+							{
+								UpgradeToType = configuration,
+								UpgradeFromType = parameterType,
+								NamedValueStorageManager = this.NamedValueStorageManager
+							}
+							: new DeclaredConfigurationUpgradeRule(writeTo, readFrom, configurationVersion, parameterTypeVersion, method)
+							{
+								UpgradeToType = parameterType,
+								UpgradeFromType = configuration,
+								NamedValueStorageManager = this.NamedValueStorageManager
+							};
+					rule.JsonConvert = this.JsonConvert;
+					identifiedUpgradeMethods.Add(rule);
+					this.Logger?.Debug($"Adding {configuration.FullName}.{method.Name} as an upgrade path from {(upgradeFrom ? parameterTypeVersion : configurationVersion)} to {(upgradeFrom ? configurationVersion : parameterTypeVersion)}");
+				}
 
 				// Add in upgrade methods on the related type, if we can.
 				{

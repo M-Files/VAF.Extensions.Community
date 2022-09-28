@@ -180,6 +180,26 @@ namespace MFiles.VAF.Extensions
 						output.Interval = new TimeSpanEx();
 						serializer.Populate(jToken.CreateReader(), output.Interval);
 					}
+					// Check whether it's an old-school interval.
+					else if (jToken["Interval"] != null)
+					{
+						output.RecurrenceType = RecurrenceType.Interval;
+						output.Interval = new TimeSpanEx();
+						serializer.Populate(jToken.CreateReader(), output.Interval);
+
+						// Now set the interval
+						if (TimeSpan.TryParse(jToken["Interval"].Value<string>(), out TimeSpan interval))
+						{
+							output.Interval.SetInterval(interval);
+						}
+						else
+						{
+							this.Logger?.Warn
+							(
+								String.Format(Resources.Exceptions.Configuration.CouldNotConvertJsonValueToFrequency, jToken)
+							);
+						}
+					}
 					//Check if this might be a Schedule
 					else if (jToken[nameof(Schedule.Triggers)] != null)
 					{

@@ -119,5 +119,38 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 			);
 		}
 
+		[TestMethod]
+		public void TimeSpanPropertyUpdated()
+		{
+			var vault = this.GetVaultMock().Object;
+			var source = new VersionThreeWithInstanceUpgradePath() { TimeSpan = new TimeSpanEx()
+			{
+				Hours = 1,
+				Minutes = 2,
+				Seconds = 3
+			}
+			};
+			var managerMock = this.GetNamedValueStorageManagerMock();
+			managerMock.Object.SetNamedValues
+			(
+				vault,
+				MFNamedValueType.MFSystemAdminConfiguration,
+				"Castle.Proxies.VaultApplicationBaseProxy",
+				this.CreateNamedValues("configuration", @"{ ""Version"" : ""3.0"", ""TimeSpan"" : { ""Interval"" : ""01:02:03"", ""RunOnVaultStartup"" : false } }")
+			);
+			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
+			{
+				NamedValueStorageManager = managerMock.Object
+			};
+			c.UpgradeConfiguration<VersionThreeWithInstanceUpgradePath>(vault);
+
+			// Attempt to retrieve the data.
+			Assert.AreEqual
+			(
+				Newtonsoft.Json.JsonConvert.SerializeObject(new VersionThreeWithInstanceUpgradePath() { TimeSpan = new TimeSpanEx() { Hours = 1, Minutes = 2, Seconds = 3, RunOnVaultStartup = false } }, NewtonsoftJsonConvert.DefaultJsonSerializerSettings),
+				managerMock.Object.GetValue(vault, MFNamedValueType.MFSystemAdminConfiguration, "Castle.Proxies.VaultApplicationBaseProxy", "configuration")
+			);
+		}
+
 	}
 }

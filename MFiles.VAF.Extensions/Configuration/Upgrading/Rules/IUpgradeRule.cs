@@ -34,5 +34,10 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// The version of the configuration after this migration has completed.
 		/// </summary>
 		Version MigrateToVersion { get; }
+
+		/// <summary>
+		/// The converter to serialize/deserialize JSON.
+		/// </summary>
+		IJsonConvert JsonConvert { get; set; }
 	}
 }

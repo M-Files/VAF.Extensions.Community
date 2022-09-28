@@ -17,7 +17,7 @@ namespace MFiles.VAF.Extensions
 		protected IConfigurationUpgradeManager ConfigurationUpgradeManager { get; private set; }
 		public virtual IConfigurationUpgradeManager GetConfigurationUpgradeManager()
 		{
-			return new ConfigurationUpgradeManager<TSecureConfiguration>(this);
+			return new ConfigurationUpgradeManager(this);
 		}
 
 		/// <inheritdoc />
@@ -29,7 +29,7 @@ namespace MFiles.VAF.Extensions
 				?? this.GetConfigurationUpgradeManager();
 
 			// Run any configuration upgrade rules.
-			this.ConfigurationUpgradeManager?.UpgradeConfiguration(vault);
+			this.ConfigurationUpgradeManager?.UpgradeConfiguration<TSecureConfiguration>(vault);
 
 			// Use the base implementation.
 			base.PopulateConfigurationObjects(vault);

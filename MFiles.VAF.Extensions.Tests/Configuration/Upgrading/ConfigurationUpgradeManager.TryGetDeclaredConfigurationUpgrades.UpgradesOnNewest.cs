@@ -191,6 +191,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 				[DataMember]
 				public string World { get; set; }
 
+				[DataMember]
+				public TimeSpanEx TimeSpan { get; set; }
+
 				[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
 				public virtual void Upgrade(VersionTwoWithInstanceUpgradePath input)
 				{

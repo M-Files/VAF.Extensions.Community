@@ -176,7 +176,7 @@ namespace MFiles.VAF.Extensions
 					if (this
 						.VaultApplication?
 						.RecurringOperationConfigurationManager?
-						.TryGetValue(queue, processor.Type, out recurrenceConfiguration) ?? false)
+						.TryGetValue(queueId, taskType, out recurrenceConfiguration) ?? false)
 					{
 						htmlString += recurrenceConfiguration.ToDashboardDisplayString();
 					}
