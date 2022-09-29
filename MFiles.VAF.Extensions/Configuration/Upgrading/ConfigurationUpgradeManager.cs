@@ -108,6 +108,131 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 			}
 		}
 
+		/// <summary>
+		/// Performs a deep-copy of all comments from <paramref name="source"/> to <paramref name="target"/>.
+		/// </summary>
+		/// <param name="source">The source object to copy comments from.</param>
+		/// <param name="target">The target object to copy comments to.</param>
+		/// <remarks>
+		/// If the value exists in <paramref name="source"/> but not <paramref name="target"/> then it is copied to <paramref name="target"/>.
+		/// If the value exists in <paramref name="target"/> but not <paramref name="source"/> then it is left as-is.
+		/// If the value exists in both <paramref name="source"/> and <paramref name="target"/> then <paramref name="target"/> is updated with the value from <paramref name="source"/>.
+		/// </remarks>
+		protected internal virtual void CopyComments(JObject source, JObject target)
+		{
+			// Sanity.
+			if (null == source || null == target)
+				return;
+
+			var sourceProperties = source.Properties().Select(p => p.Name).Where(n => !n.EndsWith("-Comment")).ToArray();
+			foreach(var propertyName in sourceProperties)
+			{
+				// Skip if the target is missing this property.
+				var sourcePropertyValue = source[propertyName];
+				var targetPropertyValue = target[propertyName];
+				if (null == targetPropertyValue)
+					continue;
+
+				// Do we need to do anything more clever with this type of property value?
+				switch(sourcePropertyValue.Type)
+				{
+					case JTokenType.Object:
+						{
+							// If the type of the source property is object then recurse.
+							this.CopyComments(sourcePropertyValue as JObject, targetPropertyValue as JObject);
+							break;
+						}
+					case JTokenType.Array:
+						{
+							// If this is an array then we can copy comments for the elements.
+							var sourceJArray = sourcePropertyValue as JArray;
+							var targetJArray = targetPropertyValue as JArray ?? new JArray();
+							if (null != sourceJArray)
+							{
+								// Iterate over the items in the collection.
+								for(var i=0; i<sourceJArray.Count; i++)
+								{
+									// Copy the comment for the array index from source to target.
+									this.CopyPropertyValue(source, target, $"{propertyName}-{i}-Comment");
+									
+									// If there's an equivalent entry in the target then process the elements.
+									if (i < targetJArray.Count
+										&& sourceJArray[i] is JObject sourceElement
+										&& targetJArray[i] is JObject targetElement)
+									{
+										this.CopyComments(sourceElement, targetElement);
+									}
+								}
+							}
+							break;
+						}
+					case JTokenType.Null:
+						{
+							// Skip nulls.
+							continue;
+						}
+				}
+
+				// Copy the comment from source to target.
+				this.CopyPropertyValue(source, target, propertyName + "-Comment");
+			}
+		}
+
+		/// <summary>
+		/// Copies a single property named <paramref name="propertyName"/> from <paramref name="source"/> to <paramref name="target"/>.
+		/// </summary>
+		/// <param name="source">The source object to locate the property in.</param>
+		/// <param name="target">The target object to update.</param>
+		/// <param name="propertyName">The name of the property.</param>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> or <paramref name="target"/> are null.</exception>
+		/// <exception cref="ArgumentException">Thrown if <paramref name="propertyName"/> is null or whitespace.</exception>
+		/// <remarks>
+		/// If the value exists in <paramref name="source"/> but not <paramref name="target"/> then it is copied to <paramref name="target"/>.
+		/// If the value exists in <paramref name="target"/> but not <paramref name="source"/> then it is left as-is.
+		/// If the value exists in both <paramref name="source"/> and <paramref name="target"/> then <paramref name="target"/> is updated with the value from <paramref name="source"/>.
+		/// </remarks>
+		protected internal void CopyPropertyValue(JObject source, JObject target, string propertyName)
+		{
+			// Sanity.
+			if (null == source)
+				throw new ArgumentNullException(nameof(source));
+			if (null == target)
+				throw new ArgumentNullException(nameof(target));
+			if (string.IsNullOrWhiteSpace(propertyName))
+				throw new ArgumentException(nameof(propertyName));
+
+			// Get the comment for this property in both source and target.
+			var sourcePropertyValue = source[propertyName];
+			var targetPropertyValue = target[propertyName];
+
+			// Does it not exist in either?
+			if (null == sourcePropertyValue && null == targetPropertyValue)
+				return;
+
+			// Does it exist in the target and not the source?
+			if (null == sourcePropertyValue && null != targetPropertyValue)
+				return;
+
+			// If it's already in the target then remove it (we'll add it in a sec).
+			if (null != targetPropertyValue)
+				target.Remove(propertyName);
+
+			// Copy the source to the target.
+			targetPropertyValue = sourcePropertyValue.DeepClone();
+			target.Add(new JProperty(propertyName, targetPropertyValue));
+
+		}
+
+		/// <summary>
+		/// Returns <see langword="true"/> if the properties (and their values) in <paramref name="a"/> are the same as those in <paramref name="b"/>.
+		/// </summary>
+		/// <param name="a">The first property.</param>
+		/// <param name="b">The second property.</param>
+		/// <returns>
+		/// <see langword="true"/> if <paramref name="a"/> and <paramref name="b"/> contain the same properties with the same values.
+		/// Note that comment properties (names ending "-Comment") are not included in this comparison.
+		/// Also note that null is equal to null but null is not equal to non-null.
+		/// </returns>
 		protected internal virtual bool AreEqual(JObject a, JObject b)
 		{
 			// Simple.
