@@ -89,22 +89,43 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				throw new ArgumentNullException(nameof(vault));
 			if (null == location)
 				throw new ArgumentNullException(nameof(location));
+			this.Logger?.Trace($"Ensuring that the latest serialization rules are run.");
 
 			// Read the data.
-			var existingData = this
-				.NamedValueStorageManager
-				.GetValue(vault, location.NamedValueType, location.Namespace, location.Name, "{}");
+			JObject existingData;
+			try
+			{
+				this.Logger?.Trace($"Loading data from NVS at {location.Namespace}/{location.Name}/{location.NamedValueType}.");
+				existingData = JObject.Parse
+				(
+					this
+						.NamedValueStorageManager
+						.GetValue(vault, location.NamedValueType, location.Namespace, location.Name, "{}")
+				);
+			}
+			catch(Exception e)
+			{
+				this.Logger?.Warn(e, $"Cannot check serialization as could not parse JObject from: {location.Namespace}/{location.Name}/{location.NamedValueType}");
+				return;
+			}
 
-			// Go through a serialize/deserialize loop to check that serialization hasn't changed.
-			var newData = this.JsonConvert.Serialize
+			// Serialize/deserialize then convert to JObject so that we can see what has changed.
+			JObject newData = JObject.Parse
 			(
-				this.JsonConvert.Deserialize<TSecureConfiguration>(existingData)
+				this.JsonConvert.Serialize
+				(
+					this.JsonConvert.Deserialize<TSecureConfiguration>(existingData.ToString())
+				)
 			);
 
+			// Copy across any comments.
+			this.CopyComments(existingData, newData);
+
 			// If serialization has changed then force updating the new version.
-			if (false == this.AreEqual(JObject.Parse(existingData), JObject.Parse(newData)))
+			if (false == this.AreEqual(existingData, newData))
 			{
-				this.NamedValueStorageManager.SetValue(vault, location.NamedValueType, location.Namespace, location.Name, newData);
+				this.Logger?.Info($"Data in NVS at {location.Namespace}/{location.Name}/{location.NamedValueType} needed to be updated.");
+				this.NamedValueStorageManager.SetValue(vault, location.NamedValueType, location.Namespace, location.Name, this.JsonConvert.Serialize(newData));
 			}
 		}
 
@@ -123,6 +144,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 			// Sanity.
 			if (null == source || null == target)
 				return;
+			this.Logger?.Trace($"Copying comments on '{(string.IsNullOrWhiteSpace(source.Path) ? "(root)" : source.Path)}'.");
 
 			var sourceProperties = source.Properties().Select(p => p.Name).Where(n => !n.EndsWith("-Comment")).ToArray();
 			foreach(var propertyName in sourceProperties)
@@ -153,7 +175,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 								for(var i=0; i<sourceJArray.Count; i++)
 								{
 									// Copy the comment for the array index from source to target.
-									this.CopyPropertyValue(source, target, $"{propertyName}-{i}-Comment");
+									this.CopyPropertyComment(source, target, $"{propertyName}-{i}");
 									
 									// If there's an equivalent entry in the target then process the elements.
 									if (i < targetJArray.Count
@@ -174,12 +196,14 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				}
 
 				// Copy the comment from source to target.
-				this.CopyPropertyValue(source, target, propertyName + "-Comment");
+				this.CopyPropertyComment(source, target, propertyName);
 			}
 		}
 
 		/// <summary>
-		/// Copies a single property named <paramref name="propertyName"/> from <paramref name="source"/> to <paramref name="target"/>.
+		/// Copies the comment for a single property named <paramref name="propertyName"/> from <paramref name="source"/> to <paramref name="target"/>.
+		/// Note: if you wish to copy the "Item-Comment" property then "Item" should be passed in <paramref name="propertyName"/>.
+		/// Note: if you wish to copy the comment for the second array element in "Triggers" then "Triggers-1" should be passed in <paramref name="propertyName"/>.
 		/// </summary>
 		/// <param name="source">The source object to locate the property in.</param>
 		/// <param name="target">The target object to update.</param>
@@ -191,7 +215,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		/// If the value exists in <paramref name="target"/> but not <paramref name="source"/> then it is left as-is.
 		/// If the value exists in both <paramref name="source"/> and <paramref name="target"/> then <paramref name="target"/> is updated with the value from <paramref name="source"/>.
 		/// </remarks>
-		protected internal void CopyPropertyValue(JObject source, JObject target, string propertyName)
+		protected internal void CopyPropertyComment(JObject source, JObject target, string propertyName)
 		{
 			// Sanity.
 			if (null == source)
@@ -202,6 +226,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				throw new ArgumentException(nameof(propertyName));
 
 			// Get the comment for this property in both source and target.
+			propertyName += "-Comment";
 			var sourcePropertyValue = source[propertyName];
 			var targetPropertyValue = target[propertyName];
 
@@ -218,6 +243,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				target.Remove(propertyName);
 
 			// Copy the source to the target.
+			this.Logger?.Debug($"Copying property {propertyName} from '{(string.IsNullOrWhiteSpace(source.Path) ? "(root)" : source.Path)}' in source.");
 			targetPropertyValue = sourcePropertyValue.DeepClone();
 			target.Add(new JProperty(propertyName, targetPropertyValue));
 

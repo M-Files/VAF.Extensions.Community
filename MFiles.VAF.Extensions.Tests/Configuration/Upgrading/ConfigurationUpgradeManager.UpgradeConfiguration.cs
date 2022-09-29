@@ -119,17 +119,14 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 			);
 		}
 
+		/// <summary>
+		/// We changed the serialization process for a timespan property from a string ("01:02:03") to separate properties for hours/minutes/seconds.
+		/// Ensure that if we give it the old format to load, it updates the JSON in NVS to the new format.
+		/// </summary>
 		[TestMethod]
-		public void TimeSpanPropertyUpdated()
+		public void EnsureLatestSerializationSettings_TimeSpan_FromStringToSeparateElements()
 		{
 			var vault = this.GetVaultMock().Object;
-			var source = new VersionThreeWithInstanceUpgradePath() { TimeSpan = new TimeSpanEx()
-			{
-				Hours = 1,
-				Minutes = 2,
-				Seconds = 3
-			}
-			};
 			var managerMock = this.GetNamedValueStorageManagerMock();
 			managerMock.Object.SetNamedValues
 			(
@@ -150,6 +147,37 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 				Newtonsoft.Json.JsonConvert.SerializeObject(new VersionThreeWithInstanceUpgradePath() { TimeSpan = new TimeSpanEx() { Hours = 1, Minutes = 2, Seconds = 3, RunOnVaultStartup = false } }, NewtonsoftJsonConvert.DefaultJsonSerializerSettings),
 				managerMock.Object.GetValue(vault, MFNamedValueType.MFSystemAdminConfiguration, "Castle.Proxies.VaultApplicationBaseProxy", "configuration")
 			);
+		}
+
+		/// <summary>
+		/// We changed the serialization process for a timespan property from a string ("01:02:03") to separate properties for hours/minutes/seconds.
+		/// Ensure that if we give it the old format to load, it updates the JSON in NVS to the new format.
+		/// </summary>
+		[TestMethod]
+		public void EnsureLatestSerializationSettings_TimeSpan_FromStringToSeparateElements_CommentsPersisted()
+		{
+			var vault = this.GetVaultMock().Object;
+			var managerMock = this.GetNamedValueStorageManagerMock();
+			managerMock.Object.SetNamedValues
+			(
+				vault,
+				MFNamedValueType.MFSystemAdminConfiguration,
+				"Castle.Proxies.VaultApplicationBaseProxy",
+				this.CreateNamedValues("configuration", @"{ ""Version"" : ""3.0"", ""TimeSpan"" : { ""Interval"" : ""01:02:03"", ""RunOnVaultStartup"" : false }, ""TimeSpan-Comment"": ""hello world"" }")
+			);
+			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
+			{
+				NamedValueStorageManager = managerMock.Object
+			};
+			c.UpgradeConfiguration<VersionThreeWithInstanceUpgradePath>(vault);
+
+			// Attempt to retrieve the data, and that the basics are correct.
+			var jObject = Newtonsoft.Json.Linq.JObject.Parse(managerMock.Object.GetValue(vault, MFNamedValueType.MFSystemAdminConfiguration, "Castle.Proxies.VaultApplicationBaseProxy", "configuration"));
+			Assert.IsNotNull(jObject);
+
+			// Ensure we have a comment!
+			var timeSpanComment = jObject["TimeSpan-Comment"];
+			Assert.AreEqual("hello world", timeSpanComment.ToString());
 		}
 
 	}
