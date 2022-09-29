@@ -243,7 +243,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				target.Remove(propertyName);
 
 			// Copy the source to the target.
-			this.Logger?.Debug($"Copying property {propertyName} from '{(string.IsNullOrWhiteSpace(source.Path) ? "(root)" : source.Path)}' in source.");
+			this.Logger?.Debug($"Copying '{(string.IsNullOrWhiteSpace(source.Path) ? "" : source.Path + ".")}{propertyName}' from source to target.");
 			targetPropertyValue = sourcePropertyValue.DeepClone();
 			target.Add(new JProperty(propertyName, targetPropertyValue));
 
