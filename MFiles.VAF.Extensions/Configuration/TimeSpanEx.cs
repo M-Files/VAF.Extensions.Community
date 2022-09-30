@@ -16,21 +16,21 @@ namespace MFiles.VAF.Extensions
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = ResourceMarker.Id + nameof(Resources.Configuration.TimeSpanEx_Interval)
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.TimeSpanEx_Interval_Hours)
 		)]
 		public int Hours { get; set; }
 
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = ResourceMarker.Id + nameof(Resources.Configuration.TimeSpanEx_Interval)
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.TimeSpanEx_Interval_Minutes)
 		)]
 		public int Minutes { get; set; }
 
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = ResourceMarker.Id + nameof(Resources.Configuration.TimeSpanEx_Interval)
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.TimeSpanEx_Interval_Seconds)
 		)]
 		public int Seconds { get; set; }
 

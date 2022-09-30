@@ -219,8 +219,14 @@
   <data name="Schedule_WeeklyTrigger_TriggerDays_Label" xml:space="preserve">
     <value>Trigger Days</value>
   </data>
-  <data name="TimeSpanEx_Interval" xml:space="preserve">
-    <value>Interval</value>
+  <data name="TimeSpanEx_Interval_Hours" xml:space="preserve">
+    <value>Hours</value>
+  </data>
+  <data name="TimeSpanEx_Interval_Minutes" xml:space="preserve">
+    <value>Minutes</value>
+  </data>
+  <data name="TimeSpanEx_Interval_Seconds" xml:space="preserve">
+    <value>Seconds</value>
   </data>
   <data name="TriggerTimeType_Custom" xml:space="preserve">
     <value>Custom</value>

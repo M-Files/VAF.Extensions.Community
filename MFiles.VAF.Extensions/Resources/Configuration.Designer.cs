@@ -367,11 +367,29 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Interval.
+        ///   Looks up a localized string similar to Hours.
         /// </summary>
-        internal static string TimeSpanEx_Interval {
+        internal static string TimeSpanEx_Interval_Hours {
             get {
-                return ResourceManager.GetString("TimeSpanEx_Interval", resourceCulture);
+                return ResourceManager.GetString("TimeSpanEx_Interval_Hours", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Minutes.
+        /// </summary>
+        internal static string TimeSpanEx_Interval_Minutes {
+            get {
+                return ResourceManager.GetString("TimeSpanEx_Interval_Minutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Seconds.
+        /// </summary>
+        internal static string TimeSpanEx_Interval_Seconds {
+            get {
+                return ResourceManager.GetString("TimeSpanEx_Interval_Seconds", resourceCulture);
             }
         }
         
