@@ -74,7 +74,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 			}
 
 			// We need to update.
-			Logger?.Info($"Data in NVS at {ReadFrom.Namespace}.{ReadFrom.Name} ({ReadFrom.NamedValueType}) needed to be updated.");
+			this.Logger?.Info($"Data in NVS at {ReadFrom.Namespace}.{ReadFrom.Name} ({ReadFrom.NamedValueType}) needed to be updated.");
 
 			// Save the new data to storage.
 			var type = WriteTo?.NamedValueType ?? ReadFrom.NamedValueType;
