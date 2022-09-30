@@ -1,6 +1,8 @@
 ﻿using MFiles.VaultApplications.Logging;
 using MFilesAPI;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Linq;
 
 namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 {
@@ -121,24 +123,44 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 				// Convert it.
 				var newData = this.Convert(data);
 
-				// Ensure that we have the Version property, if it's JSON.
-				if (null != this.MigrateToVersion)
+				// Deal with the JSON.
 				{
+					JObject sourceObj, targetObj;
 					try
 					{
-						var obj = Newtonsoft.Json.Linq.JObject.Parse(newData);
-						if (null == obj["Version"])
+						// Try to parse both old and new data.
+						sourceObj = JObject.Parse(data);
+						targetObj = JObject.Parse(newData);
+
+						// Copy the comments from the source (original) to target (new) data.
+						this.CopyComments(sourceObj, targetObj);
+
+
+						// Ensure that we have the Version property, if it's JSON.
+						if (null != this.MigrateToVersion)
 						{
-							this.Logger?.Warn("Converted JSON data did not contain a version property; adding automatically.");
-							obj["Version"] = this.MigrateToVersion.ToString();
-							newData = this.JsonConvert.Serialize(obj);
+							try
+							{
+								if (null == targetObj["Version"])
+								{
+									this.Logger?.Debug("Converted JSON data did not contain a version property; adding automatically.");
+									targetObj["Version"] = this.MigrateToVersion.ToString();
+								}
+								else if (targetObj.Value<string>("Version") != this.MigrateToVersion.ToString())
+								{
+									this.Logger?.Debug($"Converted JSON data contained a version of {targetObj.Value<string>("Version")}, but {this.MigrateToVersion} was expected; updating automatically.");
+									targetObj["Version"] = this.MigrateToVersion.ToString();
+								}
+							}
+							catch (Exception ex)
+							{
+								this.Logger?.Warn(ex, "Could not parse text into JSON; cannot check/set version number.");
+								return false;
+							}
 						}
-						else if (obj.Value<string>("Version") != this.MigrateToVersion.ToString())
-						{
-							this.Logger?.Warn($"Converted JSON data contained a version of {obj.Value<string>("Version")}, but {this.MigrateToVersion} was expected; updating automatically.");
-							obj["Version"] = this.MigrateToVersion.ToString();
-							newData = this.JsonConvert.Serialize(obj);
-						}
+
+						// Update the string representation of the new data.
+						newData = this.JsonConvert.Serialize(targetObj);
 					}
 					catch (Exception ex)
 					{
@@ -193,6 +215,126 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 			}
 
 			return true;
+		}
+
+		/// <summary>
+		/// Performs a deep-copy of all comments from <paramref name="source"/> to <paramref name="target"/>.
+		/// </summary>
+		/// <param name="source">The source object to copy comments from.</param>
+		/// <param name="target">The target object to copy comments to.</param>
+		/// <remarks>
+		/// If the value exists in <paramref name="source"/> but not <paramref name="target"/> then it is copied to <paramref name="target"/>.
+		/// If the value exists in <paramref name="target"/> but not <paramref name="source"/> then it is left as-is.
+		/// If the value exists in both <paramref name="source"/> and <paramref name="target"/> then <paramref name="target"/> is updated with the value from <paramref name="source"/>.
+		/// </remarks>
+		protected internal virtual void CopyComments(JObject source, JObject target)
+		{
+			// Sanity.
+			if (null == source || null == target)
+				return;
+			this.Logger?.Trace($"Copying comments on '{(string.IsNullOrWhiteSpace(source.Path) ? "(root)" : source.Path)}'.");
+
+			var sourceProperties = source.Properties().Select(p => p.Name).Where(n => !n.EndsWith("-Comment")).ToArray();
+			foreach (var propertyName in sourceProperties)
+			{
+				// Skip if the target is missing this property.
+				var sourcePropertyValue = source[propertyName];
+				var targetPropertyValue = target[propertyName];
+				if (null == targetPropertyValue)
+					continue;
+
+				// Do we need to do anything more clever with this type of property value?
+				switch (sourcePropertyValue.Type)
+				{
+					case JTokenType.Object:
+						{
+							// If the type of the source property is object then recurse.
+							this.CopyComments(sourcePropertyValue as JObject, targetPropertyValue as JObject);
+							break;
+						}
+					case JTokenType.Array:
+						{
+							// If this is an array then we can copy comments for the elements.
+							var sourceJArray = sourcePropertyValue as JArray;
+							var targetJArray = targetPropertyValue as JArray ?? new JArray();
+							if (null != sourceJArray)
+							{
+								// Iterate over the items in the collection.
+								for (var i = 0; i < sourceJArray.Count; i++)
+								{
+									// Copy the comment for the array index from source to target.
+									this.CopyPropertyComment(source, target, $"{propertyName}-{i}");
+
+									// If there's an equivalent entry in the target then process the elements.
+									if (i < targetJArray.Count
+										&& sourceJArray[i] is JObject sourceElement
+										&& targetJArray[i] is JObject targetElement)
+									{
+										this.CopyComments(sourceElement, targetElement);
+									}
+								}
+							}
+							break;
+						}
+					case JTokenType.Null:
+						{
+							// Skip nulls.
+							continue;
+						}
+				}
+
+				// Copy the comment from source to target.
+				this.CopyPropertyComment(source, target, propertyName);
+			}
+		}
+
+		/// <summary>
+		/// Copies the comment for a single property named <paramref name="propertyName"/> from <paramref name="source"/> to <paramref name="target"/>.
+		/// Note: if you wish to copy the "Item-Comment" property then "Item" should be passed in <paramref name="propertyName"/>.
+		/// Note: if you wish to copy the comment for the second array element in "Triggers" then "Triggers-1" should be passed in <paramref name="propertyName"/>.
+		/// </summary>
+		/// <param name="source">The source object to locate the property in.</param>
+		/// <param name="target">The target object to update.</param>
+		/// <param name="propertyName">The name of the property.</param>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> or <paramref name="target"/> are null.</exception>
+		/// <exception cref="ArgumentException">Thrown if <paramref name="propertyName"/> is null or whitespace.</exception>
+		/// <remarks>
+		/// If the value exists in <paramref name="source"/> but not <paramref name="target"/> then it is copied to <paramref name="target"/>.
+		/// If the value exists in <paramref name="target"/> but not <paramref name="source"/> then it is left as-is.
+		/// If the value exists in both <paramref name="source"/> and <paramref name="target"/> then <paramref name="target"/> is updated with the value from <paramref name="source"/>.
+		/// </remarks>
+		protected internal void CopyPropertyComment(JObject source, JObject target, string propertyName)
+		{
+			// Sanity.
+			if (null == source)
+				throw new ArgumentNullException(nameof(source));
+			if (null == target)
+				throw new ArgumentNullException(nameof(target));
+			if (string.IsNullOrWhiteSpace(propertyName))
+				throw new ArgumentException(nameof(propertyName));
+
+			// Get the comment for this property in both source and target.
+			propertyName += "-Comment";
+			var sourcePropertyValue = source[propertyName];
+			var targetPropertyValue = target[propertyName];
+
+			// Does it not exist in either?
+			if (null == sourcePropertyValue && null == targetPropertyValue)
+				return;
+
+			// Does it exist in the target and not the source?
+			if (null == sourcePropertyValue && null != targetPropertyValue)
+				return;
+
+			// If it's already in the target then remove it (we'll add it in a sec).
+			if (null != targetPropertyValue)
+				target.Remove(propertyName);
+
+			// Copy the source to the target.
+			this.Logger?.Debug($"Copying '{(string.IsNullOrWhiteSpace(source.Path) ? "" : source.Path + ".")}{propertyName}' from source to target.");
+			targetPropertyValue = sourcePropertyValue.DeepClone();
+			target.Add(new JProperty(propertyName, targetPropertyValue));
+
 		}
 	}
 	public abstract class SingleNamedValueItemUpgradeRuleBase<TOptions>

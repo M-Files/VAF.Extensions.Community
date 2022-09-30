@@ -12,7 +12,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void CopyComments_Target_Null()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
 			JObject source = new JObject();
 			JObject target = null;
@@ -26,7 +26,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void CopyComments_Source_Null()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
 			JObject source = null;
 			JObject target = new JObject();
@@ -40,7 +40,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void CopyComments_NoComments()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
 			JObject source = JObject.Parse(@"{ ""hello"": ""world"" }");
 			JObject target = JObject.Parse(@"{ ""hello"": ""world"" }");
@@ -54,7 +54,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void CopyComments_SimpleComment_OnlySourcePopulated()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
 			JObject source = JObject.Parse(@"{ ""hello"": ""world"", ""hello-Comment"": ""my comment"" }");
 			JObject target = JObject.Parse(@"{ ""hello"": ""world"" }");
@@ -69,7 +69,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void CopyComments_SimpleComment_DoesNotCopyIfTargetIsMissingCommentedProperty()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
 			JObject source = JObject.Parse(@"{ ""hello"": ""world"", ""hello-Comment"": ""my comment"" }");
 			JObject target = JObject.Parse(@"{ }");
@@ -83,7 +83,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void CopyComments_SimpleComment_SourceAndTargetPopulated()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
 			JObject source = JObject.Parse(@"{ ""hello"": ""world"", ""hello-Comment"": ""my comment"" }");
 			JObject target = JObject.Parse(@"{ ""hello"": ""world"", ""hello-Comment"": ""my old comment"" }");
@@ -98,7 +98,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void CopyComments_SimpleComment_OnlyTargetPopulated()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
 			JObject source = JObject.Parse(@"{ ""hello"": ""world"" }");
 			JObject target = JObject.Parse(@"{ ""hello"": ""world"", ""hello-Comment"": ""my comment"" }");
@@ -113,7 +113,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void CopyComments_ChildObjectIsAlsoUpdated()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
 			JObject source = JObject.Parse(@"{ ""hello"": { ""hello"" : ""world"", ""hello-Comment"" : ""my comment"" } }");
 			JObject target = JObject.Parse(@"{ ""hello"": { ""hello"" : ""world"" } }");
@@ -129,7 +129,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void CopyComments_ArrayCommentsAreCopied_OneElementOneComment()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
 			JObject source = JObject.Parse(@"{ ""Triggers"": [ { ""Item"" : ""One"" } ], ""Triggers-0-Comment"" : ""my comment"" }");
 			JObject target = JObject.Parse(@"{ ""Triggers"": [] }");
@@ -144,7 +144,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void CopyComments_ArrayCommentsAreCopied_TwoElementsOneComment()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
 			JObject source = JObject.Parse(@"{ ""Triggers"": [ { ""Item"" : ""One"" }, { ""Item"" : ""Two"" } ], ""Triggers-1-Comment"" : ""my comment"" }");
 			JObject target = JObject.Parse(@"{ ""Triggers"": [] }");
@@ -159,7 +159,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void CopyComments_ArrayCommentsAreCopied_TwoElementsTwoComments()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
 			JObject source = JObject.Parse(@"{ ""Triggers"": [ { ""Item"" : ""One"" }, { ""Item"" : ""Two"" } ], ""Triggers-0-Comment"" : ""my first comment"", ""Triggers-1-Comment"" : ""my second comment"" }");
 			JObject target = JObject.Parse(@"{ ""Triggers"": [] }");
@@ -175,7 +175,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void CopyComments_ArrayElementChildObjectIsAlsoUpdated()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
 			JObject source = JObject.Parse(@"{ ""Triggers"": [ { ""Item"" : ""One"", ""Item-Comment"": ""my comment"" } ] }");
 			JObject target = JObject.Parse(@"{ ""Triggers"": [ { ""Item"" : ""One"" }, { ""Item"" : ""Two"" } ]  }");

@@ -10,7 +10,8 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		/// Upgrades the configuration in the vault.
 		/// </summary>
 		/// <param name="vault">The vault reference to use to access named-value storage.</param>
-		void UpgradeConfiguration<TSecureConfiguration>(Vault vault);
+		void UpgradeConfiguration<TSecureConfiguration>(Vault vault)
+            where TSecureConfiguration : class, new();
 
 	}
 }

@@ -151,6 +151,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 				Times.Exactly(0)
 			);
 		}
+
 	}
 	public class SingleNamedValueItemUpgradeRuleBaseProxy
 		: SingleNamedValueItemUpgradeRuleBase

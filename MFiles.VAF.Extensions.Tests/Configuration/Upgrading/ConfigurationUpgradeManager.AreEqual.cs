@@ -1,39 +1,58 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using MFiles.VAF.Configuration;
+using MFiles.VAF.Extensions.Configuration.Upgrading;
+using MFilesAPI;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 {
 	public partial class ConfigurationUpgradeManager
 		: TestBaseWithVaultMock
 	{
+		internal class EnsureLatestSerializationSettingsUpgradeRuleProxy
+			: Extensions.Configuration.Upgrading.Rules.EnsureLatestSerializationSettingsUpgradeRule<EnsureLatestSerializationSettingsUpgradeRuleProxy.MyConfiguration>
+		{
+
+			public EnsureLatestSerializationSettingsUpgradeRuleProxy()
+				: base(Mock.Of<ISingleNamedValueItem>(m => m.IsValid() == true))
+			{
+				this.NamedValueStorageManager = new Mock<INamedValueStorageManager>().Object;
+			}
+
+			public class MyConfiguration
+			{
+
+			}
+
+		}
 
 		[TestMethod]
 		public void AreEqual_Nulls()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
-			{
-				NamedValueStorageManager = this.GetNamedValueStorageManagerMock().Object
-			};
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
 			// Check that null == null, but null != instance.
 			Assert.IsTrue(c.AreEqual(null, null));
-			Assert.IsFalse(c.AreEqual(new Newtonsoft.Json.Linq.JObject(), null));
-			Assert.IsFalse(c.AreEqual(null, new Newtonsoft.Json.Linq.JObject()));
+			Assert.IsFalse(c.AreEqual(new JObject(), null));
+			Assert.IsFalse(c.AreEqual(null, new JObject()));
 
 		}
 
 		[TestMethod]
 		public void AreEqual_False_DifferentProperties()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
-			{
-				NamedValueStorageManager = this.GetNamedValueStorageManagerMock().Object
-			};
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
-			var a = new Newtonsoft.Json.Linq.JObject();
+			var a = new JObject();
 			a.Add("hello", "world");
 
-			var b = new Newtonsoft.Json.Linq.JObject();
+			var b = new JObject();
 			b.Add("hi", "world");
 
 			Assert.IsFalse(c.AreEqual(a, b));
@@ -43,15 +62,12 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void AreEqual_False_DifferentValues()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
-			{
-				NamedValueStorageManager = this.GetNamedValueStorageManagerMock().Object
-			};
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
-			var a = new Newtonsoft.Json.Linq.JObject();
+			var a = new JObject();
 			a.Add("hello", "world");
 
-			var b = new Newtonsoft.Json.Linq.JObject();
+			var b = new JObject();
 			b.Add("hello", "you");
 
 			Assert.IsFalse(c.AreEqual(a, b));
@@ -61,16 +77,13 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void AreEqual_True_DifferentComments()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
-			{
-				NamedValueStorageManager = this.GetNamedValueStorageManagerMock().Object
-			};
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
-			var a = new Newtonsoft.Json.Linq.JObject();
+			var a = new JObject();
 			a.Add("hello", "world");
 			a.Add("hello-Comment", "comment 1");
 
-			var b = new Newtonsoft.Json.Linq.JObject();
+			var b = new JObject();
 			b.Add("hello", "world");
 			b.Add("hello-Comment", "comment 2");
 
@@ -81,23 +94,20 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void AreEqual_True_SameChildObjects()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
-			{
-				NamedValueStorageManager = this.GetNamedValueStorageManagerMock().Object
-			};
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
-			var a = new Newtonsoft.Json.Linq.JObject();
+			var a = new JObject();
 			{
 				a.Add("hello", "world");
-				var child = new Newtonsoft.Json.Linq.JObject();
+				var child = new JObject();
 				child.Add("property", "value1");
 				a.Add("child", child);
 			}
 
-			var b = new Newtonsoft.Json.Linq.JObject();
+			var b = new JObject();
 			{
 				b.Add("hello", "world");
-				var child = new Newtonsoft.Json.Linq.JObject();
+				var child = new JObject();
 				child.Add("property", "value1");
 				b.Add("child", child);
 			}
@@ -109,23 +119,20 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void AreEqual_False_DifferentChildObjects()
 		{
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
-			{
-				NamedValueStorageManager = this.GetNamedValueStorageManagerMock().Object
-			};
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
 
-			var a = new Newtonsoft.Json.Linq.JObject();
+			var a = new JObject();
 			{
 				a.Add("hello", "world");
-				var child = new Newtonsoft.Json.Linq.JObject();
+				var child = new JObject();
 				child.Add("property", "value1");
 				a.Add("child", child);
 			}
 
-			var b = new Newtonsoft.Json.Linq.JObject();
+			var b = new JObject();
 			{
 				b.Add("hello", "world");
-				var child = new Newtonsoft.Json.Linq.JObject();
+				var child = new JObject();
 				child.Add("property", "value2");
 				b.Add("child", child);
 			}

@@ -1,4 +1,5 @@
-﻿using MFiles.VAF.Extensions.Configuration.Upgrading.Rules;
+﻿using MFiles.VAF.Extensions.Configuration.Upgrading;
+using MFiles.VAF.Extensions.Configuration.Upgrading.Rules;
 using MFiles.VaultApplications.Logging;
 using MFilesAPI;
 using Newtonsoft.Json.Linq;
@@ -37,6 +38,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 
 		/// <inheritdoc />
 		public void UpgradeConfiguration<TSecureConfiguration>(Vault vault)
+			where TSecureConfiguration : class, new()
 		{
 			try
 			{
@@ -44,7 +46,8 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				this.CheckedConfigurationUpgradeTypes.Clear();
 
 				// Run any configuration upgrade rules.
-				foreach (var rule in this.GetConfigurationUpgradePath<TSecureConfiguration>(vault) ?? Enumerable.Empty<IUpgradeRule>())
+				var rules = this.GetConfigurationUpgradePath<TSecureConfiguration>(vault) ?? Enumerable.Empty<IUpgradeRule>();
+				foreach (var rule in rules)
 				{
 					try
 					{
@@ -56,21 +59,44 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 					}
 				}
 
-				// If the serialization has changed then update the saved data.
+				// Run the rule that ensures that the data is serialized according to the latest definitions.
+				try
 				{
-					// Where should we read from?
-					var readFrom = typeof(TSecureConfiguration).GetConfigurationLocation(this.VaultApplication);
-
-					// Ensure the data is formatted properly.
-					this.EnsureLatestSerializationSettings<TSecureConfiguration>(vault, readFrom);
+					this
+						.GetEnsureLatestSerializationSettingsUpgradeRule<TSecureConfiguration>(rules?.LastOrDefault())?
+						.Execute(vault);
 				}
-
+				catch(Exception e)
+				{
+					this.Logger?.Error(e, $"Could not ensure latest serialization settings.");
+				}
 
 			}
 			catch (Exception e)
 			{
 				this.Logger?.Fatal(e, $"Could not get configuration upgrade rules.");
 			}
+		}
+
+		/// <summary>
+		/// Gets the rule that will ensure that the latest serialization is applied to the configuration.
+		/// </summary>
+		/// <typeparam name="TSecureConfiguration">The type of configuration (used to deserialize/serialize).</typeparam>
+		/// <param name="lastUpgradeRule">The location of the configuration.  If null then will revert to <see cref="TypeExtensionMethods.GetConfigurationLocation"/>.</param>
+		/// <returns>The upgrade rule, or <see langword="null"/> if none should be run.</returns>
+		protected virtual IUpgradeRule GetEnsureLatestSerializationSettingsUpgradeRule<TSecureConfiguration>
+		(
+			IUpgradeRule lastUpgradeRule
+		)
+			where TSecureConfiguration : class, new()
+		{
+			var location = (lastUpgradeRule as SingleNamedValueItemUpgradeRuleBase)?.WriteTo
+				?? (lastUpgradeRule as SingleNamedValueItemUpgradeRuleBase)?.ReadFrom
+				?? typeof(TSecureConfiguration).GetConfigurationLocation(this.VaultApplication);
+			return new EnsureLatestSerializationSettingsUpgradeRule<TSecureConfiguration>(location)
+			{
+				NamedValueStorageManager = this.NamedValueStorageManager
+			};
 		}
 
 		/// <summary>
@@ -105,214 +131,9 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 			}
 			catch(Exception e)
 			{
-				this.Logger?.Warn(e, $"Cannot check serialization as could not parse JObject from: {location.Namespace}/{location.Name}/{location.NamedValueType}");
+				this.Logger?.Warn(e, $"Cannot check serialization as could not parse JObject from: {location.Namespace}.{location.Name} ({location.NamedValueType})");
 				return;
 			}
-
-			// Serialize/deserialize then convert to JObject so that we can see what has changed.
-			JObject newData = JObject.Parse
-			(
-				this.JsonConvert.Serialize
-				(
-					this.JsonConvert.Deserialize<TSecureConfiguration>(existingData.ToString())
-				)
-			);
-
-			// Copy across any comments.
-			this.CopyComments(existingData, newData);
-
-			// If serialization has changed then force updating the new version.
-			if (false == this.AreEqual(existingData, newData))
-			{
-				this.Logger?.Info($"Data in NVS at {location.Namespace}/{location.Name}/{location.NamedValueType} needed to be updated.");
-				this.NamedValueStorageManager.SetValue(vault, location.NamedValueType, location.Namespace, location.Name, this.JsonConvert.Serialize(newData));
-			}
-		}
-
-		/// <summary>
-		/// Performs a deep-copy of all comments from <paramref name="source"/> to <paramref name="target"/>.
-		/// </summary>
-		/// <param name="source">The source object to copy comments from.</param>
-		/// <param name="target">The target object to copy comments to.</param>
-		/// <remarks>
-		/// If the value exists in <paramref name="source"/> but not <paramref name="target"/> then it is copied to <paramref name="target"/>.
-		/// If the value exists in <paramref name="target"/> but not <paramref name="source"/> then it is left as-is.
-		/// If the value exists in both <paramref name="source"/> and <paramref name="target"/> then <paramref name="target"/> is updated with the value from <paramref name="source"/>.
-		/// </remarks>
-		protected internal virtual void CopyComments(JObject source, JObject target)
-		{
-			// Sanity.
-			if (null == source || null == target)
-				return;
-			this.Logger?.Trace($"Copying comments on '{(string.IsNullOrWhiteSpace(source.Path) ? "(root)" : source.Path)}'.");
-
-			var sourceProperties = source.Properties().Select(p => p.Name).Where(n => !n.EndsWith("-Comment")).ToArray();
-			foreach(var propertyName in sourceProperties)
-			{
-				// Skip if the target is missing this property.
-				var sourcePropertyValue = source[propertyName];
-				var targetPropertyValue = target[propertyName];
-				if (null == targetPropertyValue)
-					continue;
-
-				// Do we need to do anything more clever with this type of property value?
-				switch(sourcePropertyValue.Type)
-				{
-					case JTokenType.Object:
-						{
-							// If the type of the source property is object then recurse.
-							this.CopyComments(sourcePropertyValue as JObject, targetPropertyValue as JObject);
-							break;
-						}
-					case JTokenType.Array:
-						{
-							// If this is an array then we can copy comments for the elements.
-							var sourceJArray = sourcePropertyValue as JArray;
-							var targetJArray = targetPropertyValue as JArray ?? new JArray();
-							if (null != sourceJArray)
-							{
-								// Iterate over the items in the collection.
-								for(var i=0; i<sourceJArray.Count; i++)
-								{
-									// Copy the comment for the array index from source to target.
-									this.CopyPropertyComment(source, target, $"{propertyName}-{i}");
-									
-									// If there's an equivalent entry in the target then process the elements.
-									if (i < targetJArray.Count
-										&& sourceJArray[i] is JObject sourceElement
-										&& targetJArray[i] is JObject targetElement)
-									{
-										this.CopyComments(sourceElement, targetElement);
-									}
-								}
-							}
-							break;
-						}
-					case JTokenType.Null:
-						{
-							// Skip nulls.
-							continue;
-						}
-				}
-
-				// Copy the comment from source to target.
-				this.CopyPropertyComment(source, target, propertyName);
-			}
-		}
-
-		/// <summary>
-		/// Copies the comment for a single property named <paramref name="propertyName"/> from <paramref name="source"/> to <paramref name="target"/>.
-		/// Note: if you wish to copy the "Item-Comment" property then "Item" should be passed in <paramref name="propertyName"/>.
-		/// Note: if you wish to copy the comment for the second array element in "Triggers" then "Triggers-1" should be passed in <paramref name="propertyName"/>.
-		/// </summary>
-		/// <param name="source">The source object to locate the property in.</param>
-		/// <param name="target">The target object to update.</param>
-		/// <param name="propertyName">The name of the property.</param>
-		/// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> or <paramref name="target"/> are null.</exception>
-		/// <exception cref="ArgumentException">Thrown if <paramref name="propertyName"/> is null or whitespace.</exception>
-		/// <remarks>
-		/// If the value exists in <paramref name="source"/> but not <paramref name="target"/> then it is copied to <paramref name="target"/>.
-		/// If the value exists in <paramref name="target"/> but not <paramref name="source"/> then it is left as-is.
-		/// If the value exists in both <paramref name="source"/> and <paramref name="target"/> then <paramref name="target"/> is updated with the value from <paramref name="source"/>.
-		/// </remarks>
-		protected internal void CopyPropertyComment(JObject source, JObject target, string propertyName)
-		{
-			// Sanity.
-			if (null == source)
-				throw new ArgumentNullException(nameof(source));
-			if (null == target)
-				throw new ArgumentNullException(nameof(target));
-			if (string.IsNullOrWhiteSpace(propertyName))
-				throw new ArgumentException(nameof(propertyName));
-
-			// Get the comment for this property in both source and target.
-			propertyName += "-Comment";
-			var sourcePropertyValue = source[propertyName];
-			var targetPropertyValue = target[propertyName];
-
-			// Does it not exist in either?
-			if (null == sourcePropertyValue && null == targetPropertyValue)
-				return;
-
-			// Does it exist in the target and not the source?
-			if (null == sourcePropertyValue && null != targetPropertyValue)
-				return;
-
-			// If it's already in the target then remove it (we'll add it in a sec).
-			if (null != targetPropertyValue)
-				target.Remove(propertyName);
-
-			// Copy the source to the target.
-			this.Logger?.Debug($"Copying '{(string.IsNullOrWhiteSpace(source.Path) ? "" : source.Path + ".")}{propertyName}' from source to target.");
-			targetPropertyValue = sourcePropertyValue.DeepClone();
-			target.Add(new JProperty(propertyName, targetPropertyValue));
-
-		}
-
-		/// <summary>
-		/// Returns <see langword="true"/> if the properties (and their values) in <paramref name="a"/> are the same as those in <paramref name="b"/>.
-		/// </summary>
-		/// <param name="a">The first property.</param>
-		/// <param name="b">The second property.</param>
-		/// <returns>
-		/// <see langword="true"/> if <paramref name="a"/> and <paramref name="b"/> contain the same properties with the same values.
-		/// Note that comment properties (names ending "-Comment") are not included in this comparison.
-		/// Also note that null is equal to null but null is not equal to non-null.
-		/// </returns>
-		protected internal virtual bool AreEqual(JObject a, JObject b)
-		{
-			// Simple.
-			if (a == null && b == null)
-				return true;
-			if (a == null || b == null)
-				return false;
-
-			// Compare property names.  Ignore comments.
-			var aProperties = a.Properties().Select(p => p.Name).Where(n => !n.EndsWith("-Comment")).ToArray();
-			var bProperties = b.Properties().Select(p => p.Name).Where(n => !n.EndsWith("-Comment")).ToArray();
-			if (aProperties.Length != bProperties.Length)
-				return false;
-
-			// Check each in turn.
-			foreach(var propertyName in aProperties)
-			{
-				// Sanity.
-				var aPropertyValue = a[propertyName];
-				var bPropertyValue = b[propertyName];
-				if (aPropertyValue == null && bPropertyValue == null)
-					return true;
-				if (aPropertyValue == null || bPropertyValue == null)
-					return false;
-				if (a.Type != b.Type)
-					return false;
-				
-				// Check each type.
-				switch(aPropertyValue.Type)
-				{
-					case JTokenType.Object:
-						if (false == this.AreEqual((JObject)aPropertyValue, (JObject)bPropertyValue))
-							return false;
-						break;
-					case JTokenType.Array:
-						{
-							var aPropertyValueJArray = (JArray)aPropertyValue;
-							var bPropertyValueJArray = (JArray)bPropertyValue;
-							if (aPropertyValueJArray.Count != bPropertyValueJArray.Count)
-								return false;
-							// Does this need to be better?
-							if (false == (aPropertyValueJArray.ToString() == bPropertyValueJArray.ToString()))
-								return false;
-						}
-						break;
-					default:
-						if (false == (aPropertyValue.ToString() == bPropertyValue.ToString()))
-							return false;
-						break;
-				}
-			}
-
-			// Everything was the same.
-			return true;
 		}
 
 		/// <summary>

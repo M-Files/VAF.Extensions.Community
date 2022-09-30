@@ -1,7 +1,9 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VAF.Extensions.Configuration.Upgrading;
 using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,5 +69,6 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 			//Okay.
 			return storage.Object;
 		}
+
 	}
 }
