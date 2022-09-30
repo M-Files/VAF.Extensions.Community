@@ -1,13 +1,24 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using MFiles.VAF.Configuration;
+using MFiles.VAF.Extensions.Configuration.Upgrading;
+using MFilesAPI;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.Linq;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
+namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 {
-	public partial class ConfigurationUpgradeManager
+	public partial class EnsureLatestSerializationSettingsUpgradeRuleTests
 		: TestBaseWithVaultMock
 	{
+		/*
+		 * Technically CopyComments is on SingleNamedValueItemUpgradeRuleBase,
+		 * so perhaps tests should be there.
+		 */
 
 		[TestMethod]
 		public void CopyComments_Target_Null()
@@ -189,6 +200,5 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 			Assert.AreEqual(1, trigger.Properties().Count(p => p.Name == "Item-Comment" && p.Value.ToString() == "my comment"));
 
 		}
-
 	}
 }

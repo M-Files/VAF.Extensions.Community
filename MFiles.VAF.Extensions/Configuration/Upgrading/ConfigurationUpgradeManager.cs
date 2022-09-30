@@ -46,7 +46,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				this.CheckedConfigurationUpgradeTypes.Clear();
 
 				// Run any configuration upgrade rules.
-				var rules = this.GetConfigurationUpgradePath<TSecureConfiguration>(vault) ?? Enumerable.Empty<IUpgradeRule>();
+				var rules = this.GetAppropriateUpgradeRules<TSecureConfiguration>(vault) ?? Enumerable.Empty<IUpgradeRule>();
 				foreach (var rule in rules)
 				{
 					try
@@ -55,20 +55,8 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 					}
 					catch (Exception ex)
 					{
-						this.Logger?.Error(ex, $"Could not execute configuration migration rule of type {rule?.GetType()?.FullName}");
+						this.Logger?.Error(ex, $"Could not execute configuration upgrade/migration rule of type {rule?.GetType()?.FullName}");
 					}
-				}
-
-				// Run the rule that ensures that the data is serialized according to the latest definitions.
-				try
-				{
-					this
-						.GetEnsureLatestSerializationSettingsUpgradeRule<TSecureConfiguration>(rules?.LastOrDefault())?
-						.Execute(vault);
-				}
-				catch(Exception e)
-				{
-					this.Logger?.Error(e, $"Could not ensure latest serialization settings.");
 				}
 
 			}
@@ -76,6 +64,26 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 			{
 				this.Logger?.Fatal(e, $"Could not get configuration upgrade rules.");
 			}
+		}
+
+		protected virtual IEnumerable<IUpgradeRule> GetAppropriateUpgradeRules<TSecureConfiguration>(Vault vault)
+			where TSecureConfiguration : class, new()
+		{
+
+			// Run any configuration upgrade rules.
+			var rules = (this.GetConfigurationUpgradePath<TSecureConfiguration>(vault) ?? Enumerable.Empty<IUpgradeRule>())
+				.ToList();
+			foreach (var rule in rules)
+			{
+				yield return rule;
+			}
+
+			// Run the rule that ensures that the data is serialized according to the latest definitions.
+			{
+				yield return this.GetEnsureLatestSerializationSettingsUpgradeRule<TSecureConfiguration>(rules?.LastOrDefault());
+			}
+
+
 		}
 
 		/// <summary>
@@ -97,43 +105,6 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 			{
 				NamedValueStorageManager = this.NamedValueStorageManager
 			};
-		}
-
-		/// <summary>
-		/// Used to ensure that the value in <paramref name="location"/> is serialised according to the current settings.
-		/// For example: if a TimeSpanEx used to hold a location as a string, but now holds it as hour/minute/second properties,
-		/// this method will ensure that the previous data is loaded, parsed, and saved back with the hour/minute/data properties.
-		/// </summary>
-		/// <typeparam name="TSecureConfiguration">The type of configuration to load.</typeparam>
-		/// <param name="vault">The vault to load the data from.</param>
-		/// <param name="location">The item within Named Value Storage to read/write.</param>
-		/// <exception cref="ArgumentNullException">If <paramref name="vault"/> or <paramref name="location"/> are <see langword="null"/>.</exception>
-		protected virtual void EnsureLatestSerializationSettings<TSecureConfiguration>(Vault vault, ISingleNamedValueItem location)
-		{
-			// Sanity.
-			if (null == vault)
-				throw new ArgumentNullException(nameof(vault));
-			if (null == location)
-				throw new ArgumentNullException(nameof(location));
-			this.Logger?.Trace($"Ensuring that the latest serialization rules are run.");
-
-			// Read the data.
-			JObject existingData;
-			try
-			{
-				this.Logger?.Trace($"Loading data from NVS at {location.Namespace}/{location.Name}/{location.NamedValueType}.");
-				existingData = JObject.Parse
-				(
-					this
-						.NamedValueStorageManager
-						.GetValue(vault, location.NamedValueType, location.Namespace, location.Name, "{}")
-				);
-			}
-			catch(Exception e)
-			{
-				this.Logger?.Warn(e, $"Cannot check serialization as could not parse JObject from: {location.Namespace}.{location.Name} ({location.NamedValueType})");
-				return;
-			}
 		}
 
 		/// <summary>

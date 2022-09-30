@@ -6,6 +6,14 @@ using System.Linq;
 
 namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 {
+	/// <summary>
+	/// A rule to ensure that the data held in NVS is serialized according to the latest rules.
+	/// For example: if a configuration structure has changed from holding data in one way to holding it in another, this rule
+	/// should ensure that the JSON is updated.
+	/// This is useful in situations where the new data needs to be available to the configuration editor, which will always expect the JSON
+	/// in the latest format.
+	/// </summary>
+	/// <typeparam name="TSecureConfiguration"></typeparam>
 	public class EnsureLatestSerializationSettingsUpgradeRule<TSecureConfiguration>
 		: SingleNamedValueItemUpgradeRuleBase
 		where TSecureConfiguration : class, new()
@@ -38,11 +46,13 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 			if (null == JsonConvert)
 				throw new InvalidOperationException($"{nameof(JsonConvert)} cannot be null.");
 
+			this.Logger?.Trace($"Ensuring that the latest serialization rules are run.");
+
 			// Read the existing data.
 			// If we can't get the data then die.
-			if (false == TryRead(ReadFrom, vault, out string data, out Version version))
+			if (false == this.TryRead(ReadFrom, vault, out string data, out Version version))
 			{
-				Logger?.Debug($"Skipping ensuring latest serialization, as no data found in {ReadFrom}");
+				this.Logger?.Debug($"Skipping ensuring latest serialization, as no data found in {ReadFrom}");
 				return false;
 			}
 
@@ -50,16 +60,16 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 			JObject oldData = JObject.Parse(data);
 			JObject newData = JObject.Parse
 			(
-				JsonConvert.Serialize(JsonConvert.Deserialize<TSecureConfiguration>(oldData.ToString()))
+				this.JsonConvert.Serialize(this.JsonConvert.Deserialize<TSecureConfiguration>(oldData.ToString()))
 			);
 
 			// Copy across any comments.
-			CopyComments(oldData, newData);
+			this.CopyComments(oldData, newData);
 
 			// If the objects have not changed then stop.
-			if (AreEqual(oldData, newData))
+			if (this.AreEqual(oldData, newData))
 			{
-				Logger?.Trace("Data in configuration already uses latest serialization; skipping conversion.");
+				this.Logger?.Trace("Data in configuration already uses latest serialization; skipping conversion.");
 				return true;
 			}
 
@@ -71,13 +81,13 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 			var @namespace = WriteTo?.Namespace ?? ReadFrom.Namespace;
 			var name = WriteTo?.Name ?? ReadFrom.Name;
 
-			Logger?.Debug($"Attempting to update configuration in NVS.");
+			this.Logger?.Debug($"Attempting to update configuration in NVS.");
 			{
 				// Update the named values.
-				Logger?.Trace($"Writing new configuration in {@namespace}.{name} ({type})...");
-				var namedValues = NamedValueStorageManager.GetNamedValues(vault, type, @namespace) ?? new NamedValues();
+				this.Logger?.Trace($"Writing new configuration in {@namespace}.{name} ({type})...");
+				var namedValues = this.NamedValueStorageManager.GetNamedValues(vault, type, @namespace) ?? new NamedValues();
 				namedValues[name] = JsonConvert.Serialize(newData);
-				NamedValueStorageManager.SetNamedValues(vault, type, @namespace, namedValues);
+				this.NamedValueStorageManager.SetNamedValues(vault, type, @namespace, namedValues);
 			}
 
 			return true;
@@ -121,15 +131,17 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 				if (a.Type != b.Type)
 					return false;
 
-				// Check each type.
+				// Check the value of the property.
 				switch (aPropertyValue.Type)
 				{
 					case JTokenType.Object:
+						// If it's an object then check the children.
 						if (false == AreEqual((JObject)aPropertyValue, (JObject)bPropertyValue))
 							return false;
 						break;
 					case JTokenType.Array:
 						{
+							// If it's an array then check whether the children are the same.
 							var aPropertyValueJArray = (JArray)aPropertyValue;
 							var bPropertyValueJArray = (JArray)bPropertyValue;
 							if (aPropertyValueJArray.Count != bPropertyValueJArray.Count)
@@ -140,6 +152,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 						}
 						break;
 					default:
+						// Basic value; just check the value itself.
 						if (false == (aPropertyValue.ToString() == bPropertyValue.ToString()))
 							return false;
 						break;

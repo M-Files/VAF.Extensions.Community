@@ -10,28 +10,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
+namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 {
-	public partial class ConfigurationUpgradeManager
+	public partial class EnsureLatestSerializationSettingsUpgradeRuleTests
 		: TestBaseWithVaultMock
 	{
-		internal class EnsureLatestSerializationSettingsUpgradeRuleProxy
-			: Extensions.Configuration.Upgrading.Rules.EnsureLatestSerializationSettingsUpgradeRule<EnsureLatestSerializationSettingsUpgradeRuleProxy.MyConfiguration>
-		{
-
-			public EnsureLatestSerializationSettingsUpgradeRuleProxy()
-				: base(Mock.Of<ISingleNamedValueItem>(m => m.IsValid() == true))
-			{
-				this.NamedValueStorageManager = new Mock<INamedValueStorageManager>().Object;
-			}
-
-			public class MyConfiguration
-			{
-
-			}
-
-		}
-
 		[TestMethod]
 		public void AreEqual_Nulls()
 		{
@@ -86,6 +69,19 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 			var b = new JObject();
 			b.Add("hello", "world");
 			b.Add("hello-Comment", "comment 2");
+
+			Assert.IsTrue(c.AreEqual(a, b));
+
+		}
+
+		[TestMethod]
+		public void AreEqual_True_Nulls()
+		{
+			var c = new EnsureLatestSerializationSettingsUpgradeRuleProxy();
+
+			var a = JObject.Parse(@"{ ""hello"" : null }");
+
+			var b = JObject.Parse(@"{ ""hello"" : null }");
 
 			Assert.IsTrue(c.AreEqual(a, b));
 
