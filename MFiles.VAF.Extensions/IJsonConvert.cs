@@ -106,8 +106,8 @@ namespace MFiles.VAF.Extensions
 		{
 			/// <inheritdoc />
 			/// <remarks>
-			/// If the value returned by <see cref="DefaultContractResolver.CreateMemberValueProvider(MemberInfo)"/>
-			/// is of type <see cref="DynamicValueProvider"/> then a <see cref="DynamicValueProviderEx"/> is returned instead.
+			/// Wraps the value provider returned by the base implementation with a
+			/// <see cref="JsonConfEditorAwareValueProvider"/> and returns that instead.
 			/// </remarks>
 			protected override IValueProvider CreateMemberValueProvider(MemberInfo member)
 				=> new JsonConfEditorAwareValueProvider
