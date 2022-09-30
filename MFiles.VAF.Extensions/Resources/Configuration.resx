@@ -151,7 +151,7 @@
     <value>Schedule</value>
   </data>
   <data name="RecurrenceType_Unknown" xml:space="preserve">
-    <value>Unknown</value>
+    <value>None (does not run)</value>
   </data>
   <data name="ScheduleTriggerType_Daily" xml:space="preserve">
     <value>Daily</value>

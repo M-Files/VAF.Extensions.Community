@@ -160,7 +160,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unknown.
+        ///   Looks up a localized string similar to None (does not run).
         /// </summary>
         internal static string RecurrenceType_Unknown {
             get {

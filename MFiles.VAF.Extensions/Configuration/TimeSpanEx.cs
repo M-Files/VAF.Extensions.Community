@@ -10,6 +10,18 @@ namespace MFiles.VAF.Extensions
 {
 	[DataContract]
 	[JsonConverter(typeof(TimeSpanExJsonConverter))]
+	[PreviewableTextEditor
+	(
+		PreviewTemplate = "Every {0}, {1}, and {2}",
+		PreviewSources = new string[]
+		{
+			"._children{ .key == '" + nameof(TimeSpanEx.Hours) + "' }",
+			"._children{ .key == '" + nameof(TimeSpanEx.Minutes) + "' }",
+			"._children{ .key == '" + nameof(TimeSpanEx.Seconds) + "' }"
+		},
+		PreviewUnsetTexts = new string[] { "0 hours", "0 minutes", "0 seconds" },
+		PreviewValueFormats = new string[] { "{0} hour(s)", "{0} minute(s)", "{0} seconds(s)" }
+	)]
 	public class TimeSpanEx
 		: IRecurrenceConfiguration
 	{
