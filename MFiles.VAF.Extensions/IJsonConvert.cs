@@ -98,7 +98,7 @@ namespace MFiles.VAF.Extensions
 
 		/// <summary>
 		/// An implementation of <see cref="DefaultContractResolver"/>
-		/// that replaces dynamic value providers with instances of <see cref="DynamicValueProviderEx"/>.
+		/// that replaces value providers with instances of <see cref="JsonConfEditorAwareValueProvider"/>.
 		/// We do this so that we can take into account any default values specified by [JsonConfEditor] attributes.
 		/// </summary>
 		internal class JsonConfEditorDefaultValueContractResolver
