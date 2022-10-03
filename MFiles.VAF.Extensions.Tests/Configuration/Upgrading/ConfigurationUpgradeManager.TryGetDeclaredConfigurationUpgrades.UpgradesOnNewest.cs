@@ -9,6 +9,7 @@ using MFiles.VAF.Configuration;
 using System.Linq;
 using MFiles.VAF.Extensions.Configuration.Upgrading.Rules;
 using static MFiles.VAF.Extensions.Tests.Configuration.Upgrading.ConfigurationUpgradeManager.UpgradeOnNewest;
+using Newtonsoft.Json.Linq;
 
 namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 {
@@ -58,6 +59,19 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		}
 
 		[TestMethod]
+		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnNewest_OneToTwoWithStaticUpgradePath_WithJsonParameter()
+		{
+			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades<VersionTwoWithStaticUpgradePath>(out var configurationVersion, out var rules));
+			Assert.AreEqual("2.0", configurationVersion?.ToString());
+			Assert.AreEqual(2, rules.Count());
+			Assert.AreEqual(typeof(VersionZero), rules.ElementAt(0).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionOneWithStaticUpgradePath), rules.ElementAt(0).UpgradeToType);
+			Assert.AreEqual(typeof(VersionOneWithStaticUpgradePath), rules.ElementAt(1).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionTwoWithStaticUpgradePath), rules.ElementAt(1).UpgradeToType);
+		}
+
+		[TestMethod]
 		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnNewest_ZeroToTwoUpgradeWithInstanceUpgradePath()
 		{
 			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
@@ -83,6 +97,25 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 			Assert.AreEqual(typeof(VersionTwoWithInstanceUpgradePath), rules.ElementAt(1).UpgradeToType);
 			Assert.AreEqual(typeof(VersionTwoWithInstanceUpgradePath), rules.ElementAt(2).UpgradeFromType);
 			Assert.AreEqual(typeof(VersionThreeWithInstanceUpgradePath), rules.ElementAt(2).UpgradeToType);
+		}
+
+		// This upgrade (v3->v4) has two parameters; one is the source to read from and second is the source JSON.
+		// This can be useful if the developer needs access to the raw JSON for some reason.
+		[TestMethod]
+		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnNewest_ThreeToFourUpgradeWithInstanceUpgradePath_WithJsonParameter()
+		{
+			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades<VersionFourWithInstanceUpgradePath>(out var configurationVersion, out var rules));
+			Assert.AreEqual("4.0", configurationVersion?.ToString());
+			Assert.AreEqual(4, rules.Count());
+			Assert.AreEqual(typeof(VersionZero), rules.ElementAt(0).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionOneWithInstanceUpgradePath), rules.ElementAt(0).UpgradeToType);
+			Assert.AreEqual(typeof(VersionOneWithInstanceUpgradePath), rules.ElementAt(1).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionTwoWithInstanceUpgradePath), rules.ElementAt(1).UpgradeToType);
+			Assert.AreEqual(typeof(VersionTwoWithInstanceUpgradePath), rules.ElementAt(2).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionThreeWithInstanceUpgradePath), rules.ElementAt(2).UpgradeToType);
+			Assert.AreEqual(typeof(VersionThreeWithInstanceUpgradePath), rules.ElementAt(3).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionFourWithInstanceUpgradePath), rules.ElementAt(3).UpgradeToType);
 		}
 
 		/// <summary>
@@ -171,6 +204,24 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 
 			[DataContract]
 			[Extensions.Configuration.ConfigurationVersion("2.0")]
+			public class VersionTwoWithStaticUpgradePath
+				: VAF.Extensions.Configuration.VersionedConfigurationBase
+			{
+				[DataMember]
+				public string World { get; set; }
+
+				[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
+				public static VersionTwoWithStaticUpgradePath Upgrade(VersionOneWithStaticUpgradePath input, JObject source)
+				{
+					return new VersionTwoWithStaticUpgradePath()
+					{
+						World = input?.World
+					};
+				}
+			}
+
+			[DataContract]
+			[Extensions.Configuration.ConfigurationVersion("2.0")]
 			public class VersionTwoWithInstanceUpgradePath
 				: VAF.Extensions.Configuration.VersionedConfigurationBase
 			{
@@ -196,6 +247,18 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 
 				[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
 				public virtual void Upgrade(VersionTwoWithInstanceUpgradePath input)
+				{
+				}
+			}
+
+			[DataContract]
+			[Extensions.Configuration.ConfigurationVersion("4.0")]
+			public class VersionFourWithInstanceUpgradePath
+				: VAF.Extensions.Configuration.VersionedConfigurationBase
+			{
+
+				[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
+				public virtual void Upgrade(VersionThreeWithInstanceUpgradePath input, JObject source)
 				{
 				}
 			}

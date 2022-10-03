@@ -1,6 +1,8 @@
 ﻿using MFiles.VAF.Configuration;
 using MFiles.VaultApplications.Logging;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
@@ -82,16 +84,34 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 			object outputObj = null;
 			try
 			{
+				// What arguments need to be passed?
+				var arguments = new List<object>();
+				{
+					var parameters = this.MethodInfo.GetParameters();
+					switch (parameters?.Length ?? 0)
+					{
+						case 1:
+							arguments.Add(inputObj);
+							break;
+						case 2:
+							arguments.Add(inputObj);
+							arguments.Add(JObject.Parse(input));
+							break;
+						default:
+							this.Logger?.Fatal($"Cannot upgrade configuration from {this.UpgradeFromType} to {this.UpgradeToType} as method {this.MethodInfo.DeclaringType.FullName}.{this.MethodInfo.Name} has an unexpected number of parameters ({(parameters?.Length ?? 0)}).");
+							return input;
+					}
+				}
 				if (this.MethodInfo.IsStatic)
 				{
 					// If static we don't need an object reference.
-					outputObj = this.MethodInfo.Invoke(null, new object[] { inputObj });
+					outputObj = this.MethodInfo.Invoke(null, arguments.ToArray());
 				}
 				else
 				{
 					// Create an instance.
 					outputObj = Activator.CreateInstance(this.UpgradeToType);
-					this.MethodInfo.Invoke(outputObj, new object[] { inputObj });
+					this.MethodInfo.Invoke(outputObj, arguments.ToArray());
 				}
 			}
 			catch (Exception ex)

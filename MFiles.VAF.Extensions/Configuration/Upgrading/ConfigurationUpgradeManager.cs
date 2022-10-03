@@ -369,19 +369,47 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				Type parameterType = null;
 				{
 					var methodParameters = method.GetParameters();
-					if ((methodParameters?.Length ?? 0) != 1)
+					switch(methodParameters?.Length ?? 0)
 					{
-						// Should take a single parameter which is the type of the older version.
-						this.Logger?.Error($"Skipping {configuration.FullName}.{method.Name} as 1 parameter is expected (found {methodParameters.Length}).");
-						continue;
+						case 1:
+							// First parameter should not be "out".
+							if (methodParameters[0].IsOut)
+							{
+								// Should take a single parameter which is the type of the older version.
+								this.Logger?.Error($"Skipping {configuration.FullName}.{method.Name} as parameter was defined as 'out'.");
+								continue;
+							}
+							parameterType = methodParameters[0].ParameterType;
+							break;
+						case 2:
+							// First parameter should not be "out".
+							if (methodParameters[0].IsOut)
+							{
+								// Should take a single parameter which is the type of the older version.
+								this.Logger?.Error($"Skipping {configuration.FullName}.{method.Name} as first parameter was defined as 'out'.");
+								continue;
+							}
+							parameterType = methodParameters[0].ParameterType;
+							// Second parameter should not be "out".
+							if (methodParameters[1].IsOut)
+							{
+								// Should take a single parameter which is the type of the older version.
+								this.Logger?.Error($"Skipping {configuration.FullName}.{method.Name} as second parameter was defined as 'out'.");
+								continue;
+							}
+							// Second parameter should be JObject.
+							if (methodParameters[1].ParameterType != typeof(JObject))
+							{
+								// Should take a single parameter which is the type of the older version.
+								this.Logger?.Error($"Skipping {configuration.FullName}.{method.Name} as second parameter was not JObject.");
+								continue;
+							}
+							break;
+						default:
+							// Should take a single parameter which is the type of the older version.
+							this.Logger?.Error($"Skipping {configuration.FullName}.{method.Name} as 1 parameter is expected (found {methodParameters.Length}).");
+							continue;
 					}
-					if (methodParameters[0].IsOut)
-					{
-						// Should take a single parameter which is the type of the older version.
-						this.Logger?.Error($"Skipping {configuration.FullName}.{method.Name} as parameter was defined as 'out'.");
-						continue;
-					}
-					parameterType = methodParameters[0].ParameterType;
 				}
 
 				// If the parameter type is the same as the configuration,
