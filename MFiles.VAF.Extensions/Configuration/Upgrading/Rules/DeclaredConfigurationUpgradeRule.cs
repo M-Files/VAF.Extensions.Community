@@ -91,7 +91,20 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 					switch (parameters?.Length ?? 0)
 					{
 						case 1:
-							arguments.Add(inputObj);
+							if (parameters[0].ParameterType == typeof(string))
+							{
+								this.Logger?.Trace("Parameter is of type string, so passing raw NVS data.");
+								arguments.Add(input);
+							}
+							else if (parameters[0].ParameterType == typeof(JObject))
+							{
+								this.Logger?.Trace("Parameter is of type JObject, so parsing JObject.");
+								arguments.Add(JObject.Parse(input));
+							}
+							else
+							{
+								arguments.Add(inputObj);
+							}
 							break;
 						case 2:
 							arguments.Add(inputObj);
@@ -111,7 +124,19 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 				{
 					// Create an instance.
 					outputObj = Activator.CreateInstance(this.UpgradeToType);
-					this.MethodInfo.Invoke(outputObj, arguments.ToArray());
+
+					// If it returns something then store it.
+					if (this.MethodInfo.ReturnType != typeof(void))
+					{
+						outputObj = this.MethodInfo.Invoke(outputObj, arguments.ToArray());
+					}
+					else
+					{
+						// Throw away the return value.
+						this.MethodInfo.Invoke(outputObj, arguments.ToArray());
+					}
+					
+					
 				}
 			}
 			catch (Exception ex)

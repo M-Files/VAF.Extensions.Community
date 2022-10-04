@@ -304,7 +304,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		(
 			out Version configurationVersion,
 			out IEnumerable<DeclaredConfigurationUpgradeRule> upgradeRules
-		) => this.TryGetDeclaredConfigurationUpgrades(typeof(TSecureConfiguration), out configurationVersion, out upgradeRules);
+		) => this.TryGetDeclaredConfigurationUpgrades(typeof(TSecureConfiguration), null, out configurationVersion, out upgradeRules);
 
 		/// <summary>
 		/// Returns any configuration upgrades that have been declared via <see cref="ConfigurationUpgradeMethodAttribute"/> attributes.
@@ -316,6 +316,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		protected internal virtual bool TryGetDeclaredConfigurationUpgrades
 		(
 			Type configuration,
+			Version targetVersion,
 			out Version configurationVersion,
 			out IEnumerable<DeclaredConfigurationUpgradeRule> upgradeRules
 		)
@@ -346,6 +347,10 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				.FirstOrDefault();
 			configurationVersion = configurationVersionAttribute?.Version ?? VersionZero;
 
+			// If we don't have a target version then set it now.
+			// Target version is the version number of the initial type that was passed in (ignoring recursion).
+			targetVersion = targetVersion ?? configurationVersion;
+
 			// Check for upgrade methods.
 			var identifiedUpgradeMethods = new List<DeclaredConfigurationUpgradeRule>();
 			foreach (var method in configuration.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy))
@@ -357,16 +362,8 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 					continue;
 				}
 
-				// If it's not static then it should return void.
-				if (!method.IsStatic && method.ReturnType != typeof(void))
-				{
-					// Return type is incorrect.
-					this.Logger?.Error($"Skipping {configuration.FullName}.{method.Name} as the return type was not void.");
-					continue;
-				}
-
 				// The method should take one parameter.  This parameter is the type we're upgrading from.
-				Type parameterType = null;
+				Type parameterType = configurationVersionAttribute?.PreviousVersionType;
 				{
 					var methodParameters = method.GetParameters();
 					switch(methodParameters?.Length ?? 0)
@@ -379,7 +376,25 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 								this.Logger?.Error($"Skipping {configuration.FullName}.{method.Name} as parameter was defined as 'out'.");
 								continue;
 							}
-							parameterType = methodParameters[0].ParameterType;
+							// If the first parameter is a string or JObject then that is fine, otherwise use the type as 
+							if (methodParameters[0].ParameterType != typeof(string)
+								&& methodParameters[0].ParameterType != typeof(JObject))
+							{
+								parameterType = methodParameters[0].ParameterType;
+							}
+							else
+							{
+								this.Logger?.Trace($"{configuration.FullName}.{method.Name} is an upgrade method that works on string or JObject; type is being loaded from ConfigurationVersionAttribute ({(parameterType?.FullName ?? "Undefined")}).");
+								// In this case the return type must be the type we want.
+								if (method.ReturnType == typeof(void))
+								{
+									// Return type is incorrect.
+									this.Logger?.Error($"Skipping {configuration.FullName}.{method.Name} as the return type was void (cannot define upgrade path).");
+									continue;
+								}
+
+								parameterType = method.ReturnType;
+							}
 							break;
 						case 2:
 							// First parameter should not be "out".
@@ -412,10 +427,17 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 					}
 				}
 
+				// If we don't have a parameter type then die.
+				if(null == parameterType)
+				{
+					this.Logger?.Error($"Skipping {configuration.FullName}.{method.Name} could not determine the upgrade parameter type.");
+					continue;
+				}
+
 				// If the parameter type is the same as the configuration,
 				// then it's an "upgrade to" method and it RETURNS the new type.
 				// So use that instead.
-				if(parameterType == configuration)
+				if(parameterType == configuration && method.ReturnType != parameterType)
 				{
 					parameterType = method.ReturnType;
 				}
@@ -465,6 +487,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 						if (this.TryGetDeclaredConfigurationUpgrades
 						(
 							parameterType,
+							targetVersion,
 							out Version v,
 							out IEnumerable<DeclaredConfigurationUpgradeRule> mi
 						))
@@ -485,6 +508,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 					if (this.TryGetDeclaredConfigurationUpgrades
 					(
 						configurationVersionAttribute.PreviousVersionType,
+						targetVersion,
 						out Version v,
 						out IEnumerable<DeclaredConfigurationUpgradeRule> mi
 					))
@@ -507,7 +531,11 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 			}
 
 			// Copy out the ones we found.
-			upgradeRules = identifiedUpgradeMethods.OrderBy(m => m.MigrateToVersion);
+			// Only get ones that take us below the target version.
+			{
+				var v = targetVersion;
+				upgradeRules = identifiedUpgradeMethods.OrderBy(m => m.MigrateToVersion).Where(m => m.MigrateToVersion <= v);
+			}
 
 			// We have something?!
 			this.Logger?.Trace($"{upgradeRules.Count()} upgrade rules identified in total.");

@@ -118,6 +118,48 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 			Assert.AreEqual(typeof(VersionFourWithInstanceUpgradePath), rules.ElementAt(3).UpgradeToType);
 		}
 
+		// This upgrade (v4->v5) has one single (string) parameter
+		[TestMethod]
+		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnNewest_FourToFiveUpgradeWithInstanceUpgradePath()
+		{
+			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades<VersionFiveWithInstanceUpgradePath>(out var configurationVersion, out var rules));
+			Assert.AreEqual("5.0", configurationVersion?.ToString());
+			Assert.AreEqual(5, rules.Count());
+			Assert.AreEqual(typeof(VersionZero), rules.ElementAt(0).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionOneWithInstanceUpgradePath), rules.ElementAt(0).UpgradeToType);
+			Assert.AreEqual(typeof(VersionOneWithInstanceUpgradePath), rules.ElementAt(1).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionTwoWithInstanceUpgradePath), rules.ElementAt(1).UpgradeToType);
+			Assert.AreEqual(typeof(VersionTwoWithInstanceUpgradePath), rules.ElementAt(2).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionThreeWithInstanceUpgradePath), rules.ElementAt(2).UpgradeToType);
+			Assert.AreEqual(typeof(VersionThreeWithInstanceUpgradePath), rules.ElementAt(3).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionFourWithInstanceUpgradePath), rules.ElementAt(3).UpgradeToType);
+			Assert.AreEqual(typeof(VersionFourWithInstanceUpgradePath), rules.ElementAt(4).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionFiveWithInstanceUpgradePath), rules.ElementAt(4).UpgradeToType);
+		}
+
+		// This upgrade (v5->v6) has one single (Json) parameter
+		[TestMethod]
+		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnNewest_FiveToSixUpgradeWithInstanceUpgradePath()
+		{
+			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades<VersionSixWithInstanceUpgradePath>(out var configurationVersion, out var rules));
+			Assert.AreEqual("6.0", configurationVersion?.ToString());
+			Assert.AreEqual(6, rules.Count());
+			Assert.AreEqual(typeof(VersionZero), rules.ElementAt(0).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionOneWithInstanceUpgradePath), rules.ElementAt(0).UpgradeToType);
+			Assert.AreEqual(typeof(VersionOneWithInstanceUpgradePath), rules.ElementAt(1).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionTwoWithInstanceUpgradePath), rules.ElementAt(1).UpgradeToType);
+			Assert.AreEqual(typeof(VersionTwoWithInstanceUpgradePath), rules.ElementAt(2).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionThreeWithInstanceUpgradePath), rules.ElementAt(2).UpgradeToType);
+			Assert.AreEqual(typeof(VersionThreeWithInstanceUpgradePath), rules.ElementAt(3).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionFourWithInstanceUpgradePath), rules.ElementAt(3).UpgradeToType);
+			Assert.AreEqual(typeof(VersionFourWithInstanceUpgradePath), rules.ElementAt(4).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionFiveWithInstanceUpgradePath), rules.ElementAt(4).UpgradeToType);
+			Assert.AreEqual(typeof(VersionFiveWithInstanceUpgradePath), rules.ElementAt(5).UpgradeFromType);
+			Assert.AreEqual(typeof(VersionSixWithInstanceUpgradePath), rules.ElementAt(5).UpgradeToType);
+		}
+
 		/// <summary>
 		/// We have a rule that goes from 2->1 and also from 1->2.
 		/// Only one should be returned.
@@ -260,6 +302,32 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 				[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
 				public virtual void Upgrade(VersionThreeWithInstanceUpgradePath input, JObject source)
 				{
+				}
+			}
+
+			[DataContract]
+			[Extensions.Configuration.ConfigurationVersion("5.0", PreviousVersionType = typeof(VersionFourWithInstanceUpgradePath))]
+			public class VersionFiveWithInstanceUpgradePath
+				: VAF.Extensions.Configuration.VersionedConfigurationBase
+			{
+
+				[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
+				public virtual VersionFourWithInstanceUpgradePath Upgrade(string input)
+				{
+					return new VersionFourWithInstanceUpgradePath();
+				}
+			}
+
+			[DataContract]
+			[Extensions.Configuration.ConfigurationVersion("6.0", PreviousVersionType = typeof(VersionFiveWithInstanceUpgradePath))]
+			public class VersionSixWithInstanceUpgradePath
+				: VAF.Extensions.Configuration.VersionedConfigurationBase
+			{
+
+				[VAF.Extensions.Configuration.ConfigurationUpgradeMethod]
+				public virtual VersionFiveWithInstanceUpgradePath Upgrade(JObject input)
+				{
+					return new VersionFiveWithInstanceUpgradePath();
 				}
 			}
 
