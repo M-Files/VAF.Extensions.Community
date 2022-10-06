@@ -413,7 +413,11 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 				""DefaultTargetConfiguration"": {
 					""Enabled"": true,
 					""Advanced"": {
+						""KeepFileOpen"": false,
 						""ConcurrentWrites"": true
+					},
+					""FileRotation"": {
+						""MaximumArchiveDays"": 21
 					}
 				}
 			}");
@@ -424,7 +428,11 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 				""DefaultTargetConfiguration"": {
 					""Enabled"": true,
 					""Advanced"": {
+						""KeepFileOpen"": false,
 						""ConcurrentWrites"": true
+					},
+					""FileRotation"": {
+						""MaximumArchiveDays"": 21
 					}
 				}
 			}", rule.GetReadWriteLocationValue(vault));

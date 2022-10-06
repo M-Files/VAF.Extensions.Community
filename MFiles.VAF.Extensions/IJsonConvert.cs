@@ -245,12 +245,9 @@ namespace MFiles.VAF.Extensions
 				var dict = new Dictionary<string, MemberInfo>();
 
 				// The base implementation does all the retrieval of data, so utilise that.
-				//this.Logger?.Trace($"Finding members on {objectType.FullName}");
 				var baseMembers = base.GetSerializableMembers(objectType).GroupBy(m => m.Name);
 				foreach (var g in baseMembers)
 				{
-					//this.Logger?.Trace($"Checking member {g.Key}");
-
 					MemberInfo memberInfo = null;
 					switch (g.Count())
 					{
@@ -268,8 +265,6 @@ namespace MFiles.VAF.Extensions
 								// If the member is not of the correct type then it's inherited.
 								// Get the one from the actual type we cared about.
 								memberInfo = this.IdentifyLatestImplementation(objectType, memberInfo);
-								//if(null != memberInfo)
-								//	this.Logger?.Trace($"Found {g.Key} on {memberInfo.DeclaringType}");
 								break;
 							}
 					}
@@ -302,7 +297,7 @@ namespace MFiles.VAF.Extensions
 		public static Newtonsoft.Json.JsonSerializerSettings DefaultJsonSerializerSettings { get; }
 		= new Newtonsoft.Json.JsonSerializerSettings()
 			{
-				DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore,
+				DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Include,
 				NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
 				Formatting = Newtonsoft.Json.Formatting.Indented
 			};
@@ -317,7 +312,7 @@ namespace MFiles.VAF.Extensions
 		{
 			this.JsonSerializerSettings = new Newtonsoft.Json.JsonSerializerSettings()
 			{
-				DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore,
+				DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Include,
 				NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
 				Formatting = Newtonsoft.Json.Formatting.Indented,
 				ContractResolver = new DefaultValueAwareContractResolver(this)
