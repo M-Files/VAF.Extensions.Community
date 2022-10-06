@@ -1,4 +1,5 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
 using MFiles.VAF.Extensions.ExtensionMethods;
 using MFiles.VAF.Extensions.Tests.ExtensionMethods;
@@ -334,6 +335,153 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			{
 				this.Sub = new ConfigurationWithDefaultFieldValue();
 			}
+		}
+
+		[TestMethod]
+		public void EnsureDefaultPropertiesAreNotSerialized_WithNewDefaultPropertyValue()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithDefaultPropertyValueSetInConstructorWithSubObject>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, @"{}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson("{}", rule.GetReadWriteLocationValue(vault));
+
+		}
+
+		[DataContract]
+		private class ConfigurationWithNewDefaultValuePropertyValue
+			: ConfigurationWithDefaultValuePropertyValue
+		{
+			[DefaultValue("world")]
+			[DataMember]
+			public new string Hello { get; set; } = "world";
+		}
+
+		[TestMethod]
+		public void EnsureDefaultPropertiesAreNotSerialized_WithOverriddenDefaultPropertyValue()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithDefaultPropertyValueSetInConstructorWithSubObject>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, @"{}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson("{}", rule.GetReadWriteLocationValue(vault));
+
+		}
+
+		[DataContract]
+		private class ConfigurationWithVirtualValuePropertyValue
+		{
+			[DefaultValue("world")]
+			[DataMember]
+			public virtual string Hello { get; set; } = "world";
+		}
+
+		[DataContract]
+		private class ConfigurationWithOverriddenValuePropertyValue
+			: ConfigurationWithVirtualValuePropertyValue
+		{
+			[DefaultValue("a")]
+			[DataMember]
+			public new string Hello { get; set; } = "a";
+		}
+
+		[TestMethod]
+		public void LoggingUpgrade_Empty()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<NLogLoggingConfiguration>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, @"{}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson("{}", rule.GetReadWriteLocationValue(vault));
+
+		}
+
+		[TestMethod]
+		public void LoggingUpgrade_WithAdvanced()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<NLogLoggingConfiguration>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, @"{
+				""Enabled"": true,
+				""DefaultTargetConfiguration"": {
+					""Enabled"": true,
+					""Advanced"": {
+						""ConcurrentWrites"": true
+					}
+				}
+			}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson(@"{
+				""Enabled"": true,
+				""DefaultTargetConfiguration"": {
+					""Enabled"": true,
+					""Advanced"": {
+						""ConcurrentWrites"": true
+					}
+				}
+			}", rule.GetReadWriteLocationValue(vault));
+
+		}
+
+		[TestMethod]
+		public void LoggingUpgrade_WithArraysAndAdvanced()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<NLogLoggingConfiguration>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, @"{
+				""Enabled"": true,
+				""DefaultTargetConfiguration"": {
+					""Enabled"": true,
+					""Advanced"": {
+						""ConcurrentWrites"": true
+					}
+				},
+				""FileTargetConfigurations"": [
+					{
+						""Name"": ""asd"",
+						""Enabled"": true,
+						""FileRotation"": {
+							""MaximumArchiveDays"": 21
+						},
+						""Advanced"": {
+							""ConcurrentWrites"": true
+						}
+					}
+				]
+			}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson(@"{
+				""Enabled"": true,
+				""DefaultTargetConfiguration"": {
+					""Enabled"": true,
+					""Advanced"": {
+						""ConcurrentWrites"": true
+					}
+				},
+				""FileTargetConfigurations"": [
+					{
+						""Name"": ""asd"",
+						""Enabled"": true,
+						""FileRotation"": {
+							""MaximumArchiveDays"": 21
+						},
+						""Advanced"": {
+							""ConcurrentWrites"": true
+						}
+					}
+				]
+			}", rule.GetReadWriteLocationValue(vault));
+
 		}
 	}
 }
