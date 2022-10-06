@@ -15,7 +15,8 @@ namespace MFiles.VAF.Extensions.Tests
 
 			LogManager.Initialize(Moq.Mock.Of<Vault>());
 
-			// Output some stuff to the output window.
+			// Output some stuff to the standard output.
+			// This means it's associated with each test; click a test to see the standard output (debug lines!)
 			global::NLog.LogManager.Configuration.AddRule
 			(
 				global::NLog.LogLevel.Debug,

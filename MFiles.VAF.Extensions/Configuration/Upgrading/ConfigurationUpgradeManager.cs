@@ -80,6 +80,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 
 			// Run the rule that ensures that the data is serialized according to the latest definitions.
 			{
+				this.Logger?.Debug("Ensuring latest serialization is used by the saved configuration.");
 				yield return this.GetEnsureLatestSerializationSettingsUpgradeRule<TSecureConfiguration>(rules?.LastOrDefault());
 			}
 

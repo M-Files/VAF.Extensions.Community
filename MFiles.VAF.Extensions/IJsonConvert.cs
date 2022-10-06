@@ -1,11 +1,14 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VAF.Extensions.Configuration;
 using MFiles.VaultApplications.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions
 {
@@ -42,15 +45,18 @@ namespace MFiles.VAF.Extensions
 	/// </summary>
 	internal class NewtonsoftJsonConvert : IJsonConvert
 	{
-		internal class JsonConfEditorAwareValueProvider
+		internal class DefaultValueAwareValueProvider
 			: IValueProvider
 		{
-			private ILogger Logger { get; } = LogManager.GetLogger(typeof(JsonConfEditorAwareValueProvider));
+			protected IJsonConvert JsonConvert { get; set; }
+			private ILogger Logger { get; } = LogManager.GetLogger(typeof(DefaultValueAwareValueProvider));
 			private MemberInfo memberInfo;
 			private IValueProvider valueProvider;
-			public JsonConfEditorAwareValueProvider(MemberInfo memberInfo, IValueProvider valueProvider)
+			public DefaultValueAwareValueProvider(IJsonConvert jsonConvert, MemberInfo memberInfo, IValueProvider valueProvider)
 			{
-				this.memberInfo = memberInfo 
+				this.JsonConvert = jsonConvert
+					?? throw new ArgumentNullException(nameof(jsonConvert));
+				this.memberInfo = memberInfo
 					?? throw new ArgumentNullException(nameof(memberInfo));
 				this.valueProvider = valueProvider;
 			}
@@ -72,29 +78,49 @@ namespace MFiles.VAF.Extensions
 				if (null == value)
 					return null;
 
+				// If it is the version string then always output it.
+				{
+					var dataMemberAttribute = this.memberInfo.GetCustomAttribute<DataMemberAttribute>();
+					if(null != dataMemberAttribute 
+						&& this.memberInfo.DeclaringType == typeof(VersionedConfigurationBase)
+						&& this.memberInfo.Name == nameof(VersionedConfigurationBase.VersionString))
+					{
+						return value;
+					}
+				}
+
+				// Try to get the runtime default value.
 				try
 				{
 					// Create an instance of this type.
 					object defaultValue = null;
 					var instance = Activator.CreateInstance(this.memberInfo.ReflectedType);
+					Type type = null;
 					switch(this.memberInfo.MemberType)
 					{
 						case MemberTypes.Field:
 							{
 								var fieldInfo = (FieldInfo)this.memberInfo;
+								type = fieldInfo.FieldType;
 								defaultValue = fieldInfo.GetValue(instance);
 							break;
 							}
 						case MemberTypes.Property:
 							{
 								var propertyInfo = (PropertyInfo)this.memberInfo;
+								type = propertyInfo.PropertyType;
 								defaultValue = propertyInfo.GetValue(instance);
 								break;
 							}
 					}
 
 					// If the data is the same as the default value then do not serialize.
+					if (type == typeof(string) && string.Equals(defaultValue, value))
+						return null;
 					if (defaultValue == value)
+						return null;
+					if (null != value
+						&& this.JsonConvert.Serialize(defaultValue) == this.JsonConvert.Serialize(value))
 						return null;
 				}
 				catch(Exception e)
@@ -131,20 +157,69 @@ namespace MFiles.VAF.Extensions
 
 		/// <summary>
 		/// An implementation of <see cref="DefaultContractResolver"/>
-		/// that replaces value providers with instances of <see cref="JsonConfEditorAwareValueProvider"/>.
+		/// that replaces value providers with instances of <see cref="DefaultValueAwareValueProvider"/>.
 		/// We do this so that we can take into account any default values specified by [JsonConfEditor] attributes.
 		/// </summary>
-		internal class JsonConfEditorDefaultValueContractResolver
+		internal class DefaultValueAwareContractResolver
 			: DefaultContractResolver
 		{
+			protected IJsonConvert JsonConvert { get; set; }
+
+			public DefaultValueAwareContractResolver(IJsonConvert jsonConvert)
+			{
+				this.JsonConvert = jsonConvert 
+					?? throw new ArgumentNullException(nameof(jsonConvert));
+			}
+
+			/// <inheritdoc />
+			/// <remarks>
+			/// The default implementation returns memberinfo instances that have a ReflectedType
+			/// pointing to where the member was declared.  Where abstract classes declare members
+			/// we then don't have the data to instantiate the actual serialised class.
+			/// So, for these ones, ensure that we have the correct reflected type.
+			/// </remarks>
+			protected override List<MemberInfo> GetSerializableMembers(Type objectType)
+			{
+				var list = new List<MemberInfo>();
+
+				// The base implementation does all the retrieval of data, so utilise that.
+				foreach (var memberInfo in base.GetSerializableMembers(objectType))
+				{
+					// If it was declared outside of this type then
+					// re-request the member data ensuring that we use
+					// the correct type.
+					if(memberInfo.ReflectedType != objectType)
+					{
+						switch (memberInfo.MemberType)
+						{
+							case MemberTypes.Field:
+								{
+									list.Add(objectType.GetField(memberInfo.Name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static));
+									continue;
+								}
+							case MemberTypes.Property:
+								{
+									list.Add(objectType.GetProperty(memberInfo.Name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static));
+									continue;
+								}
+						}
+					}
+
+					// It was the correct type, or something other than a property or field.
+					list.Add(memberInfo);
+				}
+				return list;
+			}
+
 			/// <inheritdoc />
 			/// <remarks>
 			/// Wraps the value provider returned by the base implementation with a
-			/// <see cref="JsonConfEditorAwareValueProvider"/> and returns that instead.
+			/// <see cref="DefaultValueAwareValueProvider"/> and returns that instead.
 			/// </remarks>
 			protected override IValueProvider CreateMemberValueProvider(MemberInfo member)
-				=> new JsonConfEditorAwareValueProvider
+				=> new DefaultValueAwareValueProvider
 				(
+					this.JsonConvert,
 					member, 
 					base.CreateMemberValueProvider(member)
 				);
@@ -154,19 +229,22 @@ namespace MFiles.VAF.Extensions
 		/// The default json serialization settings to use.
 		/// </summary>
 		public static Newtonsoft.Json.JsonSerializerSettings DefaultJsonSerializerSettings { get; }
-			= new Newtonsoft.Json.JsonSerializerSettings()
-			{
-				DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore,
-				NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
-				Formatting = Newtonsoft.Json.Formatting.Indented,
-				ContractResolver = new JsonConfEditorDefaultValueContractResolver()
-			};
 
 		/// <summary>
 		/// The json serialization settings to use with this instance.
 		/// </summary>
 		public Newtonsoft.Json.JsonSerializerSettings JsonSerializerSettings { get; set; }
-			= DefaultJsonSerializerSettings;
+
+		public NewtonsoftJsonConvert()
+		{
+			this.JsonSerializerSettings = new Newtonsoft.Json.JsonSerializerSettings()
+			{
+				DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore,
+				NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+				Formatting = Newtonsoft.Json.Formatting.Indented,
+				ContractResolver = new DefaultValueAwareContractResolver(this)
+			};
+		}
 
 		/// <inheritdoc />
 		public T Deserialize<T>(string input)

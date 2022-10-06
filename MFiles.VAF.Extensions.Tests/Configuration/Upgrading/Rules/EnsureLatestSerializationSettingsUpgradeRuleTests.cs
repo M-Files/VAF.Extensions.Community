@@ -1,6 +1,7 @@
 ﻿using MFiles.VAF.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
 using MFiles.VAF.Extensions.ExtensionMethods;
+using MFiles.VAF.Extensions.Tests.ExtensionMethods;
 using MFilesAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -131,7 +132,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			rule.SetReadWriteLocationValue(vault, "{}");
 
 			Assert.IsTrue(rule.Execute(vault));
-			Assert.AreEqual("{}", rule.GetReadWriteLocationValue(vault));
+			Assert.That.AreEqualJson("{}", rule.GetReadWriteLocationValue(vault));
 
 		}
 
@@ -152,7 +153,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			rule.SetReadWriteLocationValue(vault, "{}");
 
 			Assert.IsTrue(rule.Execute(vault));
-			Assert.AreEqual("{}", rule.GetReadWriteLocationValue(vault));
+			Assert.That.AreEqualJson("{}", rule.GetReadWriteLocationValue(vault));
 
 		}
 
@@ -172,7 +173,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			rule.SetReadWriteLocationValue(vault, "{}");
 
 			Assert.IsTrue(rule.Execute(vault));
-			Assert.AreEqual("{}", rule.GetReadWriteLocationValue(vault));
+			Assert.That.AreEqualJson("{}", rule.GetReadWriteLocationValue(vault));
 
 		}
 
@@ -193,7 +194,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			rule.SetReadWriteLocationValue(vault, "{}");
 
 			Assert.IsTrue(rule.Execute(vault));
-			Assert.AreEqual("{}", rule.GetReadWriteLocationValue(vault));
+			Assert.That.AreEqualJson("{}", rule.GetReadWriteLocationValue(vault));
 
 		}
 
@@ -213,7 +214,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			rule.SetReadWriteLocationValue(vault, "{}");
 
 			Assert.IsTrue(rule.Execute(vault));
-			Assert.AreEqual("{}", rule.GetReadWriteLocationValue(vault));
+			Assert.That.AreEqualJson("{}", rule.GetReadWriteLocationValue(vault));
 
 		}
 
@@ -225,6 +226,113 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			public ConfigurationWithDefaultPropertyValueSetInConstructor()
 			{
 				this.Hello = "world";
+			}
+		}
+
+		[TestMethod]
+		public void EnsureDefaultPropertiesAreNotSerialized_SetInConstructorDerived()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithDefaultPropertyValueSetInConstructorDerived>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, "{}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson("{}", rule.GetReadWriteLocationValue(vault));
+
+		}
+
+		[TestMethod]
+		public void EnsureDefaultPropertiesAreNotSerialized_SetInConstructorDerived_CustomValues()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithDefaultPropertyValueSetInConstructorDerived>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, @"{ 
+				""Hello"" : ""User""
+			}");
+
+			// This should not touch the original, as it's the same.
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson(@"{ 
+				""Hello"" : ""User""
+			}", rule.GetReadWriteLocationValue(vault));
+
+		}
+
+		[DataContract]
+		private abstract class ConfigurationWithDefaultPropertyValueSetInConstructor_Abstract
+		{
+			[DataMember]
+			public string Hello { get; set; }
+			public ConfigurationWithDefaultPropertyValueSetInConstructor_Abstract()
+			{
+				this.Hello = "world";
+			}
+		}
+
+		[DataContract]
+		private class ConfigurationWithDefaultPropertyValueSetInConstructorDerived
+			: ConfigurationWithDefaultPropertyValueSetInConstructor_Abstract
+		{
+			[DataMember]
+			public string World { get; set; }
+			public ConfigurationWithDefaultPropertyValueSetInConstructorDerived()
+				: base()
+			{
+				this.World = "hello";
+			}
+		}
+
+		[TestMethod]
+		public void EnsureDefaultPropertiesAreNotSerialized_WithDefaultSubObject()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithDefaultPropertyValueSetInConstructorWithSubObject>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, @"{ ""Sub"" : { ""Hello"" : ""hello"" } }");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson("{}", rule.GetReadWriteLocationValue(vault));
+
+		}
+
+		[TestMethod]
+		public void EnsureDefaultPropertiesAreNotSerialized_WithSubObject()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithDefaultPropertyValueSetInConstructorWithSubObject>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, @"{ ""Sub"" : { ""Hello"" : ""to you"" } }");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson(@"{ ""Sub"" : { ""Hello"" : ""to you"" } }", rule.GetReadWriteLocationValue(vault));
+
+		}
+
+		[TestMethod]
+		public void EnsureDefaultPropertiesAreNotSerialized_WithEmptySubObject()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithDefaultPropertyValueSetInConstructorWithSubObject>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, @"{}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson("{}", rule.GetReadWriteLocationValue(vault));
+
+		}
+
+		[DataContract]
+		private class ConfigurationWithDefaultPropertyValueSetInConstructorWithSubObject
+			: ConfigurationWithDefaultPropertyValueSetInConstructorDerived
+		{
+			[DataMember]
+			public ConfigurationWithDefaultFieldValue Sub { get; set; }
+			public ConfigurationWithDefaultPropertyValueSetInConstructorWithSubObject()
+				: base()
+			{
+				this.Sub = new ConfigurationWithDefaultFieldValue();
 			}
 		}
 	}
