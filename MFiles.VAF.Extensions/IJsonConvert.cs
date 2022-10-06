@@ -1,9 +1,11 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VaultApplications.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace MFiles.VAF.Extensions
 {
@@ -43,6 +45,7 @@ namespace MFiles.VAF.Extensions
 		internal class JsonConfEditorAwareValueProvider
 			: IValueProvider
 		{
+			private ILogger Logger { get; } = LogManager.GetLogger(typeof(JsonConfEditorAwareValueProvider));
 			private MemberInfo memberInfo;
 			private IValueProvider valueProvider;
 			public JsonConfEditorAwareValueProvider(MemberInfo memberInfo, IValueProvider valueProvider)
@@ -68,6 +71,36 @@ namespace MFiles.VAF.Extensions
 				var value = this.valueProvider.GetValue(target);
 				if (null == value)
 					return null;
+
+				try
+				{
+					// Create an instance of this type.
+					object defaultValue = null;
+					var instance = Activator.CreateInstance(this.memberInfo.ReflectedType);
+					switch(this.memberInfo.MemberType)
+					{
+						case MemberTypes.Field:
+							{
+								var fieldInfo = (FieldInfo)this.memberInfo;
+								defaultValue = fieldInfo.GetValue(instance);
+							break;
+							}
+						case MemberTypes.Property:
+							{
+								var propertyInfo = (PropertyInfo)this.memberInfo;
+								defaultValue = propertyInfo.GetValue(instance);
+								break;
+							}
+					}
+
+					// If the data is the same as the default value then do not serialize.
+					if (defaultValue == value)
+						return null;
+				}
+				catch(Exception e)
+				{
+					this.Logger?.Warn(e, $"Could not identify default value for {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name}");
+				}
 
 				// If this member has a JsonConfEditorAttribute then we need to check whether to filter it.
 				{

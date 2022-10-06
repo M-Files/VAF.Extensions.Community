@@ -17,19 +17,19 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		/// <summary>
 		/// A definition of where the value should be read from.
 		/// </summary>
-		public virtual ISingleNamedValueItem ReadFrom { get; }
+		public virtual ISingleNamedValueItem ReadFrom { get; protected set; }
 
 		/// <summary>
 		/// A definition of where the value should be written to.
 		/// </summary>
 		/// <remarks>If null then will be written to <see cref="ReadFrom"/>.</remarks>
-		public virtual ISingleNamedValueItem WriteTo { get; }
+		public virtual ISingleNamedValueItem WriteTo { get; protected set; }
 
 		/// <inheritdoc />
-		public Version MigrateFromVersion { get; }
+		public Version MigrateFromVersion { get; protected set; }
 
 		/// <inheritdoc />
-		public Version MigrateToVersion { get; }
+		public Version MigrateToVersion { get; protected set; }
 
 		/// <inheritdoc />
 		public virtual bool IsValid()
