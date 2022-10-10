@@ -15,6 +15,7 @@ using MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent;
 using MFiles.VAF.Extensions.Dashboards.LoggingDashboardContent;
 using MFiles.VaultApplications.Logging.Configuration;
 using MFiles.VAF.Extensions.Dashboards.DevelopmentDashboardContent;
+using MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent;
 
 namespace MFiles.VAF.Extensions
 {
@@ -119,18 +120,26 @@ namespace MFiles.VAF.Extensions
 		#region Application overview
 
 		/// <summary>
+		/// Gets the <see cref="IApplicationOverviewDashboardContentRenderer"/> that will render the application overview dashboard section.
+		/// If null, nothing will be returned for this section.
+		/// </summary>
+		protected internal IApplicationOverviewDashboardContentRenderer ApplicationOverviewDashboardContentRenderer { get; private set; }
+
+		/// <summary>
+		/// Returns the implementation for rendering application overview dashboard content.
+		/// By default this is an instance of <see cref="DefaultApplicationOverviewDashboardContentRenderer"/>.
+		/// </summary>
+		/// <returns>The renderer, or null if nothing should be rendered.</returns>
+		protected virtual IApplicationOverviewDashboardContentRenderer GetApplicationOverviewDashboardContentRenderer()
+			=> new DefaultApplicationOverviewDashboardContentRenderer();
+
+		/// <summary>
 		/// Gets the content showing the application name, version, etc.
 		/// </summary>
 		/// <param name="context">The request context for this dashboard generation.</param>
 		/// <returns>The dashboard content, or null if none should be rendered.</returns>
 		public virtual IDashboardContent GetApplicationOverviewDashboardContent(IConfigurationRequestContext context)
-		{
-			// If there's some base content then add that.
-			var baseContent = base.GetDashboardContent(context);
-			return false == string.IsNullOrWhiteSpace(baseContent)
-				? new DashboardCustomContent(baseContent)
-				: null; // No content so return null.
-		}
+			=> this.ApplicationOverviewDashboardContentRenderer?.GetDashboardContent();
 
 		#endregion
 
