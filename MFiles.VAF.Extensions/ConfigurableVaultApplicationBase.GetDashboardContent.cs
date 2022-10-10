@@ -11,6 +11,7 @@ using MFiles.VaultApplications.Logging.NLog.ExtensionMethods;
 using MFiles.VAF.Extensions.ExtensionMethods;
 using MFilesAPI;
 using MFiles.VAF.Configuration;
+using MFiles.VAF.Extensions.Dashboards.AsynchronousContent;
 
 namespace MFiles.VAF.Extensions
 {
@@ -222,41 +223,38 @@ namespace MFiles.VAF.Extensions
 #endif
 
 		/// <summary>
-		/// Returns dashboard items from any <see cref="TaskQueueBackgroundOperationManager"/>
-		/// to be added to <see cref="GetAsynchronousOperationDashboardContent(IConfigurationRequestContext)"/>.
+		/// Returns the implementation for rendering asynchronous dashboard content.
+		/// By default this is an instance of <see cref="DashboardListAsynchronousDashboardContentRenderer"/>.
 		/// </summary>
-		/// <param name="context">The context for requesting these items.</param>
-		/// <returns>Any items.</returns>
-		protected virtual IEnumerable<DashboardListItem> GetAsynchronousDashboardListItemsFromBackgroundOperationManager(IConfigurationRequestContext context)
-			=> this
-				.GetType()
-				.GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager<TSecureConfiguration>>(this)
-				.SelectMany(m => m.GetDashboardContent());
-
-		/// <summary>
-		/// Returns dashboard items from the <see cref="TaskManager"/> and <see cref="TaskQueueResolver"/>
-		/// to be added to <see cref="GetAsynchronousOperationDashboardContent(IConfigurationRequestContext)"/>.
-		/// </summary>
-		/// <param name="context">The context for requesting these items.</param>
-		/// <returns>Any items.</returns>
-		protected virtual IEnumerable<DashboardListItem> GetAsynchronousDashboardListItemsFromTaskManager(IConfigurationRequestContext context)
-			=> this.TaskManager?.GetDashboardContent(this.TaskQueueResolver) ?? Enumerable.Empty<DashboardListItem>();
-
-		/// <summary>
-		/// Returns all dashboard items to be displayed.
-		/// Calls <see cref="GetAsynchronousDashboardListItemsFromBackgroundOperationManager"/>
-		/// and then <see cref="GetAsynchronousDashboardListItemsFromTaskManager"/>.
-		/// <see cref="GetAsynchronousOperationDashboardContent(IConfigurationRequestContext)"/>.
-		/// </summary>
-		/// <param name="context">The context for requesting these items.</param>
-		/// <returns>Any items.</returns>
-		/// <remarks>Override this method to add new items.</remarks>
-		protected virtual IEnumerable<DashboardListItem> GetAsynchronousDashboardListItems(IConfigurationRequestContext context)
+		/// <returns>The renderer, or null if nothing should be rendered.</returns>
+		protected virtual IAsynchronousDashboardContentRenderer GetAsynchronousDashboardContentRenderer()
 		{
-			foreach (var i in this.GetAsynchronousDashboardListItemsFromBackgroundOperationManager(context))
-				yield return i;
-			foreach (var i in this.GetAsynchronousDashboardListItemsFromTaskManager(context))
-				yield return i;
+			// Get the default renderer, which renders as a list.
+			return new DashboardListAsynchronousDashboardContentRenderer();
+		}
+
+		/// <summary>
+		/// Returns all providers of asynchronous content.
+		/// By default this returns an instance of <see cref="TaskQueueBackgroundOperationManagerAsynchronousDashboardContentProvider{TConfiguration}"/>
+		/// and an instance of <see cref="TaskManagerExAsynchronousDashboardContentProvider{TConfiguration}"/>.
+		/// </summary>
+		/// <returns>The providers, or an empty collection if nothing should be rendered.</returns>
+		protected virtual IEnumerable<IAsynchronousDashboardContentProvider> GetAsynchronousDashboardContentProviders()
+		{
+			// Return the data from task queue background operation manager.
+			yield return new TaskQueueBackgroundOperationManagerAsynchronousDashboardContentProvider<TSecureConfiguration>
+			(
+				this
+			);
+
+			// Return the data from the task manager.
+			yield return new TaskManagerExAsynchronousDashboardContentProvider<TSecureConfiguration>
+			(
+				this.PermanentVault,
+				this.TaskManager,
+				this.TaskQueueResolver,
+				this.RecurringOperationConfigurationManager
+			);
 		}
 
 		/// <summary>
@@ -265,31 +263,11 @@ namespace MFiles.VAF.Extensions
 		/// <returns>The dashboard content.  Can be null if no background operation managers, background operations or task processors.</returns>
 		public virtual IDashboardContent GetAsynchronousOperationDashboardContent(IConfigurationRequestContext context)
 		{
-			// Declare our list which will go into the panel.
-			var list = new DashboardList();
-			list.Items.AddRange(this.GetAsynchronousDashboardListItems(context));
+			// Get our renderer.
+			var renderer = this.GetAsynchronousDashboardContentRenderer();
 
-			// Did we get anything?
-			if (0 == list.Items.Count)
-				list.Items.Add(new DashboardListItem()
-				{
-					Title = Resources.Dashboard.AsynchronousOperations_ThereAreNoCurrentAsynchronousOperations,
-					StatusSummary = new DomainStatusSummary()
-					{
-						Status = VAF.Configuration.Domain.DomainStatus.Undefined
-					}
-				});
-
-			// Return the panel.
-			return new DashboardPanelEx()
-			{
-				Title = Resources.Dashboard.AsynchronousOperations_DashboardTitle,
-				InnerContent = new DashboardContentCollection
-				{
-					new DashboardCustomContent($"<em>{Resources.Dashboard.TimeOnServer.EscapeXmlForDashboard(DateTime.Now.ToLocalTime().ToString("HH:mm:ss"))} ({(TimeZoneInfo.Local.IsDaylightSavingTime(DateTime.Now) ? TimeZoneInfo.Local.DaylightName : TimeZoneInfo.Local.StandardName)})</em>"),
-					list
-				}
-			};
+			// Render the data from all our providers.
+			return renderer?.GetDashboardContent(this.GetAsynchronousDashboardContentProviders());
 		}
 
 		/// <summary>
