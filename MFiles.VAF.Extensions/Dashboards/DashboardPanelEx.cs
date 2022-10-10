@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Configuration.Domain;
 using MFiles.VAF.Configuration.Domain.Dashboards;
+using MFiles.VAF.Extensions.ExtensionMethods;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,9 +35,23 @@ namespace MFiles.VAF.Extensions.Dashboards
 		/// </summary>
 		public string Title
 		{
-			get { return this.DashboardPanel.Title; }
-			set { this.DashboardPanel.Title = value; }
+			get
+			{
+				return null == this.TitleDashboardContent
+					? this.DashboardPanel.Title
+					: this.TitleDashboardContent.ToString();
+			}
+			set
+			{
+				this.TitleDashboardContent = null;
+				this.DashboardPanel.Title = value;
+			}
 		}
+
+		/// <summary>
+		/// The title of the panel.
+		/// </summary>
+		public IDashboardContent TitleDashboardContent { get; set; }
 
 		/// <summary>
 		/// The status of the panel (optional).
@@ -90,6 +105,57 @@ namespace MFiles.VAF.Extensions.Dashboards
 
 		/// <inheritdoc />
 		protected override XmlDocumentFragment GenerateXmlDocumentFragment(XmlDocument xml)
-			=> this.DashboardPanel?.Generate(xml);
+		{
+			var fragment = this.DashboardPanel?.Generate(xml);
+
+			// Do we need to be more clever with the title?
+			if(null != this.TitleDashboardContent)
+			{
+				XmlElement panel = (XmlElement)fragment?.SelectNodes("*[@class=\"panel\"]")[0];
+				XmlElement titleBar = (XmlElement)panel?.SelectNodes("*[@class=\"title-bar\"]")[0];
+				XmlElement title = (XmlElement)titleBar?.SelectNodes("*[@class=\"title\"]")[0];
+				if(null != title)
+				{
+					title.InnerXml = this.TitleDashboardContent.ToXmlString();
+				}
+			}
+
+			return fragment;
+		}
+	}
+
+	/// <summary>
+	/// A specialised implementation of <see cref="DashboardPanelEx"/> to render an exception.
+	/// Primary use-case is called from <see cref="ConfigurableVaultApplicationBase{TSecureConfiguration}.GetStatusDashboardRootItems(VAF.Configuration.AdminConfigurations.IConfigurationRequestContext)"/>
+	/// to render out the fact that a dashboard exception threw whilst rendering.
+	/// </summary>
+	public class ExceptionDashboardPanel
+		: DashboardPanelEx
+	{
+		public Exception Exception { get; }
+		public ExceptionDashboardPanel(Exception e, string titleText = null)
+		{
+			this.Exception = e ?? throw new ArgumentNullException(nameof(e));
+
+			// Set the inner content.
+			this.InnerContent = new DashboardContentCollection()
+			{
+				new DashboardCustomContentEx($"<p style='color: red; margin-left: 30px'>{e.Message}</p>"),
+				new DashboardCustomContentEx($"<p><pre style='padding: 0px; color: red; margin-left: 30px'>{e.StackTrace.EscapeXmlForDashboard()}</pre></p>")
+			};
+
+			// Set the title.
+			var title = new DashboardCustomContentEx(titleText ?? "Exception")
+			{
+				Icon = "Resources/Images/Failed.png"
+			};
+			title.Styles.AddOrUpdate("color", "red");
+			this.TitleDashboardContent = title;
+
+			// General styling.
+			this.Styles.AddOrUpdate("padding", "5px 0px");
+			this.Styles.AddOrUpdate("border-top", "1px solid red");
+			this.Styles.AddOrUpdate("border-bottom", "1px solid red");
+		}
 	}
 }

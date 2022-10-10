@@ -41,20 +41,6 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <inheritdoc />
-		protected override void StartApplication()
-		{
-			base.StartApplication();
-
-#if DEBUG
-			// If we are debugging then populate the cache of referenced assemblies.
-
-			// Populate the referenced assemblies (do it via a task though to allow application to start).
-			Task.Run(this.PopulateReferencedAssemblies);
-#endif
-
-		}
-
-		/// <inheritdoc />
 		protected override void UninitializeApplication(Vault vault)
 		{
 			// If we have a logger then write out that we're stopping.

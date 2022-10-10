@@ -45,22 +45,11 @@ namespace MFiles.VAF.Extensions
 		/// <returns></returns>
 		public virtual IEnumerable<CustomDomainCommand> GetDefaultLogTargetDownloadCommands()
 		{
-			if (this.AllowUserToSelectLogFiles)
-			{
-				// One to allow them to select which logs...
-				yield return Dashboards.Commands.ShowSelectLogDownloadDashboardCommand.Create();
+			// One to allow them to select which logs...
+			yield return Dashboards.Commands.ShowSelectLogDownloadDashboardCommand.Create();
 
-				// ...and one that actually does the collation/download.
-				yield return Dashboards.Commands.DownloadSelectedLogsDashboardCommand.Create();
-			}
-			else
-			{
-				// If they can only download them all then make sure the item on the domain menu
-				// reflects that.
-				var command = Dashboards.Commands.DownloadSelectedLogsDashboardCommand.Create();
-				command.Locations = new List<ICommandLocation> { };
-				yield return command;
-			}
+			// ...and one that actually does the collation/download.
+			yield return Dashboards.Commands.DownloadSelectedLogsDashboardCommand.Create();
 			
 			// Allow the user to see the latest log entries.
 			yield return Dashboards.Commands.ShowLatestLogEntriesDashboardCommand.Create();
