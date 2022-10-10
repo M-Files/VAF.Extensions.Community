@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static MFiles.VAF.Common.ApplicationTaskQueue.TaskQueueManager;
 
-namespace MFiles.VAF.Extensions.Dashboards.AsynchronousContent
+namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 {
 	/// <summary>
 	/// Provides content around asynchronous dashboards, to be subsequently rendered on a dashboard.

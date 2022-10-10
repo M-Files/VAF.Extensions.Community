@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MFiles.VAF.Extensions.Dashboards.AsynchronousContent
+namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 {
 	/// <summary>
 	/// An implementation of <see cref="IAsynchronousDashboardContentRenderer"/> that returns data as a dashboard list.
@@ -90,7 +90,7 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousContent
 				(
 					Resources.AsynchronousOperations.DegradedQueueDashboardNotice,
 					details.TasksInQueue,
-					DashboardQueueAndTaskDetails.DegradedDashboardThreshold
+					AsynchronousDashboardContentSettings.DegradedDashboardThreshold
 				).EscapeXmlForDashboard();
 				htmlString += "</p>";
 			}

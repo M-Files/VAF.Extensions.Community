@@ -2,7 +2,7 @@
 using MFiles.VAF.Configuration.Domain.Dashboards;
 using System.Collections.Generic;
 
-namespace MFiles.VAF.Extensions.Dashboards.AsynchronousContent
+namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 {
 	/// <summary>
 	/// Renders details about executions of an asynchronous operation into a dashboard.

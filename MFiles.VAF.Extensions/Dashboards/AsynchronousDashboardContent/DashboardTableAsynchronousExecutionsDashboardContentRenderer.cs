@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MFiles.VAF.Extensions.Dashboards.AsynchronousContent
+namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 {
 	public class DashboardTableAsynchronousExecutionsDashboardContentRenderer
 		: IAsynchronousExecutionsDashboardContentRenderer

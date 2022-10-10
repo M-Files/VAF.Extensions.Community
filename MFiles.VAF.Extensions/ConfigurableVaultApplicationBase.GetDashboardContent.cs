@@ -11,7 +11,7 @@ using MFiles.VaultApplications.Logging.NLog.ExtensionMethods;
 using MFiles.VAF.Extensions.ExtensionMethods;
 using MFilesAPI;
 using MFiles.VAF.Configuration;
-using MFiles.VAF.Extensions.Dashboards.AsynchronousContent;
+using MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent;
 
 namespace MFiles.VAF.Extensions
 {

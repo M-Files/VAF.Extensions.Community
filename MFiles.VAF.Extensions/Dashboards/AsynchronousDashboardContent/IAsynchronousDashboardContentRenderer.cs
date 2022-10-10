@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.Remoting.Contexts;
 using static MFiles.VAF.Common.ApplicationTaskQueue.TaskQueueManager;
 
-namespace MFiles.VAF.Extensions.Dashboards.AsynchronousContent
+namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 {
 	/// <summary>
 	/// Renders details about asynchronous operations into a dashboard.

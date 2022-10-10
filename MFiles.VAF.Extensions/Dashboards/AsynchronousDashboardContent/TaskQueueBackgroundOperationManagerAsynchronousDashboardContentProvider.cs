@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MFiles.VAF.Extensions.Dashboards.AsynchronousContent
+namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 {
 	/// <summary>
 	/// Provides content from the <see cref="TaskQueueBackgroundOperationManager{TSecureConfiguration}"/> to

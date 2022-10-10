@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static MFiles.VAF.Common.ApplicationTaskQueue.TaskQueueManager;
 
-namespace MFiles.VAF.Extensions.Dashboards.AsynchronousContent
+namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 {
 	/// <summary>
 	/// Retrieves data from the <see cref="TaskManagerEx{TConfiguration}"/> about asynchronous operations that should
@@ -83,7 +83,7 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousContent
 
 				// Get the number of items in the queue.
 				var waitingTasks = TaskHelper.GetTaskIDs(Vault, queue, MFTaskState.MFTaskStateWaiting).Count;
-				var showDegraded = waitingTasks > DashboardQueueAndTaskDetails.DegradedDashboardThreshold;
+				var showDegraded = waitingTasks > AsynchronousDashboardContentSettings.DegradedDashboardThreshold;
 
 				// Get each task processor.
 				foreach (var processor in TaskQueueResolver.GetTaskProcessors(queue))
