@@ -13,9 +13,9 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 	public class DefaultApplicationOverviewDashboardContentRenderer<TSecureConfiguration>
 		: IApplicationOverviewDashboardContentRenderer
 		where TSecureConfiguration : class, new()
-	{
+	{ 
 		/// <inheritdoc />
-		public bool ShowDescription { get; set; } = true;
+		public string Title { get; set; } = "Application Details";
 
 		/// <inheritdoc />
 		public bool ShowVersion { get; set; } = true;
@@ -50,10 +50,6 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 		public virtual DashboardPanelEx GetDashboardContent()
 		{
 			var innerContent = new DashboardContentCollection();
-
-			// If we have a description then add that,
-			if (this.ShowDescription && false == string.IsNullOrWhiteSpace(ApplicationDefinition.Description))
-				innerContent.Add(new DashboardCustomContentEx($"<p><em>{ApplicationDefinition.Description}</em></p>"));
 
 			var table = new DashboardTable();
 			table.TableStyles.Remove("border");
@@ -128,7 +124,7 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 			// Create panel.
 			var panel = new DashboardPanelEx()
 			{
-				Title = $"{ApplicationDefinition.Name}",
+				Title = this.Title,
 				InnerContent = innerContent
 			};
 			panel.InnerContentStyles.AddOrUpdate("padding-left", "10px");
