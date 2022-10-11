@@ -123,6 +123,12 @@ namespace MFiles.VAF.Extensions
 			private set => taskQueueBackgroundOperationManager = value;
 		}
 
+		protected internal new IApplicationLicense License
+		{
+			get { return base.License; }
+			set { base.License = value; }
+		}
+
 		protected override void StartApplication()
 		{
 

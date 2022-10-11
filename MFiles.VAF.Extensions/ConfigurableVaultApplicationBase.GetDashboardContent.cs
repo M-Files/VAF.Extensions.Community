@@ -131,7 +131,7 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <returns>The renderer, or null if nothing should be rendered.</returns>
 		protected virtual IApplicationOverviewDashboardContentRenderer GetApplicationOverviewDashboardContentRenderer()
-			=> new DefaultApplicationOverviewDashboardContentRenderer();
+			=> new DefaultApplicationOverviewDashboardContentRenderer<TSecureConfiguration>(this);
 
 		/// <summary>
 		/// Gets the content showing the application name, version, etc.

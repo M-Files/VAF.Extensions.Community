@@ -10,6 +10,36 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 	public interface IApplicationOverviewDashboardContentRenderer
 	{
 		/// <summary>
+		/// Whether to show the description section.
+		/// </summary>
+		bool ShowDescription { get; set; }
+
+		/// <summary>
+		/// Whether to show the version section.
+		/// </summary>
+		bool ShowVersion { get; set; }
+
+		/// <summary>
+		/// Whether to show the publisher section.
+		/// </summary>
+		bool ShowPublisher { get; set; }
+
+		/// <summary>
+		/// Whether to show the copyright section.
+		/// </summary>
+		bool ShowCopyright { get; set; }
+
+		/// <summary>
+		/// Whether to show the MSM status.
+		/// </summary>
+		bool ShowMultiServerModeStatus { get; set; }
+
+		/// <summary>
+		/// Whether to show the licensing status.
+		/// </summary>
+		bool ShowLicenseStatus { get; set; }
+
+		/// <summary>
 		/// Gets the application overview dashboard content.
 		/// </summary>
 		/// <returns>The content, or null if nothing to render.</returns>
