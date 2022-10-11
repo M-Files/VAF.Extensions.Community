@@ -55,18 +55,35 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 			if (this.ShowDescription && false == string.IsNullOrWhiteSpace(ApplicationDefinition.Description))
 				innerContent.Add(new DashboardCustomContentEx($"<p>{ApplicationDefinition.Description}</p>"));
 
+			var table = new DashboardTable();
+			table.TableStyles.Remove("border");
+
 			// Add the version.
-			if(this.ShowVersion)
-				innerContent.Add(new DashboardCustomContentEx($"<p><strong>Version:</strong> {ApplicationDefinition.Version}</p>"));
+			if (this.ShowVersion)
+			{
+				var row = table.AddRow();
+				row.AddCell("Version:", DashboardTableCellType.Header).HeaderStyles.Remove("border-bottom");
+				row.AddCell(ApplicationDefinition.Version.ToString()).Styles.Add("width", "100%");
+			}
 
 			// Add the publisher and copyright if we have them.
 			if (this.ShowPublisher && false == string.IsNullOrWhiteSpace(ApplicationDefinition.Publisher))
-				innerContent.Add(new DashboardCustomContentEx($"<p><strong>Publisher:</strong> {ApplicationDefinition.Publisher}</p>"));
+			{
+				var row = table.AddRow();
+				row.AddCell("Publisher:", DashboardTableCellType.Header).HeaderStyles.Remove("border-bottom");
+				row.AddCell(ApplicationDefinition.Publisher.ToString());
+			}
 			if (this.ShowCopyright && false == string.IsNullOrWhiteSpace(ApplicationDefinition.Copyright))
-				innerContent.Add(new DashboardCustomContentEx($"<p><strong>Copyright:</strong> &copy; {ApplicationDefinition.Copyright}</p>"));
+			{
+				var row = table.AddRow();
+				row.AddCell("Copyright:", DashboardTableCellType.Header).HeaderStyles.Remove("border-bottom");
+				row.AddCell($"&copy; {ApplicationDefinition.Copyright}");
+			}
+
+			innerContent.Add(table);
 
 			// Add a marker to say whether this is MSM-compatible.
-			if(this.ShowMultiServerModeStatus)
+			if (this.ShowMultiServerModeStatus)
 				innerContent.Add
 				(
 					ApplicationDefinition.MultiServerCompatible
