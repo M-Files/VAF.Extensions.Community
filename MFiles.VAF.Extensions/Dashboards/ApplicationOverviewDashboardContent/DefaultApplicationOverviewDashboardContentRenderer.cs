@@ -53,7 +53,7 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 
 			// If we have a description then add that,
 			if (this.ShowDescription && false == string.IsNullOrWhiteSpace(ApplicationDefinition.Description))
-				innerContent.Add(new DashboardCustomContentEx($"<p>{ApplicationDefinition.Description}</p>"));
+				innerContent.Add(new DashboardCustomContentEx($"<p><em>{ApplicationDefinition.Description}</em></p>"));
 
 			var table = new DashboardTable();
 			table.TableStyles.Remove("border");
@@ -84,8 +84,8 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 
 			// Add a marker to say whether this is MSM-compatible.
 			if (this.ShowMultiServerModeStatus)
-				innerContent.Add
-				(
+			{
+				var element =
 					ApplicationDefinition.MultiServerCompatible
 					? new DashboardCustomContentEx($"<p style='color: green'>This application is marked as compatible with M-Files Multi-Server Mode.</p>")
 					{
@@ -94,8 +94,10 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 					: new DashboardCustomContentEx($"<p style='color: red'>This application is <strong>NOT</strong> marked as compatible with M-Files Multi-Server Mode.</p>")
 					{
 						Icon = "Resources/Images/canceled.png"
-					}
-				);
+					};
+				element.Styles.AddOrUpdate("padding-top", "4px");
+				innerContent.Add(element);
+			}
 
 			// Show the licensing status.
 			if(this.ShowLicenseStatus)
