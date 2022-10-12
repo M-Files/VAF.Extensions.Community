@@ -25,26 +25,51 @@ namespace MFiles.VAF.Extensions
 	public class TimeSpanEx
 		: IRecurrenceConfiguration
 	{
-		[DataMember]
-		[JsonConfEditor
-		(
-			Label = ResourceMarker.Id + nameof(Resources.Configuration.TimeSpanEx_Interval_Hours)
-		)]
-		public int Hours { get; set; }
+		private int hours;
+		private int minutes;
+		private int seconds;
 
 		[DataMember]
-		[JsonConfEditor
-		(
-			Label = ResourceMarker.Id + nameof(Resources.Configuration.TimeSpanEx_Interval_Minutes)
-		)]
-		public int Minutes { get; set; }
+		[JsonConfIntegerEditor
+				(
+					Label = ResourceMarker.Id + nameof(Resources.Configuration.TimeSpanEx_Interval_Hours),
+					Min = 0
+				)]
+		public int Hours
+		{
+			get => hours;
+			set => hours = value > 0
+				? value
+				: 0;
+		}
 
 		[DataMember]
-		[JsonConfEditor
+		[JsonConfIntegerEditor
 		(
-			Label = ResourceMarker.Id + nameof(Resources.Configuration.TimeSpanEx_Interval_Seconds)
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.TimeSpanEx_Interval_Minutes),
+			Min = 0
 		)]
-		public int Seconds { get; set; }
+		public int Minutes
+		{
+			get => minutes;
+			set => minutes = value > 0
+				? value
+				: 0;
+		}
+
+		[DataMember]
+		[JsonConfIntegerEditor
+		(
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.TimeSpanEx_Interval_Seconds),
+			Min = 0
+		)]
+		public int Seconds
+		{
+			get => seconds;
+			set => seconds = value > 0
+				? value
+				: 0;
+		}
 
 		/// <summary>
 		/// The interval, made up of the <see cref="Hours"/>, <see cref="Minutes"/>, and <see cref="Seconds"/> values.
@@ -74,7 +99,7 @@ namespace MFiles.VAF.Extensions
 		)]
 		public bool? RunOnVaultStartup { get; set; } = true;
 
-		public TimeSpanEx(){}
+		public TimeSpanEx() { }
 		public TimeSpanEx(TimeSpan timeSpan, bool? runOnVaultStartup = null)
 			: this()
 		{
