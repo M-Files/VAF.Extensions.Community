@@ -70,7 +70,7 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 				// Get all executions in the queue.
 				var executions = bgo.GetAllExecutions().Select(ti => ti.Cast<TaskDirective>()).ToList();
 
-				// TODO: Get the recurrence data!
+				// Get the recurrence data.
 				IRecurrenceConfiguration recurrenceConfiguration = null;
 				switch (bgo.RepeatType)
 				{

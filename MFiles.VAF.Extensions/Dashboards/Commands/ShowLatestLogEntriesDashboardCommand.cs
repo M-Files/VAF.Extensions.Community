@@ -376,8 +376,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 				else if (encoding is UnicodeEncoding)
 				{
 					// For UTF-16, even-numbered positions are the start of a character.
-					// TODO: This assumes no surrogate pairs. More work required
-					// to handle that.
+					// This assumes no surrogate pairs. More work required to handle that.
 					characterStartDetector = (pos, data) => (pos & 1) == 0;
 				}
 				else if (encoding is UTF8Encoding)

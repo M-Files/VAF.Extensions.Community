@@ -135,6 +135,79 @@
   <data name="ApplicationDetailsPanel_Title" xml:space="preserve">
     <value>Application Details</value>
   </data>
+  <data name="LicensingStatusPanel_ConcurrentUsers_Exceeded" xml:space="preserve">
+    <value>The application licence only allows a maximum of {0} concurrent users, but the server licence allows {1}.</value>
+    <comment>{0} will be replaced with the number of licensed users, {1} will be replaced with the number of licenses in use.</comment>
+  </data>
+  <data name="LicensingStatusPanel_ConcurrentUsers_Valid" xml:space="preserve">
+    <value>The application licence allows {0} concurrent users.</value>
+    <comment>{0} will be replaced with the number of licensed users, {1} will be replaced with the number of licenses in use.</comment>
+  </data>
+  <data name="LicensingStatusPanel_GroupMembership_Exceeded" xml:space="preserve">
+    <value>User group {0} has {1} members, which is more than the licensed value of {1}.</value>
+  </data>
+  <data name="LicensingStatusPanel_GroupMembership_Valid" xml:space="preserve">
+    <value>User group {0} has {1} members, which is less than the licensed value of {1}.</value>
+  </data>
+  <data name="LicensingStatusPanel_LicensedTo" xml:space="preserve">
+    <value>This application is licensed to {0}.</value>
+    <comment>{0} will be replaced with who it is licensed to.</comment>
+  </data>
+  <data name="LicensingStatusPanel_LicenseExpiredXXXXDaysAgo" xml:space="preserve">
+    <value>The licence expired {0} days ago.</value>
+    <comment>{0} will be replaced with the number of days that have passed.</comment>
+  </data>
+  <data name="LicensingStatusPanel_LicenseExpiresInXXXXDays" xml:space="preserve">
+    <value>The licence expires in {0} days.</value>
+    <comment>{0} will be replaced with the number of days until expiry.</comment>
+  </data>
+  <data name="LicensingStatusPanel_MaintenanceExpiredXXXXDaysAgo" xml:space="preserve">
+    <value>The maintenance expired {0} days ago.</value>
+    <comment>{0} will be replaced with the number of days that have passed.</comment>
+  </data>
+  <data name="LicensingStatusPanel_MaintenanceExpiresInXXXXDays" xml:space="preserve">
+    <value>The maintenance expires in {0} days.</value>
+    <comment>{0} will be replaced with the number of days until expiry.</comment>
+  </data>
+  <data name="LicensingStatusPanel_NamedUsers_Exceeded" xml:space="preserve">
+    <value>The application licence only allows a maximum of {0} named users, but the server licence allows {1}.</value>
+    <comment>{0} will be replaced with the number of licensed users, {1} will be replaced with the number of licenses in use.</comment>
+  </data>
+  <data name="LicensingStatusPanel_NamedUsers_Valid" xml:space="preserve">
+    <value>The application licence allows {0} named users.</value>
+    <comment>{0} will be replaced with the number of licensed users, {1} will be replaced with the number of licenses in use.</comment>
+  </data>
+  <data name="LicensingStatusPanel_NotValidForThisServer" xml:space="preserve">
+    <value>The license is not valid on this server.</value>
+  </data>
+  <data name="LicensingStatusPanel_NotValidInThisServerVersion" xml:space="preserve">
+    <value>The license is not valid for server version {0}.</value>
+    <comment>{0} will be replaced with the server version.</comment>
+  </data>
+  <data name="LicensingStatusPanel_NotValidInThisVault" xml:space="preserve">
+    <value>The license is not valid in vault {0}.</value>
+    <comment>{0} will be replaced with the vault GUID.</comment>
+  </data>
+  <data name="LicensingStatusPanel_ReadOnlyUsers_Valid" xml:space="preserve">
+    <value>The application licence allows {0} read-only users.</value>
+    <comment>{0} will be replaced with the number of licensed users, {1} will be replaced with the number of licenses in use.</comment>
+  </data>
+  <data name="LicensingStatusPanel_ReadOnly_Exceeded" xml:space="preserve">
+    <value>The application licence only allows a maximum of {0} read-only users, but the server licence allows {1}.</value>
+    <comment>{0} will be replaced with the number of licensed users, {1} will be replaced with the number of licenses in use.</comment>
+  </data>
+  <data name="LicensingStatusPanel_Title" xml:space="preserve">
+    <value>Licensing Status</value>
+  </data>
+  <data name="LicensingStatusPanel_ValidForThisServer" xml:space="preserve">
+    <value>The license is valid on this server.</value>
+  </data>
+  <data name="LicensingStatusPanel_ValidInThisServerVersion" xml:space="preserve">
+    <value>The license is valid for this server version.</value>
+  </data>
+  <data name="LicensingStatusPanel_ValidInThisVault" xml:space="preserve">
+    <value>The license is valid for this vault GUID.</value>
+  </data>
   <data name="MFApplicationLicenseStatusFormatError" xml:space="preserve">
     <value>The application's license is badly formatted.</value>
   </data>

@@ -10,9 +10,14 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 	public interface IApplicationOverviewDashboardContentRenderer
 	{
 		/// <summary>
-		/// The title for the panel.
+		/// The title for the application details panel.
 		/// </summary>
-		string Title { get; set; }
+		string ApplicationDetailsTitle { get; set; }
+
+		/// <summary>
+		/// The title for the licensing status panel.
+		/// </summary>
+		string LicensingStatusTitle { get; set; }
 
 		/// <summary>
 		/// Whether to show the version section.

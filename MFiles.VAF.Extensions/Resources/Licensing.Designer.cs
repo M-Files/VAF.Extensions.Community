@@ -115,6 +115,186 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The application licence only allows a maximum of {0} concurrent users, but the server licence allows {1}..
+        /// </summary>
+        internal static string LicensingStatusPanel_ConcurrentUsers_Exceeded {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_ConcurrentUsers_Exceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The application licence allows {0} concurrent users..
+        /// </summary>
+        internal static string LicensingStatusPanel_ConcurrentUsers_Valid {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_ConcurrentUsers_Valid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User group {0} has {1} members, which is more than the licensed value of {1}..
+        /// </summary>
+        internal static string LicensingStatusPanel_GroupMembership_Exceeded {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_GroupMembership_Exceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User group {0} has {1} members, which is less than the licensed value of {1}..
+        /// </summary>
+        internal static string LicensingStatusPanel_GroupMembership_Valid {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_GroupMembership_Valid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This application is licensed to {0}..
+        /// </summary>
+        internal static string LicensingStatusPanel_LicensedTo {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_LicensedTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The licence expired {0} days ago..
+        /// </summary>
+        internal static string LicensingStatusPanel_LicenseExpiredXXXXDaysAgo {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_LicenseExpiredXXXXDaysAgo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The licence expires in {0} days..
+        /// </summary>
+        internal static string LicensingStatusPanel_LicenseExpiresInXXXXDays {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_LicenseExpiresInXXXXDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The maintenance expired {0} days ago..
+        /// </summary>
+        internal static string LicensingStatusPanel_MaintenanceExpiredXXXXDaysAgo {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_MaintenanceExpiredXXXXDaysAgo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The maintenance expires in {0} days..
+        /// </summary>
+        internal static string LicensingStatusPanel_MaintenanceExpiresInXXXXDays {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_MaintenanceExpiresInXXXXDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The application licence only allows a maximum of {0} named users, but the server licence allows {1}..
+        /// </summary>
+        internal static string LicensingStatusPanel_NamedUsers_Exceeded {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_NamedUsers_Exceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The application licence allows {0} named users..
+        /// </summary>
+        internal static string LicensingStatusPanel_NamedUsers_Valid {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_NamedUsers_Valid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The license is not valid on this server..
+        /// </summary>
+        internal static string LicensingStatusPanel_NotValidForThisServer {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_NotValidForThisServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The license is not valid for server version {0}..
+        /// </summary>
+        internal static string LicensingStatusPanel_NotValidInThisServerVersion {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_NotValidInThisServerVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The license is not valid in vault {0}..
+        /// </summary>
+        internal static string LicensingStatusPanel_NotValidInThisVault {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_NotValidInThisVault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The application licence only allows a maximum of {0} read-only users, but the server licence allows {1}..
+        /// </summary>
+        internal static string LicensingStatusPanel_ReadOnly_Exceeded {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_ReadOnly_Exceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The application licence allows {0} read-only users..
+        /// </summary>
+        internal static string LicensingStatusPanel_ReadOnlyUsers_Valid {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_ReadOnlyUsers_Valid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Licensing Status.
+        /// </summary>
+        internal static string LicensingStatusPanel_Title {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The license is valid on this server..
+        /// </summary>
+        internal static string LicensingStatusPanel_ValidForThisServer {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_ValidForThisServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The license is valid for this server version..
+        /// </summary>
+        internal static string LicensingStatusPanel_ValidInThisServerVersion {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_ValidInThisServerVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The license is valid for this vault GUID..
+        /// </summary>
+        internal static string LicensingStatusPanel_ValidInThisVault {
+            get {
+                return ResourceManager.GetString("LicensingStatusPanel_ValidInThisVault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The application&apos;s license is badly formatted..
         /// </summary>
         internal static string MFApplicationLicenseStatusFormatError {

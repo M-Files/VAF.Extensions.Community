@@ -39,7 +39,7 @@ namespace MFiles.VAF.Extensions.Dashboards
 				// Is it in a resource?
 				foreach (var resource in assembly.GetManifestResourceNames())
 				{
-					// TODO: Is this good enough?
+					// Is this good enough?
 					if (resource.EndsWith(iconUri.Replace("/", ".")))
 					{
 						// Resolve the mime type.
