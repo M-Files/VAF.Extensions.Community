@@ -12,7 +12,12 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 	public class DashboardTableAsynchronousExecutionsDashboardContentRenderer
 		: IAsynchronousExecutionsDashboardContentRenderer
 	{
+		/// <summary>
+		/// The maximum number of rows/tasks to show.
+		/// If set too high then the dashboard will not render properly.
+		/// </summary>
 		public int MaximumRowsToShow { get; set; } = 100;
+
 		public virtual DashboardContentCollection GetDashboardContent
 		(
 			DashboardQueueAndTaskDetails details,

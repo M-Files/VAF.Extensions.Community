@@ -8,23 +8,28 @@ using System.Linq;
 namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 {
 	/// <summary>
-	/// An implementation of <see cref="IAsynchronousDashboardContentRenderer"/> that returns data as a dashboard list.
+	/// An implementation of <see cref="IAsynchronousDashboardContentRenderer"/> that returns 
+	/// task queue/processor data as a dashboard list.
 	/// </summary>
 	public class DashboardListAsynchronousDashboardContentRenderer
 		: IAsynchronousDashboardContentRenderer
 	{
+		/// <summary>
+		/// The renderer that will be used to render the actual task executions.
+		/// </summary>
 		protected IAsynchronousExecutionsDashboardContentRenderer ExecutionsDashboardContentRenderer { get; private set; }
 
 		public DashboardListAsynchronousDashboardContentRenderer()
-		{
 			// Default to using the table renderer.
-			ExecutionsDashboardContentRenderer = new DashboardTableAsynchronousExecutionsDashboardContentRenderer();
+			: this(new DashboardTableAsynchronousExecutionsDashboardContentRenderer())
+		{
 		}
 		public DashboardListAsynchronousDashboardContentRenderer(IAsynchronousExecutionsDashboardContentRenderer executionsDashboardContentRenderer)
 		{
 			ExecutionsDashboardContentRenderer = executionsDashboardContentRenderer
 				?? throw new ArgumentNullException(nameof(executionsDashboardContentRenderer));
 		}
+
 		/// <summary>
 		/// Renders <paramref name="data"/> as a <see cref="DashboardList"/> within a <see cref="DashboardPanelEx"/>.
 		/// </summary>
@@ -131,6 +136,8 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 			};
 		}
 
+		#region IAsynchronousDashboardContentRenderer
+
 		/// <inheritdoc />
 		IDashboardContent IAsynchronousDashboardContentRenderer.GetDashboardContent(IEnumerable<IAsynchronousDashboardContentProvider> providers)
 		{
@@ -148,5 +155,8 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 		/// <inheritdoc />
 		IDashboardContent IAsynchronousDashboardContentRenderer.GetDashboardContent(KeyValuePair<DashboardQueueAndTaskDetails, IEnumerable<TaskInfo<TaskDirective>>> item)
 			=> GetDashboardContent(item);
+
+		#endregion
+
 	}
 }

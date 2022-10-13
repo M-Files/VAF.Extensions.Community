@@ -16,13 +16,17 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 		: IAsynchronousDashboardContentProvider
 		where TConfiguration : class, new()
 	{
+		/// <summary>
+		/// The logger to use for this class.
+		/// </summary>
 		private ILogger Logger { get; }
 			= LogManager.GetLogger<TaskQueueBackgroundOperationManagerAsynchronousDashboardContentProvider<TConfiguration>>();
 
 		public ConfigurableVaultApplicationBase<TConfiguration> VaultApplication { get; protected set; }
 		public TaskQueueBackgroundOperationManagerAsynchronousDashboardContentProvider(ConfigurableVaultApplicationBase<TConfiguration> vaultApplication)
 		{
-			this.VaultApplication = vaultApplication ?? throw new ArgumentNullException(nameof(vaultApplication));
+			this.VaultApplication = vaultApplication
+				?? throw new ArgumentNullException(nameof(vaultApplication));
 		}
 
 		/// <inheritdoc />
@@ -92,7 +96,7 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 						};
 						break;
 					default:
-						Logger?.Warn($"{string.Format(Resources.AsynchronousOperations.RepeatType_UnhandledRepeatType, bgo.RepeatType)}");
+						this.Logger?.Warn($"{string.Format(Resources.AsynchronousOperations.RepeatType_UnhandledRepeatType, bgo.RepeatType)}");
 						break;
 				}
 

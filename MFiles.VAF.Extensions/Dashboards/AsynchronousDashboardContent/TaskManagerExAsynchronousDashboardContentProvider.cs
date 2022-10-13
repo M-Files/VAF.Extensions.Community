@@ -20,11 +20,32 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 		: IAsynchronousDashboardContentProvider
 		where TConfiguration : class, new()
 	{
+		/// <summary>
+		/// The logger to use for this class.
+		/// </summary>
 		private ILogger Logger { get; } = LogManager.GetLogger<TaskManagerExAsynchronousDashboardContentProvider<TConfiguration>>();
+
+		/// <summary>
+		/// The vault reference to use to retrieve data.
+		/// </summary>
 		protected Vault Vault { get; set; }
+
+		/// <summary>
+		/// The task manager to reference task data from.
+		/// </summary>
 		public TaskManagerEx<TConfiguration> TaskManager { get; protected set; }
+
+		/// <summary>
+		/// The manager that contains information about recurring tasks.
+		/// </summary>
 		public RecurringOperationConfigurationManager<TConfiguration> RecurringOperationConfigurationManager { get; protected set; }
+
+		/// <summary>
+		/// The task queue resolver to retrieve queue and task processor data from.
+		/// </summary>
 		public TaskQueueResolver TaskQueueResolver { get; protected set; }
+
+
 		public TaskManagerExAsynchronousDashboardContentProvider
 		(
 			Vault vault,
@@ -60,14 +81,13 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 				catch (Exception e)
 				{
 					// Throws if the queue is incorrect.
-					Logger?.Warn
+					this.Logger?.Warn
 					(
 						e,
 						$"Cannot load details for queue {queue}; is there a static field with the [TaskQueue] attribute?"
 					);
 					continue;
 				}
-
 
 				// Skip anything broken.
 				if (null == fieldInfo)
@@ -103,7 +123,7 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 					catch
 					{
 						// Throws if the task processor is not found.
-						Logger?.Warn
+						this.Logger?.Warn
 						(
 							$"Cannot load processor details for task type {processor.Type} on queue {queue}."
 						);
