@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MFiles.VAF.Extensions.Configuration.Upgrading;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -236,6 +237,49 @@ namespace MFiles.VAF.Extensions
 				.Where(f => type.IsAssignableFrom(f.FieldType))
 				.Where(f => includeBackingFields || !f.Name.EndsWith("_BackingField"))
 				.AsQueryable();
+		}
+
+		/// <summary>
+		/// Retrieves the location from a <see cref="Configuration.ConfigurationVersionAttribute"/> located on 
+		/// <paramref name="configurationType"/>.  If none is available then returns the default configuration location for <paramref name="vaultApplication"/>.
+		/// </summary>
+		/// <param name="configurationType">The configuration type to check.</param>
+		/// <param name="vaultApplication">The vault application to fall back to.</param>
+		/// <returns>The location in named value storage.</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="configurationType"/> or <paramref name="vaultApplication"/> are null.</exception>
+		public static ISingleNamedValueItem GetConfigurationLocation(this Type configurationType, VaultApplicationBase vaultApplication)
+		{
+			return configurationType.GetConfigurationLocation(vaultApplication, out _);
+		}
+
+		/// <summary>
+		/// Retrieves the location from a <see cref="Configuration.ConfigurationVersionAttribute"/> located on 
+		/// <paramref name="configurationType"/>.  If none is available then returns the default configuration location for <paramref name="vaultApplication"/>.
+		/// </summary>
+		/// <param name="configurationType">The configuration type to check.</param>
+		/// <param name="vaultApplication">The vault application to fall back to.</param>
+		/// <param name="configurationVersion">The version of the configuration, or <see cref="ConfigurationUpgradeManager.VersionZero"/> if none is available.</param>
+		/// <returns>The location in named value storage.</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="configurationType"/> or <paramref name="vaultApplication"/> are null.</exception>
+		public static ISingleNamedValueItem GetConfigurationLocation(this Type configurationType, VaultApplicationBase vaultApplication, out Version configurationVersion)
+		{
+			// Sanity.
+			if (null == configurationType)
+				throw new ArgumentNullException(nameof(configurationType));
+			if (null == vaultApplication)
+				throw new ArgumentNullException(nameof(vaultApplication));
+
+			// Get the configuration attribute, if there is one.
+			var parameterTypeConfigurationVersionAttribute = configurationType.GetCustomAttributes(false)?
+						.Where(a => a is Configuration.ConfigurationVersionAttribute)
+						.Cast<Configuration.ConfigurationVersionAttribute>()
+						.FirstOrDefault();
+			configurationVersion = parameterTypeConfigurationVersionAttribute?.Version ?? ConfigurationUpgradeManager.VersionZero;
+
+			// Where should we read from? (Use the configuration attribute if we can, otherwise default to vault application location.
+			return (parameterTypeConfigurationVersionAttribute?.UsesCustomNVSLocation ?? false)
+				? new SingleNamedValueItem(parameterTypeConfigurationVersionAttribute.NamedValueType, parameterTypeConfigurationVersionAttribute.Namespace, parameterTypeConfigurationVersionAttribute.Key)
+				: SingleNamedValueItem.ForLatestVAFVersion(vaultApplication);
 		}
 	}
 }

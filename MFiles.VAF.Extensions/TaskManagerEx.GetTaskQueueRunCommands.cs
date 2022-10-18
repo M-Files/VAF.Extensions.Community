@@ -15,7 +15,7 @@ namespace MFiles.VAF.Extensions
 	public partial class TaskManagerEx<TConfiguration>
 	{
 		private object _lock = new object();
-		protected Dictionary<string, CustomDomainCommand> TaskQueueRunCommands { get; }
+		public Dictionary<string, CustomDomainCommand> TaskQueueRunCommands { get; }
 			= new Dictionary<string, CustomDomainCommand>();
 
 		/// <summary>

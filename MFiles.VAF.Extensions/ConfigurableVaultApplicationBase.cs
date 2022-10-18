@@ -14,6 +14,11 @@ using MFiles.VAF.Common;
 using System.Reflection;
 using System.Collections;
 using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent;
+using System.Collections.Generic;
+using MFiles.VAF.Extensions.Dashboards.LoggingDashboardContent;
+using MFiles.VAF.Extensions.Dashboards.DevelopmentDashboardContent;
+using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions
 {
@@ -31,7 +36,7 @@ namespace MFiles.VAF.Extensions
 		/// Contains information about VAF configuration that
 		/// control when task processing repeats.
 		/// </summary>
-		public RecurringOperationConfigurationManager<TSecureConfiguration> RecurringOperationConfigurationManager { get; }
+		public RecurringOperationConfigurationManager<TSecureConfiguration> RecurringOperationConfigurationManager { get; private set; }
 
 		/// <summary>
 		/// Expose the task queue resolver (was protected, now internal so that we can use it).
@@ -55,7 +60,6 @@ namespace MFiles.VAF.Extensions
 			: base()
 		{
 			this.Logger = LogManager.GetLogger(this.GetType());
-			this.RecurringOperationConfigurationManager = new RecurringOperationConfigurationManager<TSecureConfiguration>(this);
 
 			// In unit testing scenarios the assembly location may be null or throw an exception.  Handle it.
 			Assembly assembly = null;
@@ -117,6 +121,37 @@ namespace MFiles.VAF.Extensions
 				}
 			}
 			private set => taskQueueBackgroundOperationManager = value;
+		}
+
+		protected internal new IApplicationLicense License
+		{
+			get { return base.License; }
+			set { base.License = value; }
+		}
+
+		protected override void StartApplication()
+		{
+
+			this.RecurringOperationConfigurationManager = new RecurringOperationConfigurationManager<TSecureConfiguration>(this);
+			this.ApplicationOverviewDashboardContentRenderer = this.GetApplicationOverviewDashboardContentRenderer();
+			this.AsynchronousDashboardContentRenderer = this.GetAsynchronousDashboardContentRenderer();
+			this.AsynchronousDashboardContentProviders.AddRange(this.GetAsynchronousDashboardContentProviders());
+			this.LoggingDashboardContentRenderer = this.GetLoggingDashboardContentRenderer();
+
+#if DEBUG
+			// In debug builds we want to show the referenced assemblies and the like.
+			{
+				this.DevelopmentDashboardContentRenderer = this.GetDevelopmentDashboardContentRenderer();
+				Task.Run(
+					() =>
+					{
+						this.DevelopmentDashboardContentRenderer?.PopulateReferencedAssemblies<TSecureConfiguration>();
+					}
+				);
+			}
+#endif
+
+			base.StartApplication();
 		}
 	}
 }

@@ -21,6 +21,7 @@ namespace MFiles.VaultApplications.Logging.Sensitivity.Filters
 		/// The sensivitity flag for whether to hide the task queue and type.
 		/// </summary>
 		public const string HideTaskQueueAndTypeSensitivityFlag = "HideTaskQueueAndType";
+
 		/// <summary>
 		/// The sensivitity flag for whether to show the task directive information.
 		/// </summary>

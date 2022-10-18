@@ -13,7 +13,10 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 	public abstract class DefaultLogDashboardCommandBase
 		: CustomDomainCommand
 	{
-		private ILogger Logger { get; set; } = LogManager.GetLogger(typeof(DefaultLogDashboardCommandBase));
+		/// <summary>
+		/// The logger to use for this class.
+		/// </summary>
+		private ILogger Logger { get; } = LogManager.GetLogger(typeof(DefaultLogDashboardCommandBase));
 
 		/// <summary>
 		/// View model for file information in the download dashboard.

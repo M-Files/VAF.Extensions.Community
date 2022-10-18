@@ -126,6 +126,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>VaultInteraction.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\Licensing.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Licensing.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Logging.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -183,6 +188,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>VaultInteraction.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Licensing.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Licensing.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Logging.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Logging.Designer.cs</LastGenOutput>
@@ -198,6 +207,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="nuget-readme.md" Pack="True" PackagePath="\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TaskQueueBackgroundOperations\ExtensionMethods\" />
   </ItemGroup>
   <Target Name="CleanNugetPackages" BeforeTargets="Build">
     <ItemGroup>

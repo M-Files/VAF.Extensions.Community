@@ -35,7 +35,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			var command = new DownloadSelectedLogsDashboardCommand
 			{
 				ID = CommandId,
-                DisplayName = Resources.Dashboard.Logging_Table_DownloadLogs,
+                DisplayName = Resources.Dashboard.Logging_Table_DownloadLogs
             };
 			command.Execute = command.DownloadLogs;
 			return command;

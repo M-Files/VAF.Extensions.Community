@@ -168,7 +168,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				Interval = new TimeSpan(1, 2, 3),
 				RecurrenceType = RecurrenceType.Interval
 			};
-			var expected = JToken.Parse("{\"RecurrenceType\":1,\"Interval\":{\r\n  \"Interval\": \"01:02:03\",\r\n  \"RunOnVaultStartup\": true\r\n}}");
+			var expected = JToken.Parse("{\"RecurrenceType\":1,\"Interval\":{\r\n  \"Hours\" : 1, \"Minutes\" : 2, \"Seconds\" : 3 , \"RunOnVaultStartup\": true\r\n} }");
 			var output = JToken.Parse(JsonConvert.SerializeObject(frequency));
 
 			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
@@ -234,9 +234,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 
 			Frequency expected = new Frequency()
 			{
-				Interval = new TimeSpanEx()
+				Interval = new TimeSpanEx(new TimeSpan(1, 2, 3))
 				{
-					Interval = new TimeSpan(1, 2, 3),
 					RunOnVaultStartup = true
 				},
 				RecurrenceType = RecurrenceType.Interval
@@ -256,9 +255,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 
 			Frequency expected = new Frequency()
 			{
-				Interval = new TimeSpanEx()
+				Interval = new TimeSpanEx(new TimeSpan(1, 2, 3))
 				{
-					Interval = new TimeSpan(1, 2, 3),
 					RunOnVaultStartup = false
 				},
 				RecurrenceType = RecurrenceType.Interval
@@ -436,9 +434,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		[TestMethod]
 		public void DeserializesTimeSpanExWrapper()
 		{
-			var timeSpanEx = new TimeSpanEx()
+			var timeSpanEx = new TimeSpanEx(new TimeSpan(1, 2, 3))
 			{
-				Interval = new TimeSpan(1, 2, 3),
 				RunOnVaultStartup = false
 			};
 			var oldWrapper = new TimeSpanExWrapper()

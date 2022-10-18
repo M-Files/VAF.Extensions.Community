@@ -44,8 +44,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			var command = new ShowSelectLogDownloadDashboardCommand
 			{
 				ID = CommandId,
-				DisplayName = Resources.Dashboard.Logging_Table_DownloadLogs,
-				Locations = new List<ICommandLocation> { new DomainMenuCommandLocation() }
+				DisplayName = Resources.Dashboard.Logging_Table_DownloadLogs
 			};
 			command.Execute = command.ShowLogSelectionDashboard;
 			return command;

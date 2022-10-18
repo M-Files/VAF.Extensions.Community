@@ -13,11 +13,14 @@ using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions
 {
+	internal class TaskManagerEx
+	{ }
 	public partial class TaskManagerEx<TConfiguration>
 		: TaskManager
 		where TConfiguration : class, new()
 	{
 		private ILogger Logger { get; }
+			= LogManager.GetLogger(typeof(TaskManagerEx));
 
 		/// <summary>
 		/// The vault application used to create this task manager.
@@ -40,7 +43,6 @@ namespace MFiles.VAF.Extensions
 			this.VaultApplication = vaultApplication
 				?? throw new ArgumentNullException(nameof(vaultApplication));
 			this.TaskEvent += TaskManagerEx_TaskEvent;
-			this.Logger = LogManager.GetLogger(this.GetType());
 		}
 
 		/// <inheritdoc />

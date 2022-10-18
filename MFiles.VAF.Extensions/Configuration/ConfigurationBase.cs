@@ -10,40 +10,26 @@ using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions.Configuration
 {
-	/// <summary>
-	/// An interface that is used to denote that the configuration class exposes
-	/// logging configuration somehow.
-	/// </summary>
-	public interface IConfigurationWithLoggingConfiguration
-	{
-		/// <summary>
-		/// Returns the logging configuration from whereever it may be configured.
-		/// </summary>
-		/// <returns>
-		/// The logging configuration.
-		/// </returns>
-		ILoggingConfiguration GetLoggingConfiguration();
-	}
 
 	/// <summary>
 	/// A base class for configuration that implements <see cref="IConfigurationWithLoggingConfiguration"/>.
 	/// </summary>
 	[DataContract]
 	public abstract class ConfigurationBase
-		: IConfigurationWithLoggingConfiguration
+		: VersionedConfigurationBase, IConfigurationWithLoggingConfiguration
 	{
-		[DataMember]
+		[DataMember(EmitDefaultValue = false)]
 		[JsonConfEditor
 		(
 			Label = ResourceMarker.Id + nameof(Resources.Configuration.LoggingConfiguration_Label),
 			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.LoggingConfiguration_HelpText)
 		)]
 		[Security(ChangeBy = SecurityAttribute.UserLevel.VaultAdmin, ViewBy = SecurityAttribute.UserLevel.VaultAdmin)]
-		public NLogLoggingConfiguration Logging { get; set; } = new NLogLoggingConfiguration();
+		public NLogLoggingConfiguration Logging { get; set; }
 
 		/// <inheritdoc />
 		public ILoggingConfiguration GetLoggingConfiguration()
-			=> this.Logging;
+			=> this.Logging ?? new NLogLoggingConfiguration();
 	}
 
 	[DataContract]

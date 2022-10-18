@@ -1,5 +1,7 @@
 ﻿using MFiles.VAF.Common;
 using MFiles.VAF.Configuration;
+using MFiles.VAF.Extensions.Configuration;
+using MFiles.VAF.Extensions.Configuration.Upgrading;
 using MFiles.VaultApplications.Logging;
 using MFilesAPI;
 using System;
@@ -46,6 +48,10 @@ namespace MFiles.VAF.Extensions
 			// Set the resource manager for the configuration.
 			configurationManager.ResourceManager = combinedResourceManager;
 			return configurationManager;
+		}
+		internal new SecureConfigurationManager<TSecureConfiguration> ConfManager
+		{
+			get => base.ConfManager;
 		}
 
 		protected void AddResourceManagerToConfiguration(ResourceManager resourceManager)

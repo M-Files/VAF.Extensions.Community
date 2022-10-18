@@ -14,6 +14,16 @@ namespace MFiles.VAF.Extensions
 {
 	[DataContract]
 	[JsonConverter(typeof(FrequencyJsonConverter))]
+	[PreviewableTextEditor
+	(
+		PreviewTemplate = "{0}",
+		PreviewSources = new string[]
+		{
+			"._children{ .key == '" + nameof(Frequency.RecurrenceType) + "' }"
+		},
+		PreviewUnsetTexts = new string[] { "Never" },
+		PreviewValueFormats = new string[] { "{0}" }
+	)]
 	public class Frequency
 		: IRecurrenceConfiguration
 	{
@@ -24,7 +34,8 @@ namespace MFiles.VAF.Extensions
 		[JsonConfEditor
 		(
 			Label = ResourceMarker.Id + nameof(Resources.Configuration.Frequency_RecurrenceType_Label),
-			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.Frequency_RecurrenceType_HelpText)
+			HelpText = ResourceMarker.Id + nameof(Resources.Configuration.Frequency_RecurrenceType_HelpText),
+			DefaultValue = ResourceMarker.Id + nameof(Resources.Configuration.RecurrenceType_Unknown)
 		)]
 		public RecurrenceType RecurrenceType { get; set; } = RecurrenceType.Unknown;
 
@@ -32,7 +43,7 @@ namespace MFiles.VAF.Extensions
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = ResourceMarker.Id + nameof(Resources.Configuration.General_Configuration),
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.RecurrenceType_Interval),
 			Hidden = true,
 			ShowWhen = ".parent._children{.key == 'RecurrenceType' && .value == 'Interval' }"
 		)]
@@ -42,7 +53,7 @@ namespace MFiles.VAF.Extensions
 		[DataMember]
 		[JsonConfEditor
 		(
-			Label = ResourceMarker.Id + nameof(Resources.Configuration.General_Configuration),
+			Label = ResourceMarker.Id + nameof(Resources.Configuration.RecurrenceType_Schedule),
 			Hidden = true,
 			ShowWhen = ".parent._children{.key == 'RecurrenceType' && .value == 'Schedule' }"
 		)]
@@ -172,11 +183,33 @@ namespace MFiles.VAF.Extensions
 					}
 
 					//Check if this might be a TimeSpanEx
-					if (jToken[nameof(TimeSpanEx.Interval)] != null)
+					if (jToken[nameof(TimeSpanEx.Hours)] != null
+						|| jToken[nameof(TimeSpanEx.Minutes)] != null
+						|| jToken[nameof(TimeSpanEx.Seconds)] != null)
 					{
 						output.RecurrenceType = RecurrenceType.Interval;
 						output.Interval = new TimeSpanEx();
 						serializer.Populate(jToken.CreateReader(), output.Interval);
+					}
+					// Check whether it's an old-school interval.
+					else if (jToken["Interval"] != null)
+					{
+						output.RecurrenceType = RecurrenceType.Interval;
+						output.Interval = new TimeSpanEx();
+						serializer.Populate(jToken.CreateReader(), output.Interval);
+
+						// Now set the interval
+						if (TimeSpan.TryParse(jToken["Interval"].Value<string>(), out TimeSpan interval))
+						{
+							output.Interval.SetInterval(interval);
+						}
+						else
+						{
+							this.Logger?.Warn
+							(
+								String.Format(Resources.Exceptions.Configuration.CouldNotConvertJsonValueToFrequency, jToken)
+							);
+						}
 					}
 					//Check if this might be a Schedule
 					else if (jToken[nameof(Schedule.Triggers)] != null)

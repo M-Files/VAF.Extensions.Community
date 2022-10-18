@@ -11,13 +11,5 @@ namespace MFiles.VAF.Extensions
 {
 	public partial class TaskQueueBackgroundOperationManager<TSecureConfiguration>
 	{
-		/// <summary>
-		/// Returns some dashboard content that shows the background operations and their current status.
-		/// </summary>
-		/// <returns>The dashboard content.</returns>
-		public virtual IEnumerable<DashboardListItem> GetDashboardContent()
-		{
-			return this.BackgroundOperations?.Values?.OrderBy(o => o.DashboardSortOrder).AsDashboardListItems();
-		}
 	}
 }

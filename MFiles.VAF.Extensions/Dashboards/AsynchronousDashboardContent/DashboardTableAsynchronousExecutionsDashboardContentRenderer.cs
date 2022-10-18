@@ -1,43 +1,37 @@
 ﻿using MFiles.VAF.AppTasks;
-using MFiles.VAF.Configuration;
 using MFiles.VAF.Configuration.Domain.Dashboards;
-using MFiles.VAF.Extensions.Dashboards;
 using MFiles.VAF.Extensions.ExtensionMethods;
 using MFiles.VAF.Extensions.ScheduledExecution;
-using MFiles.VAF.MultiserverMode;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace MFiles.VAF.Extensions
+namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 {
-	public static class IEnumerableApplicationTaskInfoExtensionMethods
+	public class DashboardTableAsynchronousExecutionsDashboardContentRenderer
+		: IAsynchronousExecutionsDashboardContentRenderer
 	{
 		/// <summary>
-		/// Creates a <see cref="DashboardTable"/> containing information about the executions
-		/// detailed in <paramref name="applicationTasks"/>.
+		/// The maximum number of rows/tasks to show.
+		/// If set too high then the dashboard will not render properly.
 		/// </summary>
-		/// <param name="applicationTasks">The previous executions.</param>
-		/// <returns>The table.</returns>
-		public static IDashboardContent AsDashboardContent<TDirective>
+		public int MaximumRowsToShow { get; set; } = 100;
+
+		public virtual DashboardContentCollection GetDashboardContent
 		(
-			this IEnumerable<TaskInfo<TDirective>> applicationTasks,
-			IRecurrenceConfiguration recurrenceConfiguration = null,
-			int maximumRowsToShow = 100
+			DashboardQueueAndTaskDetails details,
+			IEnumerable<TaskInfo<TaskDirective>> executions
 		)
-			where TDirective : TaskDirective
 		{
 			// Sanity.
-			if (null == applicationTasks || false == applicationTasks.Any())
+			if (null == executions || false == executions.Any())
 				return null;
 
 			// What is the timezone to display data in?
 			TimeZoneInfo timeZone = TimeZoneInfo.Local;
 			{
-				if (recurrenceConfiguration is Schedule schedule)
+				if (details.RecurrenceConfiguration is Schedule schedule)
 				{
 					if (schedule.TriggerTimeType == TriggerTimeType.Utc)
 						timeZone = TimeZoneInfo.Utc;
@@ -47,7 +41,7 @@ namespace MFiles.VAF.Extensions
 						catch { }
 					}
 				}
-				if (recurrenceConfiguration is Frequency frequency)
+				if (details.RecurrenceConfiguration is Frequency frequency)
 				{
 					if (frequency.RecurrenceType == RecurrenceType.Schedule)
 					{
@@ -63,15 +57,15 @@ namespace MFiles.VAF.Extensions
 			}
 
 			// We can only show a certain number.
-			var allTasks = applicationTasks.ToList();
+			var allTasks = executions.ToList();
 			var totalTaskCount = allTasks.Count;
 			bool isFiltered = false;
-			if (totalTaskCount > maximumRowsToShow)
+			if (totalTaskCount > MaximumRowsToShow)
 				isFiltered = true;
 
-			var list = applicationTasks
+			var list = executions
 				.OrderByDescending(e => e.LatestActivity)
-				.Take(maximumRowsToShow);
+				.Take(MaximumRowsToShow);
 
 			// Create the table and header row.
 			DashboardTable table = new DashboardTable();
@@ -131,7 +125,7 @@ namespace MFiles.VAF.Extensions
 						activation.ToTimeOffset
 						(
 							// If we are waiting for it to start then highlight that.
-							execution.State == MFilesAPI.MFTaskState.MFTaskStateWaiting
+							execution.State == MFTaskState.MFTaskStateWaiting
 								? FormattingExtensionMethods.DateTimeRepresentationOf.NextRun
 								: FormattingExtensionMethods.DateTimeRepresentationOf.LastRun,
 							timeZone
@@ -151,12 +145,12 @@ namespace MFiles.VAF.Extensions
 				var rowTitle = "";
 				switch (execution.State)
 				{
-					case MFilesAPI.MFTaskState.MFTaskStateWaiting:
+					case MFTaskState.MFTaskStateWaiting:
 						taskInfoCell.Icon = "Resources/Images/Waiting.png";
 						rowTitle = Resources.Dashboard.AsynchronousOperations_Table_WaitingRowTitle.EscapeXmlForDashboard(activation.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"));
 						row.Styles.AddOrUpdate("color", Resources.Dashboard.AsynchronousOperations_Table_ColorWaiting);
 						break;
-					case MFilesAPI.MFTaskState.MFTaskStateInProgress:
+					case MFTaskState.MFTaskStateInProgress:
 						rowTitle = Resources.Dashboard.AsynchronousOperations_Table_RunningRowTitle.EscapeXmlForDashboard();
 						if ((taskInfo?.Started.HasValue) ?? false)
 							rowTitle = Resources.Dashboard.AsynchronousOperations_Table_RunningRowTitle_WithTimes.EscapeXmlForDashboard
@@ -167,7 +161,7 @@ namespace MFiles.VAF.Extensions
 						taskInfoCell.Icon = "Resources/Images/Running.png";
 						row.Styles.AddOrUpdate("color", Resources.Dashboard.AsynchronousOperations_Table_ColorRunning);
 						break;
-					case MFilesAPI.MFTaskState.MFTaskStateFailed:
+					case MFTaskState.MFTaskStateFailed:
 						rowTitle = Resources.Dashboard.AsynchronousOperations_Table_FailedRowTitle.EscapeXmlForDashboard();
 						if ((taskInfo?.Started.HasValue) ?? false)
 							rowTitle = Resources.Dashboard.AsynchronousOperations_Table_FailedRowTitle_WithTimes.EscapeXmlForDashboard
@@ -178,7 +172,7 @@ namespace MFiles.VAF.Extensions
 						taskInfoCell.Icon = "Resources/Images/Failed.png";
 						row.Styles.AddOrUpdate("color", Resources.Dashboard.AsynchronousOperations_Table_ColorFailed);
 						break;
-					case MFilesAPI.MFTaskState.MFTaskStateCompleted:
+					case MFTaskState.MFTaskStateCompleted:
 						rowTitle = Resources.Dashboard.AsynchronousOperations_Table_CompletedRowTitle.EscapeXmlForDashboard();
 						if ((taskInfo?.Started.HasValue) ?? false)
 							rowTitle = Resources.Dashboard.AsynchronousOperations_Table_CompletedRowTitle_WithTimes.EscapeXmlForDashboard
@@ -204,7 +198,7 @@ namespace MFiles.VAF.Extensions
 					scheduledCell,
 					new DashboardCustomContent(execution.State.ForDisplay()),
 					startedCell,
-					new DashboardCustomContent(execution.State == MFilesAPI.MFTaskState.MFTaskStateWaiting ? "" : taskInfo?.GetElapsedTime().ToDisplayString()),
+					new DashboardCustomContent(execution.State == MFTaskState.MFTaskStateWaiting ? "" : taskInfo?.GetElapsedTime().ToDisplayString()),
 					taskInfo?.AsDashboardContent(removeLineBreaks)
 				);
 
@@ -221,7 +215,7 @@ namespace MFiles.VAF.Extensions
 
 			// Create an overview of the statuses.
 			var data = allTasks.GroupBy(e => e.State).ToDictionary(e => e.Key, e => e.Count());
-			
+
 			var overview = new DashboardTable();
 			{
 				// Remove all styles - we only are using this for layout.
@@ -236,7 +230,7 @@ namespace MFiles.VAF.Extensions
 				if (isFiltered)
 					cell1.InnerContent = new DashboardCustomContentEx
 					(
-						$"<p style='font-size: 12px'><em>{Resources.Dashboard.AsynchronousOperations_Table_FilteredListComment.EscapeXmlForDashboard(maximumRowsToShow, totalTaskCount)}</em></p>"
+						$"<p style='font-size: 12px'><em>{Resources.Dashboard.AsynchronousOperations_Table_FilteredListComment.EscapeXmlForDashboard(MaximumRowsToShow, totalTaskCount)}</em></p>"
 					);
 
 				// The second cell contains the totals.
@@ -258,11 +252,20 @@ namespace MFiles.VAF.Extensions
 				overview
 			};
 		}
+
 		private static string GetTotalTasksInStateForDisplay(Dictionary<MFTaskState, int> data, MFTaskState state, string resourceString, int defaultValue = default)
 		{
 			return resourceString?
 				.EscapeXmlForDashboard(data.ContainsKey(state) ? data[state] : defaultValue)?
 				.Replace("'", "&#39;");
 		}
+
+		IDashboardContent IAsynchronousExecutionsDashboardContentRenderer.GetDashboardContent
+		(
+			DashboardQueueAndTaskDetails details,
+			IEnumerable<TaskInfo<TaskDirective>> executions
+		)
+			=> GetDashboardContent(details, executions);
+
 	}
 }
