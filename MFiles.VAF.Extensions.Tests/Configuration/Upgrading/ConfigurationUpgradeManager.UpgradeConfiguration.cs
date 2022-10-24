@@ -115,7 +115,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 			// Attempt to retrieve the data.
 			Assert.That.AreEqualJson
 			(
-				Newtonsoft.Json.JsonConvert.SerializeObject(new VersionOneWithInstanceUpgradePath() {  World = "World" }, NewtonsoftJsonConvert.DefaultJsonSerializerSettings), 
+				Newtonsoft.Json.JsonConvert.SerializeObject(new VersionOneWithInstanceUpgradePath() {  World = "World" }, new NewtonsoftJsonConvert().JsonSerializerSettings), 
 				managerMock.Object.GetValue(vault, MFNamedValueType.MFSystemAdminConfiguration, "Castle.Proxies.VaultApplicationBaseProxy", "configuration")
 			);
 		}
@@ -145,7 +145,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 			// Attempt to retrieve the data.
 			Assert.That.AreEqualJson
 			(
-				Newtonsoft.Json.JsonConvert.SerializeObject(new VersionThreeWithInstanceUpgradePath() { World = "abc", TimeSpan = new TimeSpanEx() { Hours = 1, Minutes = 2, Seconds = 3, RunOnVaultStartup = false } }, NewtonsoftJsonConvert.DefaultJsonSerializerSettings),
+				Newtonsoft.Json.JsonConvert.SerializeObject(new VersionThreeWithInstanceUpgradePath() { World = "abc", TimeSpan = new TimeSpanEx() { Hours = 1, Minutes = 2, Seconds = 3, RunOnVaultStartup = false } }, new NewtonsoftJsonConvert().JsonSerializerSettings),
 				managerMock.Object.GetValue(vault, MFNamedValueType.MFSystemAdminConfiguration, "Castle.Proxies.VaultApplicationBaseProxy", "configuration")
 			);
 		}
