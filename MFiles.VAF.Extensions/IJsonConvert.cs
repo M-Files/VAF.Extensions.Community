@@ -2,6 +2,7 @@
 using MFiles.VAF.Extensions.Configuration;
 using MFiles.VaultApplications.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections;
@@ -295,11 +296,15 @@ namespace MFiles.VAF.Extensions
 		/// The default json serialization settings to use.
 		/// </summary>
 		public static Newtonsoft.Json.JsonSerializerSettings DefaultJsonSerializerSettings { get; }
-		= new Newtonsoft.Json.JsonSerializerSettings()
+			= new Newtonsoft.Json.JsonSerializerSettings()
 			{
 				DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Include,
 				NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
-				Formatting = Newtonsoft.Json.Formatting.Indented
+				Formatting = Newtonsoft.Json.Formatting.Indented,
+				Converters = new List<JsonConverter>()
+					{
+						new StringEnumConverter()
+					}
 			};
 
 		/// <summary>
@@ -310,13 +315,7 @@ namespace MFiles.VAF.Extensions
 
 		public NewtonsoftJsonConvert()
 		{
-			this.JsonSerializerSettings = new Newtonsoft.Json.JsonSerializerSettings()
-			{
-				DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Include,
-				NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
-				Formatting = Newtonsoft.Json.Formatting.Indented,
-				ContractResolver = new DefaultValueAwareContractResolver(this)
-			};
+			this.JsonSerializerSettings.ContractResolver = new DefaultValueAwareContractResolver(this);
 		}
 
 		/// <inheritdoc />

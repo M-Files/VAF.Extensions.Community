@@ -419,10 +419,24 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithSpecificEnumValue>();
 			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
 			// The runtime value should be explicitly set to default.  This should persist.
+			rule.SetReadWriteLocationValue(vault, "{ \"Hello\": \"MFACLEnforcingModeAutomatic\" }");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson("{ \"Hello\": \"MFACLEnforcingModeAutomatic\" }", rule.GetReadWriteLocationValue(vault));
+
+		}
+
+		[TestMethod]
+		public void EnsureConfigurationWithSpecificEnumValue_OverriddenWithDefault_Integer()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithSpecificEnumValue>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			// The runtime value should be explicitly set to default.  This should persist.
 			rule.SetReadWriteLocationValue(vault, "{ \"Hello\": 0 }");
 
 			Assert.IsTrue(rule.Execute(vault));
-			Assert.That.AreEqualJson("{ \"Hello\": 0 }", rule.GetReadWriteLocationValue(vault));
+			Assert.That.AreEqualJson("{ \"Hello\": \"MFACLEnforcingModeAutomatic\" }", rule.GetReadWriteLocationValue(vault));
 
 		}
 
