@@ -373,6 +373,60 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		}
 
 		[DataContract]
+		private class ConfigurationWithDefaultEnumValue
+		{
+			[DataMember]
+			public MFACLEnforcingMode Hello = MFACLEnforcingMode.MFACLEnforcingModeAutomatic;
+		}
+
+		[TestMethod]
+		public void EnsureConfigurationWithDefaultEnumValue()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithDefaultEnumValue>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, "{}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson("{}", rule.GetReadWriteLocationValue(vault));
+
+		}
+
+		[DataContract]
+		private class ConfigurationWithSpecificEnumValue
+		{
+			[DataMember]
+			public MFACLEnforcingMode Hello = MFACLEnforcingMode.MFACLEnforcingModeProvided;
+		}
+
+		[TestMethod]
+		public void EnsureConfigurationWithSpecificEnumValue()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithSpecificEnumValue>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, "{}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson("{}", rule.GetReadWriteLocationValue(vault));
+
+		}
+
+		[TestMethod]
+		public void EnsureConfigurationWithSpecificEnumValue_OverriddenWithDefault()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithSpecificEnumValue>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			// The runtime value should be explicitly set to default.  This should persist.
+			rule.SetReadWriteLocationValue(vault, "{ \"Hello\": 0 }");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson("{ \"Hello\": 0 }", rule.GetReadWriteLocationValue(vault));
+
+		}
+
+		[DataContract]
 		private class ConfigurationWithVirtualValuePropertyValue
 		{
 			[DefaultValue("world")]
