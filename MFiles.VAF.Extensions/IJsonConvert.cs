@@ -293,10 +293,11 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
-		/// The default json serialization settings to use.
+		/// Gets the default json serialization settings to use.
 		/// </summary>
-		public static Newtonsoft.Json.JsonSerializerSettings DefaultJsonSerializerSettings { get; }
-			= new Newtonsoft.Json.JsonSerializerSettings()
+		public virtual JsonSerializerSettings GetDefaultJsonSerializerSettings()
+		{
+			return new JsonSerializerSettings()
 			{
 				DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Include,
 				NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
@@ -304,18 +305,19 @@ namespace MFiles.VAF.Extensions
 				Converters = new List<JsonConverter>()
 					{
 						new StringEnumConverter()
-					}
+					},
+				ContractResolver = new DefaultValueAwareContractResolver(this)
 			};
+		}
 
 		/// <summary>
 		/// The json serialization settings to use with this instance.
 		/// </summary>
 		public Newtonsoft.Json.JsonSerializerSettings JsonSerializerSettings { get; set; }
-			= DefaultJsonSerializerSettings;
 
 		public NewtonsoftJsonConvert()
 		{
-			this.JsonSerializerSettings.ContractResolver = new DefaultValueAwareContractResolver(this);
+			this.JsonSerializerSettings = this.GetDefaultJsonSerializerSettings();
 		}
 
 		/// <inheritdoc />
@@ -327,10 +329,10 @@ namespace MFiles.VAF.Extensions
 			=> Deserialize(input, type, null);
 
 		public object Deserialize(string input, Type type, Newtonsoft.Json.JsonSerializerSettings settings)
-			=> Newtonsoft.Json.JsonConvert.DeserializeObject(input, type, settings ?? this.JsonSerializerSettings ?? DefaultJsonSerializerSettings);
+			=> Newtonsoft.Json.JsonConvert.DeserializeObject(input, type, settings ?? this.JsonSerializerSettings);
 
 		public T Deserialize<T>(string input, Newtonsoft.Json.JsonSerializerSettings settings)
-			=> Newtonsoft.Json.JsonConvert.DeserializeObject<T>(input, settings ?? this.JsonSerializerSettings ?? DefaultJsonSerializerSettings);
+			=> Newtonsoft.Json.JsonConvert.DeserializeObject<T>(input, settings ?? this.JsonSerializerSettings);
 
 		/// <inheritdoc />
 		public string Serialize<T>(T input)
@@ -341,6 +343,6 @@ namespace MFiles.VAF.Extensions
 			=> Serialize(input, t, null);
 
 		public string Serialize(object input, Type t, Newtonsoft.Json.JsonSerializerSettings settings)
-			=> Newtonsoft.Json.JsonConvert.SerializeObject(input, t, settings ?? this.JsonSerializerSettings ?? DefaultJsonSerializerSettings);
+			=> Newtonsoft.Json.JsonConvert.SerializeObject(input, t, settings ?? this.JsonSerializerSettings);
 	}
 }
