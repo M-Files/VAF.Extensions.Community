@@ -413,6 +413,19 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		}
 
 		[TestMethod]
+		public void EnsureConfigurationWithSpecificEnumValue_WithJsonValue()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithSpecificEnumValue>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, "{ \"Hello\": \"MFACLEnforcingModeProvided\" }");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson("{}", rule.GetReadWriteLocationValue(vault));
+
+		}
+
+		[TestMethod]
 		public void EnsureConfigurationWithSpecificEnumValue_OverriddenWithDefault()
 		{
 			var vault = Mock.Of<Vault>();
