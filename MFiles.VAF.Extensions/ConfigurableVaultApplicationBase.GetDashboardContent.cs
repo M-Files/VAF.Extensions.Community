@@ -7,13 +7,11 @@ using System.Linq;
 using System.Reflection;
 using MFiles.VAF.Configuration.Domain;
 using MFiles.VAF.Extensions.Dashboards;
-using MFiles.VaultApplications.Logging.NLog.ExtensionMethods;
 using MFiles.VAF.Extensions.ExtensionMethods;
 using MFilesAPI;
 using MFiles.VAF.Configuration;
 using MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent;
 using MFiles.VAF.Extensions.Dashboards.LoggingDashboardContent;
-using MFiles.VaultApplications.Logging.Configuration;
 using MFiles.VAF.Extensions.Dashboards.DevelopmentDashboardContent;
 using MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent;
 

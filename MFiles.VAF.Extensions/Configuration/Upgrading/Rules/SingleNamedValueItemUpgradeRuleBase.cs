@@ -1,4 +1,4 @@
-﻿using MFiles.VaultApplications.Logging;
+﻿using MFiles.VAF.Configuration.Logging;
 using MFilesAPI;
 using Newtonsoft.Json.Linq;
 using System;
@@ -143,7 +143,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 							{
 								if (null == targetObj["Version"])
 								{
-									this.Logger?.Debug("Converted JSON data did not contain a version property; adding automatically.");
+									this.Logger?.Debug($"Converted JSON data did not contain a version property; adding automatically.");
 									targetObj["Version"] = this.MigrateToVersion.ToString();
 								}
 								else if (targetObj.Value<string>("Version") != this.MigrateToVersion.ToString())
@@ -154,7 +154,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 							}
 							catch (Exception ex)
 							{
-								this.Logger?.Warn(ex, "Could not parse text into JSON; cannot check/set version number.");
+								this.Logger?.Warn(ex, $"Could not parse text into JSON; cannot check/set version number.");
 								return false;
 							}
 						}
@@ -164,7 +164,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 					}
 					catch (Exception ex)
 					{
-						this.Logger?.Warn(ex, "Could not parse text into JSON; cannot check/set version number.");
+						this.Logger?.Warn(ex, $"Could not parse text into JSON; cannot check/set version number.");
 						return false;
 					}
 				}

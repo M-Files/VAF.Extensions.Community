@@ -11,6 +11,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 	/// It always runs at the same time every day.  If different time triggers are required then create
 	/// multiple instances of a weekly trigger (e.g. one for Wednesdays at 3pm, one for Fridays at 9pm).
 	/// </summary>
+	[UsesConfigurationResources]
 	public class WeeklyTrigger
 		: DailyTrigger
 	{

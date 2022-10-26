@@ -1,4 +1,5 @@
-﻿using MFiles.VaultApplications.Logging.Configuration;
+﻿
+using MFiles.VAF.Configuration.Logging;
 
 namespace MFiles.VAF.Extensions.Configuration
 {

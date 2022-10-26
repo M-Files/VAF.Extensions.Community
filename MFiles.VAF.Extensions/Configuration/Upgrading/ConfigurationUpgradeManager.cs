@@ -1,6 +1,7 @@
-﻿using MFiles.VAF.Extensions.Configuration.Upgrading;
+﻿using MFiles.VAF.Configuration.Logging;
+using MFiles.VAF.Configuration.Logging.NLog;
+using MFiles.VAF.Extensions.Configuration.Upgrading;
 using MFiles.VAF.Extensions.Configuration.Upgrading.Rules;
-using MFiles.VaultApplications.Logging;
 using MFilesAPI;
 using Newtonsoft.Json.Linq;
 using System;
@@ -80,7 +81,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 
 			// Run the rule that ensures that the data is serialized according to the latest definitions.
 			{
-				this.Logger?.Debug("Ensuring latest serialization is used by the saved configuration.");
+				this.Logger?.Debug($"Ensuring latest serialization is used by the saved configuration.");
 				yield return this.GetEnsureLatestSerializationSettingsUpgradeRule<TSecureConfiguration>(rules?.LastOrDefault());
 			}
 
@@ -525,8 +526,10 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 					.ToList();
 				if (multipleUpgradeRules.Any())
 				{
-					var errorMessage = $"Multiple upgrade rules are defined between configuration versions: {string.Join(", ", multipleUpgradeRules.Select(m => $"{m.Key.Item1}-{m.Key.Item2} ({m.Count()} rules)"))}.";
-					this.Logger?.Error(errorMessage);
+					this.Logger?.Error
+					(
+						$"Multiple upgrade rules are defined between configuration versions: {string.Join(", ", multipleUpgradeRules.Select(m => $"{m.Key.Item1}-{m.Key.Item2} ({m.Count()} rules)"))}."
+					);
 					return false;
 				}
 			}

@@ -10,10 +10,14 @@ using Newtonsoft.Json;
 using MFiles.VAF.Core;
 using MFiles.VAF.Extensions.ExtensionMethods;
 using MFiles.VAF.AppTasks;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
+using MFiles.VAF.Configuration.Logging.NLog;
 
 namespace MFiles.VAF.Extensions
 {
+	internal class TaskQueueBackgroundOperationManager
+	{
+	}
 	/// <summary>
 	/// Manages one or more background operations within a single queue.
 	/// </summary>
@@ -25,7 +29,7 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		private static readonly object _lock = new object();
 
-		private ILogger Logger { get; }
+		private ILogger Logger { get; } = LogManager.GetLogger<TaskQueueBackgroundOperationManager>();
 
 		/// <summary>
 		/// The server that this application is running on.
@@ -156,8 +160,6 @@ namespace MFiles.VAF.Extensions
 			// Sanity.
 			if (string.IsNullOrWhiteSpace(queueId))
 				throw new ArgumentException(Resources.Exceptions.TaskQueueBackgroundOperations.TheQueueIdCannotBeNullOrWhitespace, nameof(queueId));
-
-			this.Logger = LogManager.GetLogger(this.GetType());
 
 			// Assign.
 			this.CancellationTokenSource = cancellationTokenSource;

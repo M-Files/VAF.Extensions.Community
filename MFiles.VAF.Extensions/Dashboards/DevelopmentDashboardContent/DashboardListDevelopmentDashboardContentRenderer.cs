@@ -1,14 +1,10 @@
-﻿using MFiles.VAF.Configuration.Domain;
-using MFiles.VAF.Configuration;
-using MFiles.VAF.Configuration.Domain.Dashboards;
+﻿using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Extensions.ExtensionMethods;
-using MFiles.VaultApplications.Logging.Configuration;
 using System.Collections.Generic;
 using System.Linq;
-using MFiles.VaultApplications.Logging.NLog.ExtensionMethods;
 using System.Reflection;
 using System;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
 
 namespace MFiles.VAF.Extensions.Dashboards.DevelopmentDashboardContent
 {

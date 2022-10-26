@@ -1,6 +1,6 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Configuration.ScheduledExecution;
-using MFiles.VaultApplications.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,11 +8,11 @@ using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions.ScheduledExecution
 {
-
 	/// <summary>
 	/// Represents a schedule in which a job should be re-run.
 	/// </summary>
 	[DataContract]
+	[UsesConfigurationResources]
 	public class Schedule
 		: IRecurrenceConfiguration
 	{

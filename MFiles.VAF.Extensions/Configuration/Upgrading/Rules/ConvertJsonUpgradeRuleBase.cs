@@ -2,7 +2,7 @@
 using MFilesAPI;
 using System;
 using System.Linq;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
 
 namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 {

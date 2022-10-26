@@ -1,9 +1,4 @@
 ﻿using MFiles.VAF.Configuration.Domain.Dashboards;
-using MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent;
-using MFiles.VaultApplications.Logging.Configuration;
-using System;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions.Dashboards.DevelopmentDashboardContent
 {

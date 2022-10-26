@@ -8,6 +8,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 	/// Class used for configuration purposes.
 	/// </summary>
 	[DataContract]
+	[UsesConfigurationResources]
 	public class Trigger
 		: TriggerBase
 	{

@@ -6,11 +6,15 @@ using System.Linq;
 using System.Reflection;
 using MFiles.VAF.AppTasks;
 using MFiles.VAF.Common;
+using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.ScheduledExecution;
-using MFiles.VaultApplications.Logging;
 
 namespace MFiles.VAF.Extensions
 {
+	internal class RecurringOperationConfigurationManager
+	{
+
+	}
 	/// <summary>
 	/// Manages recurring operations that are configured via standard VAF configuration.
 	/// </summary>
@@ -19,13 +23,13 @@ namespace MFiles.VAF.Extensions
 		: Dictionary<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>
 		where TSecureConfiguration : class, new()
 	{
-		private ILogger Logger { get; }
+		private ILogger Logger { get; } 
+			= LogManager.GetLogger<RecurringOperationConfigurationManager>();
 		protected ConfigurableVaultApplicationBase<TSecureConfiguration> VaultApplication { get; private set; }
 		public RecurringOperationConfigurationManager(ConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication)
 		{
 			this.VaultApplication = vaultApplication
 				?? throw new ArgumentNullException(nameof(vaultApplication));
-			this.Logger = LogManager.GetLogger(this.GetType());
 		}
 		/// <summary>
 		/// Attempts to get the configured provider of how to repeat the task processing.
@@ -83,7 +87,7 @@ namespace MFiles.VAF.Extensions
 				|| null == this.VaultApplication?.TaskQueueResolver
 				|| null == this.VaultApplication?.TaskManager)
 			{
-				this.Logger?.Warn("Vault application, task manager, or task queue resolver are null so cannot populate configuration; skipping.");
+				this.Logger?.Warn($"Vault application, task manager, or task queue resolver are null so cannot populate configuration; skipping.");
 				return;
 			}
 
@@ -178,7 +182,7 @@ namespace MFiles.VAF.Extensions
 				}
 				else
 				{
-					this.Logger?.Debug($"Processor for queue {tuple.Item1.QueueID} of type {tuple.Item1.TaskType} will be scheduled for {nextExecution.Value.ToString("s")}");
+					this.Logger?.Debug($"Processor for queue {tuple.Item1.QueueID} of type {tuple.Item1.TaskType} will be scheduled for {nextExecution.Value:s}");
 				}
 
 				// Cancel future executions and schedule the next one if appropriate.
@@ -222,9 +226,10 @@ namespace MFiles.VAF.Extensions
 			{
 				foreach (var item in (IEnumerable)value)
 				{
-					var a = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>>();
-					this.GetTaskProcessorConfiguration(item, out a);
-					schedules.AddRange(a);
+					{
+						this.GetTaskProcessorConfiguration(item, out List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>> a);
+						schedules.AddRange(a);
+					}
 				}
 				return;
 			}
@@ -264,9 +269,10 @@ namespace MFiles.VAF.Extensions
 			{
 				foreach (var item in (IEnumerable)value)
 				{
-					var a = new List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>>();
-					this.GetTaskProcessorConfiguration(item, out a);
-					schedules.AddRange(a);
+					{
+						this.GetTaskProcessorConfiguration(item, out List<Tuple<IRecurringOperationConfigurationAttribute, IRecurrenceConfiguration>>  a);
+						schedules.AddRange(a);
+					}
 				}
 				return;
 			}

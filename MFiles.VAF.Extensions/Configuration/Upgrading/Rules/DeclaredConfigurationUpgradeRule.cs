@@ -1,5 +1,5 @@
 ﻿using MFiles.VAF.Configuration;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -93,12 +93,12 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 						case 1:
 							if (parameters[0].ParameterType == typeof(string))
 							{
-								this.Logger?.Trace("Parameter is of type string, so passing raw NVS data.");
+								this.Logger?.Trace($"Parameter is of type string, so passing raw NVS data.");
 								arguments.Add(input);
 							}
 							else if (parameters[0].ParameterType == typeof(JObject))
 							{
-								this.Logger?.Trace("Parameter is of type JObject, so parsing JObject.");
+								this.Logger?.Trace($"Parameter is of type JObject, so parsing JObject.");
 								arguments.Add(JObject.Parse(input));
 							}
 							else

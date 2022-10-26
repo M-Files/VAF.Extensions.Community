@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net45</TargetFrameworks>
+    <TargetFrameworks>net472</TargetFrameworks>
     <Copyright>M-Files Corporation 2020 onwards</Copyright>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Version>0.1.0.0-notImportant</Version>
@@ -17,6 +17,11 @@
     <Configurations>Debug;Release;DebugNoDeployment</Configurations>
     <PackageReadmeFile>nuget-readme.md</PackageReadmeFile>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="TaskQueueBackgroundOperations\ExtensionMethods\**" />
+    <EmbeddedResource Remove="TaskQueueBackgroundOperations\ExtensionMethods\**" />
+    <None Remove="TaskQueueBackgroundOperations\ExtensionMethods\**" />
+  </ItemGroup>
   <ItemGroup>
     <None Remove="Resources\Completed.png" />
     <None Remove="Resources\DefaultLogDownloadDashboard.html" />
@@ -41,8 +46,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MFiles.VAF" Version="2.3.623.9" />
-	  <PackageReference Include="MFiles.VaultApplications.Logging" Version="22.5.136" />
+    <PackageReference Include="MFiles.VAF" Version="22.11.668-INTERNAL" />
+    <PackageReference Include="MFiles.VAF.Configuration.Logging.NLog" Version="22.11.2" />
     <PackageReference Include="MFilesAPI.Extensions" Version="1.0.6" />
   </ItemGroup>
   <ItemGroup>
@@ -207,9 +212,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="nuget-readme.md" Pack="True" PackagePath="\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="TaskQueueBackgroundOperations\ExtensionMethods\" />
   </ItemGroup>
   <Target Name="CleanNugetPackages" BeforeTargets="Build">
     <ItemGroup>

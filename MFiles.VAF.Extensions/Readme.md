@@ -329,7 +329,7 @@ To use logging from within your vault application class, simply log using the lo
 
 ```
 using MFiles.VAF.Extensions.Dashboards;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
 namespace LoggingExample
 {
 	public class VaultApplication
@@ -355,7 +355,7 @@ namespace LoggingExample
 Where you need to log from other classes, create your own logger instance.  Each class should have its own logger.
 
 ```
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
 namespace LoggingExample
 {
 	public class DocumentProcessor

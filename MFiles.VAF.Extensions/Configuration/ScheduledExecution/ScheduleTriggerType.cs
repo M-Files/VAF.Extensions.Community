@@ -3,6 +3,7 @@
 namespace MFiles.VAF.Extensions.ScheduledExecution
 
 {
+	[UsesConfigurationResources]
 	public enum ScheduleTriggerType
 	{
 		[JsonConfEditor(Label = ResourceMarker.Id + nameof(Resources.Configuration.ScheduleTriggerType_Unknown))]

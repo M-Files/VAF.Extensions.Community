@@ -1,7 +1,7 @@
 ﻿using MFiles.VAF.AppTasks;
 using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain.Dashboards;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
 using MFilesAPI;
 using System;
 using System.Collections;

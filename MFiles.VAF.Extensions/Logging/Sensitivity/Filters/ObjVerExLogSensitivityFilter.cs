@@ -1,4 +1,6 @@
 ﻿using MFiles.VAF.Common;
+using MFiles.VAF.Configuration.Logging;
+using MFiles.VAF.Configuration.Logging.SensitivityFilters;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
@@ -6,8 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-// By placing this in the MFiles.VaultApplications.Logging namespace, the "RenderInternalLogs" will apply to this too.
-namespace MFiles.VaultApplications.Logging.Sensitivity.Filters
+namespace MFiles.VAF.Extensions.Logging.Sensitivity.Filters
 {
 	/// <summary>
 	/// Implements a log sensitivity filter for <see cref="ObjVerEx>"/>.
@@ -15,21 +16,33 @@ namespace MFiles.VaultApplications.Logging.Sensitivity.Filters
 	public class ObjVerExLogSensitivityFilter
 		: LogSensitivityFilterBase<ObjVerEx>
 	{
+		/// <summary>
+		/// Resolve the delegate filter we use.
+		/// </summary>
+		/// <returns>A sensitivity filter for <see cref="IObjectVersion"/>s.</returns>
+		protected ILogSensitivityFilter<IObjectVersion> GetObjectVersionFilter()
+		{
+			return ResolveDelegateFilter(() => new ObjectVersionLogSensitivityFilter());
+		}
+
 		/// <inheritdoc />
-		public override string FilterValueForLogging(ObjVerEx value, Sensitivity level, IEnumerable<string> customFlags, string format, IFormatProvider formatProvider)
+		public override IEnumerable<SensitivityFlag> GetSupportedCustomFlags()
+		{
+			// Return any sensitivity flags from the underlying implementation.
+			foreach (SensitivityFlag sf in GetObjectVersionFilter()?.GetSupportedCustomFlags() ?? Enumerable.Empty<SensitivityFlag>())
+				yield return sf;
+		}
+
+		/// <inheritdoc />
+		public override string FilterValueForLogging(ObjVerEx value, LogSensitivity level, IEnumerable<SensitivityFlag> customFlags, string format, IFormatProvider formatProvider)
 		{
 			// Sanity.
 			if (null == value?.Info)
 				return String.Empty;
 
-			// Try and get an ObjectVersion filter from the registered factories.
-			if (false == this.TryGetFilter(out ILogSensitivityFilter<IObjectVersion> filter) || null == filter)
-			{
-				this.Logger?.Error($"Could not load required sensitivity filter for {typeof(IObjectVersion).FullName}.  {typeof(ObjectVersionLogSensitivityFilter).FullName} will be used.");
-				filter = new ObjectVersionLogSensitivityFilter();
-			}
-
-			return filter.FilterValueForLogging(value.Info, level, customFlags, format, formatProvider);
+			// Use the object version filter.
+			return this.GetObjectVersionFilter()?
+				.FilterValueForLogging(value.Info, level, customFlags, format, formatProvider);
 		}
 	}
 }

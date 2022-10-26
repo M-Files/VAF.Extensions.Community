@@ -1,7 +1,8 @@
 ﻿using MFiles.VAF.Common;
 using MFiles.VAF.Configuration;
+using MFiles.VAF.Configuration.Logging;
+using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.ScheduledExecution;
-using MFiles.VaultApplications.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -24,6 +25,7 @@ namespace MFiles.VAF.Extensions
 		PreviewUnsetTexts = new string[] { "Never" },
 		PreviewValueFormats = new string[] { "{0}" }
 	)]
+	[UsesConfigurationResources]
 	public class Frequency
 		: IRecurrenceConfiguration
 	{
@@ -205,9 +207,10 @@ namespace MFiles.VAF.Extensions
 						}
 						else
 						{
-							this.Logger?.Warn
+							this.Logger?.WarnFormat
 							(
-								String.Format(Resources.Exceptions.Configuration.CouldNotConvertJsonValueToFrequency, jToken)
+								Resources.Exceptions.Configuration.CouldNotConvertJsonValueToFrequency, 
+								jToken
 							);
 						}
 					}
@@ -220,9 +223,10 @@ namespace MFiles.VAF.Extensions
 					}
 					else
 					{
-						this.Logger?.Warn
+						this.Logger?.WarnFormat
 						(
-							String.Format(Resources.Exceptions.Configuration.CouldNotConvertJsonValueToFrequency, jToken)
+							Resources.Exceptions.Configuration.CouldNotConvertJsonValueToFrequency,
+							jToken
 						);
 						return default;
 					}

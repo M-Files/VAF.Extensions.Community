@@ -2,7 +2,8 @@
 using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain;
 using MFiles.VAF.Configuration.Interfaces.Domain;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
+using MFiles.VAF.Configuration.Logging.Targets;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
@@ -189,8 +190,8 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 					{
 						logEntries.StructuredEntries = true; // Default to assuming we CAN parse the data.
 						var defaultLoggingConfiguration = LogManager.Current.Configuration.GetAllLogTargetConfigurations()
-							.FirstOrDefault(c => c is VaultApplications.Logging.NLog.Targets.DefaultTargetConfiguration)
-							as VaultApplications.Logging.NLog.Targets.DefaultTargetConfiguration;
+							.FirstOrDefault(c => c is DefaultTargetConfiguration)
+							as DefaultTargetConfiguration;
 
 						// If it is not using the default layout then we can't parse it.
 						if (false == string.IsNullOrEmpty(defaultLoggingConfiguration?.Advanced?.Layout)

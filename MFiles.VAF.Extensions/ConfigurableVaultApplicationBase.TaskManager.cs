@@ -12,7 +12,7 @@ using System.Linq;
 using MFiles.VAF.MultiserverMode;
 using MFiles.VAF.AppTasks;
 using MFiles.VAF.Common;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
 using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions
@@ -45,29 +45,17 @@ namespace MFiles.VAF.Extensions
 			=> $"reschedule";
 
 		/// <summary>
-		/// The generic logger for the task manager.
-		/// </summary>
-		private TaskManagerLogger taskManagerLogger;
-
-		/// <summary>
 		/// Overridden to append the logger to the TaskManager as soon as it is created.
 		/// </summary>
 		/// <returns>A new TaskManager instance.</returns>
 		protected override TaskManager CreateTaskManager()
-		{
-			var taskManager = new TaskManagerEx<TSecureConfiguration>
+			=> new TaskManagerEx<TSecureConfiguration>
 			(
 					this,
 					this.GetType().Namespace,
 					this.PermanentVault,
 					GetTransactionRunner()
 			);
-
-			// We want to attach logging the second after it is created so we don't miss any events.
-			this.taskManagerLogger = new TaskManagerLogger(taskManager);
-
-			return taskManager;
-		}
 
 		/// <inheritdoc />
 		protected override void InitializeTaskManager()
@@ -89,17 +77,17 @@ namespace MFiles.VAF.Extensions
 				{
 
 				}
-				this.Logger?.Fatal(e, "Exception whilst initializing task manager.");
+				this.Logger?.Fatal(e, $"Exception whilst initializing task manager.");
 			}
 			catch(Exception e)
 			{
 				if(e is System.Runtime.InteropServices.COMException && (e?.Message?.IndexOf("(0x80040001)") ?? 0) > -1)
 				{
 					// "Parameter is incorrect".  Could be queue type has been changed.
-					this.Logger?.Fatal(e, "Exception whilst initializing task manager (the queue type cannot change between concurrent and sequential after it has been opened).");
+					this.Logger?.Fatal(e, $"Exception whilst initializing task manager (the queue type cannot change between concurrent and sequential after it has been opened).");
 					return;
 				}
-				this.Logger?.Fatal(e, "Exception whilst initializing task manager.");
+				this.Logger?.Fatal(e, $"Exception whilst initializing task manager.");
 				throw;
 			}
 		}

@@ -1,5 +1,7 @@
 ﻿using MFiles.VAF.AppTasks;
-using MFiles.VaultApplications.Logging.Sensitivity.Filters;
+using MFiles.VAF.Configuration.Logging;
+using MFiles.VAF.Extensions.Logging;
+using MFiles.VAF.Extensions.Logging.Sensitivity.Filters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -16,20 +18,20 @@ namespace MFiles.VAF.Extensions.Tests.Logging.Sensitivity.Filters
 		public void GetSupportedCustomFlags_ReturnsHideTaskQueueAndTypeSensitivityFlag()
 		{
 			var filter = new TaskInfoLogSensitivityFilter();
-			var flags = filter.GetSupportedCustomFlags()?.ToList() ?? new List<VAF.Configuration.JsonEditor.ValueOption>();
-			Assert.AreEqual(1, flags.Count(v => v.Value as string == TaskInfoLogSensitivityFilter.HideTaskQueueAndTypeSensitivityFlag));
+			var flags = filter.GetSupportedCustomFlags()?.ToList() ?? new List<SensitivityFlag>();
+			Assert.AreEqual(1, flags.Count(v => v.Id == ExtensionsNLogLogManager.TaskQueueAndTaskType.Id));
 		}
 
 		[TestMethod]
 		public void GetSupportedCustomFlags_ReturnsShowRawDirectiveInformation()
 		{
 			var filter = new TaskInfoLogSensitivityFilter();
-			var flags = filter.GetSupportedCustomFlags()?.ToList() ?? new List<VAF.Configuration.JsonEditor.ValueOption>();
-			Assert.AreEqual(1, flags.Count(v => v.Value as string == TaskInfoLogSensitivityFilter.ShowRawDirectiveInformation));
+			var flags = filter.GetSupportedCustomFlags()?.ToList() ?? new List<SensitivityFlag>();
+			Assert.AreEqual(1, flags.Count(v => v.Id == ExtensionsNLogLogManager.RawTaskDirective.Id));
 		}
 
 		[TestMethod]
-		public void FilterValueForLogging_MaximumSensitivity()
+		public void FilterValueForLogging_Maximum()
 		{
 			var taskInfo = new TaskInfo<TaskDirective>()
 			{
@@ -39,7 +41,7 @@ namespace MFiles.VAF.Extensions.Tests.Logging.Sensitivity.Filters
 			Assert.AreEqual
 			(
 				"1234",
-				filter.FilterValueForLogging(taskInfo, VaultApplications.Logging.Sensitivity.Sensitivity.MaximumSensitivity, null, null)
+				filter.FilterValueForLogging(taskInfo, LogSensitivity.Maximum, null, null)
 			);
 		}
 
@@ -56,7 +58,7 @@ namespace MFiles.VAF.Extensions.Tests.Logging.Sensitivity.Filters
 			Assert.AreEqual
 			(
 				$"{taskInfo.TaskId} (queue: {taskInfo.QueueId}, task type: {taskInfo.TaskType})",
-				filter.FilterValueForLogging(taskInfo, VaultApplications.Logging.Sensitivity.Sensitivity.MinimumSensitivity, null, null)
+				filter.FilterValueForLogging(taskInfo, LogSensitivity.Minimum, null, null)
 			);
 		}
 
@@ -72,43 +74,21 @@ namespace MFiles.VAF.Extensions.Tests.Logging.Sensitivity.Filters
 			var filter = new TaskInfoLogSensitivityFilter();
 			Assert.AreEqual
 			(
-				$"{taskInfo.TaskId} (queue: {taskInfo.QueueId}, task type: {taskInfo.TaskType})",
-				filter.FilterValueForLogging
-				(
-					taskInfo,
-					VaultApplications.Logging.Sensitivity.Sensitivity.Custom,
-					new string[0],
-					null)
-			);
-		}
-
-		[TestMethod]
-		public void FilterValueForLogging_Custom_HideTaskQueueAndTypeSensitivityFlag()
-		{
-			var taskInfo = new TaskInfo<TaskDirective>()
-			{
-				TaskId = "1234",
-				QueueId = "MyQueueId",
-				TaskType = "MyTaskType"
-			};
-			var filter = new TaskInfoLogSensitivityFilter();
-			Assert.AreEqual
-			(
 				$"{taskInfo.TaskId}",
 				filter.FilterValueForLogging
 				(
 					taskInfo,
-					VaultApplications.Logging.Sensitivity.Sensitivity.Custom,
-					new[]
+					LogSensitivity.Custom,
+					new SensitivityFlag[]
 					{
-						TaskInfoLogSensitivityFilter.HideTaskQueueAndTypeSensitivityFlag
+						
 					},
 					null)
 			);
 		}
 
 		[TestMethod]
-		public void FilterValueForLogging_Custom_ShowRawDirectiveInformation()
+		public void FilterValueForLogging_Custom_TaskQueueAndDirective()
 		{
 			var taskInfo = new TaskInfo<TaskDirective>()
 			{
@@ -120,14 +100,15 @@ namespace MFiles.VAF.Extensions.Tests.Logging.Sensitivity.Filters
 			var filter = new TaskInfoLogSensitivityFilter();
 			Assert.AreEqual
 			(
-				$"{taskInfo.TaskId} (queue: {taskInfo.QueueId}, task type: {taskInfo.TaskType}, directive: {{\"UserId\":1}})",
+				$"{taskInfo.TaskId} (queue: {taskInfo.QueueId}, task type: {taskInfo.TaskType}) (directive: {{\"UserId\":1}})",
 				filter.FilterValueForLogging
 				(
 					taskInfo,
-					VaultApplications.Logging.Sensitivity.Sensitivity.Custom,
+					LogSensitivity.Custom,
 					new[]
 					{
-						TaskInfoLogSensitivityFilter.ShowRawDirectiveInformation
+						ExtensionsNLogLogManager.TaskQueueAndTaskType,
+						ExtensionsNLogLogManager.RawTaskDirective
 					},
 					null)
 			);
@@ -150,11 +131,10 @@ namespace MFiles.VAF.Extensions.Tests.Logging.Sensitivity.Filters
 				filter.FilterValueForLogging
 				(
 					taskInfo,
-					VaultApplications.Logging.Sensitivity.Sensitivity.Custom,
+					LogSensitivity.Custom,
 					new[]
 					{
-						TaskInfoLogSensitivityFilter.HideTaskQueueAndTypeSensitivityFlag,
-						TaskInfoLogSensitivityFilter.ShowRawDirectiveInformation
+						ExtensionsNLogLogManager.RawTaskDirective
 					},
 					null
 				)
@@ -162,7 +142,7 @@ namespace MFiles.VAF.Extensions.Tests.Logging.Sensitivity.Filters
 		}
 
 		[TestMethod]
-		public void FilterValueForLogging_MinimumSensitivity_ShowRawDirectiveInformation()
+		public void FilterValueForLogging_Minimum()
 		{
 			var taskInfo = new TaskInfo<TaskDirective>()
 			{
@@ -174,14 +154,13 @@ namespace MFiles.VAF.Extensions.Tests.Logging.Sensitivity.Filters
 			var filter = new TaskInfoLogSensitivityFilter();
 			Assert.AreEqual
 			(
-				$"{taskInfo.TaskId} (queue: {taskInfo.QueueId}, task type: {taskInfo.TaskType}, directive: {{\"UserId\":1}})",
+				$"{taskInfo.TaskId} (queue: {taskInfo.QueueId}, task type: {taskInfo.TaskType}) (directive: {{\"UserId\":1}})",
 				filter.FilterValueForLogging
 				(
 					taskInfo,
-					VaultApplications.Logging.Sensitivity.Sensitivity.MinimumSensitivity,
-					new[]
+					LogSensitivity.Minimum,
+					new SensitivityFlag[]
 					{
-						TaskInfoLogSensitivityFilter.ShowRawDirectiveInformation
 					},
 					null
 				)

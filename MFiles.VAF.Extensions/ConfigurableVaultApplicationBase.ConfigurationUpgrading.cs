@@ -13,8 +13,18 @@ namespace MFiles.VAF.Extensions
 {
 	public abstract partial class ConfigurableVaultApplicationBase<TSecureConfiguration>
 	{
-
+		/// <summary>
+		/// The configuration upgrade manager.
+		/// May be null before <see cref="PopulateConfigurationObjects(Vault)"/> is called.
+		/// </summary>
+		/// <remarks>Populated with the result of calling <see cref="GetConfigurationUpgradeManager"/>.</remarks>
 		protected IConfigurationUpgradeManager ConfigurationUpgradeManager { get; private set; }
+
+		/// <summary>
+		/// Returns the instance of <see cref="IConfigurationUpgradeManager"/> that will be used
+		/// to upgrade any configuration found.
+		/// </summary>
+		/// <returns></returns>
 		public virtual IConfigurationUpgradeManager GetConfigurationUpgradeManager()
 		{
 			return new ConfigurationUpgradeManager(this);

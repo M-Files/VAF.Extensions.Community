@@ -1,4 +1,4 @@
-﻿using MFiles.VaultApplications.Logging;
+﻿using MFiles.VAF.Configuration.Logging;
 using MFilesAPI;
 using System;
 using System.Linq;

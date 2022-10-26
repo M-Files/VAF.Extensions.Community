@@ -1,6 +1,6 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Configuration;
-using MFiles.VaultApplications.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
