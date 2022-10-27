@@ -48,15 +48,20 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				return null;
 
 			// When should we start looking?
-			after = (after ?? DateTime.UtcNow).ToUniversalTime();
+			timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
 
-			// Convert the time into the timezone we're after.
-			after = TimeZoneInfo.ConvertTime(after.Value, timeZoneInfo ?? TimeZoneInfo.Local);
+			// Convert the "after" time to the time in the given timezone.
+			after = TimeZoneInfo.ConvertTimeFromUtc((after ?? DateTime.Now).ToUniversalTime(), timeZoneInfo);
 
 			// Get the next execution time (this will not find run times today).
 			return this.TriggerDays
 				.SelectMany(d => GetNextDayOfWeek(after.Value, d))
-				.SelectMany(d => this.TriggerTimes.Select(t => d.Add(t)))
+				.SelectMany(d => this.TriggerTimes.Select(
+					t =>
+					{
+						// Set up the next execution time.
+						return new DateTimeOffset(d.Date, timeZoneInfo.GetUtcOffset(d)).Add(t);
+					}))
 				.Where(d => d > after.Value)
 				.OrderBy(d => d)
 				.Select(d => d.ToUniversalTime())

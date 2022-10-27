@@ -16,6 +16,7 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 	public class DailyTriggerTests
 		: ConfigurationClassTestBase<DailyTrigger>
 	{
+
 		[TestMethod]
 		[DynamicData(nameof(GetNextExecutionData), DynamicDataSourceType.Method)]
 		public void GetNextExecution
