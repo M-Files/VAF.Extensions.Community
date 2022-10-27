@@ -7,11 +7,17 @@ The following helper library is a community-driven set of functionality that ext
 ## Using the library
 
  1. Install the latest production release from nuget.
- 2. Update your `VaultApplication.cs` file, ensuring that the base class for your vault application is changed to `MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<T>`.  A more complete example of an empty vault application class is shown below.
+ 2. Update your `VaultApplication.cs` file, ensuring that your vault application inherits from `MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<T>`.  A more complete example of an empty vault application class is shown below.
+ 3. Ensure that your `Configuration.cs` file inherits from `MFiles.VAF.Configuration.ConfigurationBase`.  A more complete example of an empty configuration class is shown below.
 
 ```
 public class VaultApplication
 	: MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<Configuration>
+{
+
+}
+public class Configuration
+	: MFiles.VAF.Configuration.ConfigurationBase
 {
 
 }
