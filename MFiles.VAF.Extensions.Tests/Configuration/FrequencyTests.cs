@@ -46,6 +46,15 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				new DateTime(2022, 10, 06, 20, 01, 00, DateTimeKind.Utc),
 				new DateTime(2022, 10, 06, 20, 30, 00, DateTimeKind.Utc)
 			};
+			yield return new object[]
+			{
+				TimeZoneInfo.ConvertTimeBySystemTimeZoneId
+				(
+					new DateTime(2022, 10, 26, 20, 31, 00, DateTimeKind.Local),
+					"GMT Standard Time"
+				),
+				new DateTime(2022, 10, 26, 20, 00, 00, DateTimeKind.Utc)
+			};
 		}
 
 		[DynamicData(nameof(SplitTriggerType_Data), DynamicDataSourceType.Method)]
@@ -146,8 +155,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
             }
         }
     ],
-    ""TriggerTimeType"": ""Custom"",
-    ""TriggerTimeCustomTimeZone"": ""GMT Standard Time""
+    ""TriggerTimeType"": ""UTC""
 }
 ");
 			{
