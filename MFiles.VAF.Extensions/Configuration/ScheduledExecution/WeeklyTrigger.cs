@@ -1,4 +1,5 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VAF.Configuration.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 	public class WeeklyTrigger
 		: DailyTrigger
 	{
+		private ILogger Logger { get; } = LogManager.GetLogger<WeeklyTrigger>();
 		/// <summary>
 		/// The days on which to trigger the schedule.
 		/// There must be at least one item in this collection for the trigger to be active.
@@ -49,20 +51,36 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			// When should we start looking?
 			timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
 
-			// Convert the "after" time to the time in the given timezone.
-			after = TimeZoneInfo.ConvertTimeFromUtc((after ?? DateTime.Now).ToUniversalTime(), timeZoneInfo);
+			// Make sure after is in UTC.
+			after = TimeZoneInfo.ConvertTimeToUtc(after ?? DateTime.Now);
+			this.Logger?.Trace($"Retrieving next execution after {after}");
+
+			this.Logger.Trace($"There are {this.TriggerTimes.Count} times configured: {string.Join(", ", this.TriggerTimes)}");
 
 			// Get the next execution time (this will not find run times today).
-			return this.TriggerDays
+			var potentialMatches = this.TriggerDays
 				.SelectMany(d => GetNextDayOfWeek(after.Value, d))
 				.SelectMany(d => this.TriggerTimes.Select(
 					t =>
 					{
-						// Set up the next execution time.
-						return new DateTimeOffset(d.Date, timeZoneInfo.GetUtcOffset(d)).Add(t);
+						// All the times may not be in UTC; what is the offset for the configured timezone?
+						var offset = timeZoneInfo.GetUtcOffset(d.Add(t));
+
+						// What is the next execution time in UTC?
+						var time = t.Subtract(offset);
+
+						// Return this time on that date in UTC.
+						var potential = new DateTimeOffset(d.Add(time), TimeSpan.Zero);
+						this.Logger?.Trace($"{d} at {t} with offset {offset} => {potential}.");
+						return potential;
 					}))
 				.Where(d => d > after.Value)
 				.OrderBy(d => d)
+				.ToList();
+
+			this.Logger?.Trace($"These are the potential matches: {string.Join(", ", potentialMatches)}");
+
+			return potentialMatches
 				.Select(d => d.ToUniversalTime())
 				.FirstOrDefault();
 		}

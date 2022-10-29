@@ -91,6 +91,10 @@ namespace MFiles.VAF.Extensions
 		/// <returns>The time span, or <see cref="TimeSpan.Zero"/> if null.</returns>
 		public TimeSpan GetElapsedTime()
 		{
+			// If we are running then it's the difference between now and started.
+			if (this.CurrentTaskState == MFTaskState.MFTaskStateInProgress)
+				return DateTime.UtcNow.Subtract(this.Started.Value);
+
 			// If we have no start or last activity date then return zero.
 			if (false == this.Started.HasValue
 				|| false == this.LastActivity.HasValue)
