@@ -1,5 +1,5 @@
 ﻿using MFiles.VAF.Configuration;
-using MFiles.VAF.Configuration.Logging;
+using MFiles.VaultApplications.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +16,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		: DailyTrigger
 	{
 		private ILogger Logger { get; } = LogManager.GetLogger<WeeklyTrigger>();
+
 		/// <summary>
 		/// The days on which to trigger the schedule.
 		/// There must be at least one item in this collection for the trigger to be active.
