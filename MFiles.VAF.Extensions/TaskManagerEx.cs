@@ -68,7 +68,7 @@ namespace MFiles.VAF.Extensions
 			string taskType,
 			TaskDirective innerDirective = null,
 			Vault vault = null,
-			DateTime? scheduleFor = null
+			DateTimeOffset? scheduleFor = null
 		)
 		{
 			// Create the re-schedule directive.
@@ -176,7 +176,7 @@ namespace MFiles.VAF.Extensions
 					directive.QueueID,
 					directive.TaskType,
 					directive: directive.InnerDirective,
-					activationTime: directive.NextExecution.Value
+					activationTime: new DateTime(directive.NextExecution.Value.ToUniversalTime().DateTime.Ticks, DateTimeKind.Utc)
 				);
 		}
 
@@ -230,7 +230,7 @@ namespace MFiles.VAF.Extensions
 		[DataMember]
 		public string TaskType { get; set; }
 		[DataMember]
-		public DateTime? NextExecution { get; set; }
+		public DateTimeOffset? NextExecution { get; set; }
 		[DataMember]
 		public TaskDirective InnerDirective { get; set; }
 	}

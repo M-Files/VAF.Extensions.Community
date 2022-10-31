@@ -52,7 +52,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			= new DayOfMonthTrigger();
 
 		/// <inheritdoc />
-		public override DateTimeOffset? GetNextExecution(DateTime? after = null, TimeZoneInfo timeZoneInfo = null)
+		public override DateTimeOffset? GetNextExecution(DateTimeOffset? after = null, TimeZoneInfo timeZoneInfo = null)
 		{
 			switch (this.Type)
 			{
@@ -136,6 +136,6 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// <param name="after">The time after which the schedule should run.  Defaults to now (i.e. next-run time) if not provided.</param>
 		/// <param name="timeZoneInfo">The time zone which any triggers should be assumed to be in.</param>
 		/// <returns>The next execution time.</returns>
-		public abstract DateTimeOffset? GetNextExecution(DateTime? after = null, TimeZoneInfo timeZoneInfo = null);
+		public abstract DateTimeOffset? GetNextExecution(DateTimeOffset? after = null, TimeZoneInfo timeZoneInfo = null);
 	}
 }

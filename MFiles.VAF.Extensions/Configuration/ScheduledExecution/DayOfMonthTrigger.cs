@@ -62,7 +62,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		}
 
 		/// <inheritdoc />
-		public override DateTimeOffset? GetNextExecution(DateTime? after = null, TimeZoneInfo timeZoneInfo = null)
+		public override DateTimeOffset? GetNextExecution(DateTimeOffset? after = null, TimeZoneInfo timeZoneInfo = null)
 		{
 			// Sanity.
 			if (
@@ -84,19 +84,13 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				(
 					d => GetNextDayOfMonth(after.Value, d, this.UnrepresentableDateHandling)
 				)
-				.SelectMany
+				.Select
 				(
-					d => this.TriggerTimes.Select
-					(
-						t =>
-						{
-							var output = new DateTimeOffset(d, (timeZoneInfo ?? TimeZoneInfo.Local).GetUtcOffset(d));
-							output = output.Date.Add(t); // Time is yet to come today.
-							return output;
-						}
-					)
+					d => new DailyTrigger() { Type = ScheduleTriggerType.Daily, TriggerTimes = this.TriggerTimes }
+						.GetNextExecutionIncludingNextDay(d, timeZoneInfo, false)
 				)
 				.Where(d => d > after.Value)
+				.Select(d => d.Value)
 				.OrderBy(d => d)
 				.Select(d => d.ToUniversalTime())
 				.FirstOrDefault();
@@ -113,9 +107,9 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// If not then it will return one item - for the next time that this day occurs
 		/// (later this month or next, depending on parameters).
 		/// </returns>
-		internal static IEnumerable<DateTime> GetNextDayOfMonth
+		internal static IEnumerable<DateTimeOffset> GetNextDayOfMonth
 		(
-			DateTime after, 
+			DateTimeOffset after, 
 			int dayOfMonth,
 			UnrepresentableDateHandling unrepresentableDateHandling
 		)
@@ -130,10 +124,10 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				// It's today.
 				// We could be running today or the same day next month (depending on trigger times).
 				// Return both options.
-				yield return after.Date;
+				yield return after;
 
 				yield return
-					new DateTime(after.Year, after.Month, 1)
+					new DateTimeOffset(after.Year, after.Month, 1, 0, 0, 0, after.Offset)
 						.AddMonths(1) // One month
 						.AddDays(dayOfMonth - 1); // Move forward to the correct day.
 			}
@@ -141,7 +135,8 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			{
 				// This day has already passed.
 				// Return the correct day next month.
-				yield return new DateTime(after.Year, after.Month, dayOfMonth).AddMonths(1);
+				yield return new DateTimeOffset(after.Year, after.Month, dayOfMonth, 0, 0, 0, after.Offset)
+					.AddMonths(1);
 			}
 			else
 			{
@@ -150,12 +145,12 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				var month = after.Month;
 				while (sanity++ < 6)
 				{
-					DateTime? date = null;
+					DateTimeOffset? date = null;
 					try
 					{
 						// Can we represent this date?
 						// If not then we've asked for 30th Feb or similar.
-						date = new DateTime(after.Year, month, dayOfMonth);
+						date = new DateTimeOffset(after.Year, month, dayOfMonth, 0, 0, 0, 0, after.Offset);
 					}
 					catch
 					{
@@ -164,7 +159,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 						{
 							case UnrepresentableDateHandling.LastDayOfMonth:
 								// Get the last day of this month instead.
-								date = new DateTime(after.Year, month, 1)
+								date = new DateTimeOffset(after.Year, month, 1, 0, 0, 0, after.Offset)
 									.AddMonths(1)
 									.AddDays(-1);
 								break;

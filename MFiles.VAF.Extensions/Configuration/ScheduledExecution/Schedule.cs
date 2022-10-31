@@ -79,7 +79,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// </summary>
 		/// <param name="after">The time after which the schedule should run.  Defaults to now (i.e. next-run time) if not provided.</param>
 		/// <returns>The next execution time.</returns>
-		public DateTimeOffset? GetNextExecution(DateTime? after = null)
+		public DateTimeOffset? GetNextExecution(DateTimeOffset? after = null)
 		{
 			// If we are not enabled then die.
 			if (false == this.Enabled)

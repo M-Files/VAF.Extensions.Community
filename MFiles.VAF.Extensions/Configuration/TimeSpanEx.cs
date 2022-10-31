@@ -108,9 +108,9 @@ namespace MFiles.VAF.Extensions
 				this.RunOnVaultStartup = runOnVaultStartup.Value;
 		}
 
-		public DateTimeOffset? GetNextExecution(DateTime? after = null)
+		public DateTimeOffset? GetNextExecution(DateTimeOffset? after = null)
 		{
-			return (after?.ToUniversalTime() ?? DateTime.UtcNow).Add(this.GetInterval());
+			return (after?.ToUniversalTime() ?? DateTimeOffset.UtcNow).Add(this.GetInterval());
 		}
 
 		public string ToDashboardDisplayString()
