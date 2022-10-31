@@ -1,6 +1,7 @@
 ﻿using MFiles.VAF.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -36,7 +37,17 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		}
 
 		/// <inheritdoc />
-		public override DateTimeOffset? GetNextExecution(DateTime? after = null, TimeZoneInfo timeZoneInfo = null)
+		public override DateTimeOffset? GetNextExecution(DateTimeOffset? after = null, TimeZoneInfo timeZoneInfo = null)
+			=> this.GetNextExecutionIncludingNextDay(after, timeZoneInfo, true);
+
+		/// <summary>
+		/// Gets the date of the next execution.
+		/// </summary>
+		/// <param name="after"></param>
+		/// <param name="timeZoneInfo"></param>
+		/// <param name="allowNextDay"></param>
+		/// <returns></returns>
+		public virtual DateTimeOffset? GetNextExecutionIncludingNextDay(DateTimeOffset? after = null, TimeZoneInfo timeZoneInfo = null, bool allowNextDay = true)
 		{
 			// Sanity.
 			if (
@@ -47,37 +58,47 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			// When should we start looking?
 			timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
 
+			// Ensure we have a value.
+			if (null == after)
+				after = DateTimeOffset.UtcNow;
+
 			// Get the next execution time.
 			return this.TriggerTimes
-				.Select
+				.Select<TimeSpan, DateTimeOffset?>
 				(
 					t =>
 					{
-						// Convert the "after" time to the time in the given timezone.
-						after = TimeZoneInfo.ConvertTimeFromUtc((after ?? DateTime.UtcNow).ToUniversalTime(), timeZoneInfo);
-
-						// Set up the next execution time which is at midnight in the correct timezone.
-						var output = new DateTimeOffset(after.Value.Date, timeZoneInfo.GetUtcOffset(after.Value.Date));
-
-						if (after.Value.TimeOfDay <= t)
-							output = output.Add(t); // Time is yet to come today (or is now).
-						else
+						// What is the potential time that this will run?
+						DateTimeOffset potential;
 						{
-							// If the next day has gone to/from DST then we need to deal with it.
-							var oldoffset = timeZoneInfo.GetUtcOffset(output);
-							output = output.AddDays(1);
-							var newoffset = timeZoneInfo.GetUtcOffset(output);
-							if(oldoffset != newoffset)
-							{
-								output = output.Subtract(newoffset - oldoffset);
-							}
-
-							// Add on the correct time, now for the subsequent day.
-							output = output.Add(t);
+							var dateTime = after.Value.Date.Add(t);
+							potential = new DateTimeOffset(dateTime, timeZoneInfo.GetUtcOffset(dateTime));
 						}
-						return output;
+
+						// If the potential run time is in the future then we can return it.
+						if (potential >= after.Value)
+							return potential;
+
+						// If we can't go to the next day then die.
+						if (false == allowNextDay)
+							return null;
+
+						// The potential run time is in the past, so we need to work out the next day.
+
+						// If the next day has gone to/from DST then we need to deal with it.
+						var oldoffset = potential.Offset;
+						potential = potential.AddDays(1);
+						var newoffset = timeZoneInfo.GetUtcOffset(potential);
+						if (oldoffset != newoffset)
+						{
+							potential = potential.Subtract(newoffset - oldoffset);
+						}
+
+						return potential;
 					}
 				)
+				.Where(d => d != null)
+				.Select(d => d.Value)
 				.OrderBy(d => d)
 				.Select(d => d.ToUniversalTime())
 				.FirstOrDefault();

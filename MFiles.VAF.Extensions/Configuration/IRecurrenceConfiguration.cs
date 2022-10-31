@@ -16,7 +16,7 @@ namespace MFiles.VAF.Extensions
         /// </summary>
         /// <param name="after">The current execution time, or null to use the current time.</param>
         /// <returns>The next-run time.  May be null if there are no valid next-run times.</returns>
-        DateTimeOffset? GetNextExecution(DateTime? after = null);
+        DateTimeOffset? GetNextExecution(DateTimeOffset? after = null);
 
 		/// <summary>
 		/// Whether the processor should run on vault startup (in addition to any other schedule or interval).

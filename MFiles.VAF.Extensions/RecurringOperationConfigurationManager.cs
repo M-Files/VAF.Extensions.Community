@@ -57,7 +57,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="queueId">The queue ID</param>
 		/// <param name="taskType">The task type ID</param>
 		/// <returns>The datetime it should run, or null if not available.</returns>
-		public DateTimeOffset? GetNextTaskProcessorExecution(string queueId, string taskType, DateTime? after = null)
+		public DateTimeOffset? GetNextTaskProcessorExecution(string queueId, string taskType, DateTimeOffset? after = null)
 		{
 			return this.TryGetValue(queueId, taskType, out IRecurrenceConfiguration recurringOperation)
 				? recurringOperation.GetNextExecution(after)

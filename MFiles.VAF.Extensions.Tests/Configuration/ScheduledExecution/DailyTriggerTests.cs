@@ -98,6 +98,14 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 				new DateTime(2021, 03, 17, 17, 01, 00), // Wednesday @ 6pm
 				new DateTime(2021, 03, 18, 17, 00, 00), // Thursday @ midnight
 			};
+
+			// Daylight savings changes
+			yield return new object[]
+			{
+				new []{ new TimeSpan(17, 0, 0) },
+				new DateTime(2021, 03, 17, 17, 01, 00), // Wednesday @ 6pm
+				new DateTime(2021, 03, 18, 17, 00, 00), // Thursday @ midnight
+			};
 		}
 	}
 }

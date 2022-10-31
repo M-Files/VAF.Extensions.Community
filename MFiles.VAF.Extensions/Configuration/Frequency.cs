@@ -81,7 +81,7 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <inheritdoc />
-		public DateTimeOffset? GetNextExecution(DateTime? after = null)
+		public DateTimeOffset? GetNextExecution(DateTimeOffset? after = null)
 		{
 			switch (this.RecurrenceType)
 			{

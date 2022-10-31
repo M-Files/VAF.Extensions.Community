@@ -39,7 +39,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		}
 
 		/// <inheritdoc />
-		public override DateTimeOffset? GetNextExecution(DateTime? after = null, TimeZoneInfo timeZoneInfo = null)
+		public override DateTimeOffset? GetNextExecution(DateTimeOffset? after = null, TimeZoneInfo timeZoneInfo = null)
 		{
 			// Sanity.
 			if (
@@ -52,8 +52,8 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			// When should we start looking?
 			timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
 
-			// Make sure after is in UTC.
-			after = TimeZoneInfo.ConvertTimeToUtc(after ?? DateTime.Now);
+			// Make sure after is in the correct timezone.
+			after = after ?? DateTimeOffset.Now;
 			this.Logger?.Trace($"Retrieving next execution after {after}");
 
 			this.Logger.Trace($"There are {this.TriggerTimes.Count} times configured: {string.Join(", ", this.TriggerTimes)}");
@@ -61,20 +61,13 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			// Get the next execution time (this will not find run times today).
 			var potentialMatches = this.TriggerDays
 				.SelectMany(d => GetNextDayOfWeek(after.Value, d))
-				.SelectMany(d => this.TriggerTimes.Select(
-					t =>
-					{
-						// All the times may not be in UTC; what is the offset for the configured timezone?
-						var offset = timeZoneInfo.GetUtcOffset(d.Add(t));
-
-						// What is the next execution time in UTC?
-						var time = t.Subtract(offset);
-
-						// Return this time on that date in UTC.
-						var potential = new DateTimeOffset(d.Add(time), TimeSpan.Zero);
-						this.Logger?.Trace($"{d} at {t} with offset {offset} => {potential}.");
-						return potential;
-					}))
+				.Select
+				(
+					d => new DailyTrigger() { Type = ScheduleTriggerType.Daily, TriggerTimes = this.TriggerTimes }
+						.GetNextExecutionIncludingNextDay(d, timeZoneInfo, false)
+				)
+				.Where(d => d != null)
+				.Select(d => d.Value)
 				.Where(d => d > after.Value)
 				.OrderBy(d => d)
 				.ToList();
@@ -97,7 +90,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// If not then it will return one item - for the next time that this day occurs
 		/// (later this week or next, depending on parameters).
 		/// </returns>
-		internal static IEnumerable<DateTime> GetNextDayOfWeek(DateTime after, DayOfWeek dayOfWeek)
+		internal static IEnumerable<DateTimeOffset> GetNextDayOfWeek(DateTimeOffset after, DayOfWeek dayOfWeek)
 		{
 			// Get the number of days ahead.
 			var daysToAdd = (7 - (after.DayOfWeek - dayOfWeek)) % 7;
@@ -105,7 +98,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			// If we get today then return it and also next week.
 			if (daysToAdd == 0)
 			{
-				yield return after.Date;
+				yield return after;
 				daysToAdd = 7;
 			}
 
