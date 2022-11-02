@@ -27,7 +27,7 @@ namespace MFiles.VAF.Extensions
 
 			// Populate the task processing schedule configuration.
 			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(isVaultStartup: false);
-
+			
 			// If we have logging configuration then set it up.
 			var loggingConfiguration = this.GetLoggingConfiguration();
 			this.Logger?.Debug("Logging configuration updating");

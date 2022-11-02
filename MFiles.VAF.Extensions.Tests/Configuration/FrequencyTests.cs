@@ -46,6 +46,67 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				new DateTime(2022, 10, 06, 20, 01, 00, DateTimeKind.Utc),
 				new DateTime(2022, 10, 06, 20, 30, 00, DateTimeKind.Utc)
 			};
+			yield return new object[]
+			{
+				TimeZoneInfo.ConvertTimeBySystemTimeZoneId
+				(
+					new DateTime(2022, 10, 26, 20, 31, 00, DateTimeKind.Local),
+					"GMT Standard Time"
+				),
+				new DateTime(2022, 10, 26, 20, 00, 00, DateTimeKind.Utc)
+			};
+		}
+		public static IEnumerable<object[]> DaylightSaving_ClocksGoBackwards_Data()
+		{
+			yield return new object[]
+			{
+				"Before the clocks change",
+				new DateTimeOffset(2022, 10, 27, 20, 01, 01, TimeSpan.FromHours(3)),
+				new DateTimeOffset(2022, 10, 28, 20, 00, 00, TimeSpan.FromHours(3))
+			};
+			yield return new object[]
+			{
+				"Calculated the day before, and then should run on, the day the clocks change",
+				new DateTimeOffset(2022, 10, 29, 20, 01, 01, TimeSpan.FromHours(3)),
+				new DateTimeOffset(2022, 10, 30, 20, 00, 00, TimeSpan.FromHours(2))
+			};
+			yield return new object[]
+			{
+				"Calculated on the day that the clocks change, after they have changed",
+				new DateTimeOffset(2022, 10, 30, 20, 01, 01, TimeSpan.FromHours(2)),
+				new DateTimeOffset(2022, 10, 31, 20, 00, 00, TimeSpan.FromHours(2))
+			};
+		}
+
+		[TestMethod]
+		[DynamicData(nameof(DaylightSaving_ClocksGoBackwards_Data), DynamicDataSourceType.Method)]
+		public void DaylightSaving_ClocksGoBackwards
+		(
+			string message,
+			DateTimeOffset now, 
+			DateTimeOffset expected
+		)
+		{
+			var frequency = JsonConvert.DeserializeObject<Frequency>(@"{
+    ""Triggers"": [
+        {
+            ""Type"": ""Daily"",
+            ""DailyTriggerConfiguration"": {
+                ""TriggerTimes"": [
+                    ""20:00:00""
+                ]
+            }
+        }
+    ],
+    ""TriggerTimeType"": ""Custom"",
+    ""TriggerTimeCustomTimeZone"": ""FLE Standard Time""
+}
+");
+			{
+				var nextRun = frequency.GetNextExecution(now);
+				Assert.IsNotNull(nextRun.Value, message);
+				Assert.AreEqual(expected, nextRun.Value, message);
+			}
 		}
 
 		[DynamicData(nameof(SplitTriggerType_Data), DynamicDataSourceType.Method)]
@@ -146,8 +207,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
             }
         }
     ],
-    ""TriggerTimeType"": ""Custom"",
-    ""TriggerTimeCustomTimeZone"": ""GMT Standard Time""
+    ""TriggerTimeType"": ""UTC""
 }
 ");
 			{

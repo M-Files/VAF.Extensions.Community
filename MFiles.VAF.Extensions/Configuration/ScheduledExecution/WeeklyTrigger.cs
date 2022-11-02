@@ -1,4 +1,5 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VaultApplications.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,8 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 	public class WeeklyTrigger
 		: DailyTrigger
 	{
+		private ILogger Logger { get; } = LogManager.GetLogger<WeeklyTrigger>();
+
 		/// <summary>
 		/// The days on which to trigger the schedule.
 		/// There must be at least one item in this collection for the trigger to be active.
@@ -36,7 +39,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		}
 
 		/// <inheritdoc />
-		public override DateTimeOffset? GetNextExecution(DateTime? after = null, TimeZoneInfo timeZoneInfo = null)
+		public override DateTimeOffset? GetNextExecution(DateTimeOffset? after = null, TimeZoneInfo timeZoneInfo = null)
 		{
 			// Sanity.
 			if (
@@ -47,17 +50,29 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				return null;
 
 			// When should we start looking?
-			after = (after ?? DateTime.UtcNow).ToUniversalTime();
+			timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
 
-			// Convert the time into the timezone we're after.
-			after = TimeZoneInfo.ConvertTime(after.Value, timeZoneInfo ?? TimeZoneInfo.Local);
+			// Make sure after is in the correct timezone.
+			after = after ?? DateTimeOffset.Now;
+			this.Logger?.Trace($"Retrieving next execution after {after}");
 
 			// Get the next execution time (this will not find run times today).
-			return this.TriggerDays
+			var potentialMatches = this.TriggerDays
 				.SelectMany(d => GetNextDayOfWeek(after.Value, d))
-				.SelectMany(d => this.TriggerTimes.Select(t => d.Add(t)))
+				.Select
+				(
+					d => new DailyTrigger() { Type = ScheduleTriggerType.Daily, TriggerTimes = this.TriggerTimes }
+						.GetNextExecutionIncludingNextDay(d, timeZoneInfo, false)
+				)
+				.Where(d => d != null)
+				.Select(d => d.Value)
 				.Where(d => d > after.Value)
 				.OrderBy(d => d)
+				.ToList();
+
+			this.Logger?.Trace($"These are the potential matches: {string.Join(", ", potentialMatches)}");
+
+			return potentialMatches
 				.Select(d => d.ToUniversalTime())
 				.FirstOrDefault();
 		}
@@ -73,7 +88,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 		/// If not then it will return one item - for the next time that this day occurs
 		/// (later this week or next, depending on parameters).
 		/// </returns>
-		internal static IEnumerable<DateTime> GetNextDayOfWeek(DateTime after, DayOfWeek dayOfWeek)
+		internal static IEnumerable<DateTimeOffset> GetNextDayOfWeek(DateTimeOffset after, DayOfWeek dayOfWeek)
 		{
 			// Get the number of days ahead.
 			var daysToAdd = (7 - (after.DayOfWeek - dayOfWeek)) % 7;
@@ -81,7 +96,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			// If we get today then return it and also next week.
 			if (daysToAdd == 0)
 			{
-				yield return after.Date;
+				yield return after;
 				daysToAdd = 7;
 			}
 

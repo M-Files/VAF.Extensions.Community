@@ -118,11 +118,11 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 		public void GetNextExecution_GMT
 		(
 			IEnumerable<TriggerBase> triggers,
-			DateTime? after,
-			DateTime? expected
+			DateTimeOffset? after,
+			DateTimeOffset? expected
 		)
 		{
-			var execution = new Schedule()
+			var trigger = new Schedule()
 			{
 				Enabled = true,
 				Triggers = triggers
@@ -131,7 +131,8 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 						.ToList(),
 				TriggerTimeType = TriggerTimeType.Custom,
 				TriggerTimeCustomTimeZone = "GMT Standard Time"
-			}.GetNextExecution(after);
+			};
+			var execution = trigger.GetNextExecution(after);
 			Assert.AreEqual(expected?.ToUniversalTime(), execution?.ToUniversalTime());
 		}
 
@@ -245,8 +246,8 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 						}.ToList()
 					}
 				},
-				new DateTime(2022, 03, 26, 00, 00, 00, DateTimeKind.Utc), // This is still in GMT (UTC+0)
-				new DateTime(2022, 03, 26, 01, 30, 00, DateTimeKind.Utc), // So it should run at 0130 UTC
+				new DateTimeOffset(2022, 03, 26, 00, 00, 00, 0, TimeSpan.Zero), // This is still in GMT (UTC+0)
+				new DateTimeOffset(2022, 03, 26, 01, 30, 00, 0, TimeSpan.Zero), // So it should run at 0130 UTC
 			};
 
 			// Just after clocks go forward.
@@ -261,8 +262,8 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 						}.ToList()
 					}
 				},
-				new DateTime(2022, 03, 27, 02, 01, 00, DateTimeKind.Utc), // The next run time will be in BST (UTC+1)
-				new DateTime(2022, 03, 28, 00, 30, 00, DateTimeKind.Utc), // Check that it runs at 0030 the next day.
+				new DateTimeOffset(2022, 03, 27, 02, 01, 00, 0, TimeSpan.Zero), // The next run time will be in BST (UTC+1)
+				new DateTimeOffset(2022, 03, 28, 00, 30, 00, 0, TimeSpan.Zero), // Check that it runs at 0030 the next day.
 			};
 
 			// Just before clocks go backwards.
@@ -273,12 +274,28 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 					new DailyTrigger(){
 						TriggerTimes = new List<TimeSpan>()
 						{
-							new TimeSpan(1, 30, 0) // The trigger for 0130 is because this is between when the clocks change
+							new TimeSpan(2, 30, 0) // The trigger for 0230 is because this is after when the clocks change
 						}.ToList()
 					}
 				},
-				new DateTime(2022, 10, 30, 00, 00, 00, DateTimeKind.Utc), // This is 0100 BST
-				new DateTime(2022, 10, 30, 00, 30, 00, DateTimeKind.Utc), // So it should run at 0030UTC / 0130 BST
+				new DateTimeOffset(2022, 10, 30, 02, 00, 00, 0, TimeSpan.Zero), // This is 0100 BST
+				new DateTimeOffset(2022, 10, 30, 02, 30, 00, 0, TimeSpan.Zero), // So it should run at 0030UTC / 0130 BST
+			};
+
+			// Just before clocks go backwards.
+			yield return new object[]
+			{
+				new TriggerBase[]
+				{
+					new DailyTrigger(){
+						TriggerTimes = new List<TimeSpan>()
+						{
+							new TimeSpan(2, 30, 0) // The trigger for 0230 is because this is after when the clocks change
+						}.ToList()
+					}
+				},
+				new DateTimeOffset(2022, 10, 30, 01, 00, 00, 0, TimeSpan.Zero), // This is 0200 BST
+				new DateTimeOffset(2022, 10, 30, 02, 30, 00, 0, TimeSpan.Zero), // So it should run at 0030UTC / 0130 BST
 			};
 
 			// Just after clocks go backwards.
@@ -293,8 +310,8 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 						}.ToList()
 					}
 				},
-				new DateTime(2022, 10, 30, 02, 01, 00, DateTimeKind.Utc), // This is 0301 in GMT
-				new DateTime(2022, 10, 31, 01, 30, 00, DateTimeKind.Utc), // Check that it runs at 0130 the next day.
+				new DateTimeOffset(2022, 10, 30, 02, 01, 00, 0, TimeSpan.Zero), // This is 0301 in GMT
+				new DateTimeOffset(2022, 10, 31, 01, 30, 00, 0, TimeSpan.Zero), // Check that it runs at 0130 the next day.
 			};
 		}
 
