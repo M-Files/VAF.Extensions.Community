@@ -6,10 +6,10 @@ namespace MFiles.VAF.Extensions
 	/// <summary>
 	/// Used to mark a configuration class as using resources from <see cref="Resources.Configuration"/>.
 	/// </summary>
-	public class UsesConfigurationResources
-		: ResourceManagerProviderAttribute
+	public class UsesConfigurationResourcesAttribute
+		: UsesResourcesAttribute
 	{
-		public override ResourceManager ResourceManager
-			=> Resources.Configuration.ResourceManager;
+		public UsesConfigurationResourcesAttribute()
+			: base(typeof(Resources.Configuration)) { }
 	}
 }
