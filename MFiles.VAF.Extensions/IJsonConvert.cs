@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Configuration;
 using MFiles.VAF.Extensions.Configuration;
+using MFiles.VAF.Extensions.Configuration.Upgrading;
 using MFiles.VaultApplications.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -99,6 +100,13 @@ namespace MFiles.VAF.Extensions
 					{
 						return value;
 					}
+				}
+
+				// If this has the AllowDefaultValueSerializationAttribute attribute then always output it.
+				{
+					var allowDefaultAttribute = this.memberInfo.GetCustomAttribute<AllowDefaultValueSerializationAttribute>();
+					if (null != allowDefaultAttribute)
+						return value;
 				}
 
 				// Try to get the runtime default value.
