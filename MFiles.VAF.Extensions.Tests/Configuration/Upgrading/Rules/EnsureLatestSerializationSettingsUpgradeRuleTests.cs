@@ -572,5 +572,46 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 			}", rule.GetReadWriteLocationValue(vault));
 
 		}
+
+		[DataContract]
+		private class ConfigurationWithValueThatShouldNotBePersisted
+		{
+			[DataMember]
+			public int Hello { get; set; } = 0;
+		}
+
+		[TestMethod]
+		public void DoesNotPersist_PropertyWithoutAllowDefaultValueAttribute()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithValueThatShouldNotBePersisted>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, "{}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson("{}", rule.GetReadWriteLocationValue(vault));
+
+		}
+
+		[DataContract]
+		private class ConfigurationWithValueThatShouldBePersisted
+		{
+			[DataMember]
+			[AllowDefaultValueSerialization]
+			public int Hello { get; set; } = 0;
+		}
+
+		[TestMethod]
+		public void DoesPersist_PropertyWithAllowDefaultValueAttribute()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithValueThatShouldBePersisted>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, "{}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson("{\"Hello\": 0}", rule.GetReadWriteLocationValue(vault));
+
+		}
 	}
 }
