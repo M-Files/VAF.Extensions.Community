@@ -61,42 +61,56 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Verbosity of loggers that emit messages specific to the upgrading of the stored application configuration..
         /// </summary>
-        internal static string MFiles_VaultApplication_Logging_Sensitivity_CustomFlags_HideTaskQueueAndType_HelpText {
+        internal static string LogCategory_ConfigurationUpgrading_HelpText {
             get {
-                return ResourceManager.GetString("MFiles_VaultApplication_Logging_Sensitivity_CustomFlags_HideTaskQueueAndType_Help" +
-                        "Text", resourceCulture);
+                return ResourceManager.GetString("LogCategory_ConfigurationUpgrading_HelpText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hide task item&apos;s queue ID and task type from logs.
+        ///   Looks up a localized string similar to Configuration Upgrading.
         /// </summary>
-        internal static string MFiles_VaultApplication_Logging_Sensitivity_CustomFlags_HideTaskQueueAndType_Label {
+        internal static string LogCategory_ConfigurationUpgrading_Label {
             get {
-                return ResourceManager.GetString("MFiles_VaultApplication_Logging_Sensitivity_CustomFlags_HideTaskQueueAndType_Labe" +
-                        "l", resourceCulture);
+                return ResourceManager.GetString("LogCategory_ConfigurationUpgrading_Label", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Note: this directive may contain sensitive information and will not be parsed for sensitivity..
+        ///   Looks up a localized string similar to Allows printing the raw/full task directive in the log output..
         /// </summary>
-        internal static string MFiles_VaultApplication_Logging_Sensitivity_CustomFlags_ShowRawDirectiveInformation_HelpText {
+        internal static string SensitivityFlag_RawDirective_HelpText {
             get {
-                return ResourceManager.GetString("MFiles_VaultApplication_Logging_Sensitivity_CustomFlags_ShowRawDirectiveInformati" +
-                        "on_HelpText", resourceCulture);
+                return ResourceManager.GetString("SensitivityFlag_RawDirective_HelpText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Show a task item&apos;s raw directive JSON in the logs.
+        ///   Looks up a localized string similar to Task directive.
         /// </summary>
-        internal static string MFiles_VaultApplication_Logging_Sensitivity_CustomFlags_ShowRawDirectiveInformation_Label {
+        internal static string SensitivityFlag_RawDirective_Label {
             get {
-                return ResourceManager.GetString("MFiles_VaultApplication_Logging_Sensitivity_CustomFlags_ShowRawDirectiveInformati" +
-                        "on_Label", resourceCulture);
+                return ResourceManager.GetString("SensitivityFlag_RawDirective_Label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allows printing the task queue ID and task type in the log output..
+        /// </summary>
+        internal static string SensitivityFlag_TaskQueueAndTaskType_HelpText {
+            get {
+                return ResourceManager.GetString("SensitivityFlag_TaskQueueAndTaskType_HelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Task queue and task type.
+        /// </summary>
+        internal static string SensitivityFlag_TaskQueueAndTaskType_Label {
+            get {
+                return ResourceManager.GetString("SensitivityFlag_TaskQueueAndTaskType_Label", resourceCulture);
             }
         }
     }

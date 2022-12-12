@@ -11,6 +11,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 	/// Represents a trigger that runs every day, potentially multiple times per day.
 	/// </summary>
 	[DataContract]
+	[UsesConfigurationResources]
 	public class DailyTrigger
 		: TriggerBase
 	{

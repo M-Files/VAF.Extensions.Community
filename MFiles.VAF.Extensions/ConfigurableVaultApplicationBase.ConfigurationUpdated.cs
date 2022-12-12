@@ -2,7 +2,7 @@
 using MFiles.VAF.Configuration;
 using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
@@ -30,41 +30,16 @@ namespace MFiles.VAF.Extensions
 			
 			// If we have logging configuration then set it up.
 			var loggingConfiguration = this.GetLoggingConfiguration();
-			this.Logger?.Debug("Logging configuration updating");
+			this.Logger?.Debug($"Logging configuration updating");
 
 			// This can be called even when null, and we may need to clear the existing configuration
 			LogManager.UpdateConfiguration(loggingConfiguration);
-			this.Logger?.Debug("Logging configuration updated");
+			this.Logger?.Debug($"Logging configuration updated");
 		}
 
-		/// <inheritdoc />
-		protected override SecureConfigurationManager<TSecureConfiguration> GetConfigurationManager()
-		{
-			var configurationManager = base.GetConfigurationManager();
-
-			// Set the resource manager for the configuration manager.
-			var combinedResourceManager = new CombinedResourceManager(configurationManager.ResourceManager);
-
-			// Set the resource manager for the configuration.
-			configurationManager.ResourceManager = combinedResourceManager;
-			return configurationManager;
-		}
 		internal new SecureConfigurationManager<TSecureConfiguration> ConfManager
 		{
 			get => base.ConfManager;
-		}
-
-		protected void AddResourceManagerToConfiguration(ResourceManager resourceManager)
-		{
-			if (null == resourceManager)
-				throw new ArgumentNullException(nameof(resourceManager));
-
-			// Try and get the combined resource manager.
-			var combinedResourceManager = this.ConfManager?.ResourceManager as CombinedResourceManager;
-			if (null == combinedResourceManager)
-				throw new InvalidOperationException(Resources.Exceptions.InternalOperations.ConfigurationManagerDoesNotSupportCombinedResources);
-
-			combinedResourceManager.ResourceManagers.Add(resourceManager);
 		}
 
 		/// <inheritdoc />
@@ -80,7 +55,7 @@ namespace MFiles.VAF.Extensions
 			}
 			catch(Exception e)
 			{
-				this.Logger?.Fatal(e, "Exception mapping configuration to recurring operations.");
+				this.Logger?.Fatal(e, $"Exception mapping configuration to recurring operations.");
 			}
 
 

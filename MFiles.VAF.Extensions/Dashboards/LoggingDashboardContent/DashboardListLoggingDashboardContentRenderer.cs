@@ -2,10 +2,10 @@
 using MFiles.VAF.Configuration;
 using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Extensions.ExtensionMethods;
-using MFiles.VaultApplications.Logging.Configuration;
 using System.Collections.Generic;
 using System.Linq;
-using MFiles.VaultApplications.Logging.NLog.ExtensionMethods;
+using MFiles.VAF.Configuration.Logging;
+using MFiles.VAF.Configuration.Logging.Targets;
 
 namespace MFiles.VAF.Extensions.Dashboards.LoggingDashboardContent
 {
@@ -99,10 +99,10 @@ namespace MFiles.VAF.Extensions.Dashboards.LoggingDashboardContent
 
 					row.AddCell(name);
 				}
-				row.AddCell($"{config.MinimumLogLevel.ToDisplayString()} to {config.MaximumLogLevel.ToDisplayString()}");
+				row.AddCell($"{config.MinimumLogLevel} and higher");
 
 				// If it's the default one then allow downloads.
-				if (config is VaultApplications.Logging.NLog.Targets.DefaultTargetConfiguration)
+				if (config is DefaultTargetConfiguration)
 				{
 					// Add whatever buttons, according to app configuration.
 					var buttons = new DashboardContentCollection();

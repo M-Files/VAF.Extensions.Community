@@ -1,6 +1,6 @@
 ﻿using MFiles.VAF.AppTasks;
 using MFiles.VAF.Configuration.Domain.Dashboards;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;

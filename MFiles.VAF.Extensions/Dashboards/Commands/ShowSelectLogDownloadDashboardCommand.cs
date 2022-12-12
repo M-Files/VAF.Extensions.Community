@@ -1,7 +1,7 @@
 ﻿using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain;
 using MFiles.VAF.Configuration.Interfaces.Domain;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;

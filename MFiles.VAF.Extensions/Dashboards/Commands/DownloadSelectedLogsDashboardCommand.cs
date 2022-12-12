@@ -1,7 +1,7 @@
 ﻿using MFiles.VAF.AdminConfigurations;
 using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain.ClientDirective;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;

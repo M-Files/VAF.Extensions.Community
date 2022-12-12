@@ -3,18 +3,20 @@ using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Core;
 using MFiles.VAF.Extensions.Dashboards;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
 using MFilesAPI;
 using System;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using MFiles.VAF.Configuration.Logging.NLog;
 
 namespace MFiles.VAF.Extensions
 {
 	internal class TaskManagerEx
-	{ }
+	{
+	}
 	public partial class TaskManagerEx<TConfiguration>
 		: TaskManager
 		where TConfiguration : class, new()
@@ -48,7 +50,7 @@ namespace MFiles.VAF.Extensions
 		/// <inheritdoc />
 		public new string AddTask(Vault vault, string queueId, string taskType, TaskDirective directive = null, DateTime? activationTime = null)
 		{
-			this.Logger?.Info($"Adding task to queue {queueId} of type {taskType}.");
+			this.Logger?.Info($"Adding task to queue {queueId} of type {taskType} at {(activationTime ?? DateTime.Now).ToString("O")}.");
 			return base.AddTask(vault, queueId, taskType, directive, activationTime);
 		}
 
@@ -211,7 +213,7 @@ namespace MFiles.VAF.Extensions
 									continue;
 
 								// Schedule.
-								this.Logger?.Info($"Re-scheduling {t.TaskType} on {t.QueueID} for {nextExecutionDate.Value}");
+								this.Logger?.Info($"Re-scheduling {t.TaskType} on {t.QueueID} for {nextExecutionDate.Value.ToString("O")}");
 								this.RescheduleTask(t.QueueID, t.TaskType, vault: this.Vault, scheduleFor: nextExecutionDate?.UtcDateTime);
 							}
 							break;

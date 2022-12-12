@@ -117,16 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="MFiles_VaultApplication_Logging_Sensitivity_CustomFlags_HideTaskQueueAndType_HelpText" xml:space="preserve">
-    <value />
+  <data name="LogCategory_ConfigurationUpgrading_HelpText" xml:space="preserve">
+    <value>Verbosity of loggers that emit messages specific to the upgrading of the stored application configuration.</value>
   </data>
-  <data name="MFiles_VaultApplication_Logging_Sensitivity_CustomFlags_HideTaskQueueAndType_Label" xml:space="preserve">
-    <value>Hide task item's queue ID and task type from logs</value>
+  <data name="LogCategory_ConfigurationUpgrading_Label" xml:space="preserve">
+    <value>Configuration Upgrading</value>
   </data>
-  <data name="MFiles_VaultApplication_Logging_Sensitivity_CustomFlags_ShowRawDirectiveInformation_HelpText" xml:space="preserve">
-    <value>Note: this directive may contain sensitive information and will not be parsed for sensitivity.</value>
+  <data name="SensitivityFlag_RawDirective_HelpText" xml:space="preserve">
+    <value>Allows printing the raw/full task directive in the log output.</value>
   </data>
-  <data name="MFiles_VaultApplication_Logging_Sensitivity_CustomFlags_ShowRawDirectiveInformation_Label" xml:space="preserve">
-    <value>Show a task item's raw directive JSON in the logs</value>
+  <data name="SensitivityFlag_RawDirective_Label" xml:space="preserve">
+    <value>Task directive</value>
+  </data>
+  <data name="SensitivityFlag_TaskQueueAndTaskType_HelpText" xml:space="preserve">
+    <value>Allows printing the task queue ID and task type in the log output.</value>
+  </data>
+  <data name="SensitivityFlag_TaskQueueAndTaskType_Label" xml:space="preserve">
+    <value>Task queue and task type</value>
   </data>
 </root>

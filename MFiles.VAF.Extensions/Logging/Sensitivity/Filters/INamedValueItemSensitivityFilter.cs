@@ -1,12 +1,13 @@
-﻿using MFiles.VAF.Extensions.Configuration.Upgrading;
+﻿using MFiles.VAF.Configuration.Logging;
+using MFiles.VAF.Configuration.Logging.SensitivityFilters;
+using MFiles.VAF.Extensions.Configuration.Upgrading;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-// By placing this in the MFiles.VaultApplications.Logging namespace, the "RenderInternalLogs" will apply to this too.
-namespace MFiles.VaultApplications.Logging.Sensitivity.Filters
+namespace MFiles.VAF.Extensions.Logging.Sensitivity.Filters
 {
 	/// <summary>
 	/// Implements a log sensitivity filter for <see cref="INamedValueItem"/>.
@@ -17,8 +18,8 @@ namespace MFiles.VaultApplications.Logging.Sensitivity.Filters
 		public override string FilterValueForLogging
 		(
 			INamedValueItem input,
-			Sensitivity level,
-			IEnumerable<string> customFlags,
+			LogSensitivity level,
+			IEnumerable<SensitivityFlag> customFlags,
 			string format,
 			IFormatProvider formatProvider
 		)

@@ -1,6 +1,6 @@
 ﻿using MFiles.VAF.Common;
 using MFiles.VAF.Configuration.AdminConfigurations;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;

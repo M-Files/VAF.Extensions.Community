@@ -13,12 +13,13 @@ using MFiles.VAF.AppTasks;
 using MFiles.VAF.Common;
 using System.Reflection;
 using System.Collections;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent;
 using System.Collections.Generic;
 using MFiles.VAF.Extensions.Dashboards.LoggingDashboardContent;
 using MFiles.VAF.Extensions.Dashboards.DevelopmentDashboardContent;
 using System.Threading.Tasks;
+using MFiles.VAF.Extensions.Logging;
 
 namespace MFiles.VAF.Extensions
 {
@@ -57,44 +58,18 @@ namespace MFiles.VAF.Extensions
 		}
 
 		public ConfigurableVaultApplicationBase()
+			: this(new ExtensionsNLogLogManager())
+		{
+		}
+		protected ConfigurableVaultApplicationBase(ILogManager logManager)
 			: base()
 		{
+			LogManager.Current = logManager ?? new ExtensionsNLogLogManager();
 			this.Logger = LogManager.GetLogger(this.GetType());
-
-			// In unit testing scenarios the assembly location may be null or throw an exception.  Handle it.
-			Assembly assembly = null;
-			try
-			{
-				assembly = this.GetType()?.Assembly;
-				if (null == assembly?.Location)
-					return;
-			}
-			catch { return; }
-
-			// Register this assembly with the logging framework.  Must be done before initialization.
-			VaultApplications
-				.Logging
-				.NLog
-				.NLogLogManager
-				.AssembliesToScanForCustomLayoutRenderers
-				.Add
-				(
-					assembly.Location
-				);
-			VaultApplications
-				.Logging
-				.Sensitivity
-				.LogSensitivityFilterFactory
-				.DefaultLogSensitivityFilterFactory
-				.Instance
-				.RegisterFiltersInAssembly
-				(
-					assembly
-				);
 		}
 		private TaskQueueBackgroundOperationManager<TSecureConfiguration> taskQueueBackgroundOperationManager;
 
-		private object _lock = new object();
+		private readonly object _lock = new object();
 
 		/// <summary>
 		/// The task queue background operation manager for this application.
