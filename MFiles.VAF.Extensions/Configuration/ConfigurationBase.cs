@@ -1,6 +1,6 @@
 ﻿using MFiles.VAF.Configuration;
-using MFiles.VaultApplications.Logging;
-using MFiles.VaultApplications.Logging.Configuration;
+using MFiles.VAF.Configuration.Logging;
+using MFiles.VAF.Configuration.Logging.NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +10,12 @@ using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions.Configuration
 {
-
 	/// <summary>
 	/// A base class for configuration that implements <see cref="IConfigurationWithLoggingConfiguration"/>.
 	/// </summary>
 	[DataContract]
+	[UsesConfigurationResources]
+	[UsesLoggingResources]
 	public abstract class ConfigurationBase
 		: VersionedConfigurationBase, IConfigurationWithLoggingConfiguration
 	{
@@ -34,19 +35,19 @@ namespace MFiles.VAF.Extensions.Configuration
 
 	[DataContract]
 	public class NLogLoggingConfiguration
-		: VaultApplications.Logging.NLog.NLogLoggingConfiguration
+		: MFiles.VAF.Configuration.Logging.NLog.Configuration.NLogLoggingConfiguration
 	{
 		/// <inheritdoc />
-		public override IEnumerable<VaultApplications.Logging.NLog.NLogLoggingExclusionRule> GetAllLoggingExclusionRules()
+		public override IEnumerable<NLogLoggingExclusionRule> GetAllLoggingExclusionRules()
 		{
 			// Include any other exclusion rules.
-			foreach (var r in base.GetAllLoggingExclusionRules() ?? Enumerable.Empty<VaultApplications.Logging.NLog.NLogLoggingExclusionRule>())
+			foreach (var r in base.GetAllLoggingExclusionRules() ?? Enumerable.Empty<NLogLoggingExclusionRule>())
 				yield return r;
 
 			// If we're set to exclude internal messages then also exclude the task manager ex (spammy).
 			if (false == (this.Advanced?.RenderInternalLogMessages ?? false))
 			{
-				yield return new VaultApplications.Logging.NLog.NLogLoggingExclusionRule()
+				yield return new NLogLoggingExclusionRule()
 				{
 					LoggerName = "MFiles.VAF.Extensions.TaskManagerEx*",
 					MinimumLogLevelOverride = LogLevel.Fatal

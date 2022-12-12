@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions.ScheduledExecution
 {
+	[UsesConfigurationResources]
 	public enum UnrepresentableDateHandling
 	{
 		/// <summary>
@@ -24,6 +25,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 	/// Represents a trigger that runs on specifically-numbered days of the month
 	/// (e.g. 1st, 5th, 12th).
 	/// </summary>
+	[UsesConfigurationResources]
 	public class DayOfMonthTrigger
 		: DailyTrigger
 	{

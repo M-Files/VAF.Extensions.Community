@@ -1,4 +1,4 @@
-﻿using MFiles.VaultApplications.Logging;
+﻿using MFiles.VAF.Configuration.Logging;
 using MFilesAPI;
 using Newtonsoft.Json.Linq;
 using System;
@@ -69,7 +69,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 			// If the objects have not changed then stop.
 			if (this.AreEqual(oldData, newData))
 			{
-				this.Logger?.Trace("Data in configuration already uses latest serialization; skipping conversion.");
+				this.Logger?.Trace($"Data in configuration already uses latest serialization; skipping conversion.");
 				return true;
 			}
 

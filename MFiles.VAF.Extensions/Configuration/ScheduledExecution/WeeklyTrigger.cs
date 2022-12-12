@@ -1,5 +1,5 @@
 ﻿using MFiles.VAF.Configuration;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +12,11 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 	/// It always runs at the same time every day.  If different time triggers are required then create
 	/// multiple instances of a weekly trigger (e.g. one for Wednesdays at 3pm, one for Fridays at 9pm).
 	/// </summary>
+	[UsesConfigurationResources]
 	public class WeeklyTrigger
 		: DailyTrigger
 	{
 		private ILogger Logger { get; } = LogManager.GetLogger<WeeklyTrigger>();
-
 		/// <summary>
 		/// The days on which to trigger the schedule.
 		/// There must be at least one item in this collection for the trigger to be active.
@@ -55,6 +55,8 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			// Make sure after is in the correct timezone.
 			after = after ?? DateTimeOffset.Now;
 			this.Logger?.Trace($"Retrieving next execution after {after}");
+
+			this.Logger.Trace($"There are {this.TriggerTimes.Count} times configured: {string.Join(", ", this.TriggerTimes)}");
 
 			// Get the next execution time (this will not find run times today).
 			var potentialMatches = this.TriggerDays

@@ -22,6 +22,7 @@ namespace MFiles.VAF.Extensions
 		PreviewUnsetTexts = new string[] { "0 hours", "0 minutes", "0 seconds" },
 		PreviewValueFormats = new string[] { "{0} hour(s)", "{0} minute(s)", "{0} seconds(s)" }
 	)]
+	[UsesConfigurationResources]
 	public class TimeSpanEx
 		: IRecurrenceConfiguration
 	{

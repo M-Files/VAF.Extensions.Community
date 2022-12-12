@@ -1,6 +1,9 @@
 ﻿using MFiles.VAF.AppTasks;
 using MFiles.VAF.Common;
 using MFiles.VAF.Configuration.JsonEditor;
+using MFiles.VAF.Configuration.Logging;
+using MFiles.VAF.Configuration.Logging.NLog.Configuration;
+using MFiles.VAF.Configuration.Logging.SensitivityFilters;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
@@ -8,8 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-// By placing this in the MFiles.VaultApplications.Logging namespace, the "RenderInternalLogs" will apply to this too.
-namespace MFiles.VaultApplications.Logging.Sensitivity.Filters
+namespace MFiles.VAF.Extensions.Logging.Sensitivity.Filters
 {
 	/// <summary>
 	/// Implements a log sensitivity filter for <see cref="TaskInfo"/>.
@@ -18,84 +20,104 @@ namespace MFiles.VaultApplications.Logging.Sensitivity.Filters
 		: LogSensitivityFilterBase<TaskInfo>
 	{
 		/// <summary>
-		/// The sensivitity flag for whether to hide the task queue and type.
+		/// Resolve the delegate filter we use.
 		/// </summary>
-		public const string HideTaskQueueAndTypeSensitivityFlag = "HideTaskQueueAndType";
+		/// <returns>A sensitivity filter for <see cref="IObjVer"/>s.</returns>
+		protected ILogSensitivityFilter<IObjID> GetObjIDFilter()
+		{
+			return ResolveDelegateFilter(() => new ObjIdLogSensitivityFilter());
+		}
 
 		/// <summary>
-		/// The sensivitity flag for whether to show the task directive information.
+		/// Resolve the delegate filter we use.
 		/// </summary>
-		public const string ShowRawDirectiveInformation = "ShowRawDirectiveInformation";
+		/// <returns>A sensitivity filter for <see cref="IObjVer"/>s.</returns>
+		protected ILogSensitivityFilter<IObjVer> GetObjVerFilter()
+		{
+			return ResolveDelegateFilter(() => new ObjVerLogSensitivityFilter());
+		}
 
 		/// <inheritdoc />
-		public override IEnumerable<ValueOption> GetSupportedCustomFlags()
+		public override IEnumerable<SensitivityFlag> GetSupportedCustomFlags()
 		{
 			foreach (var f in base.GetSupportedCustomFlags())
 				yield return f;
 
-			yield return new ValueOption()
-			{
-				Label = VAF.Extensions.Resources.Logging.MFiles_VaultApplication_Logging_Sensitivity_CustomFlags_HideTaskQueueAndType_Label,
-				HelpText = VAF.Extensions.Resources.Logging.MFiles_VaultApplication_Logging_Sensitivity_CustomFlags_HideTaskQueueAndType_HelpText,
-				Value = HideTaskQueueAndTypeSensitivityFlag
-			};
-
-			yield return new ValueOption()
-			{
-				Label = VAF.Extensions.Resources.Logging.MFiles_VaultApplication_Logging_Sensitivity_CustomFlags_ShowRawDirectiveInformation_Label,
-				HelpText = VAF.Extensions.Resources.Logging.MFiles_VaultApplication_Logging_Sensitivity_CustomFlags_ShowRawDirectiveInformation_HelpText,
-				Value = ShowRawDirectiveInformation
-			};
+			yield return ExtensionsNLogLogManager.TaskQueueAndTaskType;
+			yield return ExtensionsNLogLogManager.RawTaskDirective;
 		}
 
 		/// <inheritdoc />
-		public override string FilterValueForLogging(TaskInfo value, Sensitivity level, IEnumerable<string> customFlags, string format, IFormatProvider formatProvider)
+		public override string FilterValueForLogging(TaskInfo value, LogSensitivity level, IEnumerable<SensitivityFlag> customFlags, string format, IFormatProvider formatProvider)
 		{
-			if (null == value)
+			if (null == value?.DirectiveType)
 				return String.Empty;
 
-			customFlags = customFlags ?? Enumerable.Empty<string>();
-			switch (level)
+			string basicValue = null;
+			try
 			{
-				case Sensitivity.Custom:
+				// Is it an objverex?
+				{
+					if (null == basicValue 
+						&& typeof(ObjVerExTaskDirective).IsAssignableFrom(value.DirectiveType))
 					{
-						if (customFlags.Contains(HideTaskQueueAndTypeSensitivityFlag))
+						var d = value.Directive as ObjVerExTaskDirective;
+						var objVer = MFUtils.ParseObjVerString(d?.ObjVerEx);
+						basicValue = this.GetObjVerFilter().FilterValueForLogging(objVer, level, customFlags, format, formatProvider);
+					}
+				}
+
+				// Is it an objid?
+				{
+					if (null == basicValue
+						&& typeof(ObjIDTaskDirective).IsAssignableFrom(value.DirectiveType))
+					{
+						var d = value.Directive as ObjIDTaskDirective;
+						if (d?.TryGetObjID(out ObjID objID) ?? false)
 						{
-							if (customFlags.Contains(ShowRawDirectiveInformation))
-							{
-								return $"{value.TaskId} (directive: {value.Directive?.ToJson()})"; // No task queue and type, but directive.
-							}
-							else
-							{
-								return value.TaskId; // Just the ID.
-							}
+							basicValue = this.GetObjIDFilter().FilterValueForLogging(objID, level, customFlags, format, formatProvider);
 						}
 						else
 						{
-							if (customFlags.Contains(ShowRawDirectiveInformation))
-							{
-								return $"{value.TaskId} (queue: {value.QueueId}, task type: {value.TaskType}, directive: {value.Directive?.ToJson()})"; // Everything.
-							}
-							else
-							{
-								return $"{value.TaskId} (queue: {value.QueueId}, task type: {value.TaskType})"; // ID, queue, type, no directive.
-							}
+							return $"(invalid object data: {d?.ObjectTypeID}-{d?.ObjectID})";
 						}
 					}
-				case Sensitivity.MinimumSensitivity:
-					if (customFlags.Contains(ShowRawDirectiveInformation))
-					{
-						return $"{value.TaskId} (queue: {value.QueueId}, task type: {value.TaskType}, directive: {value.Directive?.ToJson()})"; // Everything.
-					}
-					else
-					{
-						return $"{value.TaskId} (queue: {value.QueueId}, task type: {value.TaskType})"; // ID, queue, type, no directive.
-					}
+				}
 
-
-				default: // For maximum, or anything else, just return the ID.
-					return value.TaskId; // Just the ID.
+				// Does it have a name?
+				{
+					if (null == basicValue
+						&& typeof(TaskDirectiveWithDisplayName).IsAssignableFrom(value.DirectiveType))
+					{
+						var d = value.Directive as TaskDirectiveWithDisplayName;
+						if (!string.IsNullOrWhiteSpace(d?.DisplayName))
+							basicValue = d.DisplayName;
+					}
+				}
 			}
+			catch(Exception e)
+			{
+				this.Logger?.Error(e, $"Could not filter task info for logging");
+				return String.Empty;
+			}
+
+			// If we can include the task queue then do so.
+			string taskQueueAndType = null;
+			if(CanLog(level, customFlags, ExtensionsNLogLogManager.TaskQueueAndTaskType))
+			{
+				taskQueueAndType = $" (queue: {value.QueueId}, task type: {value.TaskType})";
+			}
+
+			// If we can include the raw task directive then do so.
+			string directiveValue = null;
+			if(null != value.Directive
+				&& CanLog(level,customFlags, ExtensionsNLogLogManager.RawTaskDirective))
+			{
+				directiveValue = $" (directive: {value.Directive?.ToJson()})";
+			}
+
+			// Return the log value.
+			return $"{value.TaskId}{basicValue}{taskQueueAndType}{directiveValue}";
 		}
 	}
 }

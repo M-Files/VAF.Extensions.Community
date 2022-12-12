@@ -2,6 +2,7 @@
 
 namespace MFiles.VAF.Extensions
 {
+	[UsesConfigurationResources]
 	public enum RecurrenceType
 	{
 		[JsonConfEditor(Label = ResourceMarker.Id + nameof(Resources.Configuration.RecurrenceType_Unknown))]

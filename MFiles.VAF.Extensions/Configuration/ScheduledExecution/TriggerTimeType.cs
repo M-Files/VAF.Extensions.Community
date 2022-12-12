@@ -2,6 +2,7 @@
 
 namespace MFiles.VAF.Extensions.ScheduledExecution
 {
+	[UsesConfigurationResources]
 	public enum TriggerTimeType
 	{
 		[JsonConfEditor(Label = ResourceMarker.Id + nameof(Resources.Configuration.TriggerTimeType_ServerTime))]

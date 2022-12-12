@@ -11,7 +11,7 @@ using MFiles.VAF.MultiserverMode;
 using System.Collections.Generic;
 using MFiles.VAF.AppTasks;
 using MFiles.VAF.Extensions.Dashboards;
-using MFiles.VaultApplications.Logging;
+using MFiles.VAF.Configuration.Logging;
 
 namespace MFiles.VAF.Extensions
 {
@@ -263,7 +263,7 @@ namespace MFiles.VAF.Extensions
 			this.Name = name ?? throw new ArgumentNullException( nameof(name) );
 
 			// Initialize default values.
-			this.DashboardRunCommand.ID = $"cmdRunBackgroundOperation-{this.ID.ToString("N")}";
+			this.DashboardRunCommand.ID = $"cmdRunBackgroundOperation-{this.ID:N}";
 			this.DashboardRunCommand.Execute = (c, o) =>
 			{
 				// Try and run the background operation.
@@ -324,16 +324,12 @@ namespace MFiles.VAF.Extensions
 		/// <param name="directive">The directive ("data") to pass to the execution.</param>
 		public void RunOnSchedule(Schedule schedule, TaskDirective directive = null)
 		{
-			// Check for validity.
-			if (null == schedule)
-				throw new ArgumentNullException(nameof(schedule));
+			// Set up the Recurrence data.
+			this.Schedule = schedule ?? throw new ArgumentNullException(nameof(schedule)); ;
+			this.RepeatType = TaskQueueBackgroundOperationRepeatType.Schedule;
 
 			// Cancel any existing executions.
 			this.StopRunningAtIntervals();
-
-			// Set up the Recurrence data.
-			this.Schedule = schedule;
-			this.RepeatType = TaskQueueBackgroundOperationRepeatType.Schedule;
 
 			// Run (which will set up the next iteration).
 			var nextRun = this.Schedule?.GetNextExecution();
@@ -412,7 +408,7 @@ namespace MFiles.VAF.Extensions
 			}
 			catch (Exception e)
 			{
-				this.Logger?.Error
+				this.Logger?.ErrorFormat
 				(
 					e,
 					Resources.Exceptions.TaskQueueBackgroundOperations.ExceptionCancellingTasks,
