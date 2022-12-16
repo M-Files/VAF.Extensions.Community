@@ -48,7 +48,7 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <inheritdoc />
-		public new string AddTask(Vault vault, string queueId, string taskType, TaskDirective directive = null, DateTime? activationTime = null)
+		public new virtual string AddTask(Vault vault, string queueId, string taskType, TaskDirective directive = null, DateTime? activationTime = null)
 		{
 			this.Logger?.Info($"Adding task to queue {queueId} of type {taskType} at {(activationTime ?? DateTime.Now).ToString("O")}.");
 			return base.AddTask(vault, queueId, taskType, directive, activationTime);
