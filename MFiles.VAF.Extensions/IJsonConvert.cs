@@ -1,4 +1,5 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VAF.Configuration.JsonAdaptor;
 using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
@@ -6,6 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -134,6 +136,10 @@ namespace MFiles.VAF.Extensions
 							}
 					}
 
+					// If this is a JsonValueAdaptor then include it all regardless (fixes issue with search conditions).
+					if (type == typeof(JsonValueAdaptor))
+						return value;
+
 					// If the property has no default value, try to get the default of that type.
 					try
 					{
@@ -154,9 +160,11 @@ namespace MFiles.VAF.Extensions
 						return null;
 					if (defaultValue == value)
 						return null;
-					var serializedValue = this.JsonConvert.Serialize(value ?? "{}");
-					if (serializedValue == "{}" 
-						|| this.JsonConvert.Serialize(defaultValue) == serializedValue)
+
+					var serializedValue = null == value ? "{}" : this.JsonConvert.Serialize(value);
+					var serializedDefaultValue = null == defaultValue ? "{}" : this.JsonConvert.Serialize(defaultValue);
+
+					if (serializedValue == "{}" || serializedDefaultValue == serializedValue)
 						return null;
 				}
 				catch(Exception e)
