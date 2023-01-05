@@ -87,7 +87,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 			DateTimeOffset expected
 		)
 		{
-			var frequency = JsonConvert.DeserializeObject<Frequency>(@"{
+			var frequency = Newtonsoft.Json.JsonConvert.DeserializeObject<Frequency>(@"{
     ""Triggers"": [
         {
             ""Type"": ""Daily"",
@@ -113,7 +113,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		[TestMethod]
 		public void SplitTriggerType(DateTime now, DateTime expected)
 		{
-			var frequency = JsonConvert.DeserializeObject<Frequency>(@"{
+			var frequency = Newtonsoft.Json.JsonConvert.DeserializeObject<Frequency>(@"{
     ""Triggers"": [
         {
             ""Type"": ""Weekly"",
@@ -229,9 +229,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				RecurrenceType = RecurrenceType.Interval
 			};
 			var expected = JToken.Parse("{\"RecurrenceType\":1,\"Interval\":{\r\n  \"Hours\" : 1, \"Minutes\" : 2, \"Seconds\" : 3 , \"RunOnVaultStartup\": true\r\n} }");
-			var output = JToken.Parse(JsonConvert.SerializeObject(frequency));
+			var output = JToken.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(frequency));
 
-			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			Assert.AreEqual(Newtonsoft.Json.JsonConvert.SerializeObject(expected), Newtonsoft.Json.JsonConvert.SerializeObject(output));
 		}
 
 		/// <summary>
@@ -260,9 +260,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				RecurrenceType = RecurrenceType.Schedule
 			};
 			var expected = JToken.Parse("{\"RecurrenceType\":2,\"Schedule\":{\"Enabled\":true,\"Triggers\":[{\"Type\":1,\"DailyTriggerConfiguration\":{\"TriggerTimes\":[\"02:03:04\"]},\"WeeklyTriggerConfiguration\":{\"TriggerDays\":[],\"TriggerTimes\":[]},\"DayOfMonthTriggerConfiguration\":{\"UnrepresentableDateHandling\":0,\"TriggerDays\":[],\"TriggerTimes\":[]}}],\"RunOnVaultStartup\":false}}");
-			var output = JToken.Parse(JsonConvert.SerializeObject(frequency));
+			var output = JToken.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(frequency));
 
-			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			Assert.AreEqual(Newtonsoft.Json.JsonConvert.SerializeObject(expected), Newtonsoft.Json.JsonConvert.SerializeObject(output));
 		}
 
 		/// <summary>
@@ -272,7 +272,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		public void DeserializesCorrectly()
 		{
 			string json = @"{""RecurrenceType"":1,""Interval"":{ ""Interval"": ""01:02:03"",  ""RunOnVaultStartup"": true}}";
-			Frequency output = JsonConvert.DeserializeObject<Frequency>(json);
+			Frequency output = Newtonsoft.Json.JsonConvert.DeserializeObject<Frequency>(json);
 
 			Frequency expected = new Frequency()
 			{
@@ -280,7 +280,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				RecurrenceType = RecurrenceType.Interval
 			};
 
-			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			Assert.AreEqual(Newtonsoft.Json.JsonConvert.SerializeObject(expected), Newtonsoft.Json.JsonConvert.SerializeObject(output));
 		}
 
 		/// <summary>
@@ -290,7 +290,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		public void DeserializesTimeSpanExCorrectly_WithoutRunOnVaultStartup()
 		{
 			string json = @"{ ""Interval"": ""01:02:03""}";
-			Frequency output = JsonConvert.DeserializeObject<Frequency>(json);
+			Frequency output = Newtonsoft.Json.JsonConvert.DeserializeObject<Frequency>(json);
 
 			Frequency expected = new Frequency()
 			{
@@ -301,7 +301,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				RecurrenceType = RecurrenceType.Interval
 			};
 
-			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			Assert.AreEqual(Newtonsoft.Json.JsonConvert.SerializeObject(expected), Newtonsoft.Json.JsonConvert.SerializeObject(output));
 		}
 
 		/// <summary>
@@ -311,7 +311,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		public void DeserializesTimeSpanExCorrectly_RunOnVaultStartupEqualsFalse()
 		{
 			string json = @"{ ""Interval"": ""01:02:03"", ""RunOnVaultStartup"": false}";
-			Frequency output = JsonConvert.DeserializeObject<Frequency>(json);
+			Frequency output = Newtonsoft.Json.JsonConvert.DeserializeObject<Frequency>(json);
 
 			Frequency expected = new Frequency()
 			{
@@ -322,7 +322,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				RecurrenceType = RecurrenceType.Interval
 			};
 
-			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			Assert.AreEqual(Newtonsoft.Json.JsonConvert.SerializeObject(expected), Newtonsoft.Json.JsonConvert.SerializeObject(output));
 		}
 
 		/// <summary>
@@ -332,7 +332,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		public void DeserializesTimeSpanExCorrectly_RunOnVaultStartupEqualsTrue()
 		{
 			string json = @"{ ""Interval"": ""01:02:03"",  ""RunOnVaultStartup"": true}";
-			Frequency output = JsonConvert.DeserializeObject<Frequency>(json);
+			Frequency output = Newtonsoft.Json.JsonConvert.DeserializeObject<Frequency>(json);
 
 			Frequency expected = new Frequency()
 			{
@@ -340,7 +340,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				RecurrenceType = RecurrenceType.Interval
 			};
 
-			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			Assert.AreEqual(Newtonsoft.Json.JsonConvert.SerializeObject(expected), Newtonsoft.Json.JsonConvert.SerializeObject(output));
 		}
 
 		/// <summary>
@@ -350,9 +350,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		public void DeserializesTimeSpan()
 		{
 			TimeSpan timespan = new TimeSpan(1, 2, 3);
-			string json = JsonConvert.SerializeObject(timespan);
+			string json = Newtonsoft.Json.JsonConvert.SerializeObject(timespan);
 
-			var output = JsonConvert.DeserializeObject<Frequency>(json);
+			var output = Newtonsoft.Json.JsonConvert.DeserializeObject<Frequency>(json);
 
 			Frequency expected = new Frequency()
 			{
@@ -360,7 +360,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				RecurrenceType = RecurrenceType.Interval
 			};
 
-			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			Assert.AreEqual(Newtonsoft.Json.JsonConvert.SerializeObject(expected), Newtonsoft.Json.JsonConvert.SerializeObject(output));
 			//output.ShouldBeEquivalentTo(expected);
 		}
 
@@ -371,7 +371,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		public void DeserializesFrequencyScheduleCorrectly_Daily()
 		{
 			string json = "{\"RecurrenceType\":2,\"Schedule\":{\"Triggers\":[{\"Type\":1,\"DailyTriggerConfiguration\":{\"TriggerTimes\":[\"02:03:04\"]}}]}}";
-			Frequency output = JsonConvert.DeserializeObject<Frequency>(json);
+			Frequency output = Newtonsoft.Json.JsonConvert.DeserializeObject<Frequency>(json);
 
 			Frequency expected = new Frequency()
 			{
@@ -392,7 +392,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				RecurrenceType = RecurrenceType.Schedule
 			};
 
-			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			Assert.AreEqual(Newtonsoft.Json.JsonConvert.SerializeObject(expected), Newtonsoft.Json.JsonConvert.SerializeObject(output));
 		}
 
 		/// <summary>
@@ -402,7 +402,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		public void DeserializesScheduleCorrectly_Daily()
 		{
 			string json = "{\"Triggers\":[{\"Type\":1,\"DailyTriggerConfiguration\":{\"TriggerTimes\":[\"02:03:04\"]}}]}";
-			Frequency output = JsonConvert.DeserializeObject<Frequency>(json);
+			Frequency output = Newtonsoft.Json.JsonConvert.DeserializeObject<Frequency>(json);
 
 			Frequency expected = new Frequency()
 			{
@@ -423,7 +423,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				RecurrenceType = RecurrenceType.Schedule
 			};
 
-			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			Assert.AreEqual(Newtonsoft.Json.JsonConvert.SerializeObject(expected), Newtonsoft.Json.JsonConvert.SerializeObject(output));
 		}
 
 		/// <summary>
@@ -451,15 +451,15 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				RunOnVaultStartup = false //Picked false because it's not the default value
 			};
 
-			string json = JsonConvert.SerializeObject(schedule);
-			var output = JsonConvert.DeserializeObject<Frequency>(json);
+			string json = Newtonsoft.Json.JsonConvert.SerializeObject(schedule);
+			var output = Newtonsoft.Json.JsonConvert.DeserializeObject<Frequency>(json);
 			var expected = new Frequency()
 			{
 				Schedule = schedule,
 				RecurrenceType = RecurrenceType.Schedule,
 			};
 
-			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			Assert.AreEqual(Newtonsoft.Json.JsonConvert.SerializeObject(expected), Newtonsoft.Json.JsonConvert.SerializeObject(output));
 		}
 
 		/// <summary>
@@ -473,9 +473,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				Frequency = new TimeSpan(1, 2, 3)
 			};
 
-			string json = JsonConvert.SerializeObject(oldWrapper);
+			string json = Newtonsoft.Json.JsonConvert.SerializeObject(oldWrapper);
 
-			var output = JsonConvert.DeserializeObject<FrequencyWrapper>(json);
+			var output = Newtonsoft.Json.JsonConvert.DeserializeObject<FrequencyWrapper>(json);
 			var expected = new FrequencyWrapper()
 			{
 				Frequency = new Frequency()
@@ -485,7 +485,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				}
 			};
 
-			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			Assert.AreEqual(Newtonsoft.Json.JsonConvert.SerializeObject(expected), Newtonsoft.Json.JsonConvert.SerializeObject(output));
 		}
 
 		/// <summary>
@@ -503,9 +503,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				Frequency = timeSpanEx
 			};
 
-			string json = JsonConvert.SerializeObject(oldWrapper);
+			string json = Newtonsoft.Json.JsonConvert.SerializeObject(oldWrapper);
 
-			var output = JsonConvert.DeserializeObject<FrequencyWrapper>(json);
+			var output = Newtonsoft.Json.JsonConvert.DeserializeObject<FrequencyWrapper>(json);
 			var expected = new FrequencyWrapper()
 			{
 				Frequency = new Frequency()
@@ -515,7 +515,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				}
 			};
 
-			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			Assert.AreEqual(Newtonsoft.Json.JsonConvert.SerializeObject(expected), Newtonsoft.Json.JsonConvert.SerializeObject(output));
 		}
 
 		/// <summary>
@@ -547,9 +547,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				Frequency = schedule
 			};
 
-			string json = JsonConvert.SerializeObject(oldWrapper);
+			string json = Newtonsoft.Json.JsonConvert.SerializeObject(oldWrapper);
 
-			var output = JsonConvert.DeserializeObject<FrequencyWrapper>(json);
+			var output = Newtonsoft.Json.JsonConvert.DeserializeObject<FrequencyWrapper>(json);
 			var expected = new FrequencyWrapper()
 			{
 				Frequency = new Frequency()
@@ -559,7 +559,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 				}
 			};
 
-			Assert.AreEqual(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(output));
+			Assert.AreEqual(Newtonsoft.Json.JsonConvert.SerializeObject(expected), Newtonsoft.Json.JsonConvert.SerializeObject(output));
 		}
 	}
 }
