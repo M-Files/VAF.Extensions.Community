@@ -1,4 +1,5 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VAF.Configuration.JsonAdaptor;
 using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
 using MFiles.VAF.Extensions.ExtensionMethods;
@@ -15,6 +16,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using static MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules.EnsureLatestSerializationSettingsUpgradeRuleTests;
 
 namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 {
@@ -611,6 +613,60 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 
 			Assert.IsTrue(rule.Execute(vault));
 			Assert.That.AreEqualJson("{\"Hello\": 0}", rule.GetReadWriteLocationValue(vault));
+
+		}
+
+		[DataContract]
+		private class ConfigurationWithSearchConditionsJA
+		{
+			[DataMember]
+			public SearchConditionsJA SearchConditions { get; set; }
+				= new SearchConditionsJA();
+		}
+
+		[TestMethod]
+		public void LoggingUpgrade_ConfigurationWithSearchConditionsJA()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithSearchConditionsJA>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, @"{
+    ""SearchConditions"": [
+        {
+            ""conditionType"": ""equal"",
+            ""expression"": {
+                ""type"": ""propertyValue"",
+                ""propertyDef"": ""{82490C2F-8FB2-423B-85B5-F4ADB214C0FD}"",
+                ""indirectionLevels"": []
+            },
+            ""typedValue"": {
+                ""dataType"": ""lookup"",
+                ""value"": {
+                    ""isNull"": true
+                }
+            }
+        }
+    ]
+}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson(@"{
+    ""SearchConditions"": [
+        {
+            ""conditionType"": ""equal"",
+            ""expression"": {
+                ""type"": ""propertyValue"",
+                ""propertyDef"": ""{82490C2F-8FB2-423B-85B5-F4ADB214C0FD}""
+            },
+            ""typedValue"": {
+                ""dataType"": ""lookup"",
+                ""value"": {
+                    ""isNull"": true
+                }
+            }
+        }
+    ]
+}", rule.GetReadWriteLocationValue(vault));
 
 		}
 	}

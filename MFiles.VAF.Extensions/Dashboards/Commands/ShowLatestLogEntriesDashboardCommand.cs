@@ -100,7 +100,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			// Inject the log file list into the dashboard template.
 			var downloadMethod = clientOps.Manager.CreateCommandMethodSource(
 					clientOps.DefaultNodeLocation, RetrieveLatestLogEntriesCommand.CommandId);
-			string downloadMethodJson = JsonConvert.SerializeObject(downloadMethod);
+			string downloadMethodJson = Newtonsoft.Json.JsonConvert.SerializeObject(downloadMethod);
 			string dashboard = template
 				.Replace("%RETRIEVELOGENTRIES_METHOD%", downloadMethodJson)
 				.Replace("%IMG_WARNING_DATAURI%", DashboardHelpersEx.ImageFileToDataUri("Resources/Images/warning.png"));
@@ -158,7 +158,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			// Resolve the files to download from the input params.
 			var envContext = (EventHandlerRequestContext)context;
 			int methodIndex = envContext.Environment.InputParams.FindIndex(a => a == CommandId);
-			var requestParameters = JsonConvert.DeserializeObject<RequestParameters>
+			var requestParameters = Newtonsoft.Json.JsonConvert.DeserializeObject<RequestParameters>
 				(
 					envContext.Environment.InputParams.Skip(methodIndex + 1).FirstOrDefault() ?? "{}"
 				);
@@ -172,7 +172,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 				// Nothing will ever match; let's not dig through the files.
 				clientOps.Directives.Add(new VAF.Configuration.Domain.ClientDirective.UpdateDashboardContent()
 				{
-					Content = JsonConvert.SerializeObject(logEntries)
+					Content = Newtonsoft.Json.JsonConvert.SerializeObject(logEntries)
 				});
 				return;
 			}
@@ -275,7 +275,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			// Create the directive.
 			clientOps.Directives.Add(new VAF.Configuration.Domain.ClientDirective.UpdateDashboardContent()
 			{
-				Content = JsonConvert.SerializeObject(logEntries)
+				Content = Newtonsoft.Json.JsonConvert.SerializeObject(logEntries)
 			});
 
 		}

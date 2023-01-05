@@ -39,7 +39,7 @@ namespace MFiles.VAF.Extensions
 
 				// Add it to the object.
 				writer.WritePropertyName(name);
-				writer.WriteRawValue(JsonConvert.SerializeObject(memberValue, Formatting.Indented));
+				writer.WriteRawValue(Newtonsoft.Json.JsonConvert.SerializeObject(memberValue, Formatting.Indented));
 
 			}
 
@@ -63,7 +63,7 @@ namespace MFiles.VAF.Extensions
 
 				// Add it to the object.
 				writer.WritePropertyName(name);
-				writer.WriteRawValue(JsonConvert.SerializeObject(memberValue, Formatting.Indented));
+				writer.WriteRawValue(Newtonsoft.Json.JsonConvert.SerializeObject(memberValue, Formatting.Indented));
 
 			}
 

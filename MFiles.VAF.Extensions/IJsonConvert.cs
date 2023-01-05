@@ -1,11 +1,14 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VAF.Configuration.JsonAdaptor;
 using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
+using MFiles.VAF.Extensions.Configuration.Upgrading.Rules;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,6 +55,31 @@ namespace MFiles.VAF.Extensions
 		string Serialize(object input, Type t);
 	}
 
+	public abstract class JsonConvert
+		: IJsonConvert
+	{
+		/// <inheritdoc />
+		public abstract T Deserialize<T>(string input);
+
+		/// <inheritdoc />
+		public abstract object Deserialize(string input, Type type);
+
+		/// <inheritdoc />
+		public abstract string Serialize<T>(T input);
+
+		/// <inheritdoc />
+		public abstract string Serialize(object input, Type t);
+
+		/// <summary>
+		/// If these types are found then their default values are left intact
+		/// when converting the JSON.
+		/// </summary>
+		public static List<string> DefaultValueSkippedTypes { get; } = new List<string>()
+		{
+			"MFiles.VAF.Configuration.JsonAdaptor.JsonValueAdaptor"
+		};
+	}
+
 	/// <summary>
 	/// An implementation of <see cref="IJsonConvert"/>
 	/// that delegates to Newtonsoft.
@@ -63,8 +91,8 @@ namespace MFiles.VAF.Extensions
 		{
 			protected IJsonConvert JsonConvert { get; set; }
 			private ILogger Logger { get; } = LogManager.GetLogger(typeof(DefaultValueAwareValueProvider));
-			private MemberInfo memberInfo;
-			private IValueProvider valueProvider;
+			private readonly MemberInfo memberInfo;
+			private readonly IValueProvider valueProvider;
 			public DefaultValueAwareValueProvider(IJsonConvert jsonConvert, MemberInfo memberInfo, IValueProvider valueProvider)
 			{
 				this.JsonConvert = jsonConvert
@@ -134,6 +162,32 @@ namespace MFiles.VAF.Extensions
 							}
 					}
 
+					// Is this type part of the skipped types?
+					if (null != Extensions.JsonConvert.DefaultValueSkippedTypes)
+					{
+						foreach (var s in Extensions.JsonConvert.DefaultValueSkippedTypes)
+						{
+							// Sanity.
+							if (null == s)
+								continue;
+
+							// Is it a prefix or an exact match?
+							if (s.EndsWith("*"))
+							{
+								// It's a prefix.
+								var prefix = s.Substring(0, s.Length - 1);
+								if (type.FullName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+									return value;
+							}
+							else
+							{
+								// Exact match.
+								if (type.FullName.Equals(s, StringComparison.OrdinalIgnoreCase))
+									return value;
+							}
+						}
+					}
+
 					// If the property has no default value, try to get the default of that type.
 					try
 					{
@@ -154,9 +208,11 @@ namespace MFiles.VAF.Extensions
 						return null;
 					if (defaultValue == value)
 						return null;
-					var serializedValue = this.JsonConvert.Serialize(value ?? "{}");
-					if (serializedValue == "{}" 
-						|| this.JsonConvert.Serialize(defaultValue) == serializedValue)
+
+					var serializedValue = null == value ? "{}" : this.JsonConvert.Serialize(value);
+					var serializedDefaultValue = null == defaultValue ? "{}" : this.JsonConvert.Serialize(defaultValue);
+
+					if (serializedValue == "{}" || serializedDefaultValue == serializedValue)
 						return null;
 				}
 				catch(Exception e)
