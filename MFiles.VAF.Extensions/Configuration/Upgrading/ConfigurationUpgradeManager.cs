@@ -51,7 +51,8 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				// Get any configuration upgrade rules.
 				var upgradeStopwatch = new Stopwatch();
 				upgradeStopwatch.Start();
-				var rules = this.GetAppropriateUpgradeRules<TSecureConfiguration>(vault) ?? Enumerable.Empty<IUpgradeRule>();
+				var rules = (this.GetAppropriateUpgradeRules<TSecureConfiguration>(vault) ?? Enumerable.Empty<IUpgradeRule>())
+					.ToList();
 
 				if (!rules.Any())
 				{
@@ -60,10 +61,8 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				}
 
 				// Run the rules.
-				int ruleCount = 0;
 				foreach (var rule in rules)
 				{
-					ruleCount++;
 					try
 					{
 						var ruleStopwatch = new Stopwatch();
@@ -78,7 +77,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 					}
 				}
 				upgradeStopwatch.Stop();
-				this.Logger?.Info($"Took {upgradeStopwatch.ElapsedMilliseconds}ms to upgrade configuration ({ruleCount} rules).");
+				this.Logger?.Info($"Took {upgradeStopwatch.ElapsedMilliseconds}ms to upgrade configuration ({rules.Count} rules).");
 			}
 			catch (Exception e)
 			{
