@@ -71,10 +71,10 @@ namespace MFiles.VAF.Extensions
 
         /// <inheritdoc />
         protected override object Deserialize(string input, Type t)
-            => JsonConvert.DeserializeObject(input, t);
+            => Newtonsoft.Json.JsonConvert.DeserializeObject(input, t);
 
         /// <inheritdoc />
         protected override string Serialize(object input)
-            => JsonConvert.SerializeObject(input);
+            => Newtonsoft.Json.JsonConvert.SerializeObject(input);
     }
 }
