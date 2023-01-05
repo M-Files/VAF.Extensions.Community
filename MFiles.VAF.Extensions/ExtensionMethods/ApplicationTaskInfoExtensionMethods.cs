@@ -38,7 +38,7 @@ namespace MFiles.VAF.Extensions
 			// Try and parse the remarks into the expected type.
 			try
 			{
-				var info = JsonConvert.DeserializeObject<TTaskInformation>(serialisedContent);
+				var info = Newtonsoft.Json.JsonConvert.DeserializeObject<TTaskInformation>(serialisedContent);
 				if (null != info)
 					info.CurrentTaskState = applicationTask.State;
 				return info;
