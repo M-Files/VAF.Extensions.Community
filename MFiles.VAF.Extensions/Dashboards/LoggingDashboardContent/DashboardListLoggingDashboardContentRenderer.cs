@@ -111,6 +111,8 @@ namespace MFiles.VAF.Extensions.Dashboards.LoggingDashboardContent
 				{
 					// Add whatever buttons, according to app configuration.
 					var buttons = new DashboardContentCollection();
+
+					// If the M-Files version is old and can't provide a default log location then don't render the buttons.
 					if (false == string.IsNullOrWhiteSpace(Commands.DefaultLogDashboardCommandBase.ResolveRootLogPath(context?.Vault)))
 					{
 						if (this.AllowDashboardLogFileDownload)
