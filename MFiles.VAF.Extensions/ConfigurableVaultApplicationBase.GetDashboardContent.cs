@@ -218,7 +218,7 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <returns>The dashboard content.  Can be null if no logging data is available or configured.</returns>
 		public virtual IDashboardContent GetLoggingDashboardContent(IConfigurationRequestContext context)
-			=> this.LoggingDashboardContentRenderer?.GetDashboardContent(this.GetLoggingConfiguration());
+			=> this.LoggingDashboardContentRenderer?.GetDashboardContent(context, this.GetLoggingConfiguration());
 
 		#endregion
 
