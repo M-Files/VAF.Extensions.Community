@@ -1,4 +1,5 @@
-﻿using MFiles.VAF.Configuration.Domain.Dashboards;
+﻿using MFiles.VAF.Configuration.AdminConfigurations;
+using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Configuration.Logging;
 
 namespace MFiles.VAF.Extensions.Dashboards.LoggingDashboardContent
@@ -9,6 +10,10 @@ namespace MFiles.VAF.Extensions.Dashboards.LoggingDashboardContent
 		/// Gets the logging dashboard content.
 		/// </summary>
 		/// <returns>The content, or null if nothing to render.</returns>
-		IDashboardContent GetDashboardContent(ILoggingConfiguration loggingConfiguration);
+		IDashboardContent GetDashboardContent
+		(
+			IConfigurationRequestContext context, 
+			ILoggingConfiguration loggingConfiguration
+		);
 	}
 }

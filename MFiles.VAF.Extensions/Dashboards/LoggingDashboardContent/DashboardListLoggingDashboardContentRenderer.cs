@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Configuration.Logging.Targets;
+using MFiles.VAF.Configuration.AdminConfigurations;
 
 namespace MFiles.VAF.Extensions.Dashboards.LoggingDashboardContent
 {
@@ -27,7 +28,11 @@ namespace MFiles.VAF.Extensions.Dashboards.LoggingDashboardContent
 		/// </summary>
 		protected bool AllowDashboardLogEntryViewing { get; set; } = true;
 
-		public virtual DashboardPanelEx GetDashboardContent(ILoggingConfiguration loggingConfiguration)
+		public virtual DashboardPanelEx GetDashboardContent
+		(
+			IConfigurationRequestContext context,
+			ILoggingConfiguration loggingConfiguration
+		)
 		{
 			// If we don't have any logging configuration then return null.
 			if (loggingConfiguration == null)
@@ -106,25 +111,30 @@ namespace MFiles.VAF.Extensions.Dashboards.LoggingDashboardContent
 				{
 					// Add whatever buttons, according to app configuration.
 					var buttons = new DashboardContentCollection();
-					if (this.AllowDashboardLogFileDownload)
+
+					// If the M-Files version is old and can't provide a default log location then don't render the buttons.
+					if (false == string.IsNullOrWhiteSpace(Commands.DefaultLogDashboardCommandBase.ResolveRootLogPath(context?.Vault)))
 					{
-						buttons.Add(new DashboardDomainCommandEx
+						if (this.AllowDashboardLogFileDownload)
 						{
-							DomainCommandID = this.AllowUserToSelectLogFiles
-									? Dashboards.Commands.ShowSelectLogDownloadDashboardCommand.CommandId
-									: Dashboards.Commands.DownloadSelectedLogsDashboardCommand.CommandId,
-							Title = Resources.Dashboard.Logging_Table_DownloadLogs,
-							Icon = "Resources/Images/Download.png"
-						});
-					}
-					if (this.AllowDashboardLogEntryViewing)
-					{
-						buttons.Add(new DashboardDomainCommandEx
+							buttons.Add(new DashboardDomainCommandEx
+							{
+								DomainCommandID = this.AllowUserToSelectLogFiles
+										? Dashboards.Commands.ShowSelectLogDownloadDashboardCommand.CommandId
+										: Dashboards.Commands.DownloadSelectedLogsDashboardCommand.CommandId,
+								Title = Resources.Dashboard.Logging_Table_DownloadLogs,
+								Icon = "Resources/Images/Download.png"
+							});
+						}
+						if (this.AllowDashboardLogEntryViewing)
 						{
-							DomainCommandID = Dashboards.Commands.ShowLatestLogEntriesDashboardCommand.CommandId,
-							Title = Resources.Dashboard.Logging_Table_ShowLatestLogEntries,
-							Icon = "Resources/Images/viewlogs.png"
-						});
+							buttons.Add(new DashboardDomainCommandEx
+							{
+								DomainCommandID = Dashboards.Commands.ShowLatestLogEntriesDashboardCommand.CommandId,
+								Title = Resources.Dashboard.Logging_Table_ShowLatestLogEntries,
+								Icon = "Resources/Images/viewlogs.png"
+							});
+						}
 					}
 
 					// Add the buttons to the cell
@@ -163,7 +173,11 @@ namespace MFiles.VAF.Extensions.Dashboards.LoggingDashboardContent
 			};
 		}
 
-		IDashboardContent ILoggingDashboardContentRenderer.GetDashboardContent(ILoggingConfiguration loggingConfiguration)
-			=> this.GetDashboardContent(loggingConfiguration);
+		IDashboardContent ILoggingDashboardContentRenderer.GetDashboardContent
+		(
+			IConfigurationRequestContext context,
+			ILoggingConfiguration loggingConfiguration
+		)
+			=> this.GetDashboardContent(context, loggingConfiguration);
 	}
 }
