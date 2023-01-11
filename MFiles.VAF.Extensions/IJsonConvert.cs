@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Configuration;
 using MFiles.VAF.Configuration.JsonAdaptor;
+using MFiles.VAF.Configuration.JsonEditor;
 using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
@@ -11,6 +12,7 @@ using System;
 using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -144,6 +146,7 @@ namespace MFiles.VAF.Extensions
 					object defaultValue = null;
 					var instance = Activator.CreateInstance(this.memberInfo.ReflectedType);
 					Type type = null;
+					bool hasValueOptionsAttribute = false;
 					switch(this.memberInfo.MemberType)
 					{
 						case MemberTypes.Field:
@@ -151,6 +154,7 @@ namespace MFiles.VAF.Extensions
 								var fieldInfo = (FieldInfo)this.memberInfo;
 								type = fieldInfo.FieldType;
 								defaultValue = fieldInfo.GetValue(instance);
+								hasValueOptionsAttribute = fieldInfo.GetCustomAttribute<ValueOptionsAttribute>() != null;
 							break;
 							}
 						case MemberTypes.Property:
@@ -158,6 +162,7 @@ namespace MFiles.VAF.Extensions
 								var propertyInfo = (PropertyInfo)this.memberInfo;
 								type = propertyInfo.PropertyType;
 								defaultValue = propertyInfo.GetValue(instance);
+								hasValueOptionsAttribute = propertyInfo.GetCustomAttribute<ValueOptionsAttribute>() != null;
 								break;
 							}
 					}
@@ -203,6 +208,31 @@ namespace MFiles.VAF.Extensions
 					}
 					catch { } // Nope.
 
+					// If the type is an enum, but it has a ValueOptionsAttribute, then serialize as an integer.
+					if(type.IsEnum && hasValueOptionsAttribute)
+					{
+						try
+						{
+							value = (int)value;
+						}
+						catch (Exception e)
+						{
+							// Could not convert to integer.
+							this.Logger?.Warn(e, $"Could not convert {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name} value to an integer ({value}).");
+							return value;
+						}
+						try
+						{
+							defaultValue = (int)defaultValue;
+						}
+						catch (Exception e)
+						{
+							// Could not convert to integer.
+							this.Logger?.Warn(e, $"Could not convert {type.FullName} default value to an integer ({defaultValue}).");
+							return value;
+						}
+					}
+
 					// If the data is the same as the default value then do not serialize.
 					if (type == typeof(string) && string.Equals(defaultValue, value))
 						return null;
@@ -244,6 +274,40 @@ namespace MFiles.VAF.Extensions
 
 				// Return the value that the base implementation gave.
 				return value;
+			}
+		}
+
+		/// <summary>
+		/// A class to write enums as either integers or strings, depending on what's provided.
+		/// </summary>
+		internal class StringEnumConverterHandlesIntegers 
+			: StringEnumConverter
+		{
+			public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+			{
+				// Sanity.
+				if (null == writer 
+					|| null == value
+					|| null == serializer)
+					return;
+
+				// If it's an enum then write it as an enum.
+				try
+				{
+					var enumValue = (Enum)value;
+					base.WriteJson(writer, value, serializer);
+					return;
+				}
+				catch
+				{
+					// If we can write integers then awesome.
+					if (AllowIntegerValues && value.GetType() == typeof(int))
+					{
+						writer.WriteValue(value);
+						return;
+					}
+				}
+				throw new JsonSerializationException($"Value {value} ({value.GetType().FullName}) not supported by StringEnumConverterHandlesIntegers.");
 			}
 		}
 
@@ -368,7 +432,7 @@ namespace MFiles.VAF.Extensions
 				Formatting = Newtonsoft.Json.Formatting.Indented,
 				Converters = new List<JsonConverter>()
 					{
-						new StringEnumConverter()
+						new StringEnumConverterHandlesIntegers(){ AllowIntegerValues = true }
 					},
 				ContractResolver = new DefaultValueAwareContractResolver(this)
 			};

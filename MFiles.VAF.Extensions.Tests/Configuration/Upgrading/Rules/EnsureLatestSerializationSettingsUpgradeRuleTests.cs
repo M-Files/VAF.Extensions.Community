@@ -1,5 +1,7 @@
 ﻿using MFiles.VAF.Configuration;
 using MFiles.VAF.Configuration.JsonAdaptor;
+using MFiles.VAF.Configuration.AdminConfigurations;
+using MFiles.VAF.Configuration.JsonEditor;
 using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
 using MFiles.VAF.Extensions.ExtensionMethods;
@@ -669,5 +671,85 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 }", rule.GetReadWriteLocationValue(vault));
 
 		}
+    
+		#region IStableValueOptionsProvider
+
+		// Using this approach always stored enum values as integers; ensure we respect that.
+
+		public class MyOptionsProvided
+			: IStableValueOptionsProvider
+		{
+			/// <summary>
+			/// Options getter for MyOptions.
+			/// </summary>
+			/// <param name="context">Unused context.</param>
+			/// <returns></returns>
+			public IEnumerable<ValueOption> GetOptions(IConfigurationRequestContext context)
+			{
+				// Yield the available options.
+				yield return new ValueOption
+				{
+					Label = "First Value",
+					Value = ConfigurationWithStableValuesOptionProvider.MyOptions.FirstValue
+				};
+				yield return new ValueOption
+				{
+					Label = "Second Value",
+					Value = ConfigurationWithStableValuesOptionProvider.MyOptions.SecondValue
+				};
+				yield return new ValueOption
+				{
+					Label = "Third Value",
+					Value = ConfigurationWithStableValuesOptionProvider.MyOptions.ThirdValue
+				};
+			}
+		}
+
+		[DataContract]
+		public class ConfigurationWithStableValuesOptionProvider
+		{
+			public enum MyOptions
+			{
+				FirstValue = 10,
+				SecondValue = 20,
+				ThirdValue = 30,
+			}
+
+
+			[DataMember]
+			[JsonConfEditor(
+				Label = "Normal Enum",
+				DefaultValue = MyOptions.FirstValue)]
+			public MyOptions NormalEnum { get; set; }
+
+			[DataMember]
+			[JsonConfEditor(
+				Label = "Enum Options Provided",
+				TypeEditor = "options",
+				DefaultValue = MyOptions.FirstValue)]
+			[ValueOptions(typeof(MyOptionsProvided))]
+			public MyOptions EnumOptionsProvided { get; set; }
+		}
+
+		[TestMethod]
+		public void StableValueOptionsEnumValuesAreStoredAsIntegers()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithStableValuesOptionProvider>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, @"{
+				""NormalEnum"" : ""SecondValue"",
+				""EnumOptionsProvided"" : ""30""
+			}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson(@"{
+				""NormalEnum"" : ""SecondValue"",
+				""EnumOptionsProvided"" : ""30""
+			}", rule.GetReadWriteLocationValue(vault));
+		}
+
+		#endregion
+
 	}
 }
