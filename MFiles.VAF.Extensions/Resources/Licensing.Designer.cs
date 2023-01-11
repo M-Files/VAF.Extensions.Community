@@ -79,7 +79,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Copyright.
+        ///   Looks up a localized string similar to Copyright:.
         /// </summary>
         internal static string ApplicationDetailsPanel_RowHeaders_Copyright {
             get {
