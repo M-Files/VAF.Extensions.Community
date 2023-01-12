@@ -73,7 +73,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 
 						if (this.NamedValueStorage.TryGetValue(t, out Dictionary<string, Dictionary<string, string>> d))
 						{
-							if (d?.TryGetValue(n, out Dictionary<string, string> values) ?? false
+							Dictionary<string, string> values = null;
+							if (d?.TryGetValue(n, out values) ?? false
 								&& null != values)
 							{
 								foreach (var kvp in values)
