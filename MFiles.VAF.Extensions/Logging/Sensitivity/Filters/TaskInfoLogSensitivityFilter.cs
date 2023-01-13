@@ -73,7 +73,8 @@ namespace MFiles.VAF.Extensions.Logging.Sensitivity.Filters
 						&& typeof(ObjIDTaskDirective).IsAssignableFrom(value.DirectiveType))
 					{
 						var d = value.Directive as ObjIDTaskDirective;
-						if (d?.TryGetObjID(out ObjID objID) ?? false)
+						ObjID objID = null;
+						if (d?.TryGetObjID(out objID) ?? false)
 						{
 							basicValue = this.GetObjIDFilter().FilterValueForLogging(objID, level, customFlags, format, formatProvider);
 						}
