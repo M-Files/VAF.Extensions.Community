@@ -563,7 +563,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		}
 
 		[TestMethod]
-		public void SerializesEmptyFrequency()
+		public void SerializesDefaultFrequency()
 		{
 			var config = new FrequencyWrapper();
 			var serializedConfig = JsonConvert.SerializeObject(config, new NewtonsoftJsonConvert().JsonSerializerSettings);
