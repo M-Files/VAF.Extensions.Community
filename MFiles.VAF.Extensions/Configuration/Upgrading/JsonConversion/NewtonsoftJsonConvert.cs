@@ -1,93 +1,23 @@
 ﻿using MFiles.VAF.Configuration;
-using MFiles.VAF.Configuration.JsonAdaptor;
-using MFiles.VAF.Configuration.JsonEditor;
-using MFiles.VAF.Configuration.JsonAdaptor;
 using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
-using MFiles.VAF.Extensions.Configuration.Upgrading.Rules;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using System;
-using System.CodeDom;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions
 {
-	public interface IJsonConvert
-	{
-		/// <summary>
-		/// Deserializes <paramref name="input"/> into an instance of <typeparamref name="T"/>.
-		/// </summary>
-		/// <typeparam name="T">The type to deserialize to.</typeparam>
-		/// <param name="input">The serialized version.</param>
-		/// <returns>The instance.</returns>
-		T Deserialize<T>(string input);
-
-		/// <summary>
-		/// Deserializes <paramref name="input"/> to an instance of <paramref name="type"/>.
-		/// </summary>
-		/// <param name="input">The serialized version.</param>
-		/// <param name="type">The type to deserialize to.</param>
-		/// <returns>The instance.</returns>
-		object Deserialize(string input, Type type);
-
-		/// <summary>
-		/// Serializes <paramref name="input"/>.
-		/// </summary>
-		/// <typeparam name="T">The type to deserialize from.</typeparam>
-		/// <param name="input">The object to deserialize.</param>
-		/// <returns>The instance.</returns>
-		string Serialize<T>(T input);
-
-		/// <summary>
-		/// Serializes <paramref name="input"/>.
-		/// </summary>
-		/// <param name="t">The type to serialize from.</typeparam>
-		/// <param name="input">The object to deserialize.</param>
-		/// <returns>The instance.</returns>
-		string Serialize(object input, Type t);
-	}
-
-	public abstract class JsonConvert
-		: IJsonConvert
-	{
-		/// <inheritdoc />
-		public abstract T Deserialize<T>(string input);
-
-		/// <inheritdoc />
-		public abstract object Deserialize(string input, Type type);
-
-		/// <inheritdoc />
-		public abstract string Serialize<T>(T input);
-
-		/// <inheritdoc />
-		public abstract string Serialize(object input, Type t);
-
-		/// <summary>
-		/// If these types are found then their default values are left intact
-		/// when converting the JSON.
-		/// </summary>
-		public static List<string> DefaultValueSkippedTypes { get; } = new List<string>()
-		{
-			"MFiles.VAF.Configuration.JsonAdaptor.JsonValueAdaptor"
-		};
-	}
-
 	/// <summary>
 	/// An implementation of <see cref="IJsonConvert"/>
 	/// that delegates to Newtonsoft.
 	/// </summary>
-	internal class NewtonsoftJsonConvert : IJsonConvert
+	public class NewtonsoftJsonConvert : IJsonConvert
 	{
 		internal class DefaultValueAwareValueProvider
 			: IValueProvider
