@@ -25,7 +25,7 @@ namespace MFiles.VAF.Extensions
         /// <summary>
         /// If true, exception details can be included in the response.
         /// </summary>
-        public bool IncludeExceptionDetailsInResponse { get; }
+        public bool IncludeExceptionDetailsInResponse { get; set; }
 
         /// <summary>
         /// The required level of vault acccess to call this method.  
