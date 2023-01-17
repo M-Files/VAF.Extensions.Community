@@ -167,7 +167,7 @@ namespace MFiles.VAF.Extensions
 						? this.ReadJson(reader, objectType, existingValue, serializer)
 						: default;
 				case JsonToken.String:
-					var timeSpanEx = JsonConvert.DeserializeObject<TimeSpanEx>($"\"{reader.Value?.ToString()}\"");
+					var timeSpanEx = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSpanEx>($"\"{reader.Value?.ToString()}\"");
 					return new Frequency() { Interval = timeSpanEx, RecurrenceType = RecurrenceType.Interval };
 				case JsonToken.StartObject:
 

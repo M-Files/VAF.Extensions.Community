@@ -101,7 +101,7 @@ namespace MFiles.VAF.Extensions
 		{
 			return this.InternalDirectiveForSerialization == null
 				? null
-				: JsonConvert.DeserializeObject
+				: Newtonsoft.Json.JsonConvert.DeserializeObject
 				(
 					this.InternalDirectiveForSerialization.AsString(Encoding.UTF8),
 					Type.GetType(this.InternalDirectiveTypeForSerialization)

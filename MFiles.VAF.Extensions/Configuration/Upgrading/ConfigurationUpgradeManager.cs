@@ -6,12 +6,14 @@ using MFilesAPI;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
 namespace MFiles.VAF.Extensions.Configuration.Upgrading
 {
-	internal class ConfigurationUpgradeManager
+	public class ConfigurationUpgradeManager
 		: IConfigurationUpgradeManager
 	{
 		private ILogger Logger { get; } = LogManager.GetLogger(typeof(ConfigurationUpgradeManager));
@@ -46,27 +48,42 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				// Clear anything we've previously scanned.
 				this.CheckedConfigurationUpgradeTypes.Clear();
 
-				// Run any configuration upgrade rules.
-				var rules = this.GetAppropriateUpgradeRules<TSecureConfiguration>(vault) ?? Enumerable.Empty<IUpgradeRule>();
+				// Get any configuration upgrade rules.
+				var upgradeStopwatch = new Stopwatch();
+				upgradeStopwatch.Start();
+				var rules = (this.GetAppropriateUpgradeRules<TSecureConfiguration>(vault) ?? Enumerable.Empty<IUpgradeRule>())
+					.ToList();
+
+				if (!rules.Any())
+				{
+					this.Logger?.Info($"Skipping configuration upgrade as there were no appropriate rules.");
+					return;
+				}
+
+				// Run the rules.
 				foreach (var rule in rules)
 				{
 					try
 					{
+						var ruleStopwatch = new Stopwatch();
+						ruleStopwatch.Start();
 						rule?.Execute(vault);
+						ruleStopwatch.Stop();
+						this.Logger?.Debug($"Took {ruleStopwatch.ElapsedMilliseconds}ms to run rule of type {rule.GetType().FullName} ({rule.MigrateFromVersion?.ToString()}-{rule.MigrateToVersion?.ToString()}).");
 					}
 					catch (Exception ex)
 					{
 						this.Logger?.Error(ex, $"Could not execute configuration upgrade/migration rule of type {rule?.GetType()?.FullName}");
 					}
 				}
-
+				upgradeStopwatch.Stop();
+				this.Logger?.Info($"Took {upgradeStopwatch.ElapsedMilliseconds}ms to upgrade configuration ({rules.Count} rules).");
 			}
 			catch (Exception e)
 			{
 				this.Logger?.Fatal(e, $"Could not get configuration upgrade rules.");
 			}
 		}
-
 		protected virtual IEnumerable<IUpgradeRule> GetAppropriateUpgradeRules<TSecureConfiguration>(Vault vault)
 			where TSecureConfiguration : class, new()
 		{

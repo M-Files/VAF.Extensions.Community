@@ -90,11 +90,11 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			}
 
 			// Inject the log file list into the dashboard template.
-			string logFilesJson = JsonConvert.SerializeObject(
+			string logFilesJson = Newtonsoft.Json.JsonConvert.SerializeObject(
 					logFiles.OrderByDescending(f => f.RelativePath));
 			var downloadMethod = clientOps.Manager.CreateCommandMethodSource(
 					clientOps.DefaultNodeLocation, DownloadSelectedLogsDashboardCommand.CommandId);
-			string downloadMethodJson = JsonConvert.SerializeObject(downloadMethod);
+			string downloadMethodJson = Newtonsoft.Json.JsonConvert.SerializeObject(downloadMethod);
 			string dashboard = template
 					.Replace("%LOG_FILES_DATA%", logFilesJson)
 					.Replace("%DOWNLOAD_METHOD%", downloadMethodJson);
