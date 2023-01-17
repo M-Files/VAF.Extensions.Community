@@ -1,6 +1,7 @@
 ﻿using MFiles.VAF.Configuration;
 using MFiles.VAF.Configuration.JsonAdaptor;
 using MFiles.VAF.Configuration.JsonEditor;
+using MFiles.VAF.Configuration.JsonAdaptor;
 using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
