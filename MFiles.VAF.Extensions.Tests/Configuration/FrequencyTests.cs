@@ -561,5 +561,16 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 
 			Assert.AreEqual(Newtonsoft.Json.JsonConvert.SerializeObject(expected), Newtonsoft.Json.JsonConvert.SerializeObject(output));
 		}
+
+		[TestMethod]
+		public void SerializesDefaultFrequency()
+		{
+			var config = new FrequencyWrapper();
+			var serializedConfig = JsonConvert.SerializeObject(config, new NewtonsoftJsonConvert().JsonSerializerSettings);
+
+			Assert.IsTrue(!serializedConfig.Contains("Frequency"), "Frequency default was included in serialized output.");
+
+		}
+
 	}
 }
