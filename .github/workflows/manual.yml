@@ -42,7 +42,16 @@ jobs:
     - name: Get version number
       shell: pwsh
       run: |
-        $versionNumber = Get-Date -Format "yy.M.${{ github.run_number }}"
+        If([string]::IsNullOrEmpty({{ env.versionSuffix }}))
+        {
+            # No suffix.  Fine.
+            $versionNumber = Get-Date -Format "yy.M.${{ github.run_number }}"
+        }
+        else
+        {
+            # Suffix; ensure we add .0 in version number to stop them appearing above full releases.
+            $versionNumber = Get-Date -Format "yy.M.0.${{ github.run_number }}"
+        }
         echo "versionNumber=$versionNumber${{ env.versionSuffix }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
 
     - name: Write release notes
