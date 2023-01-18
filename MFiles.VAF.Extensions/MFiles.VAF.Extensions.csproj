@@ -46,7 +46,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MFiles.VAF" Version="22.12.672.2" />
+    <PackageReference Include="MFiles.VAF" Version="22.12.672.3" />
     <PackageReference Include="MFiles.VAF.Configuration.Logging.NLog" Version="22.11.2" />
     <PackageReference Include="MFilesAPI.Extensions" Version="1.0.6" />
   </ItemGroup>
