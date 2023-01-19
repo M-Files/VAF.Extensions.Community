@@ -443,3 +443,113 @@ public override IDashboardContent GetApplicationOverviewDashboardContent(IConfig
 #### Method signatures
 
 The dashboard-generation methods now get provided with the configuration request context, so a method with a signature of `IDashboardContent GetAsynchronousOperationDashboardContent()` has changed to `IDashboardContent GetAsynchronousOperationDashboardContent(IConfigurationRequestContext context)`.  If you are overriding these methods then alter the method signature to the new one.
+
+## JsonVaultExtensionMethod
+
+The `JsonVaultExtensionMethodAttribute` class allows developers to easily define vault extension methods that pass data back and forth as JSON strings.  The underlying mechanism used is still vault extension methods, but the developer does not need to write code to deserialize data from the input and serialize it back to the output.
+
+An example is shown below.  In this example a vault extension method is declared with the name "MyApplication.MyVaultExtensionMethod" (**remember that vault extension methods should be unique within the vault, so use a "namespace-style" name to reduce the chances of clashes between applications**).  When the vault extension method is called it will be provided with a JSON string representing `MyInputType`.  The result from this method will be encoded as JSON, in this case to a JSON array.
+
+The type data is inferred automatically from the method signature.  The types must be serializable/deserializable by Newtonsoft.Json (e.g. decorated with [DataContract]/[DataMember]), and the input type must not be an interface.
+
+```csharp
+[DataContract]
+internal class MyInputType
+{
+	[DataMember]
+	public string Name { get;set; }
+}
+[DataContract]
+internal class OutputType
+{
+	[DataMember]
+	public string Value { get;set; }
+}
+
+[JsonVaultExtensionMethod("MyApplication.MyVaultExtensionMethod")]
+internal IEnumerable<MyOutputType> MyVaultExtensionMethod
+(
+    Vault vault,
+    MyInputType input
+)
+{
+	// TODO: Implement the method.
+	throw new NotImplementedException();
+}
+```
+
+It is also possible to use the attribute with a method that accepts a string input (in which case the vault extension method input will be passed verbatim):
+
+```csharp
+[JsonVaultExtensionMethod("MyApplication.MyVaultExtensionMethod")]
+internal IEnumerable<MyOutputType> MyVaultExtensionMethod
+(
+    Vault vault,
+	string input
+)
+{
+	// TODO: Implement the method.
+	throw new NotImplementedException();
+}
+```
+
+The method signature must declare either one parameter (the transactional vault reference), or two parameters (the transactional vault reference, and then a value for the input).  Other method signatures are not supported.
+
+### Controlling failures
+
+In the case that the vault extension method fails, the system will trap the exception and return the value from `JsonVaultExtensionMethodAttribute.GetFailedOutput`.  By default this value contains no information on the exception itself.  This can be optionally included by setting `IncludeExceptionDetailsInResponse` to true.  This could be done only in debug scenarios, for example, by using the following syntax:
+
+```csharp
+
+[JsonVaultExtensionMethod("MyApplication.MyVaultExtensionMethod"
+#if DEBUG
+    , IncludeExceptionDetailsInResponse = true
+#endif
+    )]
+internal IEnumerable<MyOutputType> MyVaultExtensionMethod
+(
+    Vault vault,
+    MyInputType input
+)
+{
+	// TODO: Implement the method.
+	throw new NotImplementedException();
+}
+```
+
+It is recommended that you use try/catch to log exceptions within the method, even if they are then re-thrown to use the default behaviour.
+
+### Not accepting any input
+
+It is also possible to use the attribute with a method does care about the input.  In this case any value provided to the vault extension method input is not passed to this method.
+
+```csharp
+[JsonVaultExtensionMethod("MyApplication.MyVaultExtensionMethod")]
+internal MyOutputType MyVaultExtensionMethod
+(
+    Vault vault
+)
+{
+	// TODO: Implement the method.
+	throw new NotImplementedException();
+}
+```
+
+### Not returning any value
+
+It is also possible to use the attribute with a method does not return anything at all.  In this case the methods on `JsonVaultExtensionMethodAttribute` named `GetFailedOutput` and `GetSuccessfulOutput` will be used to define the JSON to return.
+
+```csharp
+[JsonVaultExtensionMethod("MyApplication.MyVaultExtensionMethod")]
+internal void MyVaultExtensionMethod
+(
+    Vault vault,
+	MyInputType input
+)
+{
+	// TODO: Implement the method.
+	throw new NotImplementedException();
+}
+```
+
+
