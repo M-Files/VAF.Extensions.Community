@@ -1,6 +1,7 @@
 ﻿using MFiles.VAF;
 using MFiles.VAF.Common;
 using MFiles.VAF.Configuration.Logging;
+using MFiles.VAF.Core;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
@@ -27,13 +28,24 @@ namespace MFiles.VAF.Extensions
         /// </summary>
         public bool IncludeExceptionDetailsInResponse { get; set; }
 
-        /// <summary>
-        /// The required level of vault acccess to call this method.  
-        /// Defaults to <see cref="MFVaultAccess.MFVaultAccessNone"/>.
-        /// </summary>
-        public MFVaultAccess RequiredVaultAccess { get; set; }
+		/// <summary>
+		/// The required level of vault acccess to call this method.  
+		/// Defaults to <see cref="MFVaultAccess.MFVaultAccessNone"/>.
+		/// </summary>
+		public MFVaultAccess RequiredVaultAccess { get; set; }
+			= MFVaultAccess.MFVaultAccessNone;
 
-        public TypedVaultExtensionMethodAttribute
+		public bool HasSeparateEventHandlerProxy { get; set; } = true;
+
+		/// <summary>
+		//     Indicates the user/session identity and access the vault received for the event
+		//     should have. NOTE: This can currently only be used when HasSeparateEventHandlerProxy
+		//     = true.
+		/// </summary>
+		public EventHandlerVaultUserIdentity VaultUserIdentity { get; set; }
+			= EventHandlerVaultUserIdentity.Default;
+
+		public TypedVaultExtensionMethodAttribute
         (
             string vaultExtensionMethodName
         )
@@ -98,7 +110,9 @@ namespace MFiles.VAF.Extensions
         {
             return new VaultExtensionMethodAttribute(VaultExtensionMethodName)
             {
-                RequiredVaultAccess = this.RequiredVaultAccess
+                RequiredVaultAccess = this.RequiredVaultAccess,
+				HasSeparateEventHandlerProxy = this.HasSeparateEventHandlerProxy,
+				VaultUserIdentity = this.VaultUserIdentity
             };
         }
 
