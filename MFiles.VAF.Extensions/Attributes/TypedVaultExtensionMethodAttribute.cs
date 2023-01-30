@@ -10,12 +10,12 @@ using System.Reflection;
 
 namespace MFiles.VAF.Extensions
 {
-    /// <summary>
-    /// Defines that the method is a vault extension method that sends/receives data in a custom format.
-    /// The method should declare one (single vault) or two (vault plus format of the data in the VEM input) parameters.
-    /// The method can optionally have a return type.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+	/// <summary>
+	/// Defines that the method is a vault extension method that sends/receives data in a custom format.
+	/// The method should declare one (single vault or event handler environment) or two (vault or event handler environment plus format of the data in the VEM input) parameters.
+	/// The method can optionally have a return type.
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     public abstract class TypedVaultExtensionMethodAttribute : Attribute
     {
         /// <summary>
@@ -200,18 +200,24 @@ namespace MFiles.VAF.Extensions
                 switch (this.ParameterInfo.Length)
                 {
                     case 1:
-                        // Just the vault.  Okay.
-                        if (this.ParameterInfo[0].ParameterType != typeof(Vault))
+                        // Just the vault or environment.  Okay.
+                        if (
+							this.ParameterInfo[0].ParameterType != typeof(Vault)
+							&&
+							this.ParameterInfo[0].ParameterType != typeof(EventHandlerEnvironment))
                         {
-                            this.Logger.Fatal($"Method {method.Name} expected first parameter of vault, actually {this.ParameterInfo[0].ParameterType.FullName}.");
+                            this.Logger.Fatal($"Method {method.Name} expected first parameter of Vault or EventHandlerEnvironment, actually {this.ParameterInfo[0].ParameterType.FullName}.");
                             return;
                         }
                         break;
                     case 2:
-                        // Vault and something else.
-                        if (this.ParameterInfo[0].ParameterType != typeof(Vault))
-                        {
-                            this.Logger.Fatal($"Method {method.Name} expected first parameter of vault, actually {this.ParameterInfo[0].ParameterType.FullName}.");
+						// Vault/environment and something else.
+						if (
+							this.ParameterInfo[0].ParameterType != typeof(Vault)
+							&&
+							this.ParameterInfo[0].ParameterType != typeof(EventHandlerEnvironment))
+						{
+                            this.Logger.Fatal($"Method {method.Name} expected first parameter of Vault or EventHandlerEnvironment, actually {this.ParameterInfo[0].ParameterType.FullName}.");
                             return;
                         }
                             this.InputType = this.ParameterInfo[1].ParameterType;
@@ -240,10 +246,16 @@ namespace MFiles.VAF.Extensions
             public string Execute(EventHandlerEnvironment env)
             {
                 // Declare the data we'll pass to the method.
-                var methodInputs = new List<object>() { env.Vault };
+                var methodInputs = new List<object>() { };
 
-                // If it's a string then pass it straight in.
-                if (InputType == typeof(string))
+				// Add the first parameter.
+				if (this.ParameterInfo[0].ParameterType == typeof(Vault))
+					methodInputs.Add(env.Vault);
+				if (this.ParameterInfo[0].ParameterType == typeof(EventHandlerEnvironment))
+					methodInputs.Add(env);
+
+				// If it's a string then pass it straight in.
+				if (InputType == typeof(string))
                     methodInputs.Add(env.Input);
                 else
                 {
