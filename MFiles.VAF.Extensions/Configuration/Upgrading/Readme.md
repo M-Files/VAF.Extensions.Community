@@ -171,3 +171,19 @@ public class NewConfiguration
 ```
 
 NOTE: In the above example, `OldConfiguration` will be read from the custom NVS location but `NewConfiguration` will be written to the standard location.  This style configuration will effectively move the configuration; the old version is read from the custom location, deserialized, converted, then serialized and saved to the standard location.
+
+## Disabling configuration upgrading
+
+To completely disable configuration upgrading, return null from the `GetConfigurationUpgradeManager` method on your VaultApplication class:
+
+```csharp
+public class VaultApplication : MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<Configuration>
+{
+    /// <inheritdoc />
+    /// <remarks>Configuration upgrading is disabled.</remarks>
+    public override IConfigurationUpgradeManager GetConfigurationUpgradeManager()
+	{
+		return null;
+	}
+}
+```
