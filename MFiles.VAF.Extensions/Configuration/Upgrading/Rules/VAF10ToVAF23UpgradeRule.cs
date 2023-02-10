@@ -36,19 +36,34 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 
 	}
 
+	/// <summary>
+	/// Defines that the system should attempt to migrate configuration in the associated old VAF 1.0 location
+	/// across to the appropriate VAF 2.3 location.
+	/// The configuration is literally moved with no other changes.
+	/// </summary>
 	public class VAF10ToVAF23UpgradeAttribute
-		: ConfigurationLocationUpgradeAttribute
+		: MoveConfigurationLocationAttribute
 	{
 		public VAF10ToVAF23UpgradeAttribute(string @namespace, string @name)
+			: base()
 		{
-			this.NamedValueType = MFNamedValueType.MFConfigurationValue;
-			this.Namespace = @namespace;
-			this.Name = @name;
+			this.Source = new SingleNamedValueItem
+				(
+					MFNamedValueType.MFConfigurationValue,
+					@namespace,
+					name
+				);
 		}
 
 		public override IUpgradeRule AsUpgradeRule(VaultApplicationBase vaultApplication)
 		{
-			return new VAF10ToVAF23UpgradeRule(vaultApplication, this.Namespace, this.Name, new Version("0.0"), new Version("0.0"));
+			return new VAF10ToVAF23UpgradeRule(vaultApplication, this.Source.Namespace, this.Source.Name, new Version("0.0"), new Version("0.0"));
+		}
+
+		/// <inheritdoc />
+		public override string ToString()
+		{
+			return $"Migrating configuration from {this.Source} to latest VAF location.";
 		}
 	}
 }

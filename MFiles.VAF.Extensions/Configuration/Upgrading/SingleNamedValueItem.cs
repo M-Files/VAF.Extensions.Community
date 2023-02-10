@@ -104,6 +104,12 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 
 			manager.SetNamedValues(vault, this.NamedValueType, this.Namespace, toSet);
 		}
+
+		/// <inheritdoc />
+		public override string ToString()
+		{
+			return $"{this.Namespace}.{this.Name} ({this.NamedValueType})";
+		}
 	}
 
 	public static class ISingleNamedValueItemExtensionMethods

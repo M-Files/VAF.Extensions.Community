@@ -89,14 +89,17 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		{
 			// Do we have any attribute-based migration rules?
 			var migrationRules = typeof(TSecureConfiguration)
-				.GetCustomAttributes<ConfigurationLocationUpgradeAttribute>() 
-				?? Enumerable.Empty<ConfigurationLocationUpgradeAttribute>();
+				.GetCustomAttributes<MoveConfigurationLocationAttribute>() 
+				?? Enumerable.Empty<MoveConfigurationLocationAttribute>();
 			if (migrationRules.Any())
 			{
 				// Run the ones that should run before other upgrade rules.
 				foreach (var rule in migrationRules.Where(r => r.RunBeforeOtherUpgradeRules))
 					if (null != rule)
+					{
+						this.Logger?.Debug($"Running [MoveConfigurationLocation] rule.");
 						yield return rule.AsUpgradeRule(this.VaultApplication);
+					}
 			}
 
 			// Run any configuration upgrade rules.
@@ -111,7 +114,10 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 				// Run the ones that should run after other upgrade rules.
 				foreach (var rule in migrationRules.Where(r => !r.RunBeforeOtherUpgradeRules))
 					if (null != rule)
+					{
+						this.Logger?.Debug($"Running [MoveConfigurationLocation] rule.");
 						yield return rule.AsUpgradeRule(this.VaultApplication);
+					}
 			}
 
 			// Run the rule that ensures that the data is serialized according to the latest definitions.
