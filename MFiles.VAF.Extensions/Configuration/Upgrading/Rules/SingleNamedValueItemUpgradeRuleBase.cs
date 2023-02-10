@@ -137,7 +137,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 
 
 						// Ensure that we have the Version property, if it's JSON.
-						if (null != this.MigrateToVersion)
+						if (null != this.MigrateToVersion && this.MigrateToVersion.ToString() != "0.0")
 						{
 							try
 							{

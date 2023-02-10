@@ -87,6 +87,17 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		protected virtual IEnumerable<IUpgradeRule> GetAppropriateUpgradeRules<TSecureConfiguration>(Vault vault)
 			where TSecureConfiguration : class, new()
 		{
+			// Do we have any attribute-based migration rules?
+			var migrationRules = typeof(TSecureConfiguration)
+				.GetCustomAttributes<ConfigurationLocationUpgradeAttribute>() 
+				?? Enumerable.Empty<ConfigurationLocationUpgradeAttribute>();
+			if (migrationRules.Any())
+			{
+				// Run the ones that should run before other upgrade rules.
+				foreach (var rule in migrationRules.Where(r => r.RunBeforeOtherUpgradeRules))
+					if (null != rule)
+						yield return rule.AsUpgradeRule(this.VaultApplication);
+			}
 
 			// Run any configuration upgrade rules.
 			var rules = (this.GetConfigurationUpgradePath<TSecureConfiguration>(vault) ?? Enumerable.Empty<IUpgradeRule>())
@@ -94,6 +105,13 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 			foreach (var rule in rules)
 			{
 				yield return rule;
+			}
+			if (migrationRules.Any())
+			{
+				// Run the ones that should run after other upgrade rules.
+				foreach (var rule in migrationRules.Where(r => !r.RunBeforeOtherUpgradeRules))
+					if (null != rule)
+						yield return rule.AsUpgradeRule(this.VaultApplication);
 			}
 
 			// Run the rule that ensures that the data is serialized according to the latest definitions.

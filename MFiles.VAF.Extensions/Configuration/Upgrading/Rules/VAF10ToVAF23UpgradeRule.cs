@@ -35,4 +35,20 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading.Rules
 		}
 
 	}
+
+	public class VAF10ToVAF23UpgradeAttribute
+		: ConfigurationLocationUpgradeAttribute
+	{
+		public VAF10ToVAF23UpgradeAttribute(string @namespace, string @name)
+		{
+			this.NamedValueType = MFNamedValueType.MFConfigurationValue;
+			this.Namespace = @namespace;
+			this.Name = @name;
+		}
+
+		public override IUpgradeRule AsUpgradeRule(VaultApplicationBase vaultApplication)
+		{
+			return new VAF10ToVAF23UpgradeRule(vaultApplication, this.Namespace, this.Name, new Version("0.0"), new Version("0.0"));
+		}
+	}
 }
