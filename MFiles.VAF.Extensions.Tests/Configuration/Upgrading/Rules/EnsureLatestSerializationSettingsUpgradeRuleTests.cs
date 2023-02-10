@@ -752,5 +752,34 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 		}
 
 		#endregion
+
+		[DataContract]
+		public sealed class DateTimeStoredAsDateConfiguration
+		{
+			[DataMember]
+			[JsonConfEditor(TypeEditor = "date", IsRequired = true)]
+			public DateTime? ReminderDate { get; set; }
+
+			[DataMember]
+			public DateTime? NormalDate { get; set; }
+		}
+
+		[TestMethod]
+		public void DateTimeStoredAsDate()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<DateTimeStoredAsDateConfiguration>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, @"{
+				""ReminderDate"" : ""2023-05-02"",
+				""NormalDate"" : ""2020-12-31T01:02:03""
+			}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson(@"{
+				""ReminderDate"" : ""2023-05-02"",
+				""NormalDate"" : ""2020-12-31T01:02:03""
+			}", rule.GetReadWriteLocationValue(vault));
+		}
 	}
 }
