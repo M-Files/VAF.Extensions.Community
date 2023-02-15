@@ -93,6 +93,7 @@ jobs:
         artifactErrorsFailBuild: true
         artifacts: "./MFiles.VAF.Extensions/bin/Release/MFiles.VAF.Extensions.${{ env.versionNumber }}.nupkg"
         name: ${{ env.versionNumber }}
+        tag: ${{ env.versionNumber }}
         draft: true
         omitBody: true
         prerelease: ${{ github.ref_name == 'prerelease' }}
