@@ -80,8 +80,8 @@ jobs:
 #    - name: Test
 #      run: dotnet test --no-restore --verbosity normal
 
-    - name: Push with dotnet
-      run: dotnet nuget push ./MFiles.VAF.Extensions/bin/Release/MFiles.VAF.Extensions.${{ env.versionNumber }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+    #- name: Push with dotnet
+    #  run: dotnet nuget push ./MFiles.VAF.Extensions/bin/Release/MFiles.VAF.Extensions.${{ env.versionNumber }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       
       
     - name: Create release
@@ -93,7 +93,7 @@ jobs:
         artifactErrorsFailBuild: true
         artifacts: "./MFiles.VAF.Extensions/bin/Release/MFiles.VAF.Extensions.${{ env.versionNumber }}.nupkg"
         name: ${{ env.versionNumber }}
-        draft: false
+        draft: true
         omitBody: true
         prerelease: ${{ github.ref_name == 'prerelease' }}
 
