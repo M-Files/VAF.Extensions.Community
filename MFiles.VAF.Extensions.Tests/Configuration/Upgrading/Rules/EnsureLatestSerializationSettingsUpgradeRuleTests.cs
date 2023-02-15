@@ -2,7 +2,6 @@
 using MFiles.VAF.Configuration.JsonAdaptor;
 using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.JsonEditor;
-using MFiles.VAF.Configuration.JsonAdaptor;
 using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
 using MFiles.VAF.Extensions.ExtensionMethods;
