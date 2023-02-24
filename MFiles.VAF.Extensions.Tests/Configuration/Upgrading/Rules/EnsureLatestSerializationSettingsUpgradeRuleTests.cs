@@ -780,5 +780,36 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 				""NormalDate"" : ""2020-12-31T01:02:03""
 			}", rule.GetReadWriteLocationValue(vault));
 		}
+
+		[DataContract]
+		public sealed class PropertyDefSerialization
+		{
+			[DataMember]
+			[JsonConfEditor(IsRequired = false)]
+			[MFPropertyDef]
+			public MFIdentifier ReminderDate { get; set; } = "MF.PD.ReminderDate";
+
+			[DataMember]
+			[JsonConfEditor(IsRequired = false)]
+			[MFPropertyDef(AllowEmpty = true)]
+			public MFIdentifier NotificationDate { get; set; } = "MF.PD.NotificationDate";
+		}
+
+		[TestMethod]
+		public void VaultElementReference_Serialization()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<PropertyDefSerialization>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, @"{
+				""ReminderDate"" : ""MF.PD.ReminderDate"",
+				""NotificationDate"" : ""MF.PD.NotificationDate""
+			}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson(@"{
+				""ReminderDate"" : ""MF.PD.ReminderDate""
+			}", rule.GetReadWriteLocationValue(vault));
+		}
 	}
 }

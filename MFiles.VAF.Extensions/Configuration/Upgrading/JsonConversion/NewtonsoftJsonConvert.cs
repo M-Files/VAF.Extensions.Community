@@ -165,6 +165,20 @@ namespace MFiles.VAF.Extensions
 						}
 					}
 
+					// If it's an MFIdentifier then force default values for non-allow-empty members.
+					{
+						if (type == typeof(MFIdentifier))
+						{
+							var vaultElementReferenceAttribute = this.memberInfo.GetCustomAttribute<VaultElementReferenceAttribute>();
+							if (null != vaultElementReferenceAttribute && !vaultElementReferenceAttribute.AllowEmpty)
+							{
+								// We have a value, but we're not allowed empty values.
+								// Return the value.
+								return value;
+							}
+						}
+					}
+
 					// If the data is the same as the default value then do not serialize.
 					if (type == typeof(string) && string.Equals(defaultValue, value))
 						return null;

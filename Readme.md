@@ -1,4 +1,4 @@
-![GitHub](https://img.shields.io/github/license/M-Files/VAF.Extensions.Community) ![GitHub last commit](https://img.shields.io/github/last-commit/M-Files/VAF.Extensions.Community)
+[![Build](https://github.com/M-Files/VAF.Extensions.Community/actions/workflows/build.yml/badge.svg)](https://github.com/M-Files/VAF.Extensions.Community/actions/workflows/build.yml) ![GitHub](https://img.shields.io/github/license/M-Files/VAF.Extensions.Community) ![GitHub last commit](https://img.shields.io/github/last-commit/M-Files/VAF.Extensions.Community)
 
 [![Nuget version](https://img.shields.io/nuget/v/MFiles.VAF.Extensions?label=nuget%20version)](https://www.nuget.org/packages/MFiles.VAF.Extensions/) ![Nuget](https://img.shields.io/nuget/dt/MFiles.VAF.Extensions?label=nuget%20downloads)
 
