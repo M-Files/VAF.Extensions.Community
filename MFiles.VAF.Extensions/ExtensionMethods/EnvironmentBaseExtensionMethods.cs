@@ -6,12 +6,6 @@ namespace MFiles.VAF.Extensions.ExtensionMethods
 	public static class EnvironmentBaseExtensionMethods
 	{
 		/// <summary>
-		/// The user ID reported when code is run as the M-Files user
-		/// (e.g. automatic state transitions, task processing).
-		/// </summary>
-		internal const int MFilesServerUserID = -102;
-
-		/// <summary>
 		/// Returns true if <see cref="EnvironmentBase.CurrentUserID"/>
 		/// is set to a system process (i.e. an ID less than or equal to zero).
 		/// </summary>

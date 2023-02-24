@@ -20,7 +20,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods
 		{
 			var environmentBase = new EnvironmentBase()
 			{
-				CurrentUserID = EnvironmentBaseExtensionMethods.MFilesServerUserID
+				CurrentUserID = MFBuiltInUsers.MFilesServerUserID
 			};
 			Assert.IsTrue(environmentBase.CurrentUserIsSystemProcess());
 		}
