@@ -1,21 +1,71 @@
-# When more than one pattern matches the path, a later line overrides an earlier line. This overriding is done per attribute.
-*         text=auto eol=lf
+# Code files should have platform appropriate line endings.
+# Do not force git to consider the files as text; there are some exotically encoded (eg. UCS-16)
+# files lurking in our tree. The attribute text=auto will make git treat files as text whenever
+# they look like text to it, which means strange files will not be touched.
+*.cs text=auto eol=auto
+*.cpp text=auto eol=auto
+*.h text=auto eol=auto
+*.H text=auto eol=auto
+*.hpp text=auto eol=auto
+*.c text=auto eol=auto
+*.js text=auto eol=auto
+*.kt text=auto eol=auto
+*.kts text=auto eol=auto
+*.html text=auto eol=auto
+*.css text=auto eol=auto
+*.ps1 text=auto eol=auto
+*.psm1 text=auto eol=auto
+*.java text=auto eol=auto
+*.md text=auto eol=auto
+*.nuspec text=auto eol=auto
+*.py text=auto eol=auto
+*.sh text=auto eol=auto
+*.txt text=auto eol=auto
+*.TXT text=auto eol=auto
+*.xml text=auto eol=auto
+*.XML text=auto eol=auto
+*.xsl text=auto eol=auto
+*.xslt text=auto eol=auto
+*.yml text=auto eol=auto
+*.tt text=auto eol=auto
+*.proto text=auto eol=auto
+*.ts text=auto eol=auto
+*.cc text=auto eol=auto
+*.rc text=auto eol=auto
+*.resx text=auto eol=auto
+*.config text=auto eol=auto
+*.json text=auto eol=auto
+*.peg text=auto eol=auto
+*.idl text=auto eol=auto
+*.wxs text=auto eol=auto
+*.wxl text=auto eol=auto
+*.vcxitems text=auto eol=auto
 
-# Template from https://adaptivepatchwork.com/2012/03/01/mind-the-end-of-your-line/
-# These files are text and should be normalized (convert crlf => lf)
-*.cs      text diff=csharp
-*.xaml    text
-*.csproj  text
-*.sln     text
-*.tt      text
-*.ps1     text
-*.cmd     text
-*.msbuild text
-*.md      text
+# Git configuration files. These really must be in a text format understood by git.
+.gitignore text eol=auto
+.gitattributes text eol=auto
+.gitmodules text eol=auto
 
-# Images should be treated as binary
-# (binary is a macro for -text -diff)
-*.png     binary
-*.jepg    binary
+# Visual studio projects should always have CRLF endings.
+*.*proj text=auto eol=crlf
+*.props text=auto eol=crlf
+*.properties text=auto eol=crlf
+*.targets text=auto eol=crlf
+*.sln text=auto eol=crlf
+*.filters text=auto eol=crlf
 
-*.sdf     binary
+# Bat files only run in windows environment, so they should always have CRLF endings.
+*.bat text=auto eol=crlf
+*.bat_ text=auto eol=crlf
+
+# Disable delta compression for binary-like files.
+*.jpg -delta
+*.pdf -delta
+*.bmp -delta
+*.png -delta
+*.dll -delta
+*.pdb -delta
+*.exe -delta
+*.zip -delta
+*.msi -delta
+*.mfappx -delta
