@@ -12,7 +12,7 @@ namespace MFiles.VAF.Extensions.ExtensionMethods
 		/// <param name="env">The environment to check.</param>
 		/// <returns>true if <see cref="EnvironmentBase.CurrentUserID"/> is less than or equal to zero</returns>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="env"/> is null.</exception>
-		public static bool CurrentUserIsSystemProcess(this EnvironmentBase env)
+		public static bool IsCurrentUserSystemProcess(this EnvironmentBase env)
 			// IDs under zero are system processes.
 			=> (env ?? throw new ArgumentNullException(nameof(env))).CurrentUserID  <= 0;
 	}

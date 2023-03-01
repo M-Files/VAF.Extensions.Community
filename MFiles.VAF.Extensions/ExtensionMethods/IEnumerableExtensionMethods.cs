@@ -32,7 +32,7 @@ namespace MFiles.VAF.Extensions
 		)
 		{
 			HashSet<TKey> knownKeys = new HashSet<TKey>();
-			foreach (TSource element in source.EnsureNotNull())
+			foreach (TSource element in source.AsNotNull())
 			{
 				if (knownKeys.Add(keySelector(element)))
 				{
@@ -48,7 +48,7 @@ namespace MFiles.VAF.Extensions
 		/// <typeparam name="T">The type of items in the collection.</typeparam>
 		/// <param name="collection">The collection.</param>
 		/// <returns><paramref name="collection"/> or, if it is null, <see cref="Enumerable.Empty{TResult}"/>.</returns>
-		public static IEnumerable<T> EnsureNotNull<T>(this IEnumerable<T> collection) 
+		public static IEnumerable<T> AsNotNull<T>(this IEnumerable<T> collection) 
 			=> collection ?? Enumerable.Empty<T>();
 	}
 }

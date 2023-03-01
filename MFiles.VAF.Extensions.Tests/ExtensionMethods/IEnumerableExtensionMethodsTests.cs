@@ -10,16 +10,16 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods
 	public class IEnumerableExtensionMethodsTests
 	{
 		[TestMethod]
-		public void EnsureNotNull_ReturnsOriginalCollection()
+		public void AsNotNull_ReturnsOriginalCollection()
 		{
 			var collection = new List<string>();
-			Assert.AreSame(collection, collection.EnsureNotNull());
+			Assert.AreSame(collection, collection.AsNotNull());
 		}
 
 		[TestMethod]
-		public void EnsureNotNull_DoesNotReturnNull()
+		public void AsNotNull_DoesNotReturnNull()
 		{
-			Assert.IsNotNull(((IEnumerable<string>)null).EnsureNotNull());
+			Assert.IsNotNull(((IEnumerable<string>)null).AsNotNull());
 		}
 	}
 }

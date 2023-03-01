@@ -10,29 +10,29 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods
 	{
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
-		public void CurrentUserIsSystemProcess_ThrowsWithNullArgument()
+		public void IsCurrentUserSystemProcess_ThrowsWithNullArgument()
 		{
-			((EnvironmentBase)null).CurrentUserIsSystemProcess();
+			((EnvironmentBase)null).IsCurrentUserSystemProcess();
 		}
 
 		[TestMethod]
-		public void CurrentUserIsSystemProcess_ReturnsTrueForMFilesServerUser()
+		public void IsCurrentUserSystemProcess_ReturnsTrueForMFilesServerUser()
 		{
 			var environmentBase = new EnvironmentBase()
 			{
 				CurrentUserID = MFBuiltInUsers.MFilesServerUserID
 			};
-			Assert.IsTrue(environmentBase.CurrentUserIsSystemProcess());
+			Assert.IsTrue(environmentBase.IsCurrentUserSystemProcess());
 		}
 
 		[TestMethod]
-		public void CurrentUserIsSystemProcess_ReturnsFalseForRandomValidUserId()
+		public void IsCurrentUserSystemProcess_ReturnsFalseForRandomValidUserId()
 		{
 			var environmentBase = new EnvironmentBase()
 			{
 				CurrentUserID = 4 // chosen by fair dice roll; guaranteed to be random.
 			};
-			Assert.IsFalse(environmentBase.CurrentUserIsSystemProcess());
+			Assert.IsFalse(environmentBase.IsCurrentUserSystemProcess());
 		}
 	}
 }
