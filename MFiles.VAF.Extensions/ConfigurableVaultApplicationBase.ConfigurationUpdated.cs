@@ -19,6 +19,29 @@ namespace MFiles.VAF.Extensions
 		: MFiles.VAF.Core.ConfigurableVaultApplicationBase<TSecureConfiguration>
 	where TSecureConfiguration : class, new()
 	{
+		/// <summary>
+		/// Whether the configuration is valid.
+		/// </summary>
+		private bool? isConfigurationValid;
+
+		/// <summary>
+		/// Returns whether the configuration is valid.
+		/// Note: uses a cached value that is updated during
+		/// <see cref="StartOperations(Vault)"/> and <see cref="OnConfigurationUpdated(Configuration, bool, bool)"/>.
+		/// Only re-validates if the status is unknown, or if <paramref name="force"/> is <see langword="true"/>.
+		/// </summary>
+		/// <param name="vault">The vault reference to use to validate, if the status is unknown or <paramref name="force"/> is <see langword="true"/>.</param>
+		/// <param name="force">If <see langword="true"/> then the cached value is updated.  This incurs a performance hit and should not be used often.</param>
+		/// <returns><see langword="true"/> if the configuration is valid, <see langword="false"/> otherwise.</returns>
+		protected bool GetIsConfigurationValid(Vault vault, bool force = false)
+		{
+			this.isConfigurationValid =
+				this.isConfigurationValid.HasValue && !force
+				? this.isConfigurationValid.Value
+				: this.IsValid(vault);
+			return this.isConfigurationValid.Value;
+		}
+
 		/// <inheritdoc />
 		protected override void OnConfigurationUpdated(TSecureConfiguration oldConfiguration, bool isValid, bool updateExternals)
 		{
@@ -27,7 +50,10 @@ namespace MFiles.VAF.Extensions
 
 			// Populate the task processing schedule configuration.
 			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(isVaultStartup: false);
-			
+
+			// Update the cached value with the validity status.
+			this.isConfigurationValid = isValid;
+
 			// If we have logging configuration then set it up.
 			var loggingConfiguration = this.GetLoggingConfiguration();
 			this.Logger?.Debug($"Logging configuration updating");
@@ -45,6 +71,9 @@ namespace MFiles.VAF.Extensions
 		/// <inheritdoc />
 		public override void StartOperations(Vault vaultPersistent)
 		{
+			// Do we have a valid configuration?
+			this.isConfigurationValid = this.IsValid(vaultPersistent);
+
 			// Initialize the application.
 			base.StartOperations(vaultPersistent);
 
