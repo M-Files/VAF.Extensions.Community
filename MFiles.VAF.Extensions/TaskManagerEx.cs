@@ -11,6 +11,8 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using MFiles.VAF.Configuration.Logging.NLog;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace MFiles.VAF.Extensions
 {

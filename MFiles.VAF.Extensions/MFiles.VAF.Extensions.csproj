@@ -131,6 +131,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>VaultInteraction.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\ImportReplicationPackage.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ImportReplicationPackage.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Licensing.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -192,6 +197,10 @@
     <EmbeddedResource Update="Resources\Exceptions\VaultInteraction.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>VaultInteraction.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\ImportReplicationPackage.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ImportReplicationPackage.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Licensing.resx">
       <Generator>ResXFileCodeGenerator</Generator>

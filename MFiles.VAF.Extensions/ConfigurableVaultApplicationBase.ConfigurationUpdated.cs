@@ -7,6 +7,8 @@ using MFilesAPI;
 using System;
 using System.Collections.Generic;
 using System.Resources;
+using MFiles.VAF.AppTasks;
+using MFiles.VAF.Extensions.Directives;
 
 namespace MFiles.VAF.Extensions
 {
@@ -89,6 +91,22 @@ namespace MFiles.VAF.Extensions
 			}
 
 
+		}
+
+		/// <summary>
+		/// Handles the task asking that the metadata structure cache is reinitialised.
+		/// </summary>
+		/// <param name="job">The directive for the task.</param>
+		[BroadcastProcessor
+		(
+			ReinitializeMetadataCacheTaskDirective.TaskType,
+			// ImportReplicationPackageDashboardCommand will update the server it runs on,
+			// so we only need to process on other servers.
+			FilterMode = BroadcastFilterMode.FromOtherServersOnly
+		)]
+		protected virtual void HandleReinitializeMetadataStructureCache(IBroadcastProcessingJob<ReinitializeMetadataCacheTaskDirective> job)
+		{
+			this.ReinitializeMetadataStructureCache(this.PermanentVault);
 		}
 	}
 }

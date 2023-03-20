@@ -2,6 +2,7 @@
 using MFiles.VAF.Configuration.Domain;
 using MFiles.VAF.Configuration.Domain.ClientDirective;
 using MFiles.VAF.Configuration.Logging;
+using MFiles.VAF.Extensions.Directives;
 using MFilesAPI;
 using MFilesAPI.Extensions;
 using System;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,9 +25,25 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 		/// </summary>
 		private ILogger Logger { get; } = LogManager.GetLogger(typeof(ImportReplicationPackageDashboardCommand<TConfiguration>));
 
+		/// <summary>
+		/// The vault application for this command.
+		/// </summary>
 		protected ConfigurableVaultApplicationBase<TConfiguration> VaultApplication { get; } 
+
+		/// <summary>
+		/// The path to the replication package.
+		/// </summary>
 		protected string ReplicationPackagePath { get; }
 
+		/// <summary>
+		/// Creates a command which, when clicked, will import a replication package.
+		/// </summary>
+		/// <param name="vaultApplication">The vault application for this command.</param>
+		/// <param name="commandId">The ID of this command - must be unique within the application.</param>
+		/// <param name="displayName">What to display for this command, in context menus etc.</param>
+		/// <param name="replicationPackagePath">The path to the replication package.  Can either be to a .zip file or to the index.xml file of a ready-extracted package.</param>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="vaultApplication"/> is null.</exception>
+		/// <exception cref="ArgumentException">Thrown if <paramref name="replicationPackagePath"/> does not exist.</exception>
 		public ImportReplicationPackageDashboardCommand
 		(
 			ConfigurableVaultApplicationBase<TConfiguration> vaultApplication,
@@ -47,7 +65,14 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			}
 		}
 
-		public virtual void Import
+		/// <summary>
+		/// Called when the command is executed.
+		/// Creates the import job and imports it.
+		/// Also updates the metadata cache so that it reflects new items.
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="clientOperations"></param>
+		protected virtual void Import
 		(
 			IConfigurationRequestContext context, 
 			ClientOperations clientOperations
@@ -71,12 +96,20 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			// TODO: Re-enable it after the upgrade.
 			// this.TaskQueueManager.EnableTaskPolling(true);
 
-			// TODO: Send a broadcast forcing all instances to refresh vault structure.
+			// Refresh the metadata cache on all servers.
 			this.VaultApplication.ReinitializeMetadataStructureCache(context.Vault);
+			this.VaultApplication.TaskManager.SendBroadcast
+			(
+				context.Vault, 
+				ReinitializeMetadataCacheTaskDirective.TaskType,
+				// This directive isn't needed, but shown to identify the expected
+				// task directive, if needded in the future.
+				new ReinitializeMetadataCacheTaskDirective()
+			);
 
 			// Update the client.
 			clientOperations.RefreshMetadataCache();
-			clientOperations.ShowMessage("Structure imported");
+			clientOperations.ShowMessage(Resources.ImportReplicationPackage.Successful);
 			clientOperations.ReloadDomain();
 
 		}
@@ -99,10 +132,15 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 				// Exceptions are typically already written to event log by M-Files,
 				// so we don't bother to write it ourselves.
 				this.Logger?.Info($"Exception importing job at {this.ReplicationPackagePath}");
-				throw new Exception("Cannot import package");
+				throw new Exception(Resources.ImportReplicationPackage.Failure_Generic);
 			}
 		}
 
+		/// <summary>
+		/// Creates the import job.
+		/// </summary>
+		/// <param name="disposable">An item that should be disposed when the job is finished importing.</param>
+		/// <returns>The job.</returns>
 		protected virtual ImportContentJob CreateImportContentJob(out IDisposable disposable)
 		{
 			var job = new ImportContentJob
@@ -112,7 +150,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 				ActivateAutomaticPermissionsForNewOrChangedDefinitions = true,
 				DisableImportedExternalObjectTypeConnections = true,
 				DisableImportedExternalUserGroups = true,
-				DisableImportedVaultEventHandlers = false,
+				DisableImportedVaultEventHandlers = true,
 				IgnoreAutomaticPermissionsDefinedByObjects = false,
 				ResetExportTimestamps = false
 			};
@@ -124,12 +162,20 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			{
 				case ".zip":
 					// Unzip it to a temporary folder.
-					var temporaryFolder = Path.GetTempPath() + package.Name.Substring(0, package.Name.Length - 4);
-					disposable = new TemporaryDirectory(temporaryFolder);
-					System.IO.Compression.ZipFile.ExtractToDirectory(package.FullName, temporaryFolder);
+					var fileDownloadLocation = new FileDownloadLocation
+					(
+						Path.GetTempPath(),
+						package.Name.Substring(0, package.Name.Length - 4)
+					);
+					System.IO.Compression.ZipFile.ExtractToDirectory
+					(
+						package.FullName, 
+						fileDownloadLocation.Directory.FullName
+					);
 
 					// Find the path to the xml file.
-					var xml = new DirectoryInfo(temporaryFolder)
+					var xml = fileDownloadLocation?
+						.Directory?
 						.GetDirectories()?
 						.FirstOrDefault()?
 						.GetFiles("index.xml")?
@@ -137,69 +183,22 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 						.FullName;
 					job.SourceLocation = xml ?? package.FullName;
 
+					// Our file download location now contains where to dispose.
+					disposable = fileDownloadLocation;
+
 					break;
 				case ".xml":
 					disposable = new EmptyDisposable();
 					job.SourceLocation = package.FullName;
 					break;
 				default:
-					{
-						// Allow to fail.
-						disposable = new EmptyDisposable();
-						break;
-					}
+					throw new Exception("The package must be an .xml or .zip file.");
 			}
-
 			return job;
-		}
-		internal class TemporaryDirectory : IDisposable
-		{
-			private ILogger Logger { get; } = LogManager.GetLogger(typeof(TemporaryDirectory));
-
-			private bool disposedValue;
-
-			public string Path { get; }
-			public TemporaryDirectory(string path)
-			{
-				this.Path = path;
-			}
-
-			protected virtual void Dispose(bool disposing)
-			{
-				if (!disposedValue)
-				{
-					if (disposing)
-					{
-						this.Logger?.Info($"Deleting {this.Path}");
-						Directory.Delete(this.Path, true);
-					}
-
-					// TODO: free unmanaged resources (unmanaged objects) and override finalizer
-					// TODO: set large fields to null
-					disposedValue = true;
-				}
-			}
-
-			// // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-			// ~TemporaryDirectory()
-			// {
-			//     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-			//     Dispose(disposing: false);
-			// }
-
-			public void Dispose()
-			{
-				// Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-				Dispose(disposing: true);
-				GC.SuppressFinalize(this);
-			}
 		}
 		internal class EmptyDisposable : IDisposable
 		{
 			public void Dispose() { }
 		}
-	}
-	internal static partial class ImportContentJobExtensionMethods
-	{
 	}
 }
