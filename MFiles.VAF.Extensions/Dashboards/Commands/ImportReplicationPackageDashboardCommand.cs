@@ -96,7 +96,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			// Do the upgrade.
 			this.Logger?.Trace($"Creating content import job {this.ReplicationPackagePath}");
 			var job = this.CreateImportContentJob(out IDisposable disposable);
-			using (disposable)
+			using (disposable ?? new EmptyDisposable())
 			{
 				this.Logger?.Info($"Starting import of data at {this.ReplicationPackagePath}");
 				this.ImportToVault(transactionalVault ?? context.Vault, job);
@@ -198,7 +198,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 
 					break;
 				case ".xml":
-					disposable = new EmptyDisposable();
+					disposable = null;
 					job.SourceLocation = package.FullName;
 					break;
 				default:
