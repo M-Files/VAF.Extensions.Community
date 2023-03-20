@@ -72,5 +72,30 @@ namespace MFiles.VAF.Extensions
 				.Select(bo => bo.Value?.DashboardRunCommand)
 				.Where(c => null != c);
 		}
+
+		public virtual CustomDomainCommand CreateImportReplicationPackageDomainCommand
+		(
+			string commandId,
+			string displayName,
+			string replicationPackagePath,
+			bool executeSynchronously = true
+		)
+		{
+			// TODO: Async.
+			if (!executeSynchronously)
+				throw new NotImplementedException();
+
+			// Synchronous import.
+			return new Dashboards.Commands.ImportReplicationPackageDashboardCommand<TSecureConfiguration>
+			(
+				this,
+				commandId,
+				displayName,
+				replicationPackagePath
+			)
+			{
+				Blocking = true,
+			};
+		}
 	}
 }
