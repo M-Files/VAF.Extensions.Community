@@ -20,26 +20,27 @@ namespace MFiles.VAF.Extensions
 	where TSecureConfiguration : class, new()
 	{
 		/// <summary>
-		/// Whether the configuration is valid.
+		/// Whether the current configuration is valid.
 		/// </summary>
-		private bool? isConfigurationValid;
+		private bool? isCurrentConfigurationValid;
 
 		/// <summary>
 		/// Returns whether the configuration is valid.
 		/// Note: uses a cached value that is updated during
 		/// <see cref="StartOperations(Vault)"/> and <see cref="OnConfigurationUpdated(Configuration, bool, bool)"/>.
 		/// Only re-validates if the status is unknown, or if <paramref name="force"/> is <see langword="true"/>.
+		/// Validation is done by calling <see cref="Core.ConfigurableVaultApplicationBase{TSecureConfiguration}.IsValid"/>.
 		/// </summary>
 		/// <param name="vault">The vault reference to use to validate, if the status is unknown or <paramref name="force"/> is <see langword="true"/>.</param>
 		/// <param name="force">If <see langword="true"/> then the cached value is updated.  This incurs a performance hit and should not be used often.</param>
 		/// <returns><see langword="true"/> if the configuration is valid, <see langword="false"/> otherwise.</returns>
-		protected bool GetIsConfigurationValid(Vault vault, bool force = false)
+		protected bool IsCurrentConfigurationValid(Vault vault, bool force = false)
 		{
-			this.isConfigurationValid =
-				this.isConfigurationValid.HasValue && !force
-				? this.isConfigurationValid.Value
-				: this.IsValid(vault);
-			return this.isConfigurationValid.Value;
+			this.isCurrentConfigurationValid =
+				this.isCurrentConfigurationValid.HasValue && !force
+				? this.isCurrentConfigurationValid.Value // No-op.
+				: this.IsValid(vault); // Use the IsValid method.
+			return this.isCurrentConfigurationValid.Value;
 		}
 
 		/// <inheritdoc />
@@ -52,7 +53,7 @@ namespace MFiles.VAF.Extensions
 			this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(isVaultStartup: false);
 
 			// Update the cached value with the validity status.
-			this.isConfigurationValid = isValid;
+			this.isCurrentConfigurationValid = isValid;
 
 			// If we have logging configuration then set it up.
 			var loggingConfiguration = this.GetLoggingConfiguration();
@@ -72,7 +73,7 @@ namespace MFiles.VAF.Extensions
 		public override void StartOperations(Vault vaultPersistent)
 		{
 			// Do we have a valid configuration?
-			this.isConfigurationValid = this.IsValid(vaultPersistent);
+			this.isCurrentConfigurationValid = this.IsValid(vaultPersistent);
 
 			// Initialize the application.
 			base.StartOperations(vaultPersistent);
