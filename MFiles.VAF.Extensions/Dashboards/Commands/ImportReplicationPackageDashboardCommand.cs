@@ -54,7 +54,16 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 		{
 			this.ID = commandId;
 			this.DisplayName = displayName;
-			this.Execute = this.Import;
+
+			// When it's executed, run the import in a transaction.
+			this.Execute = (c, o) =>
+			{
+				var runner = this.VaultApplication.GetTransactionRunner();
+				runner.Run((v) =>
+				{
+					this.Import(c, o, v);
+				});
+			};
 			this.VaultApplication = vaultApplication
 				?? throw new ArgumentNullException(nameof(vaultApplication));
 			var package = new FileInfo(replicationPackagePath);
@@ -75,7 +84,8 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 		protected virtual void Import
 		(
 			IConfigurationRequestContext context, 
-			ClientOperations clientOperations
+			ClientOperations clientOperations,
+			Vault transactionalVault = null
 		)
 		{
 			this.Logger?.Trace($"Starting import of data at {this.ReplicationPackagePath}");
@@ -89,7 +99,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			using (disposable)
 			{
 				this.Logger?.Info($"Starting import of data at {this.ReplicationPackagePath}");
-				this.ImportToVault(context.Vault, job);
+				this.ImportToVault(transactionalVault ?? context.Vault, job);
 			}
 			this.Logger?.Debug($"Import of {this.ReplicationPackagePath} complete.");
 
@@ -100,7 +110,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			this.VaultApplication.ReinitializeMetadataStructureCache(context.Vault);
 			this.VaultApplication.TaskManager.SendBroadcast
 			(
-				context.Vault, 
+				transactionalVault ?? context.Vault, 
 				ReinitializeMetadataCacheTaskDirective.TaskType,
 				// This directive isn't needed, but shown to identify the expected
 				// task directive, if needded in the future.
