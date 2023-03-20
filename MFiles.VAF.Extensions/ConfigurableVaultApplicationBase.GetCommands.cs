@@ -73,18 +73,23 @@ namespace MFiles.VAF.Extensions
 				.Where(c => null != c);
 		}
 
+		/// <summary>
+		/// Creates a command that, when executed, imports a replication package.
+		/// </summary>
+		/// <param name="commandId">The id of the command. Must be unique in the application.</param>
+		/// <param name="displayName">The display text for the command.</param>
+		/// <param name="replicationPackagePath">
+		/// The path to the replication package.  
+		/// Should be a .zip file included in the vault application's .mfappx.
+		/// </param>
+		/// <returns>The command.</returns>
 		public virtual CustomDomainCommand CreateImportReplicationPackageDomainCommand
 		(
 			string commandId,
 			string displayName,
-			string replicationPackagePath,
-			bool executeSynchronously = true
+			string replicationPackagePath
 		)
 		{
-			// TODO: Async.
-			if (!executeSynchronously)
-				throw new NotImplementedException();
-
 			// Synchronous import.
 			return new Dashboards.Commands.ImportReplicationPackageDashboardCommand<TSecureConfiguration>
 			(
