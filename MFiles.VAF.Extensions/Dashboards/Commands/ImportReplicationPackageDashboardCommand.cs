@@ -90,37 +90,50 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 		{
 			this.Logger?.Trace($"Starting import of data at {this.ReplicationPackagePath}");
 
-			// TODO: Disable polling during the upgrade.
-			// this.VaultApplication.TaskManager.EnableTaskPolling(false);
-
-			// Do the upgrade.
-			this.Logger?.Trace($"Creating content import job {this.ReplicationPackagePath}");
-			var job = this.CreateImportContentJob(out IDisposable disposable);
-			using (disposable ?? new EmptyDisposable())
+			var previousConcurrency = this.VaultApplication.TaskManager.MaxConcurrency;
+			try
 			{
-				this.Logger?.Info($"Starting import of data at {this.ReplicationPackagePath}");
-				this.ImportToVault(transactionalVault ?? context.Vault, job);
+				// Disable polling during the upgrade.
+				this.VaultApplication.TaskManager.MaxConcurrency = 0;
+
+				// Do the upgrade.
+				this.Logger?.Trace($"Creating content import job {this.ReplicationPackagePath}");
+				var job = this.CreateImportContentJob(out IDisposable disposable);
+				using (disposable ?? new EmptyDisposable())
+				{
+					this.Logger?.Info($"Starting import of data at {this.ReplicationPackagePath}");
+					this.ImportToVault(transactionalVault ?? context.Vault, job);
+				}
+				this.Logger?.Debug($"Import of {this.ReplicationPackagePath} complete.");
+
+				// Refresh the metadata cache on all servers.
+				this.VaultApplication.ReinitializeMetadataStructureCache(context.Vault);
+				this.VaultApplication.TaskManager.SendBroadcast
+				(
+					transactionalVault ?? context.Vault,
+					ReinitializeMetadataCacheTaskDirective.TaskType,
+					// This directive isn't needed, but shown to identify the expected
+					// task directive, if needed in the future.
+					new ReinitializeMetadataCacheTaskDirective()
+				);
+
+				// Update the client.
+				clientOperations.RefreshMetadataCache();
+				clientOperations.ShowMessage(Resources.ImportReplicationPackage.Successful);
+				clientOperations.ReloadDomain();
 			}
-			this.Logger?.Debug($"Import of {this.ReplicationPackagePath} complete.");
-
-			// TODO: Re-enable it after the upgrade.
-			// this.TaskQueueManager.EnableTaskPolling(true);
-
-			// Refresh the metadata cache on all servers.
-			this.VaultApplication.ReinitializeMetadataStructureCache(context.Vault);
-			this.VaultApplication.TaskManager.SendBroadcast
-			(
-				transactionalVault ?? context.Vault, 
-				ReinitializeMetadataCacheTaskDirective.TaskType,
-				// This directive isn't needed, but shown to identify the expected
-				// task directive, if needded in the future.
-				new ReinitializeMetadataCacheTaskDirective()
-			);
-
-			// Update the client.
-			clientOperations.RefreshMetadataCache();
-			clientOperations.ShowMessage(Resources.ImportReplicationPackage.Successful);
-			clientOperations.ReloadDomain();
+			catch
+			{
+				// Update the client.
+				clientOperations.RefreshMetadataCache();
+				clientOperations.ShowMessage(Resources.ImportReplicationPackage.Failure_Generic);
+				clientOperations.ReloadDomain();
+			}
+			finally
+			{
+				// Set the concurrency back.
+				this.VaultApplication.TaskManager.MaxConcurrency = previousConcurrency;
+			}
 
 		}
 
