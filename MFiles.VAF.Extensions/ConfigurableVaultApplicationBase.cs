@@ -109,6 +109,7 @@ namespace MFiles.VAF.Extensions
 
 			this.RecurringOperationConfigurationManager = new RecurringOperationConfigurationManager<TSecureConfiguration>(this);
 			this.ApplicationOverviewDashboardContentRenderer = this.GetApplicationOverviewDashboardContentRenderer();
+			this.ReplicationPackageDashboardContentRenderer = this.GetReplicationPackageDashboardContentRenderer();
 			this.AsynchronousDashboardContentRenderer = this.GetAsynchronousDashboardContentRenderer();
 			this.AsynchronousDashboardContentProviders.AddRange(this.GetAsynchronousDashboardContentProviders());
 			this.LoggingDashboardContentRenderer = this.GetLoggingDashboardContentRenderer();

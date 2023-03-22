@@ -53,7 +53,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 		/// <summary>
 		/// The display name for the task.
 		/// </summary>
-		public string TaskDisplayName { get; set; } = "Importing vault structure...";
+		public string TaskDisplayName { get; set; } = "Import missing vault structure";
 
 		/// <summary>
 		/// Whether this package needs to be imported.

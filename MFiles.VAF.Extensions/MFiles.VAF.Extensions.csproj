@@ -30,6 +30,7 @@
     <None Remove="Resources\Images\download.png" />
     <None Remove="Resources\Images\enabled.png" />
     <None Remove="Resources\Images\error.png" />
+    <None Remove="Resources\Images\ImportReplicationPackage.png" />
     <None Remove="Resources\Images\notenabled.png" />
     <None Remove="Resources\Images\viewlogs.png" />
     <None Remove="Resources\Images\warning.png" />
@@ -37,6 +38,7 @@
     <None Remove="Resources\Waiting.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\Images\ImportReplicationPackage.png" />
     <EmbeddedResource Include="Resources\Images\viewlogs.png" />
   </ItemGroup>
   <ItemGroup>
