@@ -14,6 +14,8 @@ using MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent;
 using MFiles.VAF.Extensions.Dashboards.LoggingDashboardContent;
 using MFiles.VAF.Extensions.Dashboards.DevelopmentDashboardContent;
 using MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent;
+using MFiles.VAF.Extensions.Dashboards.Commands;
+using System.CodeDom.Compiler;
 
 namespace MFiles.VAF.Extensions
 {
@@ -78,6 +80,9 @@ namespace MFiles.VAF.Extensions
 			{
 				// Application overview.
 				this.GetApplicationOverviewDashboardContent,
+
+				// Import any replication packages?
+				this.GetReplicationPackageImportData,
 				
 				// Any asynchronous operation content.
 				this.GetAsynchronousOperationDashboardContent,
@@ -114,6 +119,86 @@ namespace MFiles.VAF.Extensions
 		}
 
 		#endregion
+
+		/// <summary>
+		/// Gets any replication package import stuff
+		/// </summary>
+		/// <param name="context">The request context for this dashboard generation.</param>
+		/// <returns>The dashboard content, or null if none should be rendered.</returns>
+		public virtual IDashboardContent GetReplicationPackageImportData(IConfigurationRequestContext context)
+		{
+			// Get any pending/running tasks.
+			var importTasks = this.TaskManager.GetAllExecutions<ImportReplicationPackageTaskDirective>
+			(
+				this.GetExtensionsSequentialQueueID(),
+				this.GetReplicationPackageImportTaskType()
+			).ToArray();
+
+			// Get any commands that need to be run.
+			var commands = this.GetCommands(null)?
+				.Where(c => c is ImportReplicationPackageDashboardCommand<TSecureConfiguration>)
+				.Cast<ImportReplicationPackageDashboardCommand<TSecureConfiguration>>()
+				.Where(c => c.RequiresImporting)
+				.ToArray();
+
+			// If we have no data then show nothing.
+			if (importTasks.Length == 0 && commands.Length == 0)
+				return null;
+
+			// Create our panel.
+			var panel = new DashboardPanelEx()
+			{
+				Title = "Import vault structure"
+			};
+
+			// Render out a line for each command.
+			var list = new DashboardList();
+			foreach(var command in commands)
+			{
+				// Load the import status.
+				var importStatus = this.TaskManager.GetExecutions<ImportReplicationPackageTaskDirective>
+				(
+					this.GetExtensionsSequentialQueueID(),
+					this.GetReplicationPackageImportTaskType(),
+					MFTaskState.MFTaskStateWaiting,
+					MFTaskState.MFTaskStateInProgress,
+					MFTaskState.MFTaskStateCompleted,
+					MFTaskState.MFTaskStateFailed
+				).OrderByDescending(t => t.LatestActivity).ToArray();
+
+				// Create the list item.
+				var listItem = new DashboardListItemEx();
+
+				// Add the import command if none are waiting.
+				if (!importStatus.Any(t => t.State == MFTaskState.MFTaskStateWaiting))
+				{
+					listItem.Commands.Add(new DashboardDomainCommandEx()
+					{
+						DomainCommandID = command.ID,
+						Title = command.DisplayName
+					});
+				}
+
+				var dashboardContentCollection = new DashboardContentCollection();
+				foreach(var s in importStatus)
+				{
+					TaskInformation taskInfo = null == s.Status?.Data
+					? new TaskInformation()
+					: new TaskInformation(s.Status.Data);
+					dashboardContentCollection.Add
+					(
+						new DashboardCustomContentEx($"<p>{s.LatestActivity} = {taskInfo.StatusDetails} {s.State}</p>")
+					);
+				}
+				listItem.InnerContent = dashboardContentCollection;
+
+				list.Items.Add(listItem);
+			}
+			panel.InnerContent = list;
+
+			// Return the panel.
+			return panel;
+		}
 
 		#region Application overview
 

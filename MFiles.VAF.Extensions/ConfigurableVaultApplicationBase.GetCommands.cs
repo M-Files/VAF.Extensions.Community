@@ -99,7 +99,7 @@ namespace MFiles.VAF.Extensions
 				replicationPackagePath
 			)
 			{
-				Blocking = true,
+				Blocking = true
 			};
 		}
 	}

@@ -7,12 +7,13 @@ using MFiles.VAF.Configuration.Logging;
 using MFilesAPI;
 using System;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using MFiles.VAF.Configuration.Logging.NLog;
 using System.Collections.Generic;
 using System.Reflection;
+using MFiles.VAF.Extensions.Dashboards.Commands;
+using MFiles.VAF.Common;
 
 namespace MFiles.VAF.Extensions
 {
@@ -109,7 +110,7 @@ namespace MFiles.VAF.Extensions
 				this.AddTask
 				(
 					vault ?? this.Vault,
-					this.VaultApplication.GetSchedulerQueueID(),
+					this.VaultApplication.GetExtensionsSequentialQueueID(),
 					this.VaultApplication.GetRescheduleTaskType(),
 					directive
 				);
@@ -117,31 +118,96 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
-		/// Registers/opens a queue with ID provided by <see cref="ConfigurableVaultApplicationBase{TSecureConfiguration}.GetSchedulerQueueID"/>
+		/// Registers/opens a queue with ID provided by <see cref="ConfigurableVaultApplicationBase{TSecureConfiguration}.GetExtensionsSequentialQueueID"/>
 		/// and registers a process to handle tasks of type <see cref="ConfigurableVaultApplicationBase{TSecureConfiguration}.GetRescheduleTaskType"/>.
 		/// </summary>
 		/// <remarks>
 		/// This is a sequential queue, and the <see cref="HandleReschedule(ITaskProcessingJob{RescheduleProcessorTaskDirective})"/>
 		/// method processes the rescheduling tasks.
 		/// </remarks>
-		public virtual void RegisterSchedulingQueue()
+		public virtual void RegisterExtensionsQueue()
 		{
 			// Register the scheduler queue.
-			this.Logger?.Trace($"Registering scheduler queue {this.VaultApplication.GetSchedulerQueueID()}");
+			this.Logger?.Trace($"Registering scheduler queue {this.VaultApplication.GetExtensionsSequentialQueueID()}");
 			this.RegisterQueue
 			(
-				this.VaultApplication.GetSchedulerQueueID(),
-				new[]
+				this.VaultApplication.GetExtensionsSequentialQueueID(),
+				new Processor[]
 				{
-						new TaskProcessor<RescheduleProcessorTaskDirective>
-						(
-							this.VaultApplication.GetRescheduleTaskType(),
-							this.HandleReschedule,
-							TransactionMode.Unsafe
-						)
+					new TaskProcessor<RescheduleProcessorTaskDirective>
+					(
+						this.VaultApplication.GetRescheduleTaskType(),
+						this.HandleReschedule,
+						TransactionMode.Unsafe
+					),
+					new TaskProcessor<ImportReplicationPackageTaskDirective>
+					(
+						this.VaultApplication.GetReplicationPackageImportTaskType(),
+						this.HandleReplicationPackageImport,
+						TransactionMode.Unsafe
+					)
 				},
 				MFTaskQueueProcessingBehavior.MFProcessingBehaviorSequential
 			);
+		}
+
+		/// <summary>
+		/// Handles a job for a replication package to be imported.
+		/// </summary>
+		/// <param name="job">The job to execute.</param>
+		protected virtual void HandleReplicationPackageImport(ITaskProcessingJob<ImportReplicationPackageTaskDirective> job)
+		{
+			// Get the command.
+			var command = this.VaultApplication
+				.GetCommands(null)?
+				.FirstOrDefault(c => c.ID == job?.Directive?.CommandId)
+				as ImportReplicationPackageDashboardCommand<TConfiguration>;
+			if (null == command)
+			{
+				this.Logger?.Warn($"Attempt to import package with command ID '{job?.Directive?.CommandId}', but command not found or command was incorrect type.");
+				return;
+			}
+
+			// Run the command.
+			// Note that the import must use a transactional vault reference,
+			// but larger packages may take longer than a single transaction to run.
+			// This is okay as the vault structural references will still be imported
+			// even if the transaction times out.  As the import will also skip items
+			// that are already imported, we can effectively import it multiple times
+			// until it's done.
+			job.Update(details: "Importing replication package...");
+			var runner = this.VaultApplication.GetTransactionRunner();
+			var complete = false;
+			var attemptNumber = 1;
+			while (!complete)
+			{
+				try
+				{
+					runner.Run((transactionalVault) =>
+					{
+						if (command.TryImport(transactionalVault))
+						{
+							this.Logger?.Info($"Imported replication package {command.ReplicationPackagePath}.");
+							job.Update(details: "Replication package imported successfully.");
+						}
+						else
+						{
+							this.Logger?.Warn($"Failed to import replication package {command.ReplicationPackagePath}.");
+							job.Update(details: "Failed to import replication package.");
+						}
+						complete = true;
+					});
+				}
+				catch
+				{
+					// Let it re-run several times.
+					if(++attemptNumber > command.MaximumImportAttempts)
+					{
+						complete = true;
+						job.Update(details: "Import process cancelled due to repeated failures.");
+					}
+				}
+			}
 		}
 
 		/// <summary>
@@ -155,6 +221,7 @@ namespace MFiles.VAF.Extensions
 			if (null != job.Directive)
 				this.HandleReschedule(job.Directive);
 		}
+
 		/// <summary>
 		/// Cancels future executions of a task with a given queue ID and task type (read from the <paramref name="job"/>'s directive).
 		/// If the directive also contains a next-execution date then reschedules an execution of the task at that time.
@@ -223,19 +290,5 @@ namespace MFiles.VAF.Extensions
 					break;
 			}
 		}
-	}
-
-	[DataContract]
-	public class RescheduleProcessorTaskDirective
-		: TaskDirective
-	{
-		[DataMember]
-		public string QueueID { get; set; }
-		[DataMember]
-		public string TaskType { get; set; }
-		[DataMember]
-		public DateTimeOffset? NextExecution { get; set; }
-		[DataMember]
-		public TaskDirective InnerDirective { get; set; }
 	}
 }

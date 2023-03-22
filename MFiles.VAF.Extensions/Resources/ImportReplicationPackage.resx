@@ -123,4 +123,7 @@
   <data name="Successful" xml:space="preserve">
     <value>Structure imported</value>
   </data>
+  <data name="TaskCreated" xml:space="preserve">
+    <value>Import task created</value>
+  </data>
 </root>

@@ -77,5 +77,14 @@ namespace MFiles.VAF.Extensions.Resources {
                 return ResourceManager.GetString("Successful", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Import task created.
+        /// </summary>
+        internal static string TaskCreated {
+            get {
+                return ResourceManager.GetString("TaskCreated", resourceCulture);
+            }
+        }
     }
 }

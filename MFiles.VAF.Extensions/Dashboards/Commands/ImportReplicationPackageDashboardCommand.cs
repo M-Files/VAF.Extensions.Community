@@ -20,6 +20,8 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 		: CustomDomainCommand
 		where TConfiguration : class, new()
 	{
+		private int maximumImportAttempts = 10;
+
 		/// <summary>
 		/// The logger to use for this class.
 		/// </summary>
@@ -28,12 +30,37 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 		/// <summary>
 		/// The vault application for this command.
 		/// </summary>
-		protected ConfigurableVaultApplicationBase<TConfiguration> VaultApplication { get; } 
+		protected ConfigurableVaultApplicationBase<TConfiguration> VaultApplication { get; }
 
 		/// <summary>
 		/// The path to the replication package.
 		/// </summary>
-		protected string ReplicationPackagePath { get; }
+		public string ReplicationPackagePath { get; }
+
+		/// <summary>
+		/// The number of import attempts of the package before it gives up.
+		/// </summary>
+		public int MaximumImportAttempts 
+		{ 
+			get => maximumImportAttempts;
+			set
+			{
+				if (value <= 0 || value > 100)
+					value = 10;
+				maximumImportAttempts = value;
+			}
+		}
+		/// <summary>
+		/// The display name for the task.
+		/// </summary>
+		public string TaskDisplayName { get; set; } = "Importing vault structure...";
+
+		/// <summary>
+		/// Whether this package needs to be imported.
+		/// Should be calculated somehow.
+		/// </summary>
+		// TODO: Make this calcualted.
+		public bool RequiresImporting { get; set; }
 
 		/// <summary>
 		/// Creates a command which, when clicked, will import a replication package.
@@ -61,32 +88,20 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 				var runner = this.VaultApplication.GetTransactionRunner();
 				runner.Run((v) =>
 				{
-					this.Import(c, o, v);
+					this.CreateImportTask(c, o, v);
 				});
 			};
 			this.VaultApplication = vaultApplication
 				?? throw new ArgumentNullException(nameof(vaultApplication));
 			var package = new FileInfo(replicationPackagePath);
 			this.ReplicationPackagePath = package.FullName;
-			if(false == File.Exists( this.ReplicationPackagePath ) )
+			if (false == File.Exists(this.ReplicationPackagePath))
 			{
 				throw new ArgumentException("The replication package does not exist.", nameof(ReplicationPackagePath));
 			}
 		}
 
-		/// <summary>
-		/// Called when the command is executed.
-		/// Creates the import job and imports it.
-		/// Also updates the metadata cache so that it reflects new items.
-		/// </summary>
-		/// <param name="context"></param>
-		/// <param name="clientOperations"></param>
-		protected virtual void Import
-		(
-			IConfigurationRequestContext context, 
-			ClientOperations clientOperations,
-			Vault transactionalVault = null
-		)
+		public virtual bool TryImport(Vault vault)
 		{
 			this.Logger?.Trace($"Starting import of data at {this.ReplicationPackagePath}");
 
@@ -102,38 +117,76 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 				using (disposable ?? new EmptyDisposable())
 				{
 					this.Logger?.Info($"Starting import of data at {this.ReplicationPackagePath}");
-					this.ImportToVault(transactionalVault ?? context.Vault, job);
+					this.ImportToVault(vault, job);
 				}
 				this.Logger?.Debug($"Import of {this.ReplicationPackagePath} complete.");
 
 				// Refresh the metadata cache on all servers.
-				this.VaultApplication.ReinitializeMetadataStructureCache(context.Vault);
+				this.VaultApplication.ReinitializeMetadataStructureCache(this.VaultApplication.PermanentVault);
 				this.VaultApplication.TaskManager.SendBroadcast
 				(
-					transactionalVault ?? context.Vault,
+					vault,
 					ReinitializeMetadataCacheTaskDirective.TaskType,
 					// This directive isn't needed, but shown to identify the expected
-					// task directive, if needed in the future.
+					// task directive type, if needed in the future.
 					new ReinitializeMetadataCacheTaskDirective()
 				);
 
-				// Update the client.
-				clientOperations.RefreshMetadataCache();
-				clientOperations.ShowMessage(Resources.ImportReplicationPackage.Successful);
-				clientOperations.ReloadDomain();
+				// Mark us as not needing to run.
+				this.RequiresImporting = false;
+				return true;
 			}
 			catch
 			{
-				// Update the client.
-				clientOperations.RefreshMetadataCache();
-				clientOperations.ShowMessage(Resources.ImportReplicationPackage.Failure_Generic);
-				clientOperations.ReloadDomain();
+				// TODO: Should we have a flag somewhere to show the exception details?
+				this.Logger?.Error($"Exception importing package; exception details hidden from log");
+				return false;
 			}
 			finally
 			{
 				// Set the concurrency back.
 				this.VaultApplication.TaskManager.MaxConcurrency = previousConcurrency;
 			}
+		}
+
+		public virtual void CreateImportTask
+		(
+			IConfigurationRequestContext context,
+			ClientOperations clientOperations,
+			Vault transactionalVault = null
+		)
+		{
+			// Do we have any future or current execution?
+			var executions = this.VaultApplication.TaskManager.GetExecutions<ImportReplicationPackageTaskDirective>
+			(
+				this.VaultApplication.GetExtensionsSequentialQueueID(),
+				this.VaultApplication.GetReplicationPackageImportTaskType(),
+				MFTaskState.MFTaskStateWaiting,
+				MFTaskState.MFTaskStateInProgress
+			).ToArray();
+			if (executions.Length != 0)
+			{
+				clientOperations.ShowMessage("Thereis already an import scheduled or in progress.");
+				clientOperations.RefreshDashboard();
+				return;
+			}
+
+			// Add the task.
+			this.VaultApplication.TaskManager.AddTask
+			(
+				transactionalVault ?? context.Vault,
+				this.VaultApplication.GetExtensionsSequentialQueueID(),
+				this.VaultApplication.GetReplicationPackageImportTaskType(),
+				new ImportReplicationPackageTaskDirective()
+				{
+					CommandId = this.ID,
+					DisplayName = this.TaskDisplayName
+				}
+			);
+
+			// Show that we did something.
+			clientOperations.ShowMessage(Resources.ImportReplicationPackage.TaskCreated);
+			clientOperations.RefreshDashboard();
 
 		}
 
@@ -192,7 +245,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 					);
 					System.IO.Compression.ZipFile.ExtractToDirectory
 					(
-						package.FullName, 
+						package.FullName,
 						fileDownloadLocation.Directory.FullName
 					);
 

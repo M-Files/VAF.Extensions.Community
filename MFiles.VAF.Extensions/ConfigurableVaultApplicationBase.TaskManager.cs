@@ -31,10 +31,10 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
-		/// The queue ID to use for the recurring task scheduling.
+		/// The queue ID to use for extensions-specific topics.
 		/// </summary>
 		/// <returns></returns>
-		public virtual string GetSchedulerQueueID()
+		public virtual string GetExtensionsSequentialQueueID()
 			=> $"{this.TaskManager.Id}.extensions.scheduler";
 
 		/// <summary>
@@ -43,6 +43,13 @@ namespace MFiles.VAF.Extensions
 		/// <returns></returns>
 		public virtual string GetRescheduleTaskType()
 			=> $"reschedule";
+
+		/// <summary>
+		/// The task type to use for rescheduling tasks.
+		/// </summary>
+		/// <returns></returns>
+		public virtual string GetReplicationPackageImportTaskType()
+			=> $"import-replication-package";
 
 		/// <summary>
 		/// Overridden to append the logger to the TaskManager as soon as it is created.
@@ -65,8 +72,8 @@ namespace MFiles.VAF.Extensions
 				// Register all queues, etc.
 				base.InitializeTaskManager();
 
-				// Register the scheduling queue.
-				this.TaskManager?.RegisterSchedulingQueue();
+				// Register the extensions queue.
+				this.TaskManager?.RegisterExtensionsQueue();
 
 				// Now populate the run commands.
 				this.TaskManager?.PopulateTaskQueueRunCommands(this.TaskQueueResolver);
