@@ -34,12 +34,16 @@
     <None Remove="Resources\Images\notenabled.png" />
     <None Remove="Resources\Images\viewlogs.png" />
     <None Remove="Resources\Images\warning.png" />
+    <None Remove="Resources\ImportReplicationPackage\vault_impact_projection.xsl" />
+    <None Remove="Resources\ImportReplicationPackage\vault_impact_projection_translations.xml" />
     <None Remove="Resources\Running.png" />
     <None Remove="Resources\Waiting.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Images\ImportReplicationPackage.png" />
     <EmbeddedResource Include="Resources\Images\viewlogs.png" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\vault_impact_projection.xsl" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\vault_impact_projection_translations.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\lib\Resources\logo.png">
@@ -50,7 +54,7 @@
   <ItemGroup>
     <PackageReference Include="MFiles.VAF" Version="22.12.672.3" />
     <PackageReference Include="MFiles.VAF.Configuration.Logging.NLog" Version="22.11.2" />
-    <PackageReference Include="MFilesAPI.Extensions" Version="23.3.1" />
+    <PackageReference Include="MFilesAPI.Extensions" Version="23.3.2" />
   </ItemGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">

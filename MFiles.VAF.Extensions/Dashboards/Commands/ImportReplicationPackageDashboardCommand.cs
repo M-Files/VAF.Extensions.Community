@@ -118,6 +118,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 				{
 					this.Logger?.Info($"Starting import of data at {this.ReplicationPackagePath}");
 					this.ImportToVault(vault, job);
+					disposable.Dispose();
 				}
 				this.Logger?.Debug($"Import of {this.ReplicationPackagePath} complete.");
 
@@ -136,12 +137,19 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 				this.RequiresImporting = false;
 				return true;
 			}
-			catch
+#if DEBUG
+			catch (Exception e)
 			{
-				// TODO: Should we have a flag somewhere to show the exception details?
+				this.Logger?.Error(e, $"Exception importing package");
+				return false;
+			}
+#else
+			catch (Exception e)
+			{
 				this.Logger?.Error($"Exception importing package; exception details hidden from log");
 				return false;
 			}
+#endif
 			finally
 			{
 				// Set the concurrency back.

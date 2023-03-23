@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<translations>
+	<translation id="MainTitleText_ImportContent">Summary of the package content to be imported</translation>
+	<translation id="MainTitleText_UpgradeVaultStructure">Summary of the Vault Structure Modifications</translation>
+	<translation id="TitleText_WarningAboutStructureChangesPrefix">Important: </translation>
+	<translation id="TitleText_WarningAboutStructureChanges">This package modifies the metadata structure of the target vault. The changes cannot be undone. Continue by selecting OK only if you are sure that you want to commit the changes described below.</translation>
+	<translation id="TitleText_WarningAboutIgnoringScriptContent">Additional note: Script content from the package is skipped.</translation>
+	<translation id="TitleText_Links">Links</translation>
+	<translation id="TitleText_StructureSummary">Summary of the metadata structure elements in the package</translation>
+	<translation id="TitleText_DependencySummary">Summary of dependencies to the metadata structure elements in the package</translation>
+	<translation id="TitleText_ObjectsAndFilesSummary">Summary of objects and files in the package</translation>
+	<translation id="TitleText_GeneralInfo">General information</translation>
+	<translation id="TableMainTitleText_Incoming">In the package</translation>
+	<translation id="TableMainTitleText_Local">In the local vault</translation>
+	<translation id="TableColNameText_IncomingName">Name</translation>
+	<translation id="TableColNameText_IncomingID">ID</translation>
+	<translation id="TableColNameText_IncomingGUID">Unique ID</translation>
+	<translation id="TableColNameText_IncomingAliases">Aliases</translation>
+	<translation id="TableColNameText_LocalName">Name</translation>
+	<translation id="TableColNameText_LocalID">ID</translation>
+	<translation id="TableColNameText_LocalID2">Local ID</translation>
+	<translation id="TableColNameText_LocalGUID">Unique ID</translation>
+	<translation id="TableColNameText_LocalAliases">Aliases</translation>
+	<translation id="TableColNameText_Name">Name</translation>
+	<translation id="TableColNameText_ID">ID</translation>
+	<translation id="TableColNameText_GUID">Unique ID</translation>
+	<translation id="TableColNameText_Aliases">Aliases</translation>
+	<translation id="TableColNameText_Reason">Reason for skipping</translation>
+	<translation id="TableColNameText_RequestedByFeature">Requested by feature</translation>
+	<translation id="TableColNameText_Identifier">Identifier</translation>
+	<translation id="TableSubTitleText_Classes">Classes</translation>
+	<translation id="TableSubTitleText_ClassGroups">Class groups</translation>
+	<translation id="TableSubTitleText_NACLs">Named access control lists</translation>
+	<translation id="TableSubTitleText_ObjectTypes">Object types</translation>
+	<translation id="TableSubTitleText_PropertyDefs">Property definitions</translation>
+	<translation id="TableSubTitleText_UserAccounts">User accounts</translation>
+	<translation id="TableSubTitleText_UserGroups">User groups</translation>
+	<translation id="TableSubTitleText_ValueLists">Value lists</translation>
+	<translation id="TableSubTitleText_ViewDefs">View definitions</translation>
+	<translation id="TableSubTitleText_Workflows">Workflows</translation>
+	<translation id="TableSubTitleText_WorkflowStates">Workflow states</translation>
+	<translation id="TableSubTitleText_EventHandlers">Event handlers</translation>
+	<translation id="GeneralInfoText_Package">Package: </translation>
+	<translation id="GeneralInfoText_VaultGUID">Local vault unique ID: </translation>
+	<translation id="GeneralInfoText_Time">Timestamp: </translation>
+	<translation id="ObjectsAndFilesInfoText_Objects">Objects and files: </translation>
+	<translation id="ObjectsAndFilesInfoText_ValueListItems">Value list items: </translation>
+	<translation id="StructureSubTitleText_Unchanged">Unchanged elements</translation>
+	<translation id="StructureSubTitleText_ToBeUpdated">Elements to be updated</translation>
+	<translation id="StructureSubTitleText_ToBeAdded">Elements to be added</translation>
+	<translation id="StructureSubTitleText_ToBeSkipped">Elements to be skipped</translation>
+	<translation id="StructureSubTitleText_ObjectTypesAndValuelists">Object types and value lists</translation>
+	<translation id="StructureSummaryText_Unchanged">unchanged</translation>
+	<translation id="StructureSummaryText_ToBeUpdated">updated</translation>
+	<translation id="StructureSummaryText_ToBeAdded">added</translation>
+	<translation id="StructureSummaryText_ToBeSkipped">skipped</translation>
+	<translation id="StructureSubTitleText_SuccessfulDeps">Resolved references from the package content</translation>
+	<translation id="StructureSummaryText_None">none</translation>
+	<translation id="StructureSubTitleText_UnsuccessfulDeps">Unresolved references from the package content</translation>
+	<translation id="GroupDescription_ToBeUpdated">The following elements will override their existing counterparts in the vault. Any differences in identity information are highlighted.</translation>
+	<translation id="GroupDescription_ToBeAdded">The following elements will be added as new elements to the vault.</translation>
+	<translation id="GroupDescription_ToBeSkipped">The following elements will be skipped during the actual import because their references to other elements cannot be resolved in the local vault. See the "Reason for skipping" column for more information.</translation>
+	<translation id="GroupDescription_ToBeUnchanged">The following elements are in the package but will not be changed in the local vault.</translation>
+	<translation id="GroupDescription_SuccessfulDeps">The following references from the package content to other elements can be successfully resolved in the local vault. Any differences in identity information are highlighted.</translation>
+	<translation id="GroupDescription_UnsuccessfulDeps">The following references from the package content to other elements cannot be resolved in the local vault. As a result, some of the referring package content may be skipped during the actual import.</translation>
+	<translation id="CellContentText_Deleted">(deleted)</translation>
+	<translation id="TableHeaderText_CurrentMetadataElements">Current metadata elements</translation>
+	<translation id="TableHeaderText_MetadataElementsInReferenceStructure">Metadata elements in the reference implementation</translation>
+	<translation id="TableHeaderText_UnfoundMetadataElements">Unfound metadata elements</translation>
+	<translation id="MainFooterText">* The metadata element is a compulsory requirement for the feature.</translation>
+	<translation id="MainSectionHeader_NewMetadataStructureElements">New Metadata Structure Elements</translation>
+	<translation id="MainSectionHeader_ExistingMetadataStructureElements">Existing Metadata Structure Elements</translation>
+	<translation id="MainSectionHeader_SkippedMetadataStructureElements">Skipped Metadata Structure Elements</translation>
+	<translation id="MainSectionHeader_UnchangedMetadataStructureElements">Unchanged Metadata Structure Elements</translation>
+	<translation id="MainSectionHeader_DependenciesToExistingMetadataStructureElements">Dependencies to Existing Metadata Structure Elements</translation>
+	<translation id="MainSectionHeader_DependenciesToMissingMetadataStructureElements">Dependencies to Missing Metadata Structure Elements</translation>
+	<translation id="MainSectionHeader_NonExistingMetadataStructureElements">Non-Existing Metadata Elements</translation>
+	<translation id="MainSectionText_NewMetadataStructureElements">These metadata elements will be added to the document vault. If your document vault already contains a metadata element you wish to use instead,
+				do not proceed with the upgrade operation. Instead, change the M-Files Compliance Kit configuration to refer to an existing metadata element, or modify the alias
+				in the current document vault to match with the new element alias. Then re-run the vault structure upgrade.</translation>
+	<translation id="MainSectionText_ExistingMetadataStructureElements">These metadata elements will be changed in the document vault. Please examine each change before proceeding.</translation>
+	<translation id="MainSectionText_SkippedMetadataStructureElements">These metadata elements will not be added or changed due to problems in the vault structure.</translation>
+	<translation id="MainSectionText_UnchangedMetadataStructureElements">These metadata elements do not need to be changed because their structure completely matches the reference structure.</translation>
+	<translation id="MainSectionText_DependenciesToExistingMetadataStructureElements">These metadata elements should be modified to fulfil M-Files Compliance Kit requirements. However, they are not changed automatically. You can review
+				the required modifications of each element. Any functional changes must be manually implemented in the document vault.</translation>
+	<translation id="MainSectionText_DependenciesToMissingMetadataStructureElements">These metadata elements should be introduced to the document vault, but they could not be found or imported properly. This is usually because
+				of a problem in the metadata structure or in the Compliance Kit configuration.</translation>
+	<translation id="MainSectionText_NonExistingMetadataStructureElements">These metadata elements should be added to the document vault, but they could not be found from the reference configuration. This may be because of
+				faulty or customized configuration. If the Compliance Kit configuration specifies references to customized metadata elements, they must be manually added in the
+				document vault.</translation>
+</translations>
