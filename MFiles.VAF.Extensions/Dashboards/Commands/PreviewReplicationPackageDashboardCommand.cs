@@ -1,4 +1,5 @@
-﻿using MFiles.VAF.Configuration.Domain.ClientDirective;
+﻿using MFiles.VAF.Configuration.AdminConfigurations;
+using MFiles.VAF.Configuration.Domain.ClientDirective;
 using MFiles.VAF.Configuration.Logging;
 using MFilesAPI;
 using MFilesAPI.Extensions;
@@ -60,7 +61,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			this.Execute = (c, o) =>
 			{
 				// Create the dashboard content.
-				var content = this.GetPreview(c.Vault);
+				var content = this.GetPreview(c.Vault, o);
 
 				// Show it.
 				o.Directives.Add(new ShowModalDashboard()
@@ -205,7 +206,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			return output;
 		}
 
-		protected virtual string GetPreview(FileInfo xmlFile)
+		protected virtual string GetPreview(FileInfo xmlFile, ClientOperations clientOps)
 		{
 			// Sanity.
 			if (null == xmlFile || false == xmlFile.Exists)
@@ -267,21 +268,33 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 						xslTransform.Transform(xmlFile.FullName, argList, xmlWriter);
 						xmlReader.Close();
 
+						// Build up the json to call the import method.
+						var importMethod = this.ImportCommand != null
+							? clientOps.Manager.CreateCommandMethodSource
+							(
+								clientOps.DefaultNodeLocation, 
+								this.ImportCommand.ID
+							)
+							: null;
+						string importMethodJson = null != importMethod
+							? Newtonsoft.Json.JsonConvert.SerializeObject(importMethod)
+							: "null";
+
 						// Return the transformed string.
 						return this.ReplaceReferencedFileContent
 						(
-							stringWriter
-								.ToString()
-								.Replace("&#xD;&#xA;", "\\n"),
+							stringWriter.ToString(),
 							ReferencedFileType.XhtmlFile
-						);
+						)
+							.Replace("%IMPORT_METHOD%", importMethodJson)
+							.Replace("&#xD;&#xA;", "\\n");
 					}
 				}
 			}
 
 		}
 
-		public virtual string GetPreview(Vault vault)
+		public virtual string GetPreview(Vault vault, ClientOperations clientOps)
 		{
 			try
 			{
@@ -300,7 +313,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 					);
 
 					// Convert the XML to something we can see.
-					return this.GetPreview(xmlOutput);
+					return this.GetPreview(xmlOutput, clientOps);
 				}
 			}
 			catch(Exception e)
