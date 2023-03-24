@@ -34,16 +34,44 @@
     <None Remove="Resources\Images\notenabled.png" />
     <None Remove="Resources\Images\viewlogs.png" />
     <None Remove="Resources\Images\warning.png" />
+    <None Remove="Resources\ImportReplicationPackage\collapse.svg" />
+    <None Remove="Resources\ImportReplicationPackage\expand.svg" />
+    <None Remove="Resources\ImportReplicationPackage\icons-class.svg" />
+    <None Remove="Resources\ImportReplicationPackage\icons-classgroup.svg" />
+    <None Remove="Resources\ImportReplicationPackage\icons-metadatacardconfig.svg" />
+    <None Remove="Resources\ImportReplicationPackage\icons-namedacl.svg" />
+    <None Remove="Resources\ImportReplicationPackage\icons-objecttype.svg" />
+    <None Remove="Resources\ImportReplicationPackage\icons-propertydef.svg" />
+    <None Remove="Resources\ImportReplicationPackage\icons-user.svg" />
+    <None Remove="Resources\ImportReplicationPackage\icons-usergroup.svg" />
+    <None Remove="Resources\ImportReplicationPackage\icons-valuelist.svg" />
+    <None Remove="Resources\ImportReplicationPackage\icons-viewdef.svg" />
+    <None Remove="Resources\ImportReplicationPackage\js.js" />
+    <None Remove="Resources\ImportReplicationPackage\styles.css" />
+    <None Remove="Resources\ImportReplicationPackage\vault_impact_projection.translations.xml" />
     <None Remove="Resources\ImportReplicationPackage\vault_impact_projection.xsl" />
-    <None Remove="Resources\ImportReplicationPackage\vault_impact_projection_translations.xml" />
     <None Remove="Resources\Running.png" />
     <None Remove="Resources\Waiting.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Images\ImportReplicationPackage.png" />
     <EmbeddedResource Include="Resources\Images\viewlogs.png" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\collapse.svg" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\expand.svg" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\icons-user.svg" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\icons-class.svg" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\icons-classgroup.svg" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\icons-metadatacardconfig.svg" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\icons-namedacl.svg" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\icons-objecttype.svg" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\icons-propertydef.svg" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\icons-usergroup.svg" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\icons-valuelist.svg" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\icons-viewdef.svg" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\js.js" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\styles.css" />
     <EmbeddedResource Include="Resources\ImportReplicationPackage\vault_impact_projection.xsl" />
-    <EmbeddedResource Include="Resources\ImportReplicationPackage\vault_impact_projection_translations.xml" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\vault_impact_projection.translations.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\lib\Resources\logo.png">

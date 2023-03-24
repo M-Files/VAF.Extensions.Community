@@ -1,14 +1,14 @@
-﻿using MFiles.VAF.Configuration.AdminConfigurations;
+﻿using MFiles.VAF.Common;
+using MFiles.VAF.Configuration;
+using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain;
 using MFiles.VAF.Configuration.Domain.ClientDirective;
 using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Directives;
 using MFilesAPI;
-using MFilesAPI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
-using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Contexts;
 using System.Text;
@@ -16,8 +16,9 @@ using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions.Dashboards.Commands
 {
+
 	public class ImportReplicationPackageDashboardCommand<TConfiguration>
-		: CustomDomainCommand
+		: ReplicationPackageDashboardCommandBase
 		where TConfiguration : class, new()
 	{
 		private int maximumImportAttempts = 10;
@@ -30,12 +31,8 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 		/// <summary>
 		/// The vault application for this command.
 		/// </summary>
-		protected ConfigurableVaultApplicationBase<TConfiguration> VaultApplication { get; }
-
-		/// <summary>
-		/// The path to the replication package.
-		/// </summary>
-		public string ReplicationPackagePath { get; }
+		protected new ConfigurableVaultApplicationBase<TConfiguration> VaultApplication
+			=> base.VaultApplication as ConfigurableVaultApplicationBase<TConfiguration>;
 
 		/// <summary>
 		/// The number of import attempts of the package before it gives up.
@@ -50,17 +47,11 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 				maximumImportAttempts = value;
 			}
 		}
+
 		/// <summary>
 		/// The display name for the task.
 		/// </summary>
 		public string TaskDisplayName { get; set; } = "Import missing vault structure";
-
-		/// <summary>
-		/// Whether this package needs to be imported.
-		/// Should be calculated somehow.
-		/// </summary>
-		// TODO: Make this calcualted.
-		public bool RequiresImporting { get; set; }
 
 		/// <summary>
 		/// Creates a command which, when clicked, will import a replication package.
@@ -78,10 +69,8 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			string displayName,
 			string replicationPackagePath
 		)
+			: base(vaultApplication, commandId, displayName, replicationPackagePath)
 		{
-			this.ID = commandId;
-			this.DisplayName = displayName;
-
 			// When it's executed, run the import in a transaction.
 			this.Execute = (c, o) =>
 			{
@@ -91,14 +80,6 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 					this.CreateImportTask(c, o, v);
 				});
 			};
-			this.VaultApplication = vaultApplication
-				?? throw new ArgumentNullException(nameof(vaultApplication));
-			var package = new FileInfo(replicationPackagePath);
-			this.ReplicationPackagePath = package.FullName;
-			if (false == File.Exists(this.ReplicationPackagePath))
-			{
-				throw new ArgumentException("The replication package does not exist.", nameof(ReplicationPackagePath));
-			}
 		}
 
 		public virtual bool TryImport(Vault vault)
@@ -174,12 +155,13 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			).ToArray();
 			if (executions.Length != 0)
 			{
-				clientOperations.ShowMessage("Thereis already an import scheduled or in progress.");
+				clientOperations.ShowMessage("There is already an import scheduled or in progress.");
 				clientOperations.RefreshDashboard();
 				return;
 			}
 
 			// Add the task.
+			this.Logger?.Info($"Adding a task to import the replication package");
 			this.VaultApplication.TaskManager.AddTask
 			(
 				transactionalVault ?? context.Vault,
@@ -207,7 +189,9 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			// Run the import job.
 			try
 			{
+				this.Logger?.Info($"Importing the replication package.");
 				vault.ManagementOperations.ImportContent(job);
+				this.Logger?.Info($"Replication package imported.");
 			}
 			catch (Exception)
 			{
@@ -218,71 +202,6 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 				this.Logger?.Info($"Exception importing job at {this.ReplicationPackagePath}");
 				throw new Exception(Resources.ImportReplicationPackage.Failure_Generic);
 			}
-		}
-
-		/// <summary>
-		/// Creates the import job.
-		/// </summary>
-		/// <param name="disposable">An item that should be disposed when the job is finished importing.</param>
-		/// <returns>The job.</returns>
-		protected virtual ImportContentJob CreateImportContentJob(out IDisposable disposable)
-		{
-			var job = new ImportContentJob
-			{
-				Flags = MFImportContentFlag.MFImportContentFlagForceNoStructureIdUpdate |
-					MFImportContentFlag.MFImportContentFlagOmitDoneFile,
-				ActivateAutomaticPermissionsForNewOrChangedDefinitions = true,
-				DisableImportedExternalObjectTypeConnections = true,
-				DisableImportedExternalUserGroups = true,
-				DisableImportedVaultEventHandlers = true,
-				IgnoreAutomaticPermissionsDefinedByObjects = false,
-				ResetExportTimestamps = false
-			};
-			job.DisableFeaturesRequiringSystemAdministratorRole();
-
-			// If needed, unzip the file.
-			var package = new FileInfo(this.ReplicationPackagePath);
-			switch (package?.Extension?.ToLower()?.Trim())
-			{
-				case ".zip":
-					// Unzip it to a temporary folder.
-					var fileDownloadLocation = new FileDownloadLocation
-					(
-						Path.GetTempPath(),
-						package.Name.Substring(0, package.Name.Length - 4)
-					);
-					System.IO.Compression.ZipFile.ExtractToDirectory
-					(
-						package.FullName,
-						fileDownloadLocation.Directory.FullName
-					);
-
-					// Find the path to the xml file.
-					var xml = fileDownloadLocation?
-						.Directory?
-						.GetDirectories()?
-						.FirstOrDefault()?
-						.GetFiles("index.xml")?
-						.FirstOrDefault()?
-						.FullName;
-					job.SourceLocation = xml ?? package.FullName;
-
-					// Our file download location now contains where to dispose.
-					disposable = fileDownloadLocation;
-
-					break;
-				case ".xml":
-					disposable = null;
-					job.SourceLocation = package.FullName;
-					break;
-				default:
-					throw new Exception("The package must be an .xml or .zip file.");
-			}
-			return job;
-		}
-		internal class EmptyDisposable : IDisposable
-		{
-			public void Dispose() { }
 		}
 	}
 }

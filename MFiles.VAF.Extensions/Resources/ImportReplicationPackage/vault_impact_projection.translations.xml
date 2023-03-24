@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <translations>
-	<translation id="MainTitleText_ImportContent">Summary of the package content to be imported</translation>
+	<!--<translation id="MainTitleText_ImportContent">Summary of the package content to be imported</translation>
 	<translation id="MainTitleText_UpgradeVaultStructure">Summary of the Vault Structure Modifications</translation>
 	<translation id="TitleText_WarningAboutStructureChangesPrefix">Important: </translation>
 	<translation id="TitleText_WarningAboutStructureChanges">This package modifies the metadata structure of the target vault. The changes cannot be undone. Continue by selecting OK only if you are sure that you want to commit the changes described below.</translation>
@@ -87,5 +87,5 @@
 				of a problem in the metadata structure or in the Compliance Kit configuration.</translation>
 	<translation id="MainSectionText_NonExistingMetadataStructureElements">These metadata elements should be added to the document vault, but they could not be found from the reference configuration. This may be because of
 				faulty or customized configuration. If the Compliance Kit configuration specifies references to customized metadata elements, they must be manually added in the
-				document vault.</translation>
+				document vault.</translation>-->
 </translations>

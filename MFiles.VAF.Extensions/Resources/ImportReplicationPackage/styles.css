@@ -1,0 +1,36 @@
+html, body
+{
+	font-family: Lato;
+	font-size: small;
+}
+h1
+{
+	font-size: x-large;
+}
+h2
+{
+	font-size: large;
+}
+h3
+{
+	font-size: medium;
+}
+p.description
+{
+	font-style: italic;
+}
+article.objecttypes ul { list-style-image: url(icons/icons-objecttype.svg); }
+article.valuelists ul { list-style-image: url(icons/icons-valuelist.svg); }
+article.propertydefs ul { list-style-image: url(icons/icons-propertydef.svg); }
+article.usergroups ul { list-style-image: url(icons/icons-usergroup.svg); }
+article.users ul { list-style-image: url(icons/icons-user.svg); }
+article.vaultstructure
+{
+    border: 1px solid #CCC;
+    display: inline-block;
+    margin: 5px;
+    padding: 5px 10px;
+    box-sizing: border-box;
+    width: 350px;
+    vertical-align: top;
+}

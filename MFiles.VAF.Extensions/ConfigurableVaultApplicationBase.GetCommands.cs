@@ -14,6 +14,7 @@ using MFiles.VAF.AppTasks;
 using MFiles.VAF.Extensions.Dashboards;
 using MFiles.VAF.Configuration.Domain;
 using MFiles.VAF.Configuration.Interfaces.Domain;
+using MFiles.VAF.Extensions.Dashboards.Commands;
 
 namespace MFiles.VAF.Extensions
 {
@@ -83,20 +84,50 @@ namespace MFiles.VAF.Extensions
 		/// Should be a .zip file included in the vault application's .mfappx.
 		/// </param>
 		/// <returns>The command.</returns>
-		public virtual CustomDomainCommand CreateImportReplicationPackageDomainCommand
+		public virtual ImportReplicationPackageDashboardCommand<TSecureConfiguration> CreateImportReplicationPackageDomainCommand
 		(
 			string commandId,
 			string displayName,
 			string replicationPackagePath
 		)
 		{
-			// Synchronous import.
-			return new Dashboards.Commands.ImportReplicationPackageDashboardCommand<TSecureConfiguration>
+			return new ImportReplicationPackageDashboardCommand<TSecureConfiguration>
 			(
 				this,
 				commandId,
 				displayName,
 				replicationPackagePath
+			)
+			{
+				Blocking = true
+			};
+		}
+
+		/// <summary>
+		/// Creates a command that, when executed, previews a replication package import.
+		/// </summary>
+		/// <param name="commandId">The id of the command. Must be unique in the application.</param>
+		/// <param name="displayName">The display text for the command.</param>
+		/// <param name="replicationPackagePath">
+		/// The path to the replication package.  
+		/// Should be a .zip file included in the vault application's .mfappx.
+		/// </param>
+		/// <returns>The command.</returns>
+		public virtual PreviewReplicationPackageDashboardCommand<TSecureConfiguration> CreatePreviewReplicationPackageDomainCommand
+		(
+			string commandId,
+			string displayName,
+			string replicationPackagePath,
+			ImportReplicationPackageDashboardCommand<TSecureConfiguration> importCommand = null
+		)
+		{
+			return new PreviewReplicationPackageDashboardCommand<TSecureConfiguration>
+			(
+				this,
+				commandId,
+				displayName,
+				replicationPackagePath,
+				importCommand
 			)
 			{
 				Blocking = true

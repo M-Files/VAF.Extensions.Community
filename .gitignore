@@ -344,3 +344,4 @@ healthchecksdb
 
 # Allow nupkg in redist
 !redist/*.nupkg
+/MFiles.VAF.Extensions/Resources/ImportReplicationPackage/preview.xml
