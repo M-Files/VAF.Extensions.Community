@@ -14,11 +14,12 @@
 		<html>
 			<head>
 				<link rel="stylesheet" href="styles.css" type="text/css" />
-				<script src="js.js" type="text/javascript"></script>
 			</head>
 			<body>
 
 				<xsl:apply-templates select="/replicationReport"/>
+
+				<script src="js.js" type="text/javascript"></script>
 
 			</body>
 		</html>
@@ -27,12 +28,20 @@
 
 	<xsl:template match="/replicationReport">
 
-		<!-- Title. -->
-		<h1>
-			Import vault structure
-		</h1>
+		<header>
+			<h1>
+				Import vault structure
+			</h1>
+		</header>
 
-		<xsl:apply-templates select="./structure"/>
+		<article class="main">
+			<xsl:apply-templates select="./structure"/>
+		</article>
+
+		<footer>
+			<button id="cancel">Cancel</button>
+			<button id="import">Import</button>
+		</footer>
 
 	</xsl:template>
 
@@ -40,19 +49,19 @@
 	<xsl:template match="/replicationReport/structure">
 
 		<article class="unmapped">
-			<h2>Missing items</h2>
-			<p class="description">These items are missing so will be added during the import.</p>
 			<xsl:call-template name="vaultStructures">
 				<xsl:with-param name="context" select="./unmapped"/>
+				<xsl:with-param name="title">Missing items</xsl:with-param>
+				<xsl:with-param name="description">These items are missing so will be added during the import.</xsl:with-param>
 			</xsl:call-template>
 		</article>
 
 		
 		<article class="mapped ">
-			<h2>Existing items</h2>
-			<p class="description">These items already exist so will not be updated during the import.</p>
 			<xsl:call-template name="vaultStructures">
 				<xsl:with-param name="context" select="./mapped"/>
+				<xsl:with-param name="title">Existing items</xsl:with-param>
+				<xsl:with-param name="description">These items already exist so will not be updated during the import.</xsl:with-param>
 			</xsl:call-template>
 		</article>
 
@@ -60,6 +69,8 @@
 
 	<xsl:template name="vaultStructures">
 		<xsl:param name="context" />
+		<xsl:param name="title" />
+		<xsl:param name="description" />
 		<xsl:variable name="objectTypes" select="$context/objecttypes/incoming[@realobj='true']" />
 		<xsl:variable name="classGroups" select="$context/classgroups/incoming" />
 		<xsl:variable name="classes" select="$context/classes/incoming" />
@@ -70,13 +81,22 @@
 		<xsl:variable name="transitions" select="$context/transitions/incoming" />
 		<xsl:variable name="namedAccessControlLists" select="$context/namedacls/incoming" />
 		<xsl:variable name="userGroups" select="$context/usergroups/incoming" />
-		<xsl:variable name="users" select="$context/usergroups/useraccounts" />
+		<xsl:variable name="users" select="$context/useraccounts/incoming" />
+
+		<xsl:variable name="vaultStructureCount" select="count($objectTypes) + count($classGroups) + count($classes) + count($valueLists) + count($propertyDefinitions) + count($workflows) + count($workflowStates) + count($transitions)" />
+		<xsl:variable name="securityCount" select="count($namedAccessControlLists) + count($userGroups) + count($users)" />
+		<xsl:variable name="functionalityCount">0</xsl:variable>
+		<xsl:variable name="usabilityCount">0</xsl:variable>
+		<xsl:variable name="total" select="count($context/*/incoming)" />
+
+		<h2><xsl:value-of select="$title" /> (<xsl:value-of select="$total" />)</h2>
+		<p class="description"><xsl:value-of select="$description" /></p>
 
 		<div class="vaultStructures">
 
-			<xsl:if test="count($objectTypes) + count($classGroups) + count($classes) + count($valueLists) + count($propertyDefinitions) + count($workflows) + count($workflowStates) + count($transitions) &gt; 0">
+			<xsl:if test="$vaultStructureCount &gt; 0">
 
-				<h3>Vault structure</h3>
+				<h3>Vault structure <span class="count">(<xsl:value-of select="$vaultStructureCount" />)</span></h3>
 
 				<!-- object types -->
 				<xsl:call-template name="valueStructures_list">
@@ -136,9 +156,9 @@
 
 			</xsl:if>
 
-			<xsl:if test="count($namedAccessControlLists) + count($userGroups) + count($users) &gt; 0">
+			<xsl:if test="$securityCount &gt; 0">
 
-				<h3>Security and permissions</h3>
+				<h3>Security and permissions <span class="count">(<xsl:value-of select="$securityCount" />)</span></h3>
 
 				<!-- nacls -->
 				<xsl:call-template name="valueStructures_list">
@@ -163,13 +183,21 @@
 
 			</xsl:if>
 
-			<h3>Functionality</h3>
-			
-			<!-- TODO: event handlers -->
+			<xsl:if test="$functionalityCount &gt; 0">
 
-			<h3>User experience</h3>
+				<h3>Functionality</h3>
+				
+				<!-- TODO: event handlers -->
 
-			<!-- TODO: metadata card configurations, view definitions -->
+			</xsl:if>
+
+			<xsl:if test="$usabilityCount &gt; 0">
+
+				<h3>User experience</h3>
+
+				<!-- TODO: metadata card configurations, view definitions -->
+
+			</xsl:if>
 
 		</div>
 
