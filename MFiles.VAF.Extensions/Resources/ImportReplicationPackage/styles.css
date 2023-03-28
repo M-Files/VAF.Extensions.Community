@@ -4,8 +4,10 @@ html, body
 	font-size: small;
     color: #767676;
 }
-body{
+body
+{
 	padding: 90px 20px 0px 20px;
+	min-width: 900px;
 }
 body.showFooter
 {
@@ -27,7 +29,6 @@ p.description
 {
 	font-style: italic;
 }
-
 
 header{
 	padding: 10px 20px;
@@ -62,11 +63,6 @@ article.vaultstructure
     width: 350px;
     vertical-align: top;
 }
-article.objecttypes ul { list-style-image: url(icons/icons-objecttype.svg); }
-article.valuelists ul { list-style-image: url(icons/icons-valuelist.svg); }
-article.propertydefs ul { list-style-image: url(icons/icons-propertydef.svg); }
-article.usergroups ul { list-style-image: url(icons/icons-usergroup.svg); }
-article.users ul { list-style-image: url(icons/icons-user.svg); }
 
 button.hidden
 {
@@ -117,6 +113,20 @@ th, td
 	border: 1px solid #CCC;
 	vertical-align: top;
 }
+table.vaultStructures tr.incoming td{
+	border-bottom-width: 0px;
+}
+table.vaultStructures tr.incoming.local-count-0 td{
+	border-bottom-width: 1px;
+}
+table.vaultStructures tr.local td,
+	table.vaultStructures tr.local th{
+	border-top-width: 0px;
+}
+table.vaultStructures thead th
+{
+	background-color: #f0fdf5;
+}
 table.vaultStructures th, table.vaultStructures td
 {
 	font-size: small;
@@ -129,7 +139,16 @@ table.vaultStructures tbody th
 	background-position: 5px 6px;
 	width: 200px;
 }
-
+table.vaultStructures tbody h3 {
+    font-size: medium;
+    margin: 0px;
+    padding: 0px;
+    font-size: small;
+    text-align: right;
+}
+table.vaultStructures tbody td.heading{ width: 100px; }
+table.vaultStructures tbody tr td.number { width: 100px; text-align: right; }
+table.vaultStructures tbody tr td.guid { width: 300px; }
 table.vaultStructures tbody tr.objecttype th { background-image: url(icons/icons-objecttype.svg); }
 table.vaultStructures tbody tr.valueList th { background-image: url(icons/icons-valuelist.svg); }
 table.vaultStructures tbody tr.propertyDef th { background-image: url(icons/icons-propertydef.svg); }
@@ -144,4 +163,3 @@ table.vaultStructures tbody tr.userGroup th { background-image: url(icons/icons-
 table.vaultStructures tbody tr.eventHandler th {} /* todo! */
 table.vaultStructures tbody tr.metadataCardConfiguration th {} /* todo! */
 table.vaultStructures tbody tr.view th { background-image: url(icons/icons-viewdef.svg); }
-table.vaultStructures tbody tr td:first-of-type { width: 300px; }

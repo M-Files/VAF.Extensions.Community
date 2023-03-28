@@ -61,7 +61,16 @@
 			<xsl:call-template name="vaultStructures">
 				<xsl:with-param name="context" select="./mapped"/>
 				<xsl:with-param name="title">Existing items</xsl:with-param>
-				<xsl:with-param name="description">These items already exist so will not be updated during the import.</xsl:with-param>
+				<xsl:with-param name="description">These items already exist so may be updated during the import.</xsl:with-param>
+			</xsl:call-template>
+		</article>
+
+		
+		<article class="skipped ">
+			<xsl:call-template name="vaultStructures">
+				<xsl:with-param name="context" select="./skipped"/>
+				<xsl:with-param name="title">Skipped items</xsl:with-param>
+				<xsl:with-param name="description">These items will be skipped during the import.</xsl:with-param>
 			</xsl:call-template>
 		</article>
 
@@ -79,13 +88,16 @@
 		<xsl:if test="$total &gt; 0">
 			<table class="vaultStructures" cellspacing="0">
 				<thead>
-					<th>Item</th>
-					<th>Guid</th>
-					<th>Aliases</th>
+					<tr>
+						<th>Item</th>
+						<th>&nbsp;</th>
+						<th>Id</th>
+						<th>Guid</th>
+						<th>Aliases</th>
+					</tr>
 				</thead>
 				<tbody>
 					<xsl:for-each select="$items">
-						<xsl:sort select="name(..)" />
 						<xsl:variable name="type" select="name(..)" />
 						
 						<xsl:variable name="data">
@@ -111,13 +123,32 @@
 						<xsl:variable name="typeName" select="substring-before($data, '|')" />
 						<xsl:variable name="cssClass" select="substring-after($data, '|')" />
 
+						<xsl:variable name="local" select="./local" />
+
 						<tr>
-							<xsl:attribute name="class"><xsl:value-of select="$cssClass" /></xsl:attribute>
+							<xsl:attribute name="class"><xsl:value-of select="concat('incoming local-count-', count($local), ' ', $cssClass)" /></xsl:attribute>
 							<xsl:attribute name="title"><xsl:value-of select="concat($typeName, ' - ', @name)" /></xsl:attribute>
-							<th><xsl:value-of select="@name" /></th>
-							<td><xsl:value-of select="@guid" /></td>
+							<th>
+								<xsl:if test="count($local) &gt; 0">
+									<xsl:attribute name="rowspan">2</xsl:attribute>
+								</xsl:if>
+								<xsl:value-of select="@name" />
+							</th>
+							<td class="heading"><h3>Incoming</h3></td>
+							<td class="number"><xsl:value-of select="@id" /></td>
+							<td class="guid"><xsl:value-of select="@guid" /></td>
 							<td><xsl:value-of select="@aliases" /></td>
 						</tr>
+						<xsl:if test="count($local) &gt; 0">
+							<tr>
+								<xsl:attribute name="class"><xsl:value-of select="concat('local ', $cssClass)" /></xsl:attribute>
+								<xsl:attribute name="title"><xsl:value-of select="concat($typeName, ' - ', @name)" /></xsl:attribute>
+								<td class="heading"><h3>Local</h3></td>
+								<td class="number"><xsl:value-of select="$local/@id" /></td>
+								<td class="guid"><xsl:value-of select="$local/@guid" /></td>
+								<td><xsl:value-of select="$local/@aliases" /></td>
+							</tr>
+						</xsl:if>
 					</xsl:for-each>
 				</tbody>
 			</table>
@@ -137,150 +168,6 @@
 			<xsl:with-param name="description" select="$description"/>
 		</xsl:call-template>
 	</xsl:template>
-
-	<!-- <xsl:template name="vaultStructuresOld">
-		<xsl:param name="context" />
-		<xsl:param name="title" />
-		<xsl:param name="description" />
-		<xsl:variable name="objectTypes" select="$context/objecttypes/incoming[@realobj='true']" />
-		<xsl:variable name="classGroups" select="$context/classgroups/incoming" />
-		<xsl:variable name="classes" select="$context/classes/incoming" />
-		<xsl:variable name="valueLists" select="$context/objecttypes/incoming[@realobj='false']" />
-		<xsl:variable name="propertyDefinitions" select="$context/propertydefs/incoming" />
-		<xsl:variable name="workflows" select="$context/workflows/incoming" />
-		<xsl:variable name="workflowStates" select="$context/states/incoming" />
-		<xsl:variable name="transitions" select="$context/transitions/incoming" />
-		<xsl:variable name="namedAccessControlLists" select="$context/namedacls/incoming" />
-		<xsl:variable name="userGroups" select="$context/usergroups/incoming" />
-		<xsl:variable name="users" select="$context/useraccounts/incoming" />
-
-		<xsl:variable name="vaultStructureCount" select="count($objectTypes) + count($classGroups) + count($classes) + count($valueLists) + count($propertyDefinitions) + count($workflows) + count($workflowStates) + count($transitions)" />
-		<xsl:variable name="securityCount" select="count($namedAccessControlLists) + count($userGroups) + count($users)" />
-		<xsl:variable name="functionalityCount">0</xsl:variable>
-		<xsl:variable name="usabilityCount">0</xsl:variable>
-		<xsl:variable name="total" select="count($context/*/incoming)" />
-
-		<h2><xsl:value-of select="$title" /> (<xsl:value-of select="$total" />)</h2>
-		<p class="description"><xsl:value-of select="$description" /></p>
-
-		<div class="vaultStructures">
-
-			<xsl:if test="$vaultStructureCount &gt; 0">
-
-				<h3>Vault structure <span class="count">(<xsl:value-of select="$vaultStructureCount" />)</span></h3>
-
-				<xsl:call-template name="valueStructures_list">
-					<xsl:with-param name="title">Object types</xsl:with-param>
-					<xsl:with-param name="items" select="$objectTypes"/>
-					<xsl:with-param name="class">objecttypes</xsl:with-param>
-				</xsl:call-template>
-
-				<xsl:call-template name="valueStructures_list">
-					<xsl:with-param name="title">Class Groups</xsl:with-param>
-					<xsl:with-param name="items" select="$classGroups"/>
-					<xsl:with-param name="class">classgroups</xsl:with-param>
-				</xsl:call-template>
-
-				<xsl:call-template name="valueStructures_list">
-					<xsl:with-param name="title">Classes</xsl:with-param>
-					<xsl:with-param name="items" select="$classes"/>
-					<xsl:with-param name="class">classes</xsl:with-param>
-				</xsl:call-template>
-
-				<xsl:call-template name="valueStructures_list">
-					<xsl:with-param name="title">Value lists</xsl:with-param>
-					<xsl:with-param name="items" select="$valueLists"/>
-					<xsl:with-param name="class">valuelists</xsl:with-param>
-				</xsl:call-template>
-
-				<xsl:call-template name="valueStructures_list">
-					<xsl:with-param name="title">Property definitions</xsl:with-param>
-					<xsl:with-param name="items" select="$propertyDefinitions"/>
-					<xsl:with-param name="class">propertydefs</xsl:with-param>
-				</xsl:call-template>
-
-				<xsl:call-template name="valueStructures_list">
-					<xsl:with-param name="title">Workflows</xsl:with-param>
-					<xsl:with-param name="items" select="$workflows"/>
-					<xsl:with-param name="class">workflows</xsl:with-param>
-				</xsl:call-template>
-
-				<xsl:call-template name="valueStructures_list">
-					<xsl:with-param name="title">Workflow states</xsl:with-param>
-					<xsl:with-param name="items" select="$workflowStates"/>
-					<xsl:with-param name="class">states</xsl:with-param>
-				</xsl:call-template>
-
-				<xsl:call-template name="valueStructures_list">
-					<xsl:with-param name="title">State transitions</xsl:with-param>
-					<xsl:with-param name="items" select="$transitions"/>
-					<xsl:with-param name="class">transitions</xsl:with-param>
-				</xsl:call-template>
-
-			</xsl:if>
-
-			<xsl:if test="$securityCount &gt; 0">
-
-				<h3>Security and permissions <span class="count">(<xsl:value-of select="$securityCount" />)</span></h3>
-
-				<xsl:call-template name="valueStructures_list">
-					<xsl:with-param name="title">Named Access Control Lists</xsl:with-param>
-					<xsl:with-param name="items" select="$namedAccessControlLists"/>
-					<xsl:with-param name="class">nacls</xsl:with-param>
-				</xsl:call-template>
-
-				<xsl:call-template name="valueStructures_list">
-					<xsl:with-param name="title">User groups</xsl:with-param>
-					<xsl:with-param name="items" select="$userGroups"/>
-					<xsl:with-param name="class">usergroups</xsl:with-param>
-				</xsl:call-template>
-
-				<xsl:call-template name="valueStructures_list">
-					<xsl:with-param name="title">Users</xsl:with-param>
-					<xsl:with-param name="items" select="$users"/>
-					<xsl:with-param name="class">users</xsl:with-param>
-				</xsl:call-template>
-
-			</xsl:if>
-
-			<xsl:if test="$functionalityCount &gt; 0">
-
-				<h3>Functionality</h3>
-				
-
-			</xsl:if>
-
-			<xsl:if test="$usabilityCount &gt; 0">
-
-				<h3>User experience</h3>
-
-
-			</xsl:if>
-
-		</div>
-
-	</xsl:template>
-
-	<xsl:template name="valueStructures_list">
-		<xsl:param name="title" />
-		<xsl:param name="items" />
-		<xsl:param name="class" />
-
-		<xsl:if test="count($items) &gt; 0">
-			<article>
-			<xsl:attribute name="class"><xsl:value-of select="concat('vaultstructure ', $class)" /></xsl:attribute>
-
-				<h4><xsl:value-of select="$title" /> (<xsl:value-of select="count($items)" />)</h4>
-				<xsl:for-each select="$items">	
-					<ul>
-						<li><xsl:value-of select="@name" /></li>
-					</ul>
-				</xsl:for-each>
-			</article>
-		</xsl:if>
-		
-
-	</xsl:template> -->
 
 </xsl:stylesheet>
 
