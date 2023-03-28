@@ -133,6 +133,15 @@ table.vaultStructures tbody th
 table.vaultStructures tbody tr.objecttype th { background-image: url(icons/icons-objecttype.svg); }
 table.vaultStructures tbody tr.valueList th { background-image: url(icons/icons-valuelist.svg); }
 table.vaultStructures tbody tr.propertyDef th { background-image: url(icons/icons-propertydef.svg); }
+table.vaultStructures tbody tr.namedACL th { background-image: url(icons/icons-namedacl.svg); }
+table.vaultStructures tbody tr.class th { background-image: url(icons/icons-class.svg); }
+table.vaultStructures tbody tr.classGroup th { background-image: url(icons/icons-classgroup.svg); }
+table.vaultStructures tbody tr.workflow th {} /* todo! */
+table.vaultStructures tbody tr.workflowState th {} /* todo! */
+table.vaultStructures tbody tr.workflowStateTransition th {} /* todo! */
+table.vaultStructures tbody tr.userAccount th { background-image: url(icons/icons-user.svg); }
 table.vaultStructures tbody tr.userGroup th { background-image: url(icons/icons-usergroup.svg); }
-table.vaultStructures tbody tr.user th { background-image: url(icons/icons-user.svg); }
+table.vaultStructures tbody tr.eventHandler th {} /* todo! */
+table.vaultStructures tbody tr.metadataCardConfiguration th {} /* todo! */
+table.vaultStructures tbody tr.view th { background-image: url(icons/icons-viewdef.svg); }
 table.vaultStructures tbody tr td:first-of-type { width: 300px; }
