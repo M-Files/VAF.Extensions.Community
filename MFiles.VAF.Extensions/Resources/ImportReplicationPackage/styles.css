@@ -6,7 +6,7 @@ html, body
 }
 body
 {
-	padding: 90px 20px 0px 20px;
+	padding: 90px 20px 60px 20px;
 	min-width: 900px;
 }
 body.showFooter
@@ -160,6 +160,6 @@ table.vaultStructures tbody tr.workflowState th {} /* todo! */
 table.vaultStructures tbody tr.workflowStateTransition th {} /* todo! */
 table.vaultStructures tbody tr.userAccount th { background-image: url(icons/icons-user.svg); }
 table.vaultStructures tbody tr.userGroup th { background-image: url(icons/icons-usergroup.svg); }
-table.vaultStructures tbody tr.eventHandler th {} /* todo! */
+table.vaultStructures tbody tr.eventHandler th { background-image: url(icons/icons-event-handler.svg); } /* todo! */
 table.vaultStructures tbody tr.metadataCardConfiguration th {} /* todo! */
 table.vaultStructures tbody tr.view th { background-image: url(icons/icons-viewdef.svg); }

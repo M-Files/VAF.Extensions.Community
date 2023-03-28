@@ -109,11 +109,16 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 					// Find the path to the xml file.
 					var xml = fileDownloadLocation?
 						.Directory?
-						.GetDirectories()?
-						.FirstOrDefault()?
 						.GetFiles("index.xml")?
 						.FirstOrDefault()?
-						.FullName;
+						.FullName
+						?? fileDownloadLocation?
+							.Directory?
+							.GetDirectories()?
+							.FirstOrDefault()?
+							.GetFiles("index.xml")?
+							.FirstOrDefault()?
+							.FullName;
 					job.SourceLocation = xml ?? package.FullName;
 
 					// Our file download location now contains where to dispose.

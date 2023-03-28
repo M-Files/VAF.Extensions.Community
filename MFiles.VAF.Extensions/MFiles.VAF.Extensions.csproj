@@ -46,6 +46,7 @@
     <None Remove="Resources\ImportReplicationPackage\icons-usergroup.svg" />
     <None Remove="Resources\ImportReplicationPackage\icons-valuelist.svg" />
     <None Remove="Resources\ImportReplicationPackage\icons-viewdef.svg" />
+    <None Remove="Resources\ImportReplicationPackage\icons\icons-event-handler.svg" />
     <None Remove="Resources\ImportReplicationPackage\js.js" />
     <None Remove="Resources\ImportReplicationPackage\styles.css" />
     <None Remove="Resources\ImportReplicationPackage\vault_impact_projection.translations.xml" />
@@ -58,6 +59,7 @@
     <EmbeddedResource Include="Resources\Images\viewlogs.png" />
     <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\collapse.svg" />
     <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\expand.svg" />
+    <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\icons-event-handler.svg" />
     <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\icons-user.svg" />
     <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\icons-class.svg" />
     <EmbeddedResource Include="Resources\ImportReplicationPackage\icons\icons-classgroup.svg" />
