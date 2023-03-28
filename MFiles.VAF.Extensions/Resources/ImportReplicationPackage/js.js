@@ -53,7 +53,6 @@ function addCollapseExpandHandlers()
 			{
 				this.classList.toggle("collapsed");
 			});
-			e.classList.add("collapsed");
 		}
 	};
 	addHandlers(document.getElementsByTagName("h2"));

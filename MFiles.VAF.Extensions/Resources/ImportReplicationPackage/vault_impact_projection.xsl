@@ -76,50 +76,54 @@
 		<h2><xsl:value-of select="$title" /> (<xsl:value-of select="$total" />)</h2>
 		<p class="description"><xsl:value-of select="$description" /></p>
 
-		<table class="vaultStructures" cellspacing="0">
-			<thead>
-				<th>Item</th>
-				<th>Guid</th>
-				<th>Aliases</th>
-			</thead>
-			<tbody>
-				<xsl:for-each select="$items">
-					<xsl:sort select="name(..)" />
-					<xsl:variable name="type" select="name(..)" />
-					
-					<xsl:variable name="data">
-						<xsl:choose>
-							<xsl:when test="$type = 'objecttypes' and @realobj =  'true'">Object Type|objectType</xsl:when>
-							<xsl:when test="$type = 'objecttypes' and @realobj != 'true'">Value List|valueList</xsl:when>
-							<xsl:when test="$type = 'propertydefs'">Property Definition|propertyDef</xsl:when>
-							<xsl:when test="$type = 'namedacls'">Named Access Control|namedACL</xsl:when>
-							<xsl:when test="$type = 'classes'">Class|objectClass</xsl:when>
-							<xsl:when test="$type = 'classgroups'">Class Group|objectClassGroup</xsl:when>
-							<xsl:when test="$type = 'workflows'">Workflow|workflow</xsl:when>
-							<xsl:when test="$type = 'states'">Workflow State|workflowState</xsl:when>
-							<xsl:when test="$type = 'transitions'">Workflow State Transitions|workflowStateTransition</xsl:when>
-							<xsl:when test="$type = 'useraccounts'">User Account|userAccount</xsl:when>
-							<xsl:when test="$type = 'usergroups'">User Group|userGroup</xsl:when>
-							<xsl:when test="$type = 'eventhandlers'">Event Handler|eventHandler</xsl:when>
-							<xsl:when test="$type = 'metadatacardconfigurations'">Metadata Card Configuration|metadataCardConfiguration</xsl:when>
-							<xsl:when test="$type = 'viewdefs'">View|view</xsl:when>
-							<xsl:otherwise>Unknown|unknown</xsl:otherwise>
-						</xsl:choose>
-					</xsl:variable>
+		<xsl:if test="$total &gt; 0">
+			<table class="vaultStructures" cellspacing="0">
+				<thead>
+					<th>Item</th>
+					<th>Guid</th>
+					<th>Aliases</th>
+				</thead>
+				<tbody>
+					<xsl:for-each select="$items">
+						<xsl:sort select="name(..)" />
+						<xsl:variable name="type" select="name(..)" />
+						
+						<xsl:variable name="data">
+							<xsl:choose>
+								<xsl:when test="$type = 'objecttypes' and @realobj =  'true'">Object Type|objectType</xsl:when>
+								<xsl:when test="$type = 'objecttypes' and @realobj != 'true'">Value List|valueList</xsl:when>
+								<xsl:when test="$type = 'propertydefs'">Property Definition|propertyDef</xsl:when>
+								<xsl:when test="$type = 'namedacls'">Named Access Control|namedACL</xsl:when>
+								<xsl:when test="$type = 'classes'">Class|objectClass</xsl:when>
+								<xsl:when test="$type = 'classgroups'">Class Group|objectClassGroup</xsl:when>
+								<xsl:when test="$type = 'workflows'">Workflow|workflow</xsl:when>
+								<xsl:when test="$type = 'states'">Workflow State|workflowState</xsl:when>
+								<xsl:when test="$type = 'transitions'">Workflow State Transitions|workflowStateTransition</xsl:when>
+								<xsl:when test="$type = 'useraccounts'">User Account|userAccount</xsl:when>
+								<xsl:when test="$type = 'usergroups'">User Group|userGroup</xsl:when>
+								<xsl:when test="$type = 'eventhandlers'">Event Handler|eventHandler</xsl:when>
+								<xsl:when test="$type = 'metadatacardconfigurations'">Metadata Card Configuration|metadataCardConfiguration</xsl:when>
+								<xsl:when test="$type = 'viewdefs'">View|view</xsl:when>
+								<xsl:otherwise>Unknown|unknown</xsl:otherwise>
+							</xsl:choose>
+						</xsl:variable>
 
-					<xsl:variable name="typeName" select="substring-before($data, '|')" />
-					<xsl:variable name="cssClass" select="substring-after($data, '|')" />
+						<xsl:variable name="typeName" select="substring-before($data, '|')" />
+						<xsl:variable name="cssClass" select="substring-after($data, '|')" />
 
-					<tr>
-						<xsl:attribute name="class"><xsl:value-of select="$cssClass" /></xsl:attribute>
-						<xsl:attribute name="title"><xsl:value-of select="concat($typeName, ' - ', @name)" /></xsl:attribute>
-						<th><xsl:value-of select="@name" /></th>
-						<td><xsl:value-of select="@guid" /></td>
-						<td><xsl:value-of select="@aliases" /></td>
-					</tr>
-				</xsl:for-each>
-			</tbody>
-		</table>
+						<tr>
+							<xsl:attribute name="class"><xsl:value-of select="$cssClass" /></xsl:attribute>
+							<xsl:attribute name="title"><xsl:value-of select="concat($typeName, ' - ', @name)" /></xsl:attribute>
+							<th><xsl:value-of select="@name" /></th>
+							<td><xsl:value-of select="@guid" /></td>
+							<td><xsl:value-of select="@aliases" /></td>
+						</tr>
+					</xsl:for-each>
+				</tbody>
+			</table>
+
+		</xsl:if>
+
 	</xsl:template>
 
 	<xsl:template name="vaultStructures">
