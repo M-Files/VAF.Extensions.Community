@@ -68,6 +68,9 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 				{
 					Content = content
 				});
+
+				// Refresh.
+				o.RefreshDashboard();
 			};
 		}
 

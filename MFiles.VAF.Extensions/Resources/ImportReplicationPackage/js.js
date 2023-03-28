@@ -18,14 +18,13 @@ function OnNewDashboard(dashboard)
 			"click", 
 			function()
 			{
-				importMethod.source.read;
-				var params = importMethod.params;
-				this.dashboard
+				var params = importMethod.source.read.params;
+				dashboard
 					.Vault
 					.ExtensionMethodOperations
 					.ExecuteVaultExtensionMethod
 					(
-						importMethod.method,
+						importMethod.source.read.method,
 						JSON.stringify( params )
 					);
 
