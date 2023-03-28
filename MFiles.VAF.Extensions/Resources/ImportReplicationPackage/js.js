@@ -39,7 +39,7 @@ function OnNewDashboard(dashboard)
 		document.getElementById("import").classList.add("hidden");
 	}
 
-	document.classList.add("showFooter");
+	document.body.classList.add("showFooter");
 }
 
 

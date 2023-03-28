@@ -80,7 +80,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			Image = 4
 		}
 
-		private static Regex getStylesheetImageRegex = new Regex
+		protected static Regex DefaultStylesheetImageRegex = new Regex
 			(
 				"(?<url>url\\s*?\\(\\s*?(?<path>[^\\s\\)]*?)\\s*?\\)\\s*?)",
 				RegexOptions.Multiline
@@ -89,8 +89,8 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			);
 
 		protected virtual Regex GetStylesheetImageRegex()
-			=> getStylesheetImageRegex;
-		public virtual string ReplaceStylesheetImages(Match input)
+			=> DefaultStylesheetImageRegex;
+		protected virtual string ReplaceStylesheetImages(Match input)
 		{
 			// Sanity.
 			if (input == null || false == input.Success)
@@ -101,7 +101,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			return $"url(data:image/svg+xml;base64,{this.GetReferencedFileContent(ReferencedFileType.Image, path)})";
 		}
 
-		public string ReplaceReferencedFileContent(string input, ReferencedFileType type)
+		protected virtual string ReplaceReferencedFileContent(string input, ReferencedFileType type)
 		{
 			if (null == input)
 				return null;
@@ -171,7 +171,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			}
 		}
 
-		public string GetReferencedFileContent(ReferencedFileType type, string filename)
+		protected virtual string GetReferencedFileContent(ReferencedFileType type, string filename)
 		{
 			var resourceName = ResourcePrefix + filename.Replace("/", ".");
 			string output = null;
@@ -318,6 +318,9 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			}
 			catch(Exception e)
 			{
+#if DEBUG
+				System.Diagnostics.Debugger.Launch();
+#endif
 				this.Logger?.Warn(e, $"Unable to create preview of replication package import.");
 				return "Unable to create preview of replication package import.";
 			}

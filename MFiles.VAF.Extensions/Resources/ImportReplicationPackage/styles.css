@@ -52,11 +52,6 @@ footer{
     border-top: 2px solid #EEE;
 }
 
-article.objecttypes ul { list-style-image: url(icons/icons-objecttype.svg); }
-article.valuelists ul { list-style-image: url(icons/icons-valuelist.svg); }
-article.propertydefs ul { list-style-image: url(icons/icons-propertydef.svg); }
-article.usergroups ul { list-style-image: url(icons/icons-usergroup.svg); }
-article.users ul { list-style-image: url(icons/icons-user.svg); }
 article.vaultstructure
 {
     border: 1px solid #CCC;
@@ -67,6 +62,11 @@ article.vaultstructure
     width: 350px;
     vertical-align: top;
 }
+article.objecttypes ul { list-style-image: url(icons/icons-objecttype.svg); }
+article.valuelists ul { list-style-image: url(icons/icons-valuelist.svg); }
+article.propertydefs ul { list-style-image: url(icons/icons-propertydef.svg); }
+article.usergroups ul { list-style-image: url(icons/icons-usergroup.svg); }
+article.users ul { list-style-image: url(icons/icons-user.svg); }
 
 button.hidden
 {
@@ -96,12 +96,43 @@ button#import {
 	color: #318CCC;
 }
 
-h2, h3
+h2
 {
 	cursor: pointer;
 }
-h2.collapsed ~ div,
-	h3.collapsed ~ article
+h2.collapsed ~ table
 {
 	display: none;
 }
+
+table
+{
+	border-collapse: collapse;
+	box-sizing: border-box;
+	width: 100%;
+}
+th, td
+{
+	padding: 5px 10px;
+	border: 1px solid #CCC;
+	vertical-align: top;
+}
+table.vaultStructures th, table.vaultStructures td
+{
+	font-size: small;
+}
+table.vaultStructures tbody th
+{
+	text-align: left;
+	padding-left: 27px;
+	background-repeat: no-repeat;
+	background-position: 5px 6px;
+	width: 200px;
+}
+
+table.vaultStructures tbody tr.objecttype th { background-image: url(icons/icons-objecttype.svg); }
+table.vaultStructures tbody tr.valueList th { background-image: url(icons/icons-valuelist.svg); }
+table.vaultStructures tbody tr.propertyDef th { background-image: url(icons/icons-propertydef.svg); }
+table.vaultStructures tbody tr.userGroup th { background-image: url(icons/icons-usergroup.svg); }
+table.vaultStructures tbody tr.user th { background-image: url(icons/icons-user.svg); }
+table.vaultStructures tbody tr td:first-of-type { width: 300px; }
