@@ -148,7 +148,6 @@ table.vaultStructures tbody h3 {
 }
 table.vaultStructures tbody td.heading{ width: 100px; }
 table.vaultStructures tbody tr td.number { width: 100px; text-align: right; }
-table.vaultStructures tbody tr td.guid { width: 300px; }
 table.vaultStructures tbody tr.objecttype th { background-image: url(icons/icons-objecttype.svg); }
 table.vaultStructures tbody tr.valueList th { background-image: url(icons/icons-valuelist.svg); }
 table.vaultStructures tbody tr.propertyDef th { background-image: url(icons/icons-propertydef.svg); }
