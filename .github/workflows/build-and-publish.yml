@@ -51,22 +51,14 @@ jobs:
       
     - name: Create release
       id: createRelease
-      uses: actions/create-release@v1
+      uses: ncipollo/release-action@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ env.versionNumber }}
-        release_name: ${{ env.versionNumber }}
+        artifactErrorsFailBuild: true
+        artifacts: "./MFiles.VAF.Extensions/bin/Release/MFiles.VAF.Extensions.${{ env.versionNumber }}.nupkg"
+        name: ${{ env.versionNumber }}
+        tag: ${{ env.versionNumber }}
         draft: false
-        prerelease: ${{ github.ref_name == 'prerelease' }}
-
-    - name: Upload asset
-      id: uploadAsset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.createRelease.outputs.upload_url }}
-        asset_path: ./MFiles.VAF.Extensions/bin/Release/MFiles.VAF.Extensions.${{ env.versionNumber }}.nupkg
-        asset_name: MFiles.VAF.Extensions.nupkg
-        asset_content_type: application/zip
+        omitBody: true
+        prerelease: ${{ env.versionSuffix == '' }}

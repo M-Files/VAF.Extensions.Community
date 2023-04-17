@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace MFiles.VAF.Extensions
 {
@@ -71,12 +72,12 @@ namespace MFiles.VAF.Extensions
 				}
 
 				// Try to get the runtime default value.
+				Type type = null;
 				try
 				{
 					// Create an instance of this type.
 					object defaultValue = null;
 					var instance = Activator.CreateInstance(this.memberInfo.ReflectedType);
-					Type type = null;
 					bool hasValueOptionsAttribute = false;
 					switch(this.memberInfo.MemberType)
 					{
@@ -164,6 +165,20 @@ namespace MFiles.VAF.Extensions
 						}
 					}
 
+					// If it's an MFIdentifier then force default values for non-allow-empty members.
+					{
+						if (type == typeof(MFIdentifier))
+						{
+							var vaultElementReferenceAttribute = this.memberInfo.GetCustomAttribute<VaultElementReferenceAttribute>();
+							if (null != vaultElementReferenceAttribute && !vaultElementReferenceAttribute.AllowEmpty)
+							{
+								// We have a value, but we're not allowed empty values.
+								// Return the value.
+								return value;
+							}
+						}
+					}
+
 					// If the data is the same as the default value then do not serialize.
 					if (type == typeof(string) && string.Equals(defaultValue, value))
 						return null;
@@ -184,27 +199,62 @@ namespace MFiles.VAF.Extensions
 				// If this member has a JsonConfEditorAttribute then we need to check whether to filter it.
 				{
 					var jsonConfEditorAttribute = this.memberInfo.GetCustomAttribute<JsonConfEditorAttribute>();
-					if(null != jsonConfEditorAttribute && null != jsonConfEditorAttribute.DefaultValue)
+					if(null != jsonConfEditorAttribute)
 					{
-						// If it is the default then die now.
-						if (value?.ToString() == jsonConfEditorAttribute.DefaultValue?.ToString())
-							return null;
-
-						// If it's the identifier then we need to check the alias/guid/id properties.
-						if(value is MFIdentifier identifier && (
-							identifier.Alias == jsonConfEditorAttribute.DefaultValue?.ToString()
-							|| identifier.Guid == jsonConfEditorAttribute.DefaultValue?.ToString()
-							|| identifier.ID.ToString() == jsonConfEditorAttribute.DefaultValue?.ToString()
-							))
+						if (null != jsonConfEditorAttribute.DefaultValue)
 						{
-							return null;
+							// If it is the default then die now.
+							if (value?.ToString() == jsonConfEditorAttribute.DefaultValue?.ToString())
+								return null;
+
+							// If it's the identifier then we need to check the alias/guid/id properties.
+							if (value is MFIdentifier identifier && (
+								identifier.Alias == jsonConfEditorAttribute.DefaultValue?.ToString()
+								|| identifier.Guid == jsonConfEditorAttribute.DefaultValue?.ToString()
+								|| identifier.ID.ToString() == jsonConfEditorAttribute.DefaultValue?.ToString()
+								))
+							{
+								return null;
+							}
 						}
+
+						// If the configuration value has a JsonConfEditor attribute that defines an editor type
+						// then we may need to convert our deserialized value.
+						if (jsonConfEditorAttribute.TypeEditor == "date" && value is DateTime dateTime)
+							value = dateTime.ToString("yyyy-MM-dd");
 
 					}
 				}
 
 				// Return the value that the base implementation gave.
 				return value;
+			}
+		}
+
+		/// <summary>
+		/// A class to write enums as either integers or strings, depending on what's provided.
+		/// </summary>
+		internal class DateTimeConverter
+			: Newtonsoft.Json.Converters.IsoDateTimeConverter
+		{
+
+			public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+			{
+				// Sanity.
+				if (null == writer
+					|| null == value
+					|| null == serializer)
+					return;
+
+				// If it's a string then write it.
+				if(value.GetType() == typeof(string))
+				{
+					writer.WriteValue(value);
+					return;
+				}
+
+				// Use the base implementation.
+				base.WriteJson(writer, value, serializer);
 			}
 		}
 
@@ -363,7 +413,8 @@ namespace MFiles.VAF.Extensions
 				Formatting = Newtonsoft.Json.Formatting.Indented,
 				Converters = new List<JsonConverter>()
 					{
-						new StringEnumConverterHandlesIntegers(){ AllowIntegerValues = true }
+						new StringEnumConverterHandlesIntegers(){ AllowIntegerValues = true },
+						new DateTimeConverter()
 					},
 				ContractResolver = new DefaultValueAwareContractResolver(this)
 			};

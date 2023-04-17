@@ -3,6 +3,7 @@ using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions.Configuration
 {
+	[DataContract]
 	public abstract class ConfigurationCollectionItemBase
 	{
 		/// <summary>

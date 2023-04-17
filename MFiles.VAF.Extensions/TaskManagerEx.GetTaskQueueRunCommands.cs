@@ -51,6 +51,10 @@ namespace MFiles.VAF.Extensions
 						if (!showOnDashboardAttribute.ShowRunCommand)
 							continue;
 
+						// If we have a custom command to run then skip
+						if (!string.IsNullOrWhiteSpace(showOnDashboardAttribute.RunCommandId))
+							continue;
+
 						// Add it to the cache.
 						var key = $"{queue.Id}-{processor.Type}";
 						lock (_lock)
