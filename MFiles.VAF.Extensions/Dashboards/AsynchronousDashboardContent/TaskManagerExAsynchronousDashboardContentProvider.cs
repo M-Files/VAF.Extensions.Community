@@ -164,6 +164,18 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 								}
 							);
 						}
+						else if (!string.IsNullOrWhiteSpace(showOnDashboardAttribute.RunCommandId))
+						{
+							commands.Add
+							(
+								new DashboardDomainCommand
+								{
+									DomainCommandID = showOnDashboardAttribute.RunCommandId,
+									Title = showOnDashboardAttribute.RunCommandDisplayText,
+									Style = DashboardCommandStyle.Link
+								}
+							);
+						}
 					}
 
 					// Does it recur?
