@@ -55,6 +55,12 @@ namespace MFiles.VAF.Extensions.Dashboards
 		public bool ShowRunCommand { get; set; } = false;
 
 		/// <summary>
+		/// If specified, this will be used for the "Run now" command. Requires <see cref="ShowRunCommand"/> == true.
+		/// This must separately be registered as a Domain Command, usually through overriding the <see cref="ConfigurableVaultApplicationBase{TSecureConfiguration}.GetCommands(VAF.Configuration.AdminConfigurations.IConfigurationRequestContext)"/>.
+		/// </summary>
+		public string RunCommandId { get; set; }
+
+		/// <summary>
 		/// How to re-calculate any interval-based scheduled task processing
 		/// in the situation where a user manually runs the task.
 		/// </summary>
