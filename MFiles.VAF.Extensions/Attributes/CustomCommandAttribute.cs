@@ -14,7 +14,7 @@ namespace MFiles.VAF.Extensions
 	/// Declares that the associated method should be exposed via a command,
 	/// and run when the command is executed.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = true)]
 	public class CustomCommandAttribute
 		: Attribute
 	{
@@ -157,7 +157,7 @@ namespace MFiles.VAF.Extensions
 			if(null == attribute)
 				throw new ArgumentNullException(nameof(attribute));
 			if (!attribute.IsConfigured)
-				throw new InvalidOperationException("The attribute is not configured.");
+				throw new InvalidOperationException("You must call CustomCommandAttribute.Configure prior to casting to a CustomDomainCommand.");
 
 			// Convert all the data we have to something usable.
 			return new CustomDomainCommand()

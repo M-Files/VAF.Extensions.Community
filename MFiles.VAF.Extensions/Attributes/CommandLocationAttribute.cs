@@ -4,9 +4,17 @@ using System;
 
 namespace MFiles.VAF.Extensions
 {
+	/// <summary>
+	/// Base attribute that can be used to identify where a command should be located.
+	/// </summary>
 	public abstract class CommandLocationAttribute
 		: Attribute
 	{
+		/// <summary>
+		/// Converts data held within this attribute to an instance of
+		/// something that implements <see cref="ICommandLocation"/>.
+		/// </summary>
+		/// <returns>The command, or <see langword="null"/>.</returns>
 		public abstract ICommandLocation ToCommandLocation();
 	}
 
@@ -23,6 +31,8 @@ namespace MFiles.VAF.Extensions
 		/// <inheritdoc cref="ButtonBarCommandLocation.Style"/>
 		public CommandButtonStyle Style { get; set; }
 
+		/// <inheritdoc />
+		/// <remarks>Returns an instance of <see cref="ButtonBarCommandLocation"/>.</remarks>
 		public override ICommandLocation ToCommandLocation()
 		{
 			return new ButtonBarCommandLocation()
@@ -42,6 +52,8 @@ namespace MFiles.VAF.Extensions
 	public class ConfigurationMenuCommandLocationAttribute
 		: AbstractMenuCommandLocationAttribute
 	{
+		/// <inheritdoc />
+		/// <remarks>Returns an instance of <see cref="ConfigurationMenuCommandLocation"/>.</remarks>
 		public override ICommandLocation ToCommandLocation()
 		{
 			return new ConfigurationMenuCommandLocation()
@@ -62,6 +74,8 @@ namespace MFiles.VAF.Extensions
 	public class DomainMenuCommandLocationAttribute
 		: AbstractMenuCommandLocationAttribute
 	{
+		/// <inheritdoc />
+		/// <remarks>Returns an instance of <see cref="DomainMenuCommandLocation"/>.</remarks>
 		public override ICommandLocation ToCommandLocation()
 		{
 			return new DomainMenuCommandLocation()
@@ -74,6 +88,10 @@ namespace MFiles.VAF.Extensions
 		}
 	}
 
+	/// <summary>
+	/// An abstract implementation of <see cref="CommandLocationAttribute"/>
+	/// for locations that derive from <see cref="AbstractMenuCommandLocation"/>.
+	/// </summary>
 	public abstract class AbstractMenuCommandLocationAttribute
 		: CommandLocationAttribute
 	{
