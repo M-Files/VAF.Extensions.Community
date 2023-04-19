@@ -108,31 +108,59 @@ namespace MFiles.VAF.Extensions.Tests
 
 		}
 
-		//public class ValidInstanceMethod_Overridden
-		//	: ValidInstanceMethod
-		//{
-		//	public override void Method(IConfigurationRequestContext context, ClientOperations operations) { }
-		//}
+		public class ValidInstanceMethod_Overridden
+			: ValidInstanceMethod
+		{
+			public override void Method(IConfigurationRequestContext context, ClientOperations operations) { }
+		}
 
-		//[TestMethod]
-		//public void ValidInstanceMethod_Overridden_ReturnsValidData()
-		//{
-		//	var resolver = new DefaultCustomDomainCommandResolver();
-		//	resolver.Include(new ValidInstanceMethod_Overridden());
-		//	var commands = resolver.GetCustomDomainCommands();
-		//	Assert.IsNotNull(commands);
-		//	Assert.AreEqual(1, commands.Count());
+		[TestMethod]
+		public void ValidInstanceMethod_Overridden_ReturnsValidData()
+		{
+			var resolver = new DefaultCustomDomainCommandResolver();
+			resolver.Include(new ValidInstanceMethod_Overridden());
+			var commands = resolver.GetCustomDomainCommands();
+			Assert.IsNotNull(commands);
+			Assert.AreEqual(1, commands.Count());
 
-		//	var command = commands.ElementAt(0);
-		//	Assert.IsNotNull(command);
-		//	Assert.AreEqual("hello world", command.DisplayName);
-		//	Assert.AreEqual("MFiles.VAF.Extensions.Tests.DefaultCustomDomainCommandResolverTests+ValidInstanceMethod.Method", command.ID);
-		//	Assert.AreEqual(default, command.Blocking);
-		//	Assert.AreEqual(default, command.ConfirmMessage);
-		//	Assert.AreEqual(default, command.HelpText);
-		//	Assert.IsNotNull(command.Locations);
-		//	Assert.AreEqual(false, command.Locations.Any());
+			var command = commands.ElementAt(0);
+			Assert.IsNotNull(command);
+			Assert.AreEqual("hello world", command.DisplayName);
 
-		//}
+			// NOTE: the command ID is changed by the overriding.
+			// This is "expected" (as the method is now the overriding one), but is it actually expected?
+			// For this reason people should not make assumptions about the command ID, but retrieve it from...  Something?
+			Assert.AreEqual("MFiles.VAF.Extensions.Tests.DefaultCustomDomainCommandResolverTests+ValidInstanceMethod_Overridden.Method", command.ID);
+
+			Assert.AreEqual(default, command.Blocking);
+			Assert.AreEqual(default, command.ConfirmMessage);
+			Assert.AreEqual(default, command.HelpText);
+			Assert.IsNotNull(command.Locations);
+			Assert.AreEqual(false, command.Locations.Any());
+
+		}
+
+		public class ValidInstanceMethod_OverriddenWithNewAttribute
+			: ValidInstanceMethod
+		{
+			[CustomCommand("overridden label")]
+			public override void Method(IConfigurationRequestContext context, ClientOperations operations) { }
+		}
+
+		[TestMethod]
+		public void ValidInstanceMethod_OverriddenWithNewAttribute_ReturnsValidData()
+		{
+			var resolver = new DefaultCustomDomainCommandResolver();
+			resolver.Include(new ValidInstanceMethod_OverriddenWithNewAttribute());
+			var commands = resolver.GetCustomDomainCommands();
+			Assert.IsNotNull(commands);
+			Assert.AreEqual(1, commands.Count());
+
+			var command = commands.ElementAt(0);
+			Assert.IsNotNull(command);
+			Assert.AreEqual("overridden label", command.DisplayName);
+			Assert.AreEqual("MFiles.VAF.Extensions.Tests.DefaultCustomDomainCommandResolverTests+ValidInstanceMethod_OverriddenWithNewAttribute_.Method", command.ID);
+
+		}
 	}
 }

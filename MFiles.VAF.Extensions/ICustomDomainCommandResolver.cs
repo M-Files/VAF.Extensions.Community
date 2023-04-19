@@ -41,7 +41,7 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// The list of types (and instances) to scan.
 		/// </summary>
-		protected List<Tuple<Type, object>> Included { get; } = new List<Tuple<Type, object>>();
+		protected Dictionary<Type, object> Included { get; } = new Dictionary<Type, object>();
 
 		/// <inheritdoc />
 		public virtual IEnumerable<CustomDomainCommand> GetCustomDomainCommands()
@@ -49,7 +49,7 @@ namespace MFiles.VAF.Extensions
 			// Get everything from the included data.
 			return this.Included?
 				.AsNotNull()
-				.SelectMany(t => this.GetCustomDomainCommands(t.Item1, t.Item2));
+				.SelectMany(t => this.GetCustomDomainCommands(t.Key, t.Value));
 		}
 
 		/// <summary>
@@ -89,7 +89,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="type">The type to scan.</param>
 		/// <param name="instance">The instance of the object to use when calling methods.</param>
 		public virtual void Include(Type type, object instance = null)
-			=> this.Included.Add(new Tuple<Type, object>(type, instance));
+			=> this.Included.Add(type, instance);
 
 		/// <summary>
 		/// Adds <paramref name="type"/> and <paramref name="instance"/> to the list of items
