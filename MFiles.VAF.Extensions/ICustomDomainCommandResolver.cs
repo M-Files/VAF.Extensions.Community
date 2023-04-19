@@ -67,7 +67,7 @@ namespace MFiles.VAF.Extensions
 
 			// Find methods with the correct attribute.
 			var methods = type
-				.GetMethods()
+				.GetMethods(this.BindingFlags)
 				?? Enumerable.Empty<MethodInfo>();
 			foreach (var m in methods)
 			{
