@@ -1,19 +1,8 @@
-﻿// ReSharper disable once CheckNamespace
-using MFiles.VAF.Common;
-using MFiles.VAF.Common.ApplicationTaskQueue;
-using MFiles.VAF.Configuration.AdminConfigurations;
-using MFiles.VAF.Configuration.Domain.Dashboards;
-using MFiles.VAF.Core;
-using MFiles.VAF.Extensions;
-using MFiles.VAF;
+﻿using MFiles.VAF.Configuration.AdminConfigurations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MFiles.VAF.AppTasks;
-using MFiles.VAF.Extensions.Dashboards;
-using MFiles.VAF.Configuration.Domain;
-using MFiles.VAF.Configuration.Interfaces.Domain;
 
 namespace MFiles.VAF.Extensions
 {
@@ -37,8 +26,54 @@ namespace MFiles.VAF.Extensions
 			// Return the commands associated with downloading logs from the default file target.
 			foreach (var c in this.GetDefaultLogTargetDownloadCommands())
 				yield return c;
+
+			// Return the commands declared via attributes.
+			foreach (var c in this.GetCustomDomainCommandsFromAttributes())
+				yield return c;
 		}
 
+		/// <summary>
+		/// Gets custom domain commands declared via attributes on methods.
+		/// </summary>
+		/// <returns>The commands.</returns>
+		public virtual IEnumerable<CustomDomainCommand> GetCustomDomainCommandsFromAttributes()
+			=> this.GetCustomDomainCommandsFromAttributes(this.GetType(), this);
+
+		/// <summary>
+		/// Gets custom domain commands declared via attributes on methods.
+		/// </summary>
+		/// <param name="type">The type to check for methods.</param>
+		/// <param name="instance">The instance to use when calling the methods.</param>
+		/// <returns>The commands.</returns>
+		public virtual IEnumerable<CustomDomainCommand> GetCustomDomainCommandsFromAttributes
+		(
+			Type type,
+			object instance = null
+		)
+		{
+			// Sanity.
+			if (null == type)
+				yield break;
+
+			// Check whether methods have the correct attributes
+			var methods = type
+				.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
+				?? Enumerable.Empty<MethodInfo>();
+			foreach(var m in methods)
+			{
+				// If we cannot get the attribute then die.
+				var attr = m?.GetCustomAttribute<CustomCommandAttribute>();
+				if (null == attr)
+					continue;
+
+				// Configure the attribute so that it knows which method to call.
+				attr.Configure(m, instance);
+
+				// Return the associated command.
+				yield return (CustomDomainCommand)attr;
+			}
+		} 
+		
 		/// <summary>
 		/// Returns the commands associated with downloading logs from the default file target.
 		/// </summary>
