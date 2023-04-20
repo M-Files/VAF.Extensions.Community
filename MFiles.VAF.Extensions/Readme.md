@@ -552,4 +552,79 @@ internal void MyVaultExtensionMethod
 }
 ```
 
+## Defining commands for the M-Files Admin area via attributes
+
+In general terms, [commands can be added to the M-Files Admin area](https://developer.m-files.com/Frameworks/Vault-Application-Framework/Configuration/Commands/) by overriding `ConfigurableVaultApplicationBase<T>.GetCommands` and returning appropritately-defined instances of `CustomDomainCommand`.  The VAF Extensions adds the abilty to define these commands using attributes instead.
+
+*Note that the method signature must be correct for these attributes to work.  The method return type must be defined as `void` and it must define two parameters, the first of type `IConfigurationRequestContext` and the second of type `ClientOperations`.*
+
+### Buttons in the header
+
+*The code below is equivalent to [this example](https://developer.m-files.com/Frameworks/Vault-Application-Framework/Configuration/Commands/#displaying-commands-in-the-header) in the Developer Portal.*
+
+```csharp
+public class VaultApplication 
+: MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<Configuration>
+{
+	// Create a command with "Say hello" as the button text.
+	[CustomCommand("Say hello")]
+	// Add it to the header bar.
+	[ButtonBarCommandLocation]
+	public void SayHello
+	(
+		IConfigurationRequestContext context, 
+		ClientOperations operations
+	)
+	{
+		operations.ShowMessage($"Hello {context.CurrentUserSessionInfo.AccountName}");
+	}
+}
+```
+
+### Buttons in the domain menu
+
+*The code below is equivalent to [this example](https://developer.m-files.com/Frameworks/Vault-Application-Framework/Configuration/Commands/#displaying-context-menu-items-for-the-domain-menu) in the Developer Portal.*
+
+```csharp
+public class VaultApplication 
+: MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<Configuration>
+{
+	// Create a command with "Say hello" as the button text.
+	[CustomCommand("Say hello")]
+	// Add it to the domain context menu.
+	[DomainMenuCommandLocation]
+	public void SayHello
+	(
+		IConfigurationRequestContext context, 
+		ClientOperations operations
+	)
+	{
+		operations.ShowMessage($"Hello {context.CurrentUserSessionInfo.AccountName}");
+	}
+}
+```
+
+### Buttons in the configuration menu
+
+*The code below is equivalent to [this example](https://developer.m-files.com/Frameworks/Vault-Application-Framework/Configuration/Commands/#displaying-context-menu-items-for-the-configuration-menumenu) in the Developer Portal.*
+
+```csharp
+public class VaultApplication 
+: MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<Configuration>
+{
+	// Create a command with "Say hello" as the button text.
+	[CustomCommand("Say hello")]
+	// Add it to the configuration context menu.
+	[ConfigurationMenuCommandLocation]
+	public void SayHello
+	(
+		IConfigurationRequestContext context, 
+		ClientOperations operations
+	)
+	{
+		operations.ShowMessage($"Hello {context.CurrentUserSessionInfo.AccountName}");
+	}
+}
+```
+
 
