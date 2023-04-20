@@ -159,7 +159,7 @@ namespace MFiles.VAF.Extensions.Tests
 			var command = commands.ElementAt(0);
 			Assert.IsNotNull(command);
 			Assert.AreEqual("overridden label", command.DisplayName);
-			Assert.AreEqual("MFiles.VAF.Extensions.Tests.DefaultCustomDomainCommandResolverTests+ValidInstanceMethod_OverriddenWithNewAttribute_.Method", command.ID);
+			Assert.AreEqual("MFiles.VAF.Extensions.Tests.DefaultCustomDomainCommandResolverTests+ValidInstanceMethod_OverriddenWithNewAttribute.Method", command.ID);
 
 		}
 	}
