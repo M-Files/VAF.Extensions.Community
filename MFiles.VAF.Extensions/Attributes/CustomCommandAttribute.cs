@@ -1,6 +1,8 @@
 ﻿using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain;
+using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Configuration.Interfaces.Domain;
+using MFiles.VAF.Extensions.Dashboards;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +21,7 @@ namespace MFiles.VAF.Extensions
 		: Attribute
 	{
 		/// <inheritdoc cref="CustomDomainCommand.ID"/>
-		public string CommandId { get; protected set; }
+		public string CommandId { get; set; }
 
 		/// <inheritdoc cref="CustomDomainCommand.Locations"/>
 		public List<ICommandLocation> Locations { get; set; }
@@ -36,15 +38,20 @@ namespace MFiles.VAF.Extensions
 		/// <inheritdoc cref="CustomDomainCommand.Blocking"/>
 		public bool Blocking { get; set; }
 
+		/// <summary>
+		/// <see langword="true"/> if <see cref="Configure"/> is successfully called
+		/// (and hence this object can be converted to a custom domain command), 
+		/// <see langword="false"/> otherwise.
+		/// </summary>
 		public bool IsConfigured { get; protected set; }
+
+		/// <inheritdoc cref="CustomDomainCommand.Execute"/>
+		public Action<IConfigurationRequestContext, ClientOperations> Execute { get; protected set; }
 
 		public CustomCommandAttribute(string label)
 		{
 			this.Label = label;
 		}
-
-		/// <inheritdoc cref="CustomDomainCommand.Execute"/>
-		public Action<IConfigurationRequestContext, ClientOperations> Execute { get; protected set; }
 
 		/// <summary>
 		/// Configures the command for use.
@@ -61,9 +68,9 @@ namespace MFiles.VAF.Extensions
 			string commandId = null
 		)
 		{
-			this.Execute = execute ?? throw new ArgumentNullException( nameof( execute ) );
+			this.Execute = execute ?? throw new ArgumentNullException(nameof(execute));
 			this.CommandId = commandId ?? throw new ArgumentNullException(nameof(commandId));
-			this.Locations = new List<ICommandLocation>(locations?? Enumerable.Empty<ICommandLocation>());
+			this.Locations = new List<ICommandLocation>(locations ?? Enumerable.Empty<ICommandLocation>());
 			this.IsConfigured = true;
 		}
 
@@ -129,8 +136,10 @@ namespace MFiles.VAF.Extensions
 
 			// Get the command Id and use the other overload.
 			var commandId = string.IsNullOrWhiteSpace(this.CommandId)
-				? $"{method.DeclaringType.FullName}.{method.Name}"
+				? this.GetDefaultCommandId(method)
 				: this.CommandId;
+
+			// Set us all up.
 			this.Configure
 			(
 				// Invoke the method when executed.
@@ -138,20 +147,34 @@ namespace MFiles.VAF.Extensions
 				{
 					method.Invoke
 					(
-						method.IsStatic ? null : instance, 
+						method.IsStatic ? null : instance,
 						new object[] { c, o }
 					);
 				},
 				locations.ToArray(),
 				commandId
 			);
+
+		}
+
+		/// <summary>
+		/// Returns the command ID for the provided <paramref name="method"/>.
+		/// </summary>
+		/// <param name="method">The method that will be run by the command.</param>
+		/// <returns>The command ID.</returns>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="method"/> is <see langword="null"/>.</exception>
+		public virtual string GetDefaultCommandId(MethodInfo method)
+		{
+			if(null == method)
+				throw new ArgumentNullException(nameof(method));
+			return $"{method.DeclaringType.FullName}.{method.Name}";
 		}
 
 		/// <summary>
 		/// Converts <paramref name="attribute"/> to a <see cref="CustomDomainCommand"/>.
 		/// </summary>
 		/// <param name="attribute">The attribute to convert.</param>
-		public static explicit operator CustomDomainCommand(CustomCommandAttribute attribute)
+		public static explicit operator CustomDomainCommandEx(CustomCommandAttribute attribute)
 		{
 			// Sanity.
 			if(null == attribute)
@@ -160,7 +183,7 @@ namespace MFiles.VAF.Extensions
 				throw new InvalidOperationException("You must call CustomCommandAttribute.Configure prior to casting to a CustomDomainCommand.");
 
 			// Convert all the data we have to something usable.
-			return new CustomDomainCommand()
+			return new CustomDomainCommandEx()
 			{
 				Execute = attribute.Execute,
 				ID = attribute.CommandId,
@@ -168,12 +191,13 @@ namespace MFiles.VAF.Extensions
 				ConfirmMessage = attribute.ConfirmMessage,
 				DisplayName = attribute.Label,
 				HelpText = attribute.HelpText,
-				Locations = attribute.Locations ?? new List<ICommandLocation>()
+				Locations = attribute.Locations ?? new List<ICommandLocation>(),
+				CustomCommandAttribute = attribute
 			};
 		}
 
 		/// <summary>
-		/// Converts this attribute to a <see cref="CustomDomainCommand"/>.
+		/// Converts this attribute to a <see cref="CustomDomainCommandEx"/>.
 		/// </summary>
 		/// <param name="method">The method to execute.</param>
 		/// <param name="instance">The instance that declared the method.</param>
@@ -183,20 +207,33 @@ namespace MFiles.VAF.Extensions
 		/// If <paramref name="instance"/> is null then <paramref name="method"/> must point to a static method.
 		/// If <paramref name="instance"/> is not null then either it must be of a type that can be cast to the type that declared <paramref name="method"/>, or <paramref name="method"/> must point to a static method.
 		/// </remarks>
-		public virtual CustomDomainCommand ToCustomDomainCommand(MethodInfo method, object instance = null)
+		public virtual CustomDomainCommandEx ToCustomDomainCommand(MethodInfo method, object instance = null)
 		{
 			// Configure it.
 			this.Configure(method, instance);
-			return (CustomDomainCommand)this;
+			return (CustomDomainCommandEx)this;
 		}
 
 		/// <summary>
 		/// Converts this attribute to a <see cref="CustomDomainCommand"/>.
 		/// </summary>
 		/// <returns>The domain command.</returns>
-		public virtual CustomDomainCommand ToCustomDomainCommand()
+		public virtual CustomDomainCommandEx ToCustomDomainCommand()
 		{
-			return (CustomDomainCommand) this;
+			return (CustomDomainCommandEx) this;
 		}
+	}
+	
+	/// <summary>
+	/// An extension of <see cref="CustomDomainCommand"/> that allows
+	/// reference to the <see cref="CustomCommandAttribute"/> that declared it.
+	/// </summary>
+	public class CustomDomainCommandEx
+		: CustomDomainCommand
+	{
+		/// <summary>
+		/// The attribute that declared this custom domain command.
+		/// </summary>
+		public CustomCommandAttribute CustomCommandAttribute { get; set; }
 	}
 }

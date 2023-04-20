@@ -1,4 +1,6 @@
 ﻿using MFiles.VAF.Configuration.AdminConfigurations;
+using MFiles.VAF.Configuration.Domain.Dashboards;
+using MFiles.VAF.Extensions.Dashboards;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +17,19 @@ namespace MFiles.VAF.Extensions
 		/// Gets all custom domain commands.
 		/// </summary>
 		/// <returns>The found domain commands.</returns>
-		IEnumerable<CustomDomainCommand> GetCustomDomainCommands();
+		IEnumerable<CustomDomainCommandEx> GetCustomDomainCommands();
+
+		/// <summary>
+		/// Returns a dashboard domain command for the given command Id.
+		/// </summary>
+		/// <param name="commandId">The ID of the command to return.</param>
+		/// <param name="style">The style for the command.</param>
+		/// <returns>The command, or null if not found.</returns>
+		DashboardDomainCommandEx GetDashboardDomainCommand
+		(
+			string commandId,
+			DashboardCommandStyle style = DashboardCommandStyle.Link
+		);
 	}
 
 	/// <summary>
@@ -44,7 +58,35 @@ namespace MFiles.VAF.Extensions
 		protected Dictionary<Type, object> Included { get; } = new Dictionary<Type, object>();
 
 		/// <inheritdoc />
-		public virtual IEnumerable<CustomDomainCommand> GetCustomDomainCommands()
+		public DashboardDomainCommandEx GetDashboardDomainCommand
+		(
+			string commandId,
+			DashboardCommandStyle style = DashboardCommandStyle.Link
+		)
+		{
+			// Sanity.
+			if (string.IsNullOrWhiteSpace(commandId))
+				return null;
+
+			// Try to get the domain command for this method.
+			var command = this.GetCustomDomainCommands()
+				.FirstOrDefault(c => c.ID == commandId);
+			
+			// Sanity.
+			if (null == command)
+				return null;
+
+			// Return the command.
+			return new DashboardDomainCommandEx
+			{
+				DomainCommandID = command.ID,
+				Title = command.DisplayName,
+				Style = style
+			};
+		}
+
+		/// <inheritdoc />
+		public virtual IEnumerable<CustomDomainCommandEx> GetCustomDomainCommands()
 		{
 			// Get everything from the included data.
 			return this.Included?
@@ -59,7 +101,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="type">The type to look for methods in.</param>
 		/// <param name="instance">The instance to use when calling the method.</param>
 		/// <returns>Any and all custom domain commands.</returns>
-		public virtual IEnumerable<CustomDomainCommand> GetCustomDomainCommands(Type type, object instance = null)
+		public virtual IEnumerable<CustomDomainCommandEx> GetCustomDomainCommands(Type type, object instance = null)
 		{
 			// Sanity.
 			if (null == type)
@@ -130,9 +172,15 @@ namespace MFiles.VAF.Extensions
 			= new List<ICustomDomainCommandResolver>();
 
 		/// <inheritdoc />
-		public virtual IEnumerable<CustomDomainCommand> GetCustomDomainCommands()
+		public virtual IEnumerable<CustomDomainCommandEx> GetCustomDomainCommands()
 			=> this.CustomDomainCommandResolvers?
 				.SelectMany(r => r.GetCustomDomainCommands()?.AsNotNull())?
 				.AsNotNull();
+
+		/// <inheritdoc />
+		public virtual DashboardDomainCommandEx GetDashboardDomainCommand(string commandId, DashboardCommandStyle style = DashboardCommandStyle.Link)
+			=> this.CustomDomainCommandResolvers?
+			.Select(c => c.GetDashboardDomainCommand(commandId, style))
+			.FirstOrDefault(c => c != null);
 	}
 }

@@ -604,6 +604,8 @@ public class VaultApplication
 }
 ```
 
+The `DomainMenuCommandLocationAttribute` allows you to additionally define other appropriate content such as the priority and icon.
+
 ### Buttons in the configuration menu
 
 *The code below is equivalent to [this example](https://developer.m-files.com/Frameworks/Vault-Application-Framework/Configuration/Commands/#displaying-context-menu-items-for-the-configuration-menumenu) in the Developer Portal.*
@@ -627,4 +629,40 @@ public class VaultApplication
 }
 ```
 
+The `ConfigurationMenuCommandLocationAttribute` allows you to additionally define other appropriate content such as the priority and icon.
 
+### Defining commands and referencing them in a dashboard
+
+It is also possible to use attributes to define a command, and then to manually render the command inside a dashboard.  To do this you must provide a static command ID when declaring the command:
+
+```csharp
+public class VaultApplication 
+: MFiles.VAF.Extensions.ConfigurableVaultApplicationBase<Configuration>
+{
+	// Define the constant command ID.
+	private const string SayHelloCommandId = "SayHello";
+
+	// Create a command with "Say hello" as the button text and an explicit command ID.
+	[CustomCommand("Say hello", CommandId = SayHelloCommandId)]
+	public void SayHello
+	(
+		IConfigurationRequestContext context, 
+		ClientOperations operations
+	)
+	{
+		operations.ShowMessage($"Hello {context.CurrentUserSessionInfo.AccountName}");
+	}
+
+	// An example of returning the command; typically you would not
+	// replace the entire dashboard with it!
+	public override IEnumerable<IDashboardContent> GetStatusDashboardRootItems
+	(
+		IConfigurationRequestContext context
+	)
+	{
+		// Just return the button.
+		yield return this.GetCustomDomainCommandResolver()?
+			.GetDashboardDomainCommand(SayHelloCommandId); // Use the explicit command ID to find it again.
+	}
+}
+```
