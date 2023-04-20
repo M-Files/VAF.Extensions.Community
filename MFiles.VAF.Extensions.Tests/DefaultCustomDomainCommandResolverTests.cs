@@ -12,6 +12,9 @@ namespace MFiles.VAF.Extensions.Tests
 	[TestClass]
 	public class DefaultCustomDomainCommandResolverTests
 	{
+		/// <summary>
+		/// By default there should be no commands returned.
+		/// </summary>
 		[TestMethod]
 		public void NoIncludedTypesReturnsEmptyCollection()
 		{
@@ -27,6 +30,9 @@ namespace MFiles.VAF.Extensions.Tests
 			public virtual void Method(IConfigurationRequestContext context, ClientOperations operations){}
 		}
 
+		/// <summary>
+		/// A simple instance method with CustomCommandAttribute.
+		/// </summary>
 		[TestMethod]
 		public void ValidInstanceMethod_ReturnsValidData()
 		{
@@ -57,6 +63,9 @@ namespace MFiles.VAF.Extensions.Tests
 			public virtual void Method(IConfigurationRequestContext context, ClientOperations operations) { }
 		}
 
+		/// <summary>
+		/// A simple instance method with CustomCommandAttribute and lots of optional data.
+		/// </summary>
 		[TestMethod]
 		public void ValidInstanceMethodAndAdditionalData_ReturnsValidData()
 		{
@@ -84,9 +93,12 @@ namespace MFiles.VAF.Extensions.Tests
 		public class ValidStaticMethod
 		{
 			[CustomCommand("hello world")]
-			public virtual void Method(IConfigurationRequestContext context, ClientOperations operations) { }
+			public static void Method(IConfigurationRequestContext context, ClientOperations operations) { }
 		}
 
+		/// <summary>
+		/// A simple static method with CustomCommandAttribute.
+		/// </summary>
 		[TestMethod]
 		public void ValidStaticMethod_ReturnsValidData()
 		{
@@ -114,6 +126,11 @@ namespace MFiles.VAF.Extensions.Tests
 			public override void Method(IConfigurationRequestContext context, ClientOperations operations) { }
 		}
 
+		/// <summary>
+		/// The tested class inherits from a class that defined a custom domain command,
+		/// but it overrides the base virtual method.
+		/// Ensure that the new method is found along with the base custom command data.
+		/// </summary>
 		[TestMethod]
 		public void ValidInstanceMethod_Overridden_ReturnsValidData()
 		{
@@ -147,6 +164,11 @@ namespace MFiles.VAF.Extensions.Tests
 			public override void Method(IConfigurationRequestContext context, ClientOperations operations) { }
 		}
 
+		/// <summary>
+		/// The tested class inherits from a class that defined a custom domain command,
+		/// but it overrides the base virtual method and additionally defines its own custom command.
+		/// Ensure that the new method is found and the updated custom command data.
+		/// </summary>
 		[TestMethod]
 		public void ValidInstanceMethod_OverriddenWithNewAttribute_ReturnsValidData()
 		{
