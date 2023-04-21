@@ -110,6 +110,30 @@ namespace MFiles.VAF.Extensions.Tests
 
 		}
 
+		public class ValidInstanceMethodWithCustomCommandId
+		{
+			[CustomCommand("hello world", CommandId = "helloWorld")]
+			public void Method(IConfigurationRequestContext context, ClientOperations operations) { }
+		}
+
+		/// <summary>
+		/// A valid instance command with custom command ID is returned correctly.
+		/// </summary>
+		[TestMethod]
+		public void ValidInstanceMethodWithCustomCommandId_ReturnsValidData()
+		{
+			var resolver = new DefaultCustomDomainCommandResolver();
+			resolver.Include(new ValidInstanceMethodWithCustomCommandId());
+			var commands = resolver.GetCustomDomainCommands();
+			Assert.IsNotNull(commands);
+			Assert.AreEqual(1, commands.Count());
+
+			var command = commands.ElementAt(0);
+			Assert.IsNotNull(command);
+			Assert.AreEqual("helloWorld", command.ID);
+
+		}
+
 		public class ValidStaticMethod
 		{
 			[CustomCommand("hello world")]

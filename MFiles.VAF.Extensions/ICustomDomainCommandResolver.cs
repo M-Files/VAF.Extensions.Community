@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain.Dashboards;
+using MFiles.VAF.Configuration.Interfaces.Domain;
 using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Dashboards;
 using System;
@@ -18,7 +19,7 @@ namespace MFiles.VAF.Extensions
 		/// Gets all custom domain commands.
 		/// </summary>
 		/// <returns>The found domain commands.</returns>
-		IEnumerable<CustomDomainCommandEx> GetCustomDomainCommands();
+		IEnumerable<CustomDomainCommand> GetCustomDomainCommands();
 
 		/// <summary>
 		/// Returns a dashboard domain command for the given command Id.
@@ -93,7 +94,7 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <inheritdoc />
-		public virtual IEnumerable<CustomDomainCommandEx> GetCustomDomainCommands()
+		public virtual IEnumerable<CustomDomainCommand> GetCustomDomainCommands()
 		{
 			// Get everything from the included data.
 			return this.Included?
@@ -108,7 +109,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="type">The type to look for methods in.</param>
 		/// <param name="instance">The instance to use when calling the method.</param>
 		/// <returns>Any and all custom domain commands.</returns>
-		public virtual IEnumerable<CustomDomainCommandEx> GetCustomDomainCommands(Type type, object instance = null)
+		public virtual IEnumerable<CustomDomainCommand> GetCustomDomainCommands(Type type, object instance = null)
 		{
 			// Sanity.
 			if (null == type)
@@ -118,31 +119,130 @@ namespace MFiles.VAF.Extensions
 			var methods = type
 				.GetMethods(this.BindingFlags)
 				?? Enumerable.Empty<MethodInfo>();
-			foreach (var m in methods)
+			foreach (var method in methods)
 			{
 				// If we cannot get the attribute then die.
-				var attr = m?.GetCustomAttribute<CustomCommandAttribute>();
-				if (null == attr)
+				var attribute = method?.GetCustomAttribute<CustomCommandAttribute>();
+				if (null == attribute)
 					continue;
 
-				this.Logger?.Trace($"[CustomCommand] found on {type.FullName}.{m.Name}.  Attempting to use.");
+				this.Logger?.Trace($"[CustomCommand] found on {type.FullName}.{method.Name}.  Attempting to use.");
+
+				// Set the command ID if one is not set.
+				attribute.CommandId = string.IsNullOrWhiteSpace(attribute.CommandId)
+					? this.GetDefaultCommandId(method)
+					: attribute.CommandId;
 
 				// Convert the attribute to a custom domain command.
-				CustomDomainCommandEx command = null;
+				CustomDomainCommand command = null;
 				try
 				{
-					command = attr?.ToCustomDomainCommand(m, instance);
+
+					// Validate the method signature.
+					{
+						var invalidSignatureString = $"The method signature must be `void {method.Name}(IConfigurationRequestContext c, ClientOperations o)`";
+						if (typeof(void) != method.ReturnType)
+							throw new ArgumentException(invalidSignatureString, nameof(method));
+						if (method.ContainsGenericParameters)
+							throw new ArgumentException(invalidSignatureString, nameof(method));
+						var parameters = method.GetParameters();
+						if (parameters.Length != 2)
+							throw new ArgumentException(invalidSignatureString, nameof(method));
+						if (parameters[0].ParameterType != typeof(IConfigurationRequestContext))
+							throw new ArgumentException(invalidSignatureString, nameof(method));
+						if (parameters[1].ParameterType != typeof(ClientOperations))
+							throw new ArgumentException(invalidSignatureString, nameof(method));
+					}
+
+					// Validate the instance.
+					if (null == instance)
+					{
+						// If the instance is null then the method must be static.
+						if (!method.IsStatic)
+							throw new ArgumentException("The method must be static if an instance is not provided.", nameof(method));
+					}
+					else
+					{
+						// If the instance is not null then the instance type must be valid OR the method must be static.
+						if (!method.IsStatic && !instance.GetType().IsAssignableFrom(method.DeclaringType))
+							throw new ArgumentException($"The instance type ('{instance.GetType().FullName}') must be assignable to the declaring type ({method.DeclaringType.FullName}).", nameof(method));
+					}
+
+					// Convert it to a domain command.
+					command = new CustomDomainCommand()
+					{
+						Execute = (c, o) =>
+						{
+							this.Logger?.Trace($"Command {attribute.CommandId} invoked.");
+							try
+							{
+								method.Invoke
+								(
+									method.IsStatic ? null : instance,
+									new object[] { c, o }
+								);
+							}
+							catch(Exception e)
+							{
+								this.Logger?.Error(e, $"Exception whilst executing {attribute.CommandId}.");
+								throw;
+							}
+						},
+						ID = attribute.CommandId,
+						Blocking = attribute.Blocking,
+						ConfirmMessage = attribute.ConfirmMessage,
+						DisplayName = attribute.Label,
+						HelpText = attribute.HelpText,
+						Locations = this.GetCommandLocationsFromAttributes(method)?.ToList() 
+							?? new List<ICommandLocation>()
+					};
 				}
 				catch(Exception e)
 				{
-					this.Logger?.Error(e, $"{type.FullName}.{m.Name} cannot be used with [CustomCommand]; the method signature may not be correct.");
+					this.Logger?.Error(e, $"{type.FullName}.{method.Name} cannot be used with [CustomCommand]; the method signature may not be correct.");
 				}
 				if (null != command)
 				{
-					this.Logger?.Info($"Successfully converted {type.FullName}.{m.Name} to custom command (ID: {command.ID}).");
+					this.Logger?.Info($"Successfully converted {type.FullName}.{method.Name} to custom command (ID: {command.ID}).");
 					yield return command;
 				}
 			}
+		}
+
+		/// <summary>
+		/// Reflects any <see cref="CommandLocationAttribute"/> instances on the given
+		/// <paramref name="method"/> then calls <see cref="CommandLocationAttribute.ToCommandLocation"/>
+		/// on each and returns the value.
+		/// </summary>
+		/// <param name="method">The method to reflect.</param>
+		/// <returns>Any locations.</returns>
+		protected virtual IEnumerable<ICommandLocation> GetCommandLocationsFromAttributes(MethodInfo method)
+		{
+			// Sanity.
+			if (null == method)
+				throw new ArgumentNullException(nameof(method));
+
+			// Get the locations via reflection.
+			var locationAttributes = method
+				.GetCustomAttributes<CommandLocationAttribute>()
+				?? Enumerable.Empty<CommandLocationAttribute>();
+			foreach (var a in locationAttributes.Where(l => l != null))
+			{
+				yield return a.ToCommandLocation();
+			}
+		}
+
+		/// <summary>
+		/// Returns the command ID for the provided <paramref name="method"/>.
+		/// </summary>
+		/// <param name="method">The method that will be run by the command.</param>
+		/// <returns>The command ID.</returns>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="method"/> is <see langword="null"/>.</exception>
+		protected virtual string GetDefaultCommandId(MethodInfo method)
+		{
+			if (null == method)
+				throw new ArgumentNullException(nameof(method));
+			return $"{method.DeclaringType.FullName}.{method.Name}";
 		}
 
 		/// <summary>
@@ -194,7 +294,7 @@ namespace MFiles.VAF.Extensions
 			= new List<ICustomDomainCommandResolver>();
 
 		/// <inheritdoc />
-		public virtual IEnumerable<CustomDomainCommandEx> GetCustomDomainCommands()
+		public virtual IEnumerable<CustomDomainCommand> GetCustomDomainCommands()
 			=> this.CustomDomainCommandResolvers?
 				.SelectMany(r => r.GetCustomDomainCommands()?.AsNotNull())?
 				.AsNotNull();
