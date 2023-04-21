@@ -1,20 +1,9 @@
-﻿// ReSharper disable once CheckNamespace
-using MFiles.VAF.Common;
-using MFiles.VAF.Common.ApplicationTaskQueue;
-using MFiles.VAF.Configuration.AdminConfigurations;
-using MFiles.VAF.Configuration.Domain.Dashboards;
-using MFiles.VAF.Core;
-using MFiles.VAF.Extensions;
-using MFiles.VAF;
+﻿using MFiles.VAF.Configuration.AdminConfigurations;
+using MFiles.VAF.Extensions.Dashboards.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MFiles.VAF.AppTasks;
-using MFiles.VAF.Extensions.Dashboards;
-using MFiles.VAF.Configuration.Domain;
-using MFiles.VAF.Configuration.Interfaces.Domain;
-using MFiles.VAF.Extensions.Dashboards.Commands;
 
 namespace MFiles.VAF.Extensions
 {
@@ -24,22 +13,39 @@ namespace MFiles.VAF.Extensions
 		public override IEnumerable<CustomDomainCommand> GetCommands(IConfigurationRequestContext context)
 		{
 			// Return the base commands, if any.
-			foreach (var c in base.GetCommands(context) ?? new CustomDomainCommand[0])
+			foreach (var c in base.GetCommands(context)?.AsNotNull())
 				yield return c;
 
 			// Return the command related to the background operation approach.
-			foreach (var c in this.GetTaskQueueBackgroundOperationRunCommands())
+			foreach (var c in this.GetTaskQueueBackgroundOperationRunCommands()?.AsNotNull())
 				yield return c;
 
 			// Return the commands related to the VAF 2.3+ attribute-based approach.
-			foreach (var c in this.TaskManager.GetTaskQueueRunCommands(this.TaskQueueResolver))
+			foreach (var c in this.TaskManager?.GetTaskQueueRunCommands(this.TaskQueueResolver)?.AsNotNull())
 				yield return c;
 
 			// Return the commands associated with downloading logs from the default file target.
-			foreach (var c in this.GetDefaultLogTargetDownloadCommands())
+			foreach (var c in this.GetDefaultLogTargetDownloadCommands()?.AsNotNull())
+				yield return c;
+
+			// Return the commands declared via attributes.
+			foreach (var c in this.GetCustomDomainCommandResolver()?.GetCustomDomainCommands()?.AsNotNull())
 				yield return c;
 		}
 
+		/// <summary>
+		/// Returns an object - or <see langword="null"/> - that searches known object types
+		/// to find methods decorated with <see cref="CustomCommandAttribute"/>.
+		/// </summary>
+		/// <returns>The resolver, or <see langword="null"/> if none is configured.</returns>
+		/// <remarks>Returns <see cref="DefaultCustomDomainCommandResolver"/> by default.</remarks>
+		public virtual ICustomDomainCommandResolver GetCustomDomainCommandResolver()
+		{
+			var resolver = new DefaultCustomDomainCommandResolver();
+			resolver.Include(this);
+			return resolver;
+		}
+		
 		/// <summary>
 		/// Returns the commands associated with downloading logs from the default file target.
 		/// </summary>

@@ -15,6 +15,14 @@ namespace MFiles.VAF.Extensions.Tests
 		: TestBaseWithVaultMock
 	{
 
+		[TestMethod]
+		public void GetCustomDomainCommandResolver_Default()
+		{
+			var proxy = new ConfigurableVaultApplicationBaseProxy<object>();
+			var resolver = proxy.GetCustomDomainCommandResolver();
+			Assert.IsNotNull(resolver);
+			Assert.IsInstanceOfType(resolver, typeof(DefaultCustomDomainCommandResolver));
+		}
 	}
 
 	public class ConfigurableVaultApplicationBaseProxy<TSecureConfigurationType>
