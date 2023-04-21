@@ -6,8 +6,10 @@ using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Dashboards;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Reflection;
+using static MFiles.VAF.Configuration.ResourceEditor.ResourceEditorPlugin;
 
 namespace MFiles.VAF.Extensions.Dashboards.Commands
 {
@@ -57,6 +59,10 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 
 			// Return the commands related to the VAF 2.3+ attribute-based approach.
 			foreach (var c in GetTaskQueueRunCommands()?.AsNotNull())
+				yield return c;
+
+			// Get any package import commands.
+			foreach (var c in this.GetImportPackageDomainCommands())
 				yield return c;
 
 		}
@@ -115,6 +121,71 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			// Return the commands related to the VAF 2.3+ attribute-based approach.
 			foreach (var c in VaultApplication?.TaskManager?.GetTaskQueueRunCommands(VaultApplication.TaskQueueResolver)?.AsNotNull())
 				yield return c;
+		}
+
+		/// <summary>
+		/// Gets import-package commands from all included types.
+		/// </summary>
+		/// <returns></returns>
+		protected virtual IEnumerable<CustomDomainCommand> GetImportPackageDomainCommands()
+		{
+			return this.Included?
+				.SelectMany(t => this.GetImportPackageDomainCommandsFromType(t.Key, t.Value))
+				?? Enumerable.Empty<CustomDomainCommand>();
+		}
+
+		/// <summary>
+		/// Gets import-package commands from the given <paramref name="type"/>.
+		/// </summary>
+		/// <param name="type">The type to load the commands from.</param>
+		/// <param name="instance">The instance of the type.</param>
+		/// <returns>Any commands exposed via attributes.</returns>
+		protected virtual IEnumerable<CustomDomainCommand> GetImportPackageDomainCommandsFromType(Type type, object instance)
+		{
+			// Sanity.
+			if (null == type)
+				yield break;
+
+			// Get all [ReplicationPackageAttributes] on the class.
+			var attributes = type.GetCustomAttributes<ReplicationPackageAttribute>();
+			if ((attributes?.Count() ?? 0) == 0)
+				yield break;
+
+			// Return commands as appropriate.
+			foreach (var attribute in attributes)
+			{
+				// Generate the import command.
+				var importCommand = new ImportReplicationPackageDashboardCommand<TSecureConfiguration>
+				(
+					this.VaultApplication,
+					attribute.ImportCommandId,
+					attribute.ImportLabel,
+					attribute.PackagePath
+				)
+				{
+					Blocking = true,
+					RequiresImporting = true
+				};
+				yield return importCommand;
+
+				// Should we also do a preview command?
+				if (!attribute.PreviewPackageBeforeImport)
+					continue;
+
+				// Create the preview command.
+				var previewCommand = new PreviewReplicationPackageDashboardCommand<TSecureConfiguration>
+				(
+					this.VaultApplication,
+					attribute.PreviewCommandId,
+					attribute.PreviewLabel,
+					attribute.PackagePath,
+					importCommand
+				)
+				{
+					Blocking = true
+				};
+				yield return previewCommand;
+			}
 		}
 
 	}
@@ -207,7 +278,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			foreach (var method in methods)
 			{
 				// Attempt to get the command from the method.
-				var command = GetCustomDomainCommandFromMethod(method, instance);
+				var command = this.GetCustomDomainCommandFromMethod(method, instance);
 				if (null != command)
 					yield return command;
 			}
@@ -235,7 +306,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 
 			// Set the command ID if one is not set.
 			attribute.CommandId = string.IsNullOrWhiteSpace(attribute.CommandId)
-				? GetDefaultCommandId(method)
+				? this.GetCustomDomainCommandId(method)
 				: attribute.CommandId;
 
 			// Convert the attribute to a custom domain command.
@@ -337,7 +408,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 		/// <param name="method">The method that will be run by the command.</param>
 		/// <returns>The command ID.</returns>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="method"/> is <see langword="null"/>.</exception>
-		protected virtual string GetDefaultCommandId(MethodInfo method)
+		protected virtual string GetCustomDomainCommandId(MethodInfo method)
 		{
 			if (null == method)
 				throw new ArgumentNullException(nameof(method));
