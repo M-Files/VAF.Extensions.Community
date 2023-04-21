@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain;
+using MFiles.VAF.Extensions.Dashboards.Commands;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MFiles.VAF.Extensions.Tests
+namespace MFiles.VAF.Extensions.Tests.Dashboards.Commands
 {
 	[TestClass]
 	public class DefaultCustomDomainCommandResolverTests
@@ -27,7 +28,7 @@ namespace MFiles.VAF.Extensions.Tests
 		public class InvalidInstanceMethod
 		{
 			[CustomCommand("hello world")]
-			public virtual bool Method(IConfigurationRequestContext context, ClientOperations operations) 
+			public virtual bool Method(IConfigurationRequestContext context, ClientOperations operations)
 				=> false;
 		}
 
@@ -65,7 +66,7 @@ namespace MFiles.VAF.Extensions.Tests
 			var command = commands.ElementAt(0);
 			Assert.IsNotNull(command);
 			Assert.AreEqual("hello world", command.DisplayName);
-			Assert.AreEqual("MFiles.VAF.Extensions.Tests.DefaultCustomDomainCommandResolverTests+ValidInstanceMethod.Method", command.ID);
+			Assert.AreEqual("MFiles.VAF.Extensions.Tests.Dashboards.Commands.DefaultCustomDomainCommandResolverTests+ValidInstanceMethod.Method", command.ID);
 			Assert.AreEqual(default, command.Blocking);
 			Assert.AreEqual(default, command.ConfirmMessage);
 			Assert.AreEqual(default, command.HelpText);
@@ -76,7 +77,7 @@ namespace MFiles.VAF.Extensions.Tests
 
 		public class ValidInstanceMethodAndAdditionalData
 		{
-			[CustomCommand("hello world", Blocking = true, ConfirmMessage = "abc", HelpText ="def")]
+			[CustomCommand("hello world", Blocking = true, ConfirmMessage = "abc", HelpText = "def")]
 			[ButtonBarCommandLocation(Priority = 1)]
 			[DomainMenuCommandLocation]
 			[ConfigurationMenuCommandLocation]
@@ -98,7 +99,7 @@ namespace MFiles.VAF.Extensions.Tests
 			var command = commands.ElementAt(0);
 			Assert.IsNotNull(command);
 			Assert.AreEqual("hello world", command.DisplayName);
-			Assert.AreEqual("MFiles.VAF.Extensions.Tests.DefaultCustomDomainCommandResolverTests+ValidInstanceMethodAndAdditionalData.Method", command.ID);
+			Assert.AreEqual("MFiles.VAF.Extensions.Tests.Dashboards.Commands.DefaultCustomDomainCommandResolverTests+ValidInstanceMethodAndAdditionalData.Method", command.ID);
 			Assert.AreEqual(true, command.Blocking);
 			Assert.AreEqual("abc", command.ConfirmMessage);
 			Assert.AreEqual("def", command.HelpText);
@@ -155,7 +156,7 @@ namespace MFiles.VAF.Extensions.Tests
 			var command = commands.ElementAt(0);
 			Assert.IsNotNull(command);
 			Assert.AreEqual("hello world", command.DisplayName);
-			Assert.AreEqual("MFiles.VAF.Extensions.Tests.DefaultCustomDomainCommandResolverTests+ValidStaticMethod.Method", command.ID);
+			Assert.AreEqual("MFiles.VAF.Extensions.Tests.Dashboards.Commands.DefaultCustomDomainCommandResolverTests+ValidStaticMethod.Method", command.ID);
 			Assert.AreEqual(default, command.Blocking);
 			Assert.AreEqual(default, command.ConfirmMessage);
 			Assert.AreEqual(default, command.HelpText);
@@ -191,7 +192,7 @@ namespace MFiles.VAF.Extensions.Tests
 			// NOTE: the command ID is changed by the overriding.
 			// This is "expected" (as the method is now the overriding one), but is it actually expected?
 			// For this reason people should not make assumptions about the command ID, but retrieve it from...  Something?
-			Assert.AreEqual("MFiles.VAF.Extensions.Tests.DefaultCustomDomainCommandResolverTests+ValidInstanceMethod_Overridden.Method", command.ID);
+			Assert.AreEqual("MFiles.VAF.Extensions.Tests.Dashboards.Commands.DefaultCustomDomainCommandResolverTests+ValidInstanceMethod_Overridden.Method", command.ID);
 
 			Assert.AreEqual(default, command.Blocking);
 			Assert.AreEqual(default, command.ConfirmMessage);
@@ -225,7 +226,7 @@ namespace MFiles.VAF.Extensions.Tests
 			var command = commands.ElementAt(0);
 			Assert.IsNotNull(command);
 			Assert.AreEqual("overridden label", command.DisplayName);
-			Assert.AreEqual("MFiles.VAF.Extensions.Tests.DefaultCustomDomainCommandResolverTests+ValidInstanceMethod_OverriddenWithNewAttribute.Method", command.ID);
+			Assert.AreEqual("MFiles.VAF.Extensions.Tests.Dashboards.Commands.DefaultCustomDomainCommandResolverTests+ValidInstanceMethod_OverriddenWithNewAttribute.Method", command.ID);
 
 		}
 	}

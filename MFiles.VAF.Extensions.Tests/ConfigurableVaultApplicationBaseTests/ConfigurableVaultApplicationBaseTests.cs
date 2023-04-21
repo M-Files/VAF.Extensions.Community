@@ -6,6 +6,7 @@ using Moq;
 using System;
 using MFiles.VAF.Configuration;
 using System.Collections.Generic;
+using MFiles.VAF.Extensions.Dashboards.Commands;
 
 namespace MFiles.VAF.Extensions.Tests
 {

@@ -1,4 +1,5 @@
-﻿using MFiles.VAF.Configuration.AdminConfigurations;
+﻿using MFiles.VAF.AppTasks;
+using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain.Dashboards;
 using MFiles.VAF.Configuration.Interfaces.Domain;
 using MFiles.VAF.Configuration.Logging;
@@ -8,30 +9,114 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace MFiles.VAF.Extensions
+namespace MFiles.VAF.Extensions.Dashboards.Commands
 {
+
 	/// <summary>
-	/// Returns custom domain commands.
+	/// A default implementation of <see cref="ICustomDomainCommandResolver"/>
+	/// which uses reflection to find methods decorated with <see cref="CustomCommandAttribute"/>.
 	/// </summary>
-	public interface ICustomDomainCommandResolver
+	public class DefaultCustomDomainCommandResolver<TSecureConfiguration>
+		: DefaultCustomDomainCommandResolver
+		where TSecureConfiguration : class, new()
 	{
-		/// <summary>
-		/// Gets all custom domain commands.
-		/// </summary>
-		/// <returns>The found domain commands.</returns>
-		IEnumerable<CustomDomainCommand> GetCustomDomainCommands();
 
 		/// <summary>
-		/// Returns a dashboard domain command for the given command Id.
+		/// The vault application that this resolver is running within.
 		/// </summary>
-		/// <param name="commandId">The ID of the command to return.</param>
-		/// <param name="style">The style for the command.</param>
-		/// <returns>The command, or null if not found.</returns>
-		DashboardDomainCommandEx GetDashboardDomainCommand
-		(
-			string commandId,
-			DashboardCommandStyle style = default
-		);
+		protected ConfigurableVaultApplicationBase<TSecureConfiguration> VaultApplication { get; }
+
+		/// <summary>
+		/// Creates an instance of <see cref="DefaultCustomDomainCommandResolver{TSecureConfiguration}"/>
+		/// and includes the provided <paramref name="vaultApplication"/> in the list of things to resolve against.
+		/// </summary>
+		/// <param name="vaultApplication">The vault application this is running within.</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="vaultApplication"/> is <see langword="null"/>.</exception>
+		public DefaultCustomDomainCommandResolver(ConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication)
+			: base()
+		{
+			this.VaultApplication = vaultApplication
+				?? throw new ArgumentNullException(nameof(vaultApplication));
+			this.Include(this.VaultApplication);
+		}
+
+		/// <inheritdoc />
+		public override IEnumerable<CustomDomainCommand> GetCustomDomainCommands()
+		{
+			// Return the base commands.
+			foreach (var c in base.GetCustomDomainCommands()?.AsNotNull())
+				yield return c;
+
+			// Return the command related to the background operation approach.
+			foreach (var c in GetTaskQueueBackgroundOperationRunCommands()?.AsNotNull())
+				yield return c;
+
+			// Return the commands associated with downloading logs from the default file target.
+			foreach (var c in GetDefaultLogTargetDownloadCommands()?.AsNotNull())
+				yield return c;
+
+			// Return the commands related to the VAF 2.3+ attribute-based approach.
+			foreach (var c in GetTaskQueueRunCommands()?.AsNotNull())
+				yield return c;
+
+		}
+
+		/// <summary>
+		/// Returns the commands associated with downloading logs from the default file target.
+		/// </summary>
+		/// <returns></returns>
+		protected virtual IEnumerable<CustomDomainCommand> GetDefaultLogTargetDownloadCommands()
+		{
+			// One to allow them to select which logs...
+			yield return ShowSelectLogDownloadDashboardCommand.Create();
+
+			// ...and one that actually does the collation/download.
+			yield return DownloadSelectedLogsDashboardCommand.Create();
+
+			// Allow the user to see the latest log entries.
+			yield return ShowLatestLogEntriesDashboardCommand.Create();
+			yield return RetrieveLatestLogEntriesCommand.Create();
+		}
+
+		/// <summary>
+		/// Returns the commands associated with manually running task queue background operations.
+		/// </summary>
+		/// <returns></returns>
+		protected virtual IEnumerable<CustomDomainCommand> GetTaskQueueBackgroundOperationRunCommands()
+		{
+			// Sanity.
+			if (null == VaultApplication)
+				yield break;
+
+			// Get the background operations that have a run command.
+			// Note: this should be all of them.
+			foreach (var c in
+				GetType()
+				.GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager<TSecureConfiguration>>(VaultApplication)
+				.SelectMany(tqbom => tqbom.BackgroundOperations)
+				.AsEnumerable()
+				.Select(bo => bo.Value?.DashboardRunCommand)
+				.Where(c => null != c))
+				yield return c;
+		}
+
+		/// <summary>
+		/// Returns the commands associated with manually running task queue background operations.
+		/// </summary>
+		/// <returns></returns>
+		protected virtual IEnumerable<CustomDomainCommand> GetTaskQueueRunCommands()
+		{
+			// Sanity.
+			if (null == VaultApplication?.TaskManager)
+				yield break;
+			if (null == VaultApplication?.TaskQueueResolver)
+				yield break;
+
+			// Return the commands related to the VAF 2.3+ attribute-based approach.
+			foreach (var c in VaultApplication?.TaskManager?.GetTaskQueueRunCommands(VaultApplication.TaskQueueResolver)?.AsNotNull())
+				yield return c;
+		}
+
 	}
 
 	/// <summary>
@@ -44,13 +129,13 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// Create our logger.
 		/// </summary>
-		private ILogger Logger { get; } 
+		private ILogger Logger { get; }
 			= LogManager.GetLogger(typeof(DefaultCustomDomainCommandResolver));
 
 		/// <summary>
 		/// The default binding flags to use when finding methods.
 		/// </summary>
-		public static BindingFlags DefaultBindingFlags 
+		public static BindingFlags DefaultBindingFlags
 			= BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.FlattenHierarchy;
 
 		/// <summary>
@@ -77,9 +162,9 @@ namespace MFiles.VAF.Extensions
 				return null;
 
 			// Try to get the domain command for this method.
-			var command = this.GetCustomDomainCommands()
+			var command = GetCustomDomainCommands()
 				.FirstOrDefault(c => c.ID == commandId);
-			
+
 			// Sanity.
 			if (null == command)
 				return null;
@@ -97,9 +182,9 @@ namespace MFiles.VAF.Extensions
 		public virtual IEnumerable<CustomDomainCommand> GetCustomDomainCommands()
 		{
 			// Get everything from the included data.
-			return this.Included?
+			return Included?
 				.AsNotNull()
-				.SelectMany(t => this.GetCustomDomainCommandsFromType(t.Key, t.Value));
+				.SelectMany(t => GetCustomDomainCommandsFromType(t.Key, t.Value));
 		}
 
 		/// <summary>
@@ -117,12 +202,12 @@ namespace MFiles.VAF.Extensions
 
 			// Find methods with the correct attribute.
 			var methods = type
-				.GetMethods(this.BindingFlags)
+				.GetMethods(BindingFlags)
 				?? Enumerable.Empty<MethodInfo>();
 			foreach (var method in methods)
 			{
 				// Attempt to get the command from the method.
-				var command = this.GetCustomDomainCommandFromMethod(method, instance);
+				var command = GetCustomDomainCommandFromMethod(method, instance);
 				if (null != command)
 					yield return command;
 			}
@@ -146,11 +231,11 @@ namespace MFiles.VAF.Extensions
 			if (null == attribute)
 				return null;
 
-			this.Logger?.Trace($"[CustomCommand] found on {method.DeclaringType.FullName}.{method.Name}.  Attempting to use.");
+			Logger?.Trace($"[CustomCommand] found on {method.DeclaringType.FullName}.{method.Name}.  Attempting to use.");
 
 			// Set the command ID if one is not set.
 			attribute.CommandId = string.IsNullOrWhiteSpace(attribute.CommandId)
-				? this.GetDefaultCommandId(method)
+				? GetDefaultCommandId(method)
 				: attribute.CommandId;
 
 			// Convert the attribute to a custom domain command.
@@ -192,7 +277,7 @@ namespace MFiles.VAF.Extensions
 				{
 					Execute = (c, o) =>
 					{
-						this.Logger?.Trace($"Command {attribute.CommandId} invoked.");
+						Logger?.Trace($"Command {attribute.CommandId} invoked.");
 						try
 						{
 							method.Invoke
@@ -203,7 +288,7 @@ namespace MFiles.VAF.Extensions
 						}
 						catch (Exception e)
 						{
-							this.Logger?.Error(e, $"Exception whilst executing {attribute.CommandId}.");
+							Logger?.Error(e, $"Exception whilst executing {attribute.CommandId}.");
 							throw;
 						}
 					},
@@ -212,17 +297,17 @@ namespace MFiles.VAF.Extensions
 					ConfirmMessage = attribute.ConfirmMessage,
 					DisplayName = attribute.Label,
 					HelpText = attribute.HelpText,
-					Locations = this.GetCommandLocationsFromMethodAttributes(method)?.ToList()
+					Locations = GetCommandLocationsFromMethodAttributes(method)?.ToList()
 						?? new List<ICommandLocation>()
 				};
 			}
 			catch (Exception e)
 			{
-				this.Logger?.Error(e, $"{method.DeclaringType.FullName}.{method.Name} cannot be used with [CustomCommand]; the method signature may not be correct.");
+				Logger?.Error(e, $"{method.DeclaringType.FullName}.{method.Name} cannot be used with [CustomCommand]; the method signature may not be correct.");
 				return null;
 			}
 		}
-		
+
 		/// <summary>
 		/// Reflects any <see cref="CommandLocationAttribute"/> instances on the given
 		/// <paramref name="method"/> then calls <see cref="CommandLocationAttribute.ToCommandLocation"/>
@@ -267,7 +352,7 @@ namespace MFiles.VAF.Extensions
 		/// <param name="type">The type to scan.</param>
 		/// <param name="instance">The instance of the object to use when calling methods.</param>
 		public virtual void Include(Type type, object instance = null)
-			=> this.Included.Add(type, instance);
+			=> Included.Add(type, instance);
 
 		/// <summary>
 		/// Adds <paramref name="type"/> and <paramref name="instance"/> to the list of items
@@ -276,7 +361,7 @@ namespace MFiles.VAF.Extensions
 		/// <typeparam name="TType">The type to scan.</typeparam>
 		/// <param name="instance">The instance of the object to use when calling methods.</param>
 		public virtual void Include<TType>(TType instance)
-			=> this.Include
+			=> Include
 			(
 				instance?.GetType() ?? throw new ArgumentNullException(nameof(instance)),
 				instance
@@ -289,34 +374,10 @@ namespace MFiles.VAF.Extensions
 		/// <param name="instance">The instance of the object to scan and use when calling methods.</param>
 		/// <exception cref="ArgumentNullException">Thrown when <paramref name="instance"/> is null.</exception>
 		public virtual void Include(object instance)
-			=> this.Include
+			=> Include
 			(
 				instance?.GetType() ?? throw new ArgumentNullException(nameof(instance)),
 				instance
 			);
-	}
-
-	/// <summary>
-	/// An implementation of <see cref="ICustomDomainCommandResolver"/> that 
-	/// can be used to return custom domain commands from multiple other instances
-	/// of <see cref="ICustomDomainCommandResolver"/>.
-	/// </summary>
-	public class AggregatedCustomDomainCommandResolver
-		: ICustomDomainCommandResolver
-	{
-		public List<ICustomDomainCommandResolver> CustomDomainCommandResolvers { get; }
-			= new List<ICustomDomainCommandResolver>();
-
-		/// <inheritdoc />
-		public virtual IEnumerable<CustomDomainCommand> GetCustomDomainCommands()
-			=> this.CustomDomainCommandResolvers?
-				.SelectMany(r => r.GetCustomDomainCommands()?.AsNotNull())?
-				.AsNotNull();
-
-		/// <inheritdoc />
-		public virtual DashboardDomainCommandEx GetDashboardDomainCommand(string commandId, DashboardCommandStyle style = DashboardCommandStyle.Link)
-			=> this.CustomDomainCommandResolvers?
-			.Select(c => c.GetDashboardDomainCommand(commandId, style))
-			.FirstOrDefault(c => c != null);
 	}
 }
