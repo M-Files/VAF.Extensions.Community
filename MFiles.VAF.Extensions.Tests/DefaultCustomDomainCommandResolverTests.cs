@@ -24,10 +24,30 @@ namespace MFiles.VAF.Extensions.Tests
 			Assert.AreEqual(false, commands.Any());
 		}
 
+		public class InvalidInstanceMethod
+		{
+			[CustomCommand("hello world")]
+			public virtual bool Method(IConfigurationRequestContext context, ClientOperations operations) 
+				=> false;
+		}
+
+		/// <summary>
+		/// If there's an invalid method we should log, not throw.
+		/// </summary>
+		[TestMethod]
+		public void InvalidMethodDoesNotThrow()
+		{
+			var resolver = new DefaultCustomDomainCommandResolver();
+			resolver.Include(new InvalidInstanceMethod());
+			var commands = resolver.GetCustomDomainCommands();
+			Assert.IsNotNull(commands);
+			Assert.AreEqual(false, commands.Any());
+		}
+
 		public class ValidInstanceMethod
 		{
 			[CustomCommand("hello world")]
-			public virtual void Method(IConfigurationRequestContext context, ClientOperations operations){}
+			public virtual void Method(IConfigurationRequestContext context, ClientOperations operations) { }
 		}
 
 		/// <summary>

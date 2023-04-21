@@ -94,7 +94,7 @@ namespace MFiles.VAF.Extensions
 
 			// Validate the method signature.
 			{
-				var invalidSignatureString = "The method signature must be `void XXXX(IConfigurationRequestContext c, ClientOperations o)`";
+				var invalidSignatureString = $"The method signature must be `void {method.Name}(IConfigurationRequestContext c, ClientOperations o)`";
 				if (typeof(void) != method.ReturnType)
 					throw new ArgumentException(invalidSignatureString, nameof(method));
 				if(method.ContainsGenericParameters)

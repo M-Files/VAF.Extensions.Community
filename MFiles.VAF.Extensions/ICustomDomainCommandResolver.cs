@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Domain.Dashboards;
+using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Dashboards;
 using System;
 using System.Collections.Generic;
@@ -39,6 +40,12 @@ namespace MFiles.VAF.Extensions
 	public class DefaultCustomDomainCommandResolver
 		: ICustomDomainCommandResolver
 	{
+		/// <summary>
+		/// Create our logger.
+		/// </summary>
+		private ILogger Logger { get; } 
+			= LogManager.GetLogger(typeof(DefaultCustomDomainCommandResolver));
+
 		/// <summary>
 		/// The default binding flags to use when finding methods.
 		/// </summary>
@@ -118,8 +125,23 @@ namespace MFiles.VAF.Extensions
 				if (null == attr)
 					continue;
 
+				this.Logger?.Trace($"[CustomCommand] found on {type.FullName}.{m.Name}.  Attempting to use.");
+
 				// Convert the attribute to a custom domain command.
-				yield return attr?.ToCustomDomainCommand(m, instance);
+				CustomDomainCommandEx command = null;
+				try
+				{
+					command = attr?.ToCustomDomainCommand(m, instance);
+				}
+				catch(Exception e)
+				{
+					this.Logger?.Error(e, $"{type.FullName}.{m.Name} cannot be used with [CustomCommand]; the method signature may not be correct.");
+				}
+				if (null != command)
+				{
+					this.Logger?.Info($"Successfully converted {type.FullName}.{m.Name} to custom command (ID: {command.ID}).");
+					yield return command;
+				}
 			}
 		}
 
