@@ -6,7 +6,7 @@ using Moq;
 using System;
 using MFiles.VAF.Configuration;
 using System.Collections.Generic;
-using MFiles.VAF.Extensions.Dashboards.Commands;
+using MFiles.VAF.Extensions.Dashboards.Commands.CustomDomainCommandResolution;
 
 namespace MFiles.VAF.Extensions.Tests
 {
@@ -22,7 +22,7 @@ namespace MFiles.VAF.Extensions.Tests
 			var proxy = new ConfigurableVaultApplicationBaseProxy<object>();
 			var resolver = proxy.GetCustomDomainCommandResolver();
 			Assert.IsNotNull(resolver);
-			Assert.IsInstanceOfType(resolver, typeof(DefaultCustomDomainCommandResolver));
+			Assert.IsInstanceOfType(resolver, typeof(DefaultCustomDomainCommandResolver<object>));
 		}
 	}
 
