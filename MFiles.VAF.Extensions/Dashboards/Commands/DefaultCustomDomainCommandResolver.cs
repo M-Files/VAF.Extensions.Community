@@ -134,6 +134,24 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 				?? Enumerable.Empty<CustomDomainCommand>();
 		}
 
+		protected virtual string GetImportPackageDomainCommandId(Type type, ReplicationPackageAttribute attribute)
+		{
+			if (null == type)
+				throw new ArgumentNullException(nameof(type));
+			if (null == attribute)
+				throw new ArgumentNullException(nameof(attribute));
+			return $"{type.FullName}-{attribute.PackagePath}-Import";
+		}
+
+		protected virtual string GetPreviewPackageDomainCommandId(Type type, ReplicationPackageAttribute attribute)
+		{
+			if (null == type)
+				throw new ArgumentNullException(nameof(type));
+			if (null == attribute)
+				throw new ArgumentNullException(nameof(attribute));
+			return $"{type.FullName}-{attribute.PackagePath}-Preview";
+		}
+
 		/// <summary>
 		/// Gets import-package commands from the given <paramref name="type"/>.
 		/// </summary>
@@ -154,6 +172,13 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			// Return commands as appropriate.
 			foreach (var attribute in attributes)
 			{
+
+				// Set the command IDs.
+				if (string.IsNullOrWhiteSpace(attribute.ImportCommandId))
+					attribute.ImportCommandId = this.GetImportPackageDomainCommandId(type, attribute);
+				if (string.IsNullOrWhiteSpace(attribute.PreviewCommandId))
+					attribute.PreviewCommandId = this.GetPreviewPackageDomainCommandId(type, attribute);
+
 				// Generate the import command.
 				var importCommand = new ImportReplicationPackageDashboardCommand<TSecureConfiguration>
 				(
@@ -184,6 +209,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 				{
 					Blocking = true
 				};
+				importCommand.PreviewCommand = previewCommand;
 				yield return previewCommand;
 			}
 		}

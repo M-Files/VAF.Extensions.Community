@@ -53,6 +53,8 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 		/// </summary>
 		public string TaskDisplayName { get; set; } = "Import missing vault structure";
 
+		public PreviewReplicationPackageDashboardCommand<TConfiguration> PreviewCommand { get; set; }
+
 		/// <summary>
 		/// Creates a command which, when clicked, will import a replication package.
 		/// </summary>
