@@ -1,5 +1,5 @@
 ﻿using MFiles.VAF.Configuration.AdminConfigurations;
-using MFiles.VAF.Extensions.Dashboards.Commands;
+using MFiles.VAF.Extensions.Dashboards.Commands.CustomDomainCommandResolution;
 using System;
 using System.Collections.Generic;
 using System.Linq;

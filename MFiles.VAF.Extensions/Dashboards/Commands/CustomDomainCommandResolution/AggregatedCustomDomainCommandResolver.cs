@@ -3,7 +3,7 @@ using MFiles.VAF.Configuration.Domain.Dashboards;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MFiles.VAF.Extensions.Dashboards.Commands
+namespace MFiles.VAF.Extensions.Dashboards.Commands.CustomDomainCommandResolution
 {
 	/// <summary>
 	/// An implementation of <see cref="ICustomDomainCommandResolver"/> that 

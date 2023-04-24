@@ -1,9 +1,6 @@
-﻿using MFiles.VAF.AppTasks;
-using MFiles.VAF.Configuration.AdminConfigurations;
-using MFiles.VAF.Configuration.Domain.Dashboards;
+﻿using MFiles.VAF.Configuration.AdminConfigurations;
 using MFiles.VAF.Configuration.Interfaces.Domain;
 using MFiles.VAF.Configuration.Logging;
-using MFiles.VAF.Extensions.Dashboards;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
@@ -11,223 +8,20 @@ using System.Linq;
 using System.Reflection;
 using static MFiles.VAF.Configuration.ResourceEditor.ResourceEditorPlugin;
 
-namespace MFiles.VAF.Extensions.Dashboards.Commands
+namespace MFiles.VAF.Extensions.Dashboards.Commands.CustomDomainCommandResolution
 {
-
 	/// <summary>
 	/// A default implementation of <see cref="ICustomDomainCommandResolver"/>
 	/// which uses reflection to find methods decorated with <see cref="CustomCommandAttribute"/>.
 	/// </summary>
-	public class DefaultCustomDomainCommandResolver<TSecureConfiguration>
-		: DefaultCustomDomainCommandResolver
-		where TSecureConfiguration : class, new()
-	{
-
-		/// <summary>
-		/// The vault application that this resolver is running within.
-		/// </summary>
-		protected ConfigurableVaultApplicationBase<TSecureConfiguration> VaultApplication { get; }
-
-		/// <summary>
-		/// Creates an instance of <see cref="DefaultCustomDomainCommandResolver{TSecureConfiguration}"/>
-		/// and includes the provided <paramref name="vaultApplication"/> in the list of things to resolve against.
-		/// </summary>
-		/// <param name="vaultApplication">The vault application this is running within.</param>
-		/// <exception cref="ArgumentNullException">If <paramref name="vaultApplication"/> is <see langword="null"/>.</exception>
-		public DefaultCustomDomainCommandResolver(ConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication)
-			: base()
-		{
-			this.VaultApplication = vaultApplication
-				?? throw new ArgumentNullException(nameof(vaultApplication));
-			this.Include(this.VaultApplication);
-		}
-
-		/// <inheritdoc />
-		public override IEnumerable<CustomDomainCommand> GetCustomDomainCommands()
-		{
-			// Return the base commands.
-			foreach (var c in base.GetCustomDomainCommands()?.AsNotNull())
-				yield return c;
-
-			// Return the command related to the background operation approach.
-			foreach (var c in GetTaskQueueBackgroundOperationRunCommands()?.AsNotNull())
-				yield return c;
-
-			// Return the commands associated with downloading logs from the default file target.
-			foreach (var c in GetDefaultLogTargetDownloadCommands()?.AsNotNull())
-				yield return c;
-
-			// Return the commands related to the VAF 2.3+ attribute-based approach.
-			foreach (var c in GetTaskQueueRunCommands()?.AsNotNull())
-				yield return c;
-
-			// Get any package import commands.
-			foreach (var c in this.GetImportPackageDomainCommands())
-				yield return c;
-
-		}
-
-		/// <summary>
-		/// Returns the commands associated with downloading logs from the default file target.
-		/// </summary>
-		/// <returns></returns>
-		protected virtual IEnumerable<CustomDomainCommand> GetDefaultLogTargetDownloadCommands()
-		{
-			// One to allow them to select which logs...
-			yield return ShowSelectLogDownloadDashboardCommand.Create();
-
-			// ...and one that actually does the collation/download.
-			yield return DownloadSelectedLogsDashboardCommand.Create();
-
-			// Allow the user to see the latest log entries.
-			yield return ShowLatestLogEntriesDashboardCommand.Create();
-			yield return RetrieveLatestLogEntriesCommand.Create();
-		}
-
-		/// <summary>
-		/// Returns the commands associated with manually running task queue background operations.
-		/// </summary>
-		/// <returns></returns>
-		protected virtual IEnumerable<CustomDomainCommand> GetTaskQueueBackgroundOperationRunCommands()
-		{
-			// Sanity.
-			if (null == VaultApplication)
-				yield break;
-
-			// Get the background operations that have a run command.
-			// Note: this should be all of them.
-			foreach (var c in
-				GetType()
-				.GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager<TSecureConfiguration>>(VaultApplication)
-				.SelectMany(tqbom => tqbom.BackgroundOperations)
-				.AsEnumerable()
-				.Select(bo => bo.Value?.DashboardRunCommand)
-				.Where(c => null != c))
-				yield return c;
-		}
-
-		/// <summary>
-		/// Returns the commands associated with manually running task queue background operations.
-		/// </summary>
-		/// <returns></returns>
-		protected virtual IEnumerable<CustomDomainCommand> GetTaskQueueRunCommands()
-		{
-			// Sanity.
-			if (null == VaultApplication?.TaskManager)
-				yield break;
-			if (null == VaultApplication?.TaskQueueResolver)
-				yield break;
-
-			// Return the commands related to the VAF 2.3+ attribute-based approach.
-			foreach (var c in VaultApplication?.TaskManager?.GetTaskQueueRunCommands(VaultApplication.TaskQueueResolver)?.AsNotNull())
-				yield return c;
-		}
-
-		/// <summary>
-		/// Gets import-package commands from all included types.
-		/// </summary>
-		/// <returns></returns>
-		protected virtual IEnumerable<CustomDomainCommand> GetImportPackageDomainCommands()
-		{
-			return this.Included?
-				.SelectMany(t => this.GetImportPackageDomainCommandsFromType(t.Key, t.Value))
-				?? Enumerable.Empty<CustomDomainCommand>();
-		}
-
-		protected virtual string GetImportPackageDomainCommandId(Type type, ReplicationPackageAttribute attribute)
-		{
-			if (null == type)
-				throw new ArgumentNullException(nameof(type));
-			if (null == attribute)
-				throw new ArgumentNullException(nameof(attribute));
-			return $"{type.FullName}-{attribute.PackagePath}-Import";
-		}
-
-		protected virtual string GetPreviewPackageDomainCommandId(Type type, ReplicationPackageAttribute attribute)
-		{
-			if (null == type)
-				throw new ArgumentNullException(nameof(type));
-			if (null == attribute)
-				throw new ArgumentNullException(nameof(attribute));
-			return $"{type.FullName}-{attribute.PackagePath}-Preview";
-		}
-
-		/// <summary>
-		/// Gets import-package commands from the given <paramref name="type"/>.
-		/// </summary>
-		/// <param name="type">The type to load the commands from.</param>
-		/// <param name="instance">The instance of the type.</param>
-		/// <returns>Any commands exposed via attributes.</returns>
-		protected virtual IEnumerable<CustomDomainCommand> GetImportPackageDomainCommandsFromType(Type type, object instance)
-		{
-			// Sanity.
-			if (null == type)
-				yield break;
-
-			// Get all [ReplicationPackageAttributes] on the class.
-			var attributes = type.GetCustomAttributes<ReplicationPackageAttribute>();
-			if ((attributes?.Count() ?? 0) == 0)
-				yield break;
-
-			// Return commands as appropriate.
-			foreach (var attribute in attributes)
-			{
-
-				// Set the command IDs.
-				if (string.IsNullOrWhiteSpace(attribute.ImportCommandId))
-					attribute.ImportCommandId = this.GetImportPackageDomainCommandId(type, attribute);
-				if (string.IsNullOrWhiteSpace(attribute.PreviewCommandId))
-					attribute.PreviewCommandId = this.GetPreviewPackageDomainCommandId(type, attribute);
-
-				// Generate the import command.
-				var importCommand = new ImportReplicationPackageDashboardCommand<TSecureConfiguration>
-				(
-					this.VaultApplication,
-					attribute.ImportCommandId,
-					attribute.ImportLabel,
-					attribute.PackagePath
-				)
-				{
-					Blocking = true,
-					RequiresImporting = true
-				};
-				yield return importCommand;
-
-				// Should we also do a preview command?
-				if (!attribute.PreviewPackageBeforeImport)
-					continue;
-
-				// Create the preview command.
-				var previewCommand = new PreviewReplicationPackageDashboardCommand<TSecureConfiguration>
-				(
-					this.VaultApplication,
-					attribute.PreviewCommandId,
-					attribute.PreviewLabel,
-					attribute.PackagePath,
-					importCommand
-				)
-				{
-					Blocking = true
-				};
-				importCommand.PreviewCommand = previewCommand;
-				yield return previewCommand;
-			}
-		}
-
-	}
-
-	/// <summary>
-	/// A default implementation of <see cref="ICustomDomainCommandResolver"/>
-	/// which uses reflection to find methods decorated with <see cref="CustomCommandAttribute"/>.
-	/// </summary>
-	public class DefaultCustomDomainCommandResolver
-		: ICustomDomainCommandResolver
+	public class AttributeCustomDomainCommandResolver
+		: CustomDomainCommandResolverBase
 	{
 		/// <summary>
 		/// Create our logger.
 		/// </summary>
 		private ILogger Logger { get; }
-			= LogManager.GetLogger(typeof(DefaultCustomDomainCommandResolver));
+			= LogManager.GetLogger(typeof(AttributeCustomDomainCommandResolver));
 
 		/// <summary>
 		/// The default binding flags to use when finding methods.
@@ -247,36 +41,22 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 		/// </summary>
 		protected Dictionary<Type, object> Included { get; } = new Dictionary<Type, object>();
 
-		/// <inheritdoc />
-		public DashboardDomainCommandEx GetDashboardDomainCommand
-		(
-			string commandId,
-			DashboardCommandStyle style = default
-		)
+		/// <summary>
+		/// Creates an instance of <see cref="AttributeCustomDomainCommandResolver{TSecureConfiguration}"/>
+		/// and includes the provided <paramref name="vaultApplication"/> in the list of things to resolve against.
+		/// </summary>
+		/// <param name="vaultApplication">The vault application this is running within.</param>
+		/// <exception cref="ArgumentNullException">If <paramref name="vaultApplication"/> is <see langword="null"/>.</exception>
+		public AttributeCustomDomainCommandResolver(params object[] include)
+			: base()
 		{
-			// Sanity.
-			if (string.IsNullOrWhiteSpace(commandId))
-				return null;
-
-			// Try to get the domain command for this method.
-			var command = GetCustomDomainCommands()
-				.FirstOrDefault(c => c.ID == commandId);
-
-			// Sanity.
-			if (null == command)
-				return null;
-
-			// Return the command.
-			return new DashboardDomainCommandEx
-			{
-				DomainCommandID = command.ID,
-				Title = command.DisplayName,
-				Style = style
-			};
+			if (null != include)
+				foreach (var i in include.Where(i => i != null))
+					Include(i);
 		}
 
 		/// <inheritdoc />
-		public virtual IEnumerable<CustomDomainCommand> GetCustomDomainCommands()
+		public override IEnumerable<CustomDomainCommand> GetCustomDomainCommands()
 		{
 			// Get everything from the included data.
 			return Included?
