@@ -24,7 +24,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands.CustomDomainCommandResolutio
 		/// <param name="vaultApplication">The vault application this is running within.</param>
 		/// <exception cref="ArgumentNullException">If <paramref name="vaultApplication"/> is <see langword="null"/>.</exception>
 		public ImportPackageCustomDomainCommandResolver(ConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication)
-			: base()
+			: base(vaultApplication)
 		{
 			this.VaultApplication = vaultApplication
 				?? throw new ArgumentNullException(nameof(vaultApplication));
