@@ -363,7 +363,7 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 				row.AddCell(Resources.Licensing.ApplicationDetailsPanel_RowHeaders_Publisher, DashboardTableCellType.Header)
 					.HeaderStyles
 					.Remove("border-bottom");
-				row.AddCell(ApplicationDefinition.Publisher.ToString());
+				row.AddCell(ApplicationDefinition.Publisher.EscapeXmlForDashboard());
 			}
 			if (this.ShowCopyright && false == string.IsNullOrWhiteSpace(ApplicationDefinition.Copyright))
 			{
@@ -371,7 +371,7 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 				row.AddCell(Resources.Licensing.ApplicationDetailsPanel_RowHeaders_Copyright, DashboardTableCellType.Header)
 					.HeaderStyles
 					.Remove("border-bottom");
-				row.AddCell($"&copy; {ApplicationDefinition.Copyright}");
+				row.AddCell($"&copy; {ApplicationDefinition.Copyright.EscapeXmlForDashboard()}");
 			}
 
 			innerContent.Add(table);

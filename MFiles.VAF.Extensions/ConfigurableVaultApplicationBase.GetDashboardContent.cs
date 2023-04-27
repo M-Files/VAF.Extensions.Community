@@ -41,9 +41,21 @@ namespace MFiles.VAF.Extensions
 		public override string GetDashboardContent(IConfigurationRequestContext context)
 		{
 			// Create a new dashboard.
-			var dashboard = this.CreateStatusDashboard();
-			if (null == dashboard)
-				return "";
+			StatusDashboard dashboard;
+			try
+			{
+				dashboard = this.CreateStatusDashboard();
+				if (null == dashboard)
+					return "";
+			}
+			catch(Exception e)
+			{
+				// Log the exception and render an exception panel.
+				var exception = new Exception("Could not create status dashboard", e);
+				FormattableString message = $"Could not create status dashboard.";
+				this.Logger?.Error(e, message);
+				return new ExceptionDashboardPanel(exception, $"Could not create status dashboard")?.ToString();
+			}
 
 			// Add all content in turn.
 			foreach (var content in this.GetStatusDashboardRootItems(context) ?? Enumerable.Empty<IDashboardContent>())
@@ -51,7 +63,18 @@ namespace MFiles.VAF.Extensions
 					dashboard.AddContent(content);
 
 			// Return the dashboard.
-			return dashboard.ToString();
+			try
+			{
+				return dashboard.ToString();
+			}
+			catch (Exception e)
+			{
+				// Log the exception and render an exception panel.
+				var exception = new Exception("Could not render dashboard to a string", e);
+				FormattableString message = $"Could not render dashboard to a string.";
+				this.Logger?.Error(e, message);
+				return new ExceptionDashboardPanel(exception, $"Could not render dashboard")?.ToString();
+			}
 		}
 
 		/// <summary>
