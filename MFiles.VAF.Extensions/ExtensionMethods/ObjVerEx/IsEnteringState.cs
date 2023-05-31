@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MFiles.VAF.Extensions.ExtensionMethods
+namespace MFiles.VAF.Extensions
 {
 	public static partial class ObjVerExExtensionMethods
 	{
