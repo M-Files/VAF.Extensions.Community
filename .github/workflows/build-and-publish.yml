@@ -60,5 +60,6 @@ jobs:
         name: ${{ env.versionNumber }}
         tag: ${{ env.versionNumber }}
         draft: false
+        makeLatest: true
         omitBody: true
-        prerelease: ${{ env.versionSuffix == '' }}
+        prerelease: false
