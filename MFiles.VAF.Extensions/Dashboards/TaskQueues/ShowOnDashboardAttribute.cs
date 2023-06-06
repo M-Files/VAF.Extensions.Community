@@ -98,9 +98,15 @@ namespace MFiles.VAF.Extensions.Dashboards
 		public string RunCommandDisplayText { get; set; } = ShowOnDashboardAttribute.DefaultRunCommandDisplayText;
 
 		/// <summary>
-		/// Used to determine the order in which the task processors are shown on the dashboard
+		/// The default value for the <see cref="Order"/> property.
 		/// </summary>
-		public int Order { get; set; } = 100;
+		protected internal const int DefaultOrder = 100;
+
+		/// <summary>
+		/// Used to determine the order in which the task processors are shown on the dashboard.
+		/// Defaults to <see cref="DefaultOrder"/>.
+		/// </summary>
+		public int Order { get; set; } = ShowOnDashboardAttribute.DefaultOrder;
 
 		public ShowOnDashboardAttribute(string name)
 		{

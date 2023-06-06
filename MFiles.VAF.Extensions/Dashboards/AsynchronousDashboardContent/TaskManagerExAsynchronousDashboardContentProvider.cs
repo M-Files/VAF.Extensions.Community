@@ -198,7 +198,7 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 							Description = showOnDashboardAttribute?.Description,
 							Commands = commands,
 							TasksInQueue = waitingTasks,
-							Order = showOnDashboardAttribute?.Order ?? 100,
+							Order = showOnDashboardAttribute?.Order ?? ShowOnDashboardAttribute.DefaultOrder,
 							RecurrenceConfiguration = recurrenceConfiguration
 						},
 						// Get known executions (prior, running and future).
