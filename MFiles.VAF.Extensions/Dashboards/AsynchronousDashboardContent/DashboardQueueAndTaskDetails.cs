@@ -44,5 +44,10 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 		/// If this is a recurring process then details on the recurring frequency.
 		/// </summary>
 		public IRecurrenceConfiguration RecurrenceConfiguration { get; set; }
+
+		/// <summary>
+		/// Determines the order the operations are shown on the dashboard.
+		/// </summary>
+		public int Order { get; set; }
 	}
 }
