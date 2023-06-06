@@ -63,8 +63,12 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 		/// <inheritdoc />
 		public IEnumerable<KeyValuePair<DashboardQueueAndTaskDetails, IEnumerable<TaskInfo<TaskDirective>>>> GetAsynchronousDashboardContent()
 		{
+
+			var items = new List<KeyValuePair<DashboardQueueAndTaskDetails, IEnumerable<TaskInfo<TaskDirective>>>>();
+
 			if (null == TaskQueueResolver)
-				yield break;
+				return items;
+
 
 			foreach (var queue in TaskQueueResolver.GetQueues())
 			{
@@ -184,7 +188,7 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 						.TryGetValue(queue, processor.Type, out recurrenceConfiguration);
 
 					// Return the data.
-					yield return new KeyValuePair<DashboardQueueAndTaskDetails, IEnumerable<TaskInfo<TaskDirective>>>
+					items.Add(new KeyValuePair<DashboardQueueAndTaskDetails, IEnumerable<TaskInfo<TaskDirective>>>
 					(
 						new DashboardQueueAndTaskDetails()
 						{
@@ -194,16 +198,19 @@ namespace MFiles.VAF.Extensions.Dashboards.AsynchronousDashboardContent
 							Description = showOnDashboardAttribute?.Description,
 							Commands = commands,
 							TasksInQueue = waitingTasks,
+							Order = showOnDashboardAttribute?.Order ?? 100,
 							RecurrenceConfiguration = recurrenceConfiguration
 						},
 						// Get known executions (prior, running and future).
 						showDegraded
 							? TaskManager.GetExecutions<TaskDirective>(queue, processor.Type, MFTaskState.MFTaskStateInProgress)
 							: TaskManager.GetAllExecutions<TaskDirective>(queue, processor.Type)
-					);
+					));
 
 				}
 			}
+
+			return items.OrderBy(i => i.Key.Order);
 		}
 	}
 }
