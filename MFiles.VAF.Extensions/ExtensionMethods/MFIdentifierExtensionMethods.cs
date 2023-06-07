@@ -8,24 +8,7 @@ using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions
 {
-	public interface IObjTypeMFIdentifier
-	{
-		Type GetUnresolvedType();
-		bool Resolved { get; }
-		MFIdentifier Resolve(Vault vault, Type type, bool forceRefresh);
-		string Alias { get; } 
-		int ID { get; }
-	}
-	public class ObjTypeMFIdentifier
-		: MFIdentifier, IObjTypeMFIdentifier
-	{
-		public ObjTypeMFIdentifier() {}
-		public ObjTypeMFIdentifier(object source) : base(source) {}
-		public ObjTypeMFIdentifier(int id) : base(id) { }
-		public ObjTypeMFIdentifier(string str) : base(str) { }
-		public ObjTypeMFIdentifier(ObjID objID) : base(objID) { }
-	}
-	public static class IObjTypeMFIdentifierExtensionMethods
+	public static class MFIdentifierExtensionMethods
 	{
 		/// <summary>
 		/// Returns the <see cref="ObjType"/> for the given <paramref name="identifier"/>.
@@ -35,10 +18,11 @@ namespace MFiles.VAF.Extensions
 		/// <returns>The ID of the property definition to use for "owner" relationships.</returns>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="identifier"/> is null, or <paramref name="vault"/> is null and <paramref name="identifier"/> needs to be resolved.</exception>
 		/// <exception cref="InvalidOperationException">Thrown if <paramref name="identifier"/> does not point to an object type, or resolution was unsuccessful.</exception>
-		private static ObjType GetObjType(this IObjTypeMFIdentifier identifier, Vault vault)
+		private static ObjType GetObjType(this MFIdentifier identifier, Vault vault)
 		{
 			// Sanity.
 			identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
+			vault = vault ?? throw new ArgumentNullException(nameof(vault));
 
 			// Throw if the identifier isn't an object type.
 			{
@@ -54,7 +38,6 @@ namespace MFiles.VAF.Extensions
 			if (false == identifier.Resolved)
 			{
 				// We need a vault to resolve.
-				vault = vault ?? throw new ArgumentNullException(nameof(vault));
 				identifier.Resolve(vault, typeof(ObjType), forceRefresh: false);
 
 				// Throw if we can't resolve.
@@ -74,7 +57,7 @@ namespace MFiles.VAF.Extensions
 		/// <returns>The ID of the property definition to use for "owner" relationships.</returns>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="identifier"/> is null, or <paramref name="vault"/> is null and <paramref name="identifier"/> needs to be resolved.</exception>
 		/// <exception cref="InvalidOperationException">Thrown if <paramref name="identifier"/> does not point to an object type, or resolution was unsuccessful.</exception>
-		public static MFIdentifier GetOwnerPropertyDef(this IObjTypeMFIdentifier identifier, Vault vault)
+		public static MFIdentifier GetOwnerPropertyDef(this MFIdentifier identifier, Vault vault)
 		{
 			// Sanity.
 			identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
@@ -100,7 +83,7 @@ namespace MFiles.VAF.Extensions
 		/// <returns>The ID of the property definition to use for "default" relationships.</returns>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="identifier"/> is null, or <paramref name="vault"/> is null and <paramref name="identifier"/> needs to be resolved.</exception>
 		/// <exception cref="InvalidOperationException">Thrown if <paramref name="identifier"/> does not point to an object type, or resolution was unsuccessful.</exception>
-		public static MFIdentifier GetDefaultPropertyDef(this IObjTypeMFIdentifier identifier, Vault vault)
+		public static MFIdentifier GetDefaultPropertyDef(this MFIdentifier identifier, Vault vault)
 		{
 			// Sanity.
 			identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
@@ -126,7 +109,7 @@ namespace MFiles.VAF.Extensions
 		/// <returns>The ID of the owning type, or null if this type does not have an owner.</returns>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="identifier"/> is null, or <paramref name="vault"/> is null and <paramref name="identifier"/> needs to be resolved.</exception>
 		/// <exception cref="InvalidOperationException">Thrown if <paramref name="identifier"/> does not point to an object type, or resolution was unsuccessful.</exception>
-		public static int? GetOwnerType(this IObjTypeMFIdentifier identifier, Vault vault)
+		public static int? GetOwnerType(this MFIdentifier identifier, Vault vault)
 		{
 			// Sanity.
 			identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
