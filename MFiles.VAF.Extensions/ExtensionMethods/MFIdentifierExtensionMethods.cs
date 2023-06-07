@@ -60,12 +60,9 @@ namespace MFiles.VAF.Extensions
 		public static MFIdentifier GetOwnerPropertyDef(this MFIdentifier identifier, Vault vault)
 		{
 			// Sanity.
-			identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
-
-			// Try to get the object type.
 			try
 			{
-				return identifier
+				return identifier?
 					.GetObjType(vault)
 					.OwnerPropertyDef;
 			}
@@ -85,13 +82,10 @@ namespace MFiles.VAF.Extensions
 		/// <exception cref="InvalidOperationException">Thrown if <paramref name="identifier"/> does not point to an object type, or resolution was unsuccessful.</exception>
 		public static MFIdentifier GetDefaultPropertyDef(this MFIdentifier identifier, Vault vault)
 		{
-			// Sanity.
-			identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
-
 			// Try to get the object type.
 			try
 			{
-				return identifier
+				return identifier?
 					.GetObjType(vault)
 					.DefaultPropertyDef;
 			}
@@ -111,13 +105,10 @@ namespace MFiles.VAF.Extensions
 		/// <exception cref="InvalidOperationException">Thrown if <paramref name="identifier"/> does not point to an object type, or resolution was unsuccessful.</exception>
 		public static int? GetOwnerType(this MFIdentifier identifier, Vault vault)
 		{
-			// Sanity.
-			identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
-
 			// Try to get the object type.
 			try
 			{
-				var objType = identifier
+				var objType = identifier?
 					.GetObjType(vault);
 				return objType.HasOwnerType
 					? (int?)objType.OwnerType : null;
