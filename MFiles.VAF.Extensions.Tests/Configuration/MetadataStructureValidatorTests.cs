@@ -89,7 +89,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		class Configuration
 		{
 			[DataMember]
-			[MFObjType]
+			[MFObjType(AllowEmpty = true)]
 			public MFIdentifier ObjectType { get; set; }
 
 			[DefaultPropertyDef(nameof(ObjectType))]
@@ -97,6 +97,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 
 			[OwnerPropertyDef(nameof(ObjectType))]
 			public MFIdentifier OwnerPropertyDef { get; set; }
+
+			[DataMember]
+			public Configuration SubConfiguration { get; set; }
 
 		}
 
@@ -166,6 +169,95 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 			// Check that our properties are empty.
 			Assert.IsNull(config.DefaultPropertyDef?.ID);
 			Assert.IsNull(config.OwnerPropertyDef?.ID);
+		}
+
+		[TestMethod]
+		public void SubConfiguration_HappyPath()
+		{
+			// The config should have a single valid object type defined.
+			// The default/owner properties will be driven from this.
+			var config = new Configuration()
+			{
+				SubConfiguration = new Configuration()
+				{
+					ObjectType = "hello_world"
+				}
+			};
+			Assert.IsNull(config.SubConfiguration.DefaultPropertyDef);
+			Assert.IsNull(config.SubConfiguration.OwnerPropertyDef);
+
+			// Set up the required mocks and other constructs.
+			var vaultMock = this.GetVaultMock();
+			var validator = this.GetMetadataStructureValidator();
+			var validationResult = new ValidationResultForValidation();
+
+			// Check that the overall validation passed.
+			Assert.IsTrue
+			(
+				validator.ValidateItem
+				(
+					vaultMock.Object,
+					"MyConfigId",
+					config,
+					validationResult
+				)
+			);
+
+			// Check that we got our properties populated.
+			Assert.AreEqual(123, config.SubConfiguration.DefaultPropertyDef?.ID);
+			Assert.AreEqual(321, config.SubConfiguration.OwnerPropertyDef?.ID);
+		}
+
+		[DataContract]
+		class ConfigurationWithField
+		{
+			[DataMember]
+			[MFObjType(AllowEmpty = true)]
+			public MFIdentifier ObjectType;
+
+			[DefaultPropertyDef(nameof(ObjectType))]
+			public MFIdentifier DefaultPropertyDef;
+
+			[OwnerPropertyDef(nameof(ObjectType))]
+			public MFIdentifier OwnerPropertyDef;
+
+			[DataMember]
+			public ConfigurationWithField SubConfiguration;
+
+		}
+
+		[TestMethod]
+		public void HappyPath_WithField()
+		{
+			// The config should have a single valid object type defined.
+			// The default/owner properties will be driven from this.
+			var config = new ConfigurationWithField()
+			{
+				ObjectType = "hello_world"
+			};
+			Assert.IsNull(config.DefaultPropertyDef);
+			Assert.IsNull(config.OwnerPropertyDef);
+
+			// Set up the required mocks and other constructs.
+			var vaultMock = this.GetVaultMock();
+			var validator = this.GetMetadataStructureValidator();
+			var validationResult = new ValidationResultForValidation();
+
+			// Check that the overall validation passed.
+			Assert.IsTrue
+			(
+				validator.ValidateItem
+				(
+					vaultMock.Object,
+					"MyConfigId",
+					config,
+					validationResult
+				)
+			);
+
+			// Check that we got our properties populated.
+			Assert.AreEqual(123, config.DefaultPropertyDef?.ID);
+			Assert.AreEqual(321, config.OwnerPropertyDef?.ID);
 		}
 	}
 }
