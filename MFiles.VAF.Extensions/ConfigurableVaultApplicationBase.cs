@@ -20,6 +20,8 @@ using MFiles.VAF.Extensions.Dashboards.LoggingDashboardContent;
 using MFiles.VAF.Extensions.Dashboards.DevelopmentDashboardContent;
 using System.Threading.Tasks;
 using MFiles.VAF.Extensions.Logging;
+using MFiles.VAF.Configuration;
+using MFiles.VAF.Extensions.Configuration;
 
 namespace MFiles.VAF.Extensions
 {
@@ -127,6 +129,12 @@ namespace MFiles.VAF.Extensions
 #endif
 
 			base.StartApplication();
+		}
+
+		/// <inheritdoc />
+		protected override IMetadataStructureValidator CreateMetadataStructureValidator()
+		{
+			return new MFiles.VAF.Extensions.Configuration.MetadataStructureValidator();
 		}
 	}
 }
