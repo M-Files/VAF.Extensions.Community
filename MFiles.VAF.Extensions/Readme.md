@@ -666,3 +666,38 @@ public class VaultApplication
 	}
 }
 ```
+
+## Getting the owner or default property definitions of a configured object type
+
+It is sometimes important to be able to identify the automatically-generated "default" and "owner" property definitions for a given configured object type. These can be retrieved via the API, but boilerplate code is required everywhere. It should be easy for the developer to retrieve these properties.
+
+The `[DefaultPropertyDef]` and `[OwnerPropertyDef]` attributes can be used to easily find these items.  In the example below the ObjectType reference can be configured, and the default and owner properties simply refer to it.  Note that these properties will be null if the object type is not correctly configured.
+
+**Note: The default and owner property definitions do not have `[DataMember]` nor `[MFPropertyDef]` attributes as they are not expected to be configured by the vault administrator.**
+
+```csharp
+[DataContract]
+public class Configuration
+{
+	[DataMember]
+	[MFObjType]
+	public MFIdentifier ObjectType { get; set; }
+
+	[DefaultPropertyDef(nameof(ObjectType))]
+	public MFIdentifier DefaultPropertyDef { get; set; }
+
+	[OwnerPropertyDef(nameof(ObjectType))]
+	public MFIdentifier OwnerPropertyDef { get; set; }
+
+}
+
+public class VaultApplication
+	: MFiles.VAF.Core.ConfigurableVaultApplicationBase<Configuration>
+{
+	[VaultExtensionMethod("MyExtensionMethod")]
+	public void MyExtensionMethod(EventHandlerEnvironment env)
+	{
+		Console.WriteLine($"Configured object type: {this.Configuration.ObjectType?.ID} (default: {this.Configuration.DefaultPropertyDef?.ID}, owner: {this.Configuration.OwnerPropertyDef?.ID})");
+	}
+}
+```
