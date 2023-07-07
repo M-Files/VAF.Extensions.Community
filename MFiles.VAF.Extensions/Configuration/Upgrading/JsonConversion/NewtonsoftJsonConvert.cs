@@ -299,7 +299,13 @@ namespace MFiles.VAF.Extensions
 			}
 		}
 
-
+		/// <summary>
+		/// A converter that allows JSON for known types (<see cref="JsonConvert.LeaveJsonAloneTypes"/>)
+		/// to be round-tripped through deserialization/serialization, rather than the deserialization/serialization
+		/// process potentially affecting them.
+		/// Used to ensure that classes that cannot be deserialized/serialized in .NET
+		/// (such as <see cref="SearchConditionsJA"/>) are not changed.
+		/// </summary>
 		internal class LeaveJsonAloneConverter
 			: JsonConverterBase
 		{
