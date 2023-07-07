@@ -24,7 +24,8 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		public static List<string> DefaultValueSkippedTypes { get; } = new List<string>()
 		{
-			"MFiles.VAF.Configuration.JsonAdaptor.JsonValueAdaptor"
+			"MFiles.VAF.Configuration.JsonAdaptor.TypedValueJA",
+			"MFiles.VAF.Configuration.JsonAdaptor.ExpressionJA"
 		};
 	}
 }

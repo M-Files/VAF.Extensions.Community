@@ -1,15 +1,19 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VAF.Configuration.JsonAdaptor;
 using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
+using MFilesAPI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
+using static MFiles.VAF.Extensions.NewtonsoftJsonConvert.LeaveJsonAloneConverter;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace MFiles.VAF.Extensions
@@ -71,6 +75,12 @@ namespace MFiles.VAF.Extensions
 						return value;
 				}
 
+				// If it's our safe version then always output it.
+				{
+					if (value is SearchConditionsJAEx)
+						return value;
+				}
+
 				// Try to get the runtime default value.
 				Type type = null;
 				try
@@ -113,13 +123,15 @@ namespace MFiles.VAF.Extensions
 							{
 								// It's a prefix.
 								var prefix = s.Substring(0, s.Length - 1);
-								if (type.FullName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+								if (type.FullName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+									|| this.memberInfo.DeclaringType.FullName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
 									return value;
 							}
 							else
 							{
 								// Exact match.
-								if (type.FullName.Equals(s, StringComparison.OrdinalIgnoreCase))
+								if (type.FullName.Equals(s, StringComparison.OrdinalIgnoreCase)
+									|| this.memberInfo.DeclaringType.FullName.Equals(s, StringComparison.OrdinalIgnoreCase))
 									return value;
 							}
 						}
@@ -292,6 +304,52 @@ namespace MFiles.VAF.Extensions
 			}
 		}
 
+		internal class LeaveJsonAloneConverter
+			: JsonConverterBase
+		{
+			internal interface IMustBeLeftAlone
+			{
+				string RawJSON { get; set; }
+			}
+			internal class SearchConditionsJAEx 
+				: SearchConditionsJA, IMustBeLeftAlone
+			{
+				public string RawJSON { get; set; }
+			}
+			public override bool CanConvert(Type objectType)
+			{
+				return objectType == typeof(SearchConditionsJA) 
+					|| objectType == typeof(SearchConditionsJAEx);
+			}
+
+			public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+			{
+				switch (reader.TokenType)
+				{
+					case JsonToken.None:
+						// Try again.
+						return reader.Read()
+							? this.ReadJson(reader, objectType, existingValue, serializer)
+							: default;
+				}
+
+				return new SearchConditionsJAEx()
+				{
+					RawJSON = JRaw.Create(reader)?.ToString()
+				};
+			}
+
+			public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+			{
+				if (!(value is IMustBeLeftAlone s))
+				{
+					base.WriteJson(writer, value, serializer);
+					return;
+				}
+				writer.WriteRawValue(s.RawJSON);
+			}
+		}
+
 		/// <summary>
 		/// An implementation of <see cref="DefaultContractResolver"/>
 		/// that replaces value providers with instances of <see cref="DefaultValueAwareValueProvider"/>.
@@ -406,6 +464,14 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		public virtual JsonSerializerSettings GetDefaultJsonSerializerSettings()
 		{
+			var defaults = Newtonsoft.Json.JsonConvert.DefaultSettings?.Invoke()
+				?? new JsonSerializerSettings();
+			defaults.NullValueHandling = NullValueHandling.Ignore;
+			defaults.Converters.Add(new StringEnumConverterHandlesIntegers() { AllowIntegerValues = true });
+			defaults.Converters.Add(new DateTimeConverter());
+			defaults.Converters.Add(new LeaveJsonAloneConverter());
+			defaults.ContractResolver = new DefaultValueAwareContractResolver(this);
+			return defaults;
 			return new JsonSerializerSettings()
 			{
 				DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Include,
