@@ -75,12 +75,6 @@ namespace MFiles.VAF.Extensions
 						return value;
 				}
 
-				// If it's our safe version then always output it.
-				{
-					if (value is SearchConditionsJAEx)
-						return value;
-				}
-
 				// Try to get the runtime default value.
 				Type type = null;
 				try
@@ -307,19 +301,16 @@ namespace MFiles.VAF.Extensions
 		internal class LeaveJsonAloneConverter
 			: JsonConverterBase
 		{
-			internal interface IMustBeLeftAlone
-			{
-				string RawJSON { get; set; }
-			}
-			internal class SearchConditionsJAEx 
-				: SearchConditionsJA, IMustBeLeftAlone
-			{
-				public string RawJSON { get; set; }
-			}
+			private static readonly Dictionary<object, string> RawJsonLookup
+				= new Dictionary<object, string>();
 			public override bool CanConvert(Type objectType)
 			{
-				return objectType == typeof(SearchConditionsJA) 
-					|| objectType == typeof(SearchConditionsJAEx);
+				var t = objectType.FullName;
+				return JsonConvert.DefaultValueSkippedTypes.Any
+				(
+					s => string.Equals(s, t, StringComparison.OrdinalIgnoreCase)
+						|| (t.Length > s.Length && s.EndsWith("*") && string.Equals(s.Substring(0, s.Length-1), t.Substring(0, s.Length-1)))
+				);
 			}
 
 			public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
@@ -333,20 +324,32 @@ namespace MFiles.VAF.Extensions
 							: default;
 				}
 
-				return new SearchConditionsJAEx()
-				{
-					RawJSON = JRaw.Create(reader)?.ToString()
-				};
+				// Get the JSON.
+				var rawJson = JRaw.Create(reader)?.ToString();
+				if (null == rawJson)
+					return null;
+
+				// Get the instance.
+				var instance = Newtonsoft.Json.JsonConvert.DeserializeObject
+				(
+					rawJson, 
+					objectType, 
+					serializer.Converters.Where(c => c != this).ToArray()
+				);
+
+				// Save the raw JSON.
+				RawJsonLookup.Add(instance, rawJson);
+				return instance;
 			}
 
 			public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
 			{
-				if (!(value is IMustBeLeftAlone s))
+				if(!RawJsonLookup.ContainsKey(value))
 				{
 					base.WriteJson(writer, value, serializer);
 					return;
 				}
-				writer.WriteRawValue(s.RawJSON);
+				writer.WriteRawValue(RawJsonLookup[value]);
 			}
 		}
 
@@ -472,18 +475,6 @@ namespace MFiles.VAF.Extensions
 			defaults.Converters.Add(new LeaveJsonAloneConverter());
 			defaults.ContractResolver = new DefaultValueAwareContractResolver(this);
 			return defaults;
-			return new JsonSerializerSettings()
-			{
-				DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Include,
-				NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
-				Formatting = Newtonsoft.Json.Formatting.Indented,
-				Converters = new List<JsonConverter>()
-					{
-						new StringEnumConverterHandlesIntegers(){ AllowIntegerValues = true },
-						new DateTimeConverter()
-					},
-				ContractResolver = new DefaultValueAwareContractResolver(this)
-			};
 		}
 
 		/// <summary>
