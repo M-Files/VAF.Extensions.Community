@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting.Messaging;
 using System.Runtime.Serialization;
 using static MFiles.VAF.Extensions.NewtonsoftJsonConvert.LeaveJsonAloneConverter;
 using static System.Net.Mime.MediaTypeNames;
@@ -298,21 +299,48 @@ namespace MFiles.VAF.Extensions
 			}
 		}
 
+
 		internal class LeaveJsonAloneConverter
 			: JsonConverterBase
 		{
+			private ILogger Logger { get; } = LogManager.GetLogger(typeof(LeaveJsonAloneConverter));
+
+			/// <summary>
+			/// A collection of the data read from the raw JSON (so it can be written back as-is).
+			/// The (deserialized) object instance is the key, and the JSON is the value.
+			/// </summary>
 			private static readonly Dictionary<object, string> RawJsonLookup
 				= new Dictionary<object, string>();
+
+			/// <inheritdoc />
+			/// <remarks>Checks whether the type exists in <see cref="JsonConvert.LeaveJsonAloneTypes"/>.</remarks>
 			public override bool CanConvert(Type objectType)
 			{
+				if (null == objectType)
+					return false;
+				this.Logger?.Trace($"Types to be left alone: {string.Join(", ", JsonConvert.LeaveJsonAloneTypes)}");
+
+				// If the type is included in the "leave json alone" collection,
+				// either explicitly or via a prefix match, then we will deal with it.
 				var t = objectType.FullName;
-				return JsonConvert.DefaultValueSkippedTypes.Any
+				var b = JsonConvert.LeaveJsonAloneTypes.Any
 				(
 					s => string.Equals(s, t, StringComparison.OrdinalIgnoreCase)
 						|| (t.Length > s.Length && s.EndsWith("*") && string.Equals(s.Substring(0, s.Length-1), t.Substring(0, s.Length-1)))
 				);
+				if (b)
+				{
+					this.Logger?.Debug($"Caching raw JSON for type {t} as it was found in the list of types to leave alone.");
+				}
+				else
+				{
+					this.Logger?.Trace($"Type {t} will be deserialized and serialized.");
+				}
+				return b;
 			}
 
+			/// <inheritdoc />
+			/// <remarks>Allows standard deserialization, but caches the raw JSON for future reference.</remarks>
 			public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
 			{
 				switch (reader.TokenType)
@@ -324,12 +352,15 @@ namespace MFiles.VAF.Extensions
 							: default;
 				}
 
-				// Get the JSON.
+				// Get the raw JSON.
 				var rawJson = JRaw.Create(reader)?.ToString();
 				if (null == rawJson)
+				{
+					this.Logger?.Warn($"Cannot cache data for {objectType.FullName} as value is null ({reader.Path}).");
 					return null;
+				}
 
-				// Get the instance.
+				// Deserialize the JSON into an instance of the expected type.
 				var instance = Newtonsoft.Json.JsonConvert.DeserializeObject
 				(
 					rawJson, 
@@ -337,18 +368,24 @@ namespace MFiles.VAF.Extensions
 					serializer.Converters.Where(c => c != this).ToArray()
 				);
 
-				// Save the raw JSON.
+				// Add the pair to the dictionary/cache and return the instance.
+				this.Logger?.Trace($"Caching JSON for {objectType.FullName} at {reader.Path}.");
 				RawJsonLookup.Add(instance, rawJson);
 				return instance;
 			}
 
+			/// <inheritdoc />
+			/// <remarks>If a cached version of the JSON exists then renders that instead,
+			/// otherwise uses the default serialization.</remarks>
 			public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
 			{
-				if(!RawJsonLookup.ContainsKey(value))
+				if(null == value || !RawJsonLookup.ContainsKey(value))
 				{
+					this.Logger?.Warn($"No data found in cache for {writer.Path}.");
 					base.WriteJson(writer, value, serializer);
 					return;
 				}
+				this.Logger?.Trace($"Cache retrieved for {value.GetType().FullName} at {writer.Path}.");
 				writer.WriteRawValue(RawJsonLookup[value]);
 			}
 		}

@@ -19,10 +19,18 @@ namespace MFiles.VAF.Extensions
 		public abstract string Serialize(object input, Type t);
 
 		/// <summary>
-		/// If these types are found then their default values are left intact
-		/// when converting the JSON.
+		/// If these types are found then their default values output when serializing
+		/// instances.
 		/// </summary>
-		public static List<string> DefaultValueSkippedTypes { get; } = new List<string>()
+		/// <remarks></remarks>
+		public static List<string> DefaultValueSkippedTypes { get; } = new List<string>();
+
+		/// <summary>
+		/// If these types are found in the JSON then the raw JSON will be maintained.
+		/// Useful for types that are not expected to go through .NET serialization
+		/// such as <see cref="VAF.Configuration.JsonAdaptor.SearchConditionsJA"/>.
+		/// </summary>
+		public static List<string> LeaveJsonAloneTypes { get; } = new List<string>()
 		{
 			"MFiles.VAF.Configuration.JsonAdaptor.SearchConditionsJA"
 		};
