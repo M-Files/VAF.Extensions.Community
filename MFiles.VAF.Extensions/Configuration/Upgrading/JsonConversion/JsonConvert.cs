@@ -19,8 +19,8 @@ namespace MFiles.VAF.Extensions
 		public abstract string Serialize(object input, Type t);
 
 		/// <summary>
-		/// If these types are found then their default values output when serializing
-		/// instances.
+		/// If these types are found then their default values are output when
+		/// serializing instances.
 		/// </summary>
 		/// <remarks></remarks>
 		public static List<string> DefaultValueSkippedTypes { get; } = new List<string>();

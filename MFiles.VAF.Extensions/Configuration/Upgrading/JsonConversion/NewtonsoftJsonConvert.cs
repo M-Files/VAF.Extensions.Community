@@ -3,7 +3,6 @@ using MFiles.VAF.Configuration.JsonAdaptor;
 using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
-using MFilesAPI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -12,10 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Remoting.Messaging;
 using System.Runtime.Serialization;
-using static MFiles.VAF.Extensions.NewtonsoftJsonConvert.LeaveJsonAloneConverter;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace MFiles.VAF.Extensions
 {
