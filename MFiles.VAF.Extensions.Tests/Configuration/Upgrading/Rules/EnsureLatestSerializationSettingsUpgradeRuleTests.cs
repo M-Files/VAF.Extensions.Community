@@ -659,7 +659,8 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
             ""conditionType"": ""equal"",
             ""expression"": {
                 ""type"": ""propertyValue"",
-                ""propertyDef"": ""{82490C2F-8FB2-423B-85B5-F4ADB214C0FD}""
+                ""propertyDef"": ""{82490C2F-8FB2-423B-85B5-F4ADB214C0FD}"",
+				""indirectionLevels"": []
             },
             ""typedValue"": {
                 ""dataType"": ""lookup"",
@@ -672,7 +673,54 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 }", rule.GetReadWriteLocationValue(vault));
 
 		}
-    
+
+		[TestMethod]
+		public void ConfigurationWithSearchConditionsJA_FileTypeSearch()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithSearchConditionsJA>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, @"{
+    ""SearchConditions"": [
+                {
+                    ""conditionType"": ""equal"",
+                    ""expression"": {
+                        ""type"": ""fileValue"",
+                        ""fileType"": ""hasFiles"",
+                        ""indirectionLevels"": []
+                    },
+                    ""typedValue"": {
+                        ""dataType"": ""boolean"",
+                        ""value"": {
+                            ""boolean"": false
+                        }
+                    }
+                }
+            ]
+}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson(@"{
+    ""SearchConditions"": [
+                {
+                    ""conditionType"": ""equal"",
+                    ""expression"": {
+                        ""type"": ""fileValue"",
+                        ""fileType"": ""hasFiles"",
+                        ""indirectionLevels"": []
+                    },
+                    ""typedValue"": {
+                        ""dataType"": ""boolean"",
+                        ""value"": {
+                            ""boolean"": false
+                        }
+                    }
+                }
+            ]
+}", rule.GetReadWriteLocationValue(vault));
+
+		}
+
 		#region IStableValueOptionsProvider
 
 		// Using this approach always stored enum values as integers; ensure we respect that.

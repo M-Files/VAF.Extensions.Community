@@ -1,16 +1,17 @@
 ﻿using MFiles.VAF.Configuration;
+using MFiles.VAF.Configuration.JsonAdaptor;
 using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace MFiles.VAF.Extensions
 {
@@ -113,13 +114,15 @@ namespace MFiles.VAF.Extensions
 							{
 								// It's a prefix.
 								var prefix = s.Substring(0, s.Length - 1);
-								if (type.FullName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+								if (type.FullName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+									|| this.memberInfo.DeclaringType.FullName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
 									return value;
 							}
 							else
 							{
 								// Exact match.
-								if (type.FullName.Equals(s, StringComparison.OrdinalIgnoreCase))
+								if (type.FullName.Equals(s, StringComparison.OrdinalIgnoreCase)
+									|| this.memberInfo.DeclaringType.FullName.Equals(s, StringComparison.OrdinalIgnoreCase))
 									return value;
 							}
 						}
@@ -293,6 +296,103 @@ namespace MFiles.VAF.Extensions
 		}
 
 		/// <summary>
+		/// A converter that allows JSON for known types (<see cref="JsonConvert.LeaveJsonAloneTypes"/>)
+		/// to be round-tripped through deserialization/serialization, rather than the deserialization/serialization
+		/// process potentially affecting them.
+		/// Used to ensure that classes that cannot be deserialized/serialized in .NET
+		/// (such as <see cref="SearchConditionsJA"/>) are not changed.
+		/// </summary>
+		internal class LeaveJsonAloneConverter
+			: JsonConverterBase
+		{
+			private ILogger Logger { get; } = LogManager.GetLogger(typeof(LeaveJsonAloneConverter));
+
+			/// <summary>
+			/// A collection of the data read from the raw JSON (so it can be written back as-is).
+			/// The (deserialized) object instance is the key, and the JSON is the value.
+			/// </summary>
+			private static readonly Dictionary<object, string> RawJsonLookup
+				= new Dictionary<object, string>();
+
+			/// <inheritdoc />
+			/// <remarks>Checks whether the type exists in <see cref="JsonConvert.LeaveJsonAloneTypes"/>.</remarks>
+			public override bool CanConvert(Type objectType)
+			{
+				if (null == objectType)
+					return false;
+				this.Logger?.Trace($"Types to be left alone: {string.Join(", ", JsonConvert.LeaveJsonAloneTypes)}");
+
+				// If the type is included in the "leave json alone" collection,
+				// either explicitly or via a prefix match, then we will deal with it.
+				var t = objectType.FullName;
+				var b = JsonConvert.LeaveJsonAloneTypes.Any
+				(
+					s => string.Equals(s, t, StringComparison.OrdinalIgnoreCase)
+						|| (t.Length > s.Length && s.EndsWith("*") && string.Equals(s.Substring(0, s.Length-1), t.Substring(0, s.Length-1)))
+				);
+				if (b)
+				{
+					this.Logger?.Debug($"Caching raw JSON for type {t} as it was found in the list of types to leave alone.");
+				}
+				else
+				{
+					this.Logger?.Trace($"Type {t} will be deserialized and serialized.");
+				}
+				return b;
+			}
+
+			/// <inheritdoc />
+			/// <remarks>Allows standard deserialization, but caches the raw JSON for future reference.</remarks>
+			public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+			{
+				switch (reader.TokenType)
+				{
+					case JsonToken.None:
+						// Try again.
+						return reader.Read()
+							? this.ReadJson(reader, objectType, existingValue, serializer)
+							: default;
+				}
+
+				// Get the raw JSON.
+				var rawJson = JRaw.Create(reader)?.ToString();
+				if (null == rawJson)
+				{
+					this.Logger?.Warn($"Cannot cache data for {objectType.FullName} as value is null ({reader.Path}).");
+					return null;
+				}
+
+				// Deserialize the JSON into an instance of the expected type.
+				var instance = Newtonsoft.Json.JsonConvert.DeserializeObject
+				(
+					rawJson, 
+					objectType, 
+					serializer.Converters.Where(c => c != this).ToArray()
+				);
+
+				// Add the pair to the dictionary/cache and return the instance.
+				this.Logger?.Trace($"Caching JSON for {objectType.FullName} at {reader.Path}.");
+				RawJsonLookup.Add(instance, rawJson);
+				return instance;
+			}
+
+			/// <inheritdoc />
+			/// <remarks>If a cached version of the JSON exists then renders that instead,
+			/// otherwise uses the default serialization.</remarks>
+			public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+			{
+				if(null == value || !RawJsonLookup.ContainsKey(value))
+				{
+					this.Logger?.Warn($"No data found in cache for {writer.Path}.");
+					base.WriteJson(writer, value, serializer);
+					return;
+				}
+				this.Logger?.Trace($"Cache retrieved for {value.GetType().FullName} at {writer.Path}.");
+				writer.WriteRawValue(RawJsonLookup[value]);
+			}
+		}
+
+		/// <summary>
 		/// An implementation of <see cref="DefaultContractResolver"/>
 		/// that replaces value providers with instances of <see cref="DefaultValueAwareValueProvider"/>.
 		/// We do this so that we can take into account any default values specified by [JsonConfEditor] attributes.
@@ -406,18 +506,14 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		public virtual JsonSerializerSettings GetDefaultJsonSerializerSettings()
 		{
-			return new JsonSerializerSettings()
-			{
-				DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Include,
-				NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
-				Formatting = Newtonsoft.Json.Formatting.Indented,
-				Converters = new List<JsonConverter>()
-					{
-						new StringEnumConverterHandlesIntegers(){ AllowIntegerValues = true },
-						new DateTimeConverter()
-					},
-				ContractResolver = new DefaultValueAwareContractResolver(this)
-			};
+			var defaults = Newtonsoft.Json.JsonConvert.DefaultSettings?.Invoke()
+				?? new JsonSerializerSettings();
+			defaults.NullValueHandling = NullValueHandling.Ignore;
+			defaults.Converters.Add(new StringEnumConverterHandlesIntegers() { AllowIntegerValues = true });
+			defaults.Converters.Add(new DateTimeConverter());
+			defaults.Converters.Add(new LeaveJsonAloneConverter());
+			defaults.ContractResolver = new DefaultValueAwareContractResolver(this);
+			return defaults;
 		}
 
 		/// <summary>
