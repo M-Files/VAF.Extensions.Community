@@ -230,5 +230,31 @@ namespace MFiles.VAF.Extensions.Tests.Dashboards.Commands.CustomDomainCommandRes
 			Assert.AreEqual("MFiles.VAF.Extensions.Tests.Dashboards.Commands.CustomDomainCommandResolution.AttributeCustomDomainCommandResolverTests+ValidInstanceMethod_OverriddenWithNewAttribute.Method", command.ID);
 
 		}
+
+		public class DerivedClass
+			: ValidInstanceMethod
+		{
+		}
+
+		/// <summary>
+		/// The tested class inherits from a class that defined a custom domain command,
+		/// but it overrides the base virtual method and additionally defines its own custom command.
+		/// Ensure that the new method is found and the updated custom command data.
+		/// </summary>
+		[TestMethod]
+		public void DerivedClass_ReturnsValidData()
+		{
+			var resolver = new AttributeCustomDomainCommandResolver();
+			resolver.Include(new DerivedClass());
+			var commands = resolver.GetCustomDomainCommands();
+			Assert.IsNotNull(commands);
+			Assert.AreEqual(1, commands.Count());
+
+			var command = commands.ElementAt(0);
+			Assert.IsNotNull(command);
+			Assert.AreEqual("hello world", command.DisplayName);
+			Assert.AreEqual("MFiles.VAF.Extensions.Tests.Dashboards.Commands.CustomDomainCommandResolution.AttributeCustomDomainCommandResolverTests+ValidInstanceMethod.Method", command.ID);
+
+		}
 	}
 }
