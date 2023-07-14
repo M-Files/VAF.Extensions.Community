@@ -143,7 +143,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands.CustomDomainCommandResolutio
 				else
 				{
 					// If the instance is not null then the instance type must be valid OR the method must be static.
-					if (!method.IsStatic && !instance.GetType().IsAssignableFrom(method.DeclaringType))
+					if (!method.IsStatic && !method.DeclaringType.IsAssignableFrom(instance.GetType()))
 						throw new ArgumentException($"The instance type ('{instance.GetType().FullName}') must be assignable to the declaring type ({method.DeclaringType.FullName}).", nameof(method));
 				}
 
