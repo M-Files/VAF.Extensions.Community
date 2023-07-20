@@ -93,7 +93,9 @@ namespace MFiles.VAF.Extensions
 		{
 			// If we are running then it's the difference between now and started.
 			if (this.CurrentTaskState == MFTaskState.MFTaskStateInProgress)
-				return DateTime.UtcNow.Subtract(this.Started.Value);
+				return this.Started.HasValue
+					? DateTime.UtcNow.Subtract(this.Started.Value)
+					: TimeSpan.Zero;
 
 			// If we have no start or last activity date then return zero.
 			if (false == this.Started.HasValue
