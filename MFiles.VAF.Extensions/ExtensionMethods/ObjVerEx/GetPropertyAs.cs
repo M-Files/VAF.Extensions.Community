@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using MFiles.VAF.Common;
+using MFiles.VAF.Extensions.ExtensionMethods;
 using MFilesAPI;
 
 namespace MFiles.VAF.Extensions
@@ -36,11 +37,12 @@ namespace MFiles.VAF.Extensions
 			if(null == propertyValue || propertyValue.TypedValue.IsNULL() || propertyValue.TypedValue.IsUninitialized())
 				return default(T);
 
+			// What is the type of this property?
+			var dataType = objVerEx.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
+
 			// Should we validate the type?
 			if (null != validDataTypes && validDataTypes.Length > 0)
 			{
-				// What is the type of this property?
-				var dataType = objVerEx.Vault.PropertyDefOperations.GetPropertyDef(propertyDef).DataType;
 
 				// Is it in the collection of valid types.
 				if (false == validDataTypes.Contains(dataType))
@@ -59,8 +61,23 @@ namespace MFiles.VAF.Extensions
 				}
 			}
 
-			// Attempt to return the data as correctly typed value.
-			return (T)propertyValue.TypedValue.Value;
+
+			// If it's a timestamp then ensure that the DateTimeKind is set properly.
+			if (dataType == MFDataType.MFDatatypeTimestamp
+				&& typeof(T) == typeof(DateTime?))
+			{
+				{
+					return (T)(object)propertyValue
+						.TypedValue
+						.GetValueAsTimestamp()
+						.ToPreciseDateTime(DateTimeKind.Utc);
+				}
+			}
+			else
+			{
+				// Attempt to return the data as correctly typed value.
+				return (T)propertyValue.TypedValue.Value;
+			}
 		}
 
 		#endregion
