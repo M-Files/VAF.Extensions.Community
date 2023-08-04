@@ -65,7 +65,17 @@ namespace MFiles.VAF.Extensions
 			// Return the dashboard.
 			try
 			{
-				return dashboard.ToString();
+				var dashboardContent = dashboard.ToString();
+
+				// If we have no dashboard content and the base implementation
+				// of StartApplication was not called then this is likely a bug.
+				if(dashboard.Contents.Count == 0
+					&& !this.startApplicationCalled)
+				{
+					dashboardContent = "<p style='color: red;'>Exception rendering dashboard: <span style='font-family: Courier New, monospace'>base.StartApplication</span> not called.</p>";
+				}
+
+				return dashboardContent;
 			}
 			catch (Exception e)
 			{

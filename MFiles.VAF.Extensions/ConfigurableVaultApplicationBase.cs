@@ -106,9 +106,11 @@ namespace MFiles.VAF.Extensions
 			set { base.License = value; }
 		}
 
+		private bool startApplicationCalled = false;
+
 		protected override void StartApplication()
 		{
-
+			this.startApplicationCalled = true;
 			this.RecurringOperationConfigurationManager = new RecurringOperationConfigurationManager<TSecureConfiguration>(this);
 			this.ApplicationOverviewDashboardContentRenderer = this.GetApplicationOverviewDashboardContentRenderer();
 			this.AsynchronousDashboardContentRenderer = this.GetAsynchronousDashboardContentRenderer();
