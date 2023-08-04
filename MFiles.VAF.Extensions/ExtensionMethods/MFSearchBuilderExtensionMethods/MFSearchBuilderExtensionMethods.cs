@@ -1,5 +1,6 @@
 ﻿using System;
 using MFiles.VAF.Common;
+using MFiles.VAF.Extensions.ExtensionMethods;
 using MFilesAPI;
 
 namespace MFiles.VAF.Extensions
@@ -156,7 +157,14 @@ namespace MFiles.VAF.Extensions
 			if (null == value)
 				searchCondition.TypedValue.SetValueToNULL(dataType);
 			else
+			{
+				// For conditions for timestamps, be as precise as possible.
+				if (value is DateTime d && dataType == MFDataType.MFDatatypeTimestamp)
+					value = d.ToPreciseTimestamp();
+
+				// Set the value.
 				searchCondition.TypedValue.SetValue(dataType, value);
+			}
 
 			// Add the search condition to the collection.
 			searchBuilder.Conditions.Add(-1, searchCondition);
