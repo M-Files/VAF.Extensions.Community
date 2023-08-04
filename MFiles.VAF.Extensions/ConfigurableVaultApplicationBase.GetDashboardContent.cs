@@ -65,7 +65,19 @@ namespace MFiles.VAF.Extensions
 			// Return the dashboard.
 			try
 			{
-				return dashboard.ToString();
+				var dashboardContent = dashboard.ToString();
+
+				// If we have no dashboard content and the base implementation
+				// of StartApplication was not called then this is likely a bug.
+				if(dashboard.Contents.Count == 0
+					&& !this.startApplicationCalled)
+				{
+					var content = new ExceptionDashboardPanel("Exception rendering dashboard", "If you override StartApplication then ensure that you call base.StartApplication so that the dashboard can correctly render.");
+					content.Styles.Add("margin", "10px");
+					dashboardContent = content.ToXmlString();
+				}
+
+				return dashboardContent;
 			}
 			catch (Exception e)
 			{
