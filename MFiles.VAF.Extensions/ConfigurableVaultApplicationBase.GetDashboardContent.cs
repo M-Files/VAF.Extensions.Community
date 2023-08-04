@@ -72,7 +72,9 @@ namespace MFiles.VAF.Extensions
 				if(dashboard.Contents.Count == 0
 					&& !this.startApplicationCalled)
 				{
-					dashboardContent = "<p style='color: red;'>Exception rendering dashboard: <span style='font-family: Courier New, monospace'>base.StartApplication</span> not called.</p>";
+					var content = new DashboardCustomContentEx("<p style='color: red; padding: 10px 10px 10px 20px; margin: 10px; border: 1px solid red; background-position-x: 3px !important;'>Exception rendering dashboard: <span style='font-family: Courier New, monospace'>base.StartApplication</span> not called.</p>");
+					content.Icon = "Resources/Images/Failed.png";
+					dashboardContent = content.ToXmlString();
 				}
 
 				return dashboardContent;
