@@ -72,8 +72,8 @@ namespace MFiles.VAF.Extensions
 				if(dashboard.Contents.Count == 0
 					&& !this.startApplicationCalled)
 				{
-					var content = new DashboardCustomContentEx("<p style='color: red; padding: 10px 10px 10px 20px; margin: 10px; border: 1px solid red; background-position-x: 3px !important;'>Exception rendering dashboard: <span style='font-family: Courier New, monospace'>base.StartApplication</span> not called.</p>");
-					content.Icon = "Resources/Images/Failed.png";
+					var content = new ExceptionDashboardPanel("Exception rendering dashboard", "If you override StartApplication then ensure that you call base.StartApplication so that the dashboard can correctly render.");
+					content.Styles.Add("margin", "10px");
 					dashboardContent = content.ToXmlString();
 				}
 

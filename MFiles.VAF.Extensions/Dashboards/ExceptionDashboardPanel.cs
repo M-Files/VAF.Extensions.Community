@@ -14,20 +14,33 @@ namespace MFiles.VAF.Extensions.Dashboards
 	public class ExceptionDashboardPanel
 		: DashboardPanelEx
 	{
+		/// <summary>
+		/// The exception that is being represented.
+		/// Note that the exception may be null if no underlying exception was thrown.
+		/// </summary>
 		public Exception Exception { get; }
 		public ExceptionDashboardPanel(Exception e, string titleText = null)
+			: this(titleText, e?.Message, e?.StackTrace)
 		{
 			this.Exception = e ?? throw new ArgumentNullException(nameof(e));
-
+		}
+		public ExceptionDashboardPanel
+		(
+			string titleText, 
+			string message, 
+			string stackTrace = null
+		)
+		{
 			// Set the inner content.
-			this.InnerContent = new DashboardContentCollection()
-			{
-				new DashboardCustomContentEx($"<p style='color: red; margin-left: 30px'>{e.Message}</p>"),
-				new DashboardCustomContentEx($"<p><pre style='padding: 0px; color: red; margin-left: 30px'>{e.StackTrace.EscapeXmlForDashboard()}</pre></p>")
-			};
+			var collection = new DashboardContentCollection();
+			if(!string.IsNullOrWhiteSpace(message))
+				collection.Add(new DashboardCustomContentEx($"<p style='color: red; margin-left: 30px'>{message.EscapeXmlForDashboard()}</p>"));
+			if (!string.IsNullOrWhiteSpace(stackTrace))
+				collection.Add(new DashboardCustomContentEx($"<p><pre style='padding: 0px; color: red; margin-left: 30px'>{stackTrace.EscapeXmlForDashboard()}</pre></p>"));
+			this.InnerContent = collection;
 
 			// Set the title.
-			var title = new DashboardCustomContentEx(titleText ?? "Exception")
+			var title = new DashboardCustomContentEx(string.IsNullOrWhiteSpace(titleText) ? "Exception" : titleText)
 			{
 				Icon = "Resources/Images/Failed.png"
 			};
