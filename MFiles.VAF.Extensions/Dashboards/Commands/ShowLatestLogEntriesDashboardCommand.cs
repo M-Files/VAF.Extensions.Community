@@ -195,7 +195,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 
 						// If it is not using the default layout then we can't parse it.
 						if (false == string.IsNullOrEmpty(defaultLoggingConfiguration?.Advanced?.Layout)
-							&& defaultLoggingConfiguration?.Advanced?.Layout != "${longdate}\t(v${application-version})\t${logger}\t${log-context}\t${level}:\t${message}${onexception:${newline}${exception:format=ToString:innerformat=ToString:separator=\r\n}}")
+							&& Regex.Unescape(defaultLoggingConfiguration?.Advanced?.Layout) != "${longdate}\t(v${application-version})\t${logger}\t${log-context}\t${level}:\t${message}${onexception:${newline}${exception:format=ToString:innerformat=ToString:separator=\r\n}}")
 							logEntries.StructuredEntries = false;
 					}
 					var linesRead = 0;
