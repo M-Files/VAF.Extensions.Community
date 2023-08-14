@@ -72,6 +72,38 @@ namespace MFiles.VAF.Extensions
 						return value;
 				}
 
+				var jsonConfEditorAttribute = this.memberInfo.GetCustomAttribute<JsonConfEditorAttribute>();
+				if(null != jsonConfEditorAttribute)
+				{ 
+
+
+					if (null != jsonConfEditorAttribute.DefaultValue)
+					{
+						// If it is the default then die now.
+						if (value?.ToString() == jsonConfEditorAttribute.DefaultValue?.ToString())
+							return null;
+
+						// If it's the identifier then we need to check the alias/guid/id properties.
+						if (value is MFIdentifier identifier && (
+							identifier.Alias == jsonConfEditorAttribute.DefaultValue?.ToString()
+							|| identifier.Guid == jsonConfEditorAttribute.DefaultValue?.ToString()
+							|| identifier.ID.ToString() == jsonConfEditorAttribute.DefaultValue?.ToString()
+							))
+						{
+							return null;
+						}
+					}
+
+					// If the configuration value has a JsonConfEditor attribute that defines an editor type
+					// then we may need to convert our deserialized value.
+					if (jsonConfEditorAttribute.TypeEditor == "date" && value is DateTime dateTime)
+						value = dateTime.ToString("yyyy-MM-dd");
+
+					// If it is required then give the current value.
+					if (jsonConfEditorAttribute.IsRequired)
+						return value;
+				}
+
 				// Try to get the runtime default value.
 				Type type = null;
 				try
@@ -197,36 +229,6 @@ namespace MFiles.VAF.Extensions
 				catch(Exception e)
 				{
 					this.Logger?.Warn(e, $"Could not identify default value for {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name}");
-				}
-
-				// If this member has a JsonConfEditorAttribute then we need to check whether to filter it.
-				{
-					var jsonConfEditorAttribute = this.memberInfo.GetCustomAttribute<JsonConfEditorAttribute>();
-					if(null != jsonConfEditorAttribute)
-					{
-						if (null != jsonConfEditorAttribute.DefaultValue)
-						{
-							// If it is the default then die now.
-							if (value?.ToString() == jsonConfEditorAttribute.DefaultValue?.ToString())
-								return null;
-
-							// If it's the identifier then we need to check the alias/guid/id properties.
-							if (value is MFIdentifier identifier && (
-								identifier.Alias == jsonConfEditorAttribute.DefaultValue?.ToString()
-								|| identifier.Guid == jsonConfEditorAttribute.DefaultValue?.ToString()
-								|| identifier.ID.ToString() == jsonConfEditorAttribute.DefaultValue?.ToString()
-								))
-							{
-								return null;
-							}
-						}
-
-						// If the configuration value has a JsonConfEditor attribute that defines an editor type
-						// then we may need to convert our deserialized value.
-						if (jsonConfEditorAttribute.TypeEditor == "date" && value is DateTime dateTime)
-							value = dateTime.ToString("yyyy-MM-dd");
-
-					}
 				}
 
 				// Return the value that the base implementation gave.
