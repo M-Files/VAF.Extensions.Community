@@ -129,48 +129,16 @@ namespace MFiles.VAF.Extensions.Webhooks
                             output = this.MethodInfo.Invoke(this.Instance, new[] { env });
                             break;
                         case 2:
-                            var inputType = parameters[1].ParameterType;
-                            object input = null;
-                            //if (typeof(WebhookInput).IsAssignableFrom(inputType))
-                            //{
-                            //    // Firstly check for the generic types.
-                            //    input = WebhookInput.CreateFromEnvironment(env);
-                            //    if (inputType.IsGenericType && inputType.GenericTypeArguments.Length == 1)
-                            //    {
-                            //        // public void XXXX(EventHandlerEnvironment env, WebhookInput<AnotherType> input);
-                            //        // public WebhookOutput XXXX(EventHandlerEnvironment env, WebhookInput<AnotherType> input);
-                            //        // public WebhookOutput<MyType> XXXX(EventHandlerEnvironment env, WebhookInput<AnotherType> input);
-                            //        input = WebhookInput.CreateFromEnvironment
-                            //        (
-                            //            serializer,
-                            //            env,
-                            //            inputType.GenericTypeArguments[0]
-                            //        );
-                            //    }
-                            //    else
-                            //    {
-                            //        // public void XXXX(EventHandlerEnvironment env, WebhookInput input);
-                            //        // public WebhookOutput XXXX(EventHandlerEnvironment env, WebhookInput input);
-                            //        // public WebhookOutput<MyType> XXXX(EventHandlerEnvironment env, WebhookInput input);
-                            //    }
-
-                            //}
-                            //else
-                            //{
-                                // Just a plain class type.
-                                // public void XXXX(EventHandlerEnvironment env, MyType input);
-                                // public WebhookOutput XXXX(EventHandlerEnvironment env, MyType input);
-                                // public WebhookOutput<MyType> XXXX(EventHandlerEnvironment env, MyType input);
-                                input = serializer.Deserialize(env.InputBytes, inputType);
-                            //}
-
+							// public void XXXX(EventHandlerEnvironment env, MyType input);
+							// public WebhookOutput XXXX(EventHandlerEnvironment env, MyType input);
+							// public WebhookOutput<MyType> XXXX(EventHandlerEnvironment env, MyType input);
+                            object input = serializer.Deserialize(env.InputBytes, parameters[1].ParameterType);
                             output = this.MethodInfo.Invoke(this.Instance, new object[] { env, input });
                             break;
                     }
                 }
                 else
                 {
-
                     {
                         // Method signature not valid.
                         var e = new InvalidOperationException("Method signature not valid");
