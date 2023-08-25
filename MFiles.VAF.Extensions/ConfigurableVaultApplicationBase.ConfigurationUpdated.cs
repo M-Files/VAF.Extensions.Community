@@ -62,6 +62,16 @@ namespace MFiles.VAF.Extensions
 			// This can be called even when null, and we may need to clear the existing configuration
 			LogManager.UpdateConfiguration(loggingConfiguration);
 			this.Logger?.Debug($"Logging configuration updated");
+			
+			// Ensure that our web hook configuration is updated.
+			try
+			{
+				this.WebhookAuthenticationConfigurationManager?.PopulateFromConfiguration(this.Configuration);
+			}
+			catch (Exception e)
+			{
+				this.Logger?.Fatal(e, $"Exception loading web hook configuration.");
+			}
 		}
 
 		internal new SecureConfigurationManager<TSecureConfiguration> ConfManager
@@ -86,6 +96,16 @@ namespace MFiles.VAF.Extensions
 			catch(Exception e)
 			{
 				this.Logger?.Fatal(e, $"Exception mapping configuration to recurring operations.");
+			}
+
+			// Ensure that our web hook configuration is updated.
+			try
+			{
+				this.WebhookAuthenticationConfigurationManager?.PopulateFromConfiguration(this.Configuration);
+			}
+			catch (Exception e)
+			{
+				this.Logger?.Fatal(e, $"Exception loading web hook configuration.");
 			}
 
 
