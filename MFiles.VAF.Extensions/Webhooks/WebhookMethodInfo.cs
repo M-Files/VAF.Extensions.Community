@@ -29,15 +29,20 @@ namespace MFiles.VAF.Extensions.Webhooks
 
         protected WebhookAuthenticationConfigurationManager<TConfiguration> AuthenticationConfigurationManager { get; }
 
+		/// <inheritdoc />
         public bool HasSeparateEventHandlerProxy => this.Attribute?.HasSeparateEventHandlerProxy ?? true;
 
-        public EventHandlerVaultUserIdentity VaultUserIdentity => EventHandlerVaultUserIdentity.Server;
+		/// <inheritdoc />
+		public EventHandlerVaultUserIdentity VaultUserIdentity => EventHandlerVaultUserIdentity.Server;
 
-        public MFEventHandlerType GetEventHandlerType => MFEventHandlerType.MFEventHandlerVaultAnonymousExtensionMethod;
+		/// <inheritdoc />
+		public MFEventHandlerType GetEventHandlerType => MFEventHandlerType.MFEventHandlerVaultAnonymousExtensionMethod;
 
-        public string LogString => $"{this.MethodInfo?.DeclaringType?.Name}.{this.MethodInfo.Name}";
+		/// <inheritdoc />
+		public string LogString => $"{this.MethodInfo?.DeclaringType?.Name}.{this.MethodInfo.Name}";
 
-        public int Priority => 0;
+		/// <inheritdoc />
+		public int Priority => 0;
 
         public WebhookMethodInfo
         (
@@ -56,27 +61,55 @@ namespace MFiles.VAF.Extensions.Webhooks
             this.Instance = instance;
         }
 
-        public string Execute(EventHandlerEnvironment env, IExecutionTrace trace)
+		/// <inheritdoc />
+		public string Execute(EventHandlerEnvironment env, IExecutionTrace trace)
             => throw new InvalidOperationException("Only ExecuteAnonymous is supported");
 
-        public AnonymousExtensionMethodResult ExecuteAnonymous(EventHandlerEnvironment environment, IExecutionTrace trace)
+		/// <inheritdoc />
+		public AnonymousExtensionMethodResult ExecuteAnonymous(EventHandlerEnvironment environment, IExecutionTrace trace)
         {
-            // Get the authenticator.
-            var authenticator = this.AuthenticationConfigurationManager.GetAuthenticator(this.WebhookName);
+			try
+			{
+				trace?.TraceBeforeExtensionMethod(environment.ActivityID.DisplayValue, this.LogString);
+				this.Logger.Trace($"Executing webhook {this.WebhookName}");
 
-            // If it is not a valid request then return now.
-            if (!this.IsValidRequest(environment, authenticator, out AnonymousExtensionMethodResult result))
-            {
-                if (null == result)
-                    throw new UnauthorizedAccessException();
-                return result;
-            }
+				// Get the authenticator.
+				var authenticator = this.AuthenticationConfigurationManager.GetAuthenticator(this.WebhookName);
 
-            // Run it.
-            this.Logger.Trace($"Executing web hook {this.WebhookName}");
-            return this.ExecuteMethod(environment);
+				// If it is not a valid request then return now.
+				AnonymousExtensionMethodResult result;
+				if (!this.IsValidRequest(environment, authenticator, out result))
+				{
+					if (null == result)
+						throw new UnauthorizedAccessException();
+					this.Logger.Trace($"Call to webhook {this.WebhookName} was not authorised.");
+					trace?.TraceAfterExtensionMethod(environment.ActivityID.DisplayValue, this.LogString, null);
+					return result;
+				}
+
+				// Run it.
+				result = this.ExecuteMethod(environment);
+
+				// Awesome.
+				this.Logger.Trace($"Webhook completed successfully {this.WebhookName}");
+				trace?.TraceAfterExtensionMethod(environment.ActivityID.DisplayValue, this.LogString, null);
+				return result;
+			}
+			catch(Exception e)
+			{
+				// Notify the execution end also in case of error.
+				trace?.TraceAfterExtensionMethod(environment.ActivityID.DisplayValue, this.LogString, e.Message);
+				this.Logger?.Warn(e, $"Webhook failed. {this.LogString}");
+				throw;
+			}
         }
 
+		/// <summary>
+		/// Ensures that the method signature is one of the expected ones,
+		/// then calls <see cref="MethodInfo"/>.
+		/// </summary>
+		/// <param name="env">The environment to pass to the method.</param>
+		/// <returns>The result of the call to the method, or an empty <see cref="AnonymousExtensionMethodResult"/>.</returns>
         protected virtual AnonymousExtensionMethodResult ExecuteMethod(EventHandlerEnvironment env)
         {
 
@@ -104,8 +137,9 @@ namespace MFiles.VAF.Extensions.Webhooks
                 && parameters.Length == 1
                 && parameters[0].ParameterType == typeof(EventHandlerEnvironment))
             {
-                // Simple syntax.
-                output = this.MethodInfo.Invoke(this.Instance, new[] { env }) as AnonymousExtensionMethodResult;
+				// Simple syntax.
+				// public AnonymousExtensionMethodResult XXXX(EventHandlerEnvironment env);
+				output = this.MethodInfo.Invoke(this.Instance, new[] { env }) as AnonymousExtensionMethodResult;
             }
             else
             {
@@ -173,6 +207,15 @@ namespace MFiles.VAF.Extensions.Webhooks
 
         }
 
+		/// <summary>
+		/// Returns true if the <paramref name="authenticator"/> is both valid for this type of
+		/// webhook, and states that the request is valid.
+		/// </summary>
+		/// <param name="env">The environment representing the request.</param>
+		/// <param name="authenticator">The authenticator to use to authorise access.</param>
+		/// <param name="output">The output of the authorisation process, if one is provided.</param>
+		/// <returns><see langword="true"/> if the request is authorised, <see langword="false"/> otherwise.</returns>
+		/// <exception cref="UnauthorizedAccessException"></exception>
         public virtual bool IsValidRequest
         (
             EventHandlerEnvironment env, 
@@ -180,27 +223,33 @@ namespace MFiles.VAF.Extensions.Webhooks
             out AnonymousExtensionMethodResult output
         )
         {
+			output = null;
 
-            // Validate that this type is okay for the declaration.
-            if ((authenticator == null || authenticator is NoAuthenticationWebhookAuthenticator)
+			// Validate that this type is okay for the declaration.
+			if ((authenticator == null || authenticator is NoAuthenticationWebhookAuthenticator)
                     && !this.Attribute.SupportsNoAuthentication)
             {
                 this.Logger.Warn($"Web hook {this.WebhookName} requires authentication, but no authentication is configured.  Request is being denied.");
                 throw new UnauthorizedAccessException();
             }
+			if (authenticator == null)
+			{
+				// No authenticator, but the attribute supports no authentication, so...  Awesome.
+				return true;
+			}
             if (!this.Attribute.SupportsAuthenticator(authenticator.GetType()))
             {
                 this.Logger.Warn($"Web hook {this.WebhookName} does not support authenticator of type {authenticator.GetType().FullName}.  Request is being denied.");
                 throw new UnauthorizedAccessException();
             }
 
+			// Authenticate!
             if(!authenticator.IsRequestAuthenticated(env, out output))
             {
-                this.Logger.Trace($"Authenticator of type {authenticator.GetType().FullName} stated that the request was not authenticated.  Request is being denied.");
+                this.Logger.Debug($"Authenticator of type {authenticator.GetType().FullName} stated that the request was not authenticated.  Request is being denied.");
                 return false;
             }
 
-            output = null;
             return true;
 
         }

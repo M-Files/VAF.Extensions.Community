@@ -9,6 +9,10 @@ using System.Text;
 
 namespace MFiles.VAF.Extensions.Webhooks.Authentication
 {
+	/// <summary>
+	/// Implements basic (base64-encoded credentials in a HTTP header)
+	/// authentication.  Also exposes appropriate configuration values.
+	/// </summary>
     [DataContract]
     public class BasicWebhookAuthenticator
         : WebhookAuthenticatorBase
@@ -33,10 +37,13 @@ namespace MFiles.VAF.Extensions.Webhooks.Authentication
         {
         }
 
+		/// <inheritdoc />
         protected override bool ContainsCredentials(EventHandlerEnvironment env)
             => !string.IsNullOrWhiteSpace(env?.InputHttpHeaders?.GetValueOrEmpty("Authorization"));
 
-        protected override AnonymousExtensionMethodResult CreateResult
+		/// <inheritdoc />
+		/// <remarks>Adds the WWW-Authenticate header.</remarks>
+		protected override AnonymousExtensionMethodResult CreateResult
         (
             HttpStatusCode statusCode,
             NamedValues headers,
@@ -54,7 +61,8 @@ namespace MFiles.VAF.Extensions.Webhooks.Authentication
             return base.CreateResult(statusCode, headers, content);
         }
 
-        protected override bool AreCredentialsValid(EventHandlerEnvironment env)
+		/// <inheritdoc />
+		protected override bool AreCredentialsValid(EventHandlerEnvironment env)
         {
             // Sanity.
             if (null == env)

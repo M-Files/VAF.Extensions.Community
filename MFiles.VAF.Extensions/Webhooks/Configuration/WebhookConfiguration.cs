@@ -47,6 +47,10 @@ namespace MFiles.VAF.Extensions.Webhooks.Configuration
         public SecretWebhookAuthenticator SecretWebhookAuthenticationConfiguration { get; set; }
             = new SecretWebhookAuthenticator();
 
+		/// <inheritdoc />
+		/// <remarks>
+		/// Returns an appropriate authenticator depending upon the configured <see cref="AuthenticationType"/>.
+		/// </remarks>
         public virtual IWebhookAuthenticator GetWebhookAuthenticator()
         {
             switch (this.AuthenticationType)

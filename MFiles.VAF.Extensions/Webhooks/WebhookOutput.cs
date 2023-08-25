@@ -5,11 +5,7 @@ using static MFiles.VAF.Configuration.ValidationResultForValidation;
 
 namespace MFiles.VAF.Extensions.Webhooks
 {
-    public interface IConvertableToAnonymousExtensionMethodResult
-    {
-        AnonymousExtensionMethodResult AsAnonymousExtensionMethodResult();
-    }
-    public class WebhookOutput
+	public class WebhookOutput
         : IConvertableToAnonymousExtensionMethodResult
     {
         public NamedValues ResponseHeaders { get; set; }

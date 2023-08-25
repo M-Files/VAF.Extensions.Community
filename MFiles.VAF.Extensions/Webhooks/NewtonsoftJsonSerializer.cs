@@ -8,31 +8,45 @@ namespace MFiles.VAF.Extensions.Webhooks
     public class NewtonsoftJsonSerializer
         : ISerializer
     {
-
+		/// <summary>
+		/// The type of encoding to use.  Defaults to <see cref="Encoding.UTF8"/>.
+		/// </summary>
         public Encoding Encoding { get; set; }
             = Encoding.UTF8;
-        public Formatting Formatting { get; set; }
+
+		/// <summary>
+		/// How to format the resulting JSON.  Defaults to <see cref="Formatting.Indented"/>.
+		/// </summary>
+		public Formatting Formatting { get; set; }
             = Formatting.Indented;
+
+		/// <summary>
+		/// The settings to use for the serialization.
+		/// </summary>
         public JsonSerializerSettings JsonSerializerSettings { get; set; }
             = new JsonSerializerSettings();
 
+		/// <inheritdoc />
         public T Deserialize<T>(byte[] input)
             => (T)this.Deserialize(input, typeof(T));
 
-        public byte[] Serialize<T>(T input)
+		/// <inheritdoc />
+		public byte[] Serialize<T>(T input)
             => this.Serialize(input as object);
 
-        public virtual object Deserialize(byte[] input, Type t)
+		/// <inheritdoc />
+		public virtual object Deserialize(byte[] input, Type t)
             => input == null
             ? t.IsValueType ? Activator.CreateInstance(t) : null
-            : JsonConvert.DeserializeObject(this.Encoding.GetString(input), t, this.JsonSerializerSettings);
+            : Newtonsoft.Json.JsonConvert.DeserializeObject(this.Encoding.GetString(input), t, this.JsonSerializerSettings);
 
-        public virtual byte[] Serialize(object input)
+		/// <inheritdoc />
+		public virtual byte[] Serialize(object input)
             => this.Encoding.GetBytes
             (
                 input == default
                 ? typeof(IEnumerable).IsAssignableFrom(input.GetType()) ? "[]" : "{}"
-                : JsonConvert.SerializeObject(input, this.Formatting, this.JsonSerializerSettings)
+                : Newtonsoft.Json.JsonConvert.SerializeObject(input, this.Formatting, this.JsonSerializerSettings)
             );
     }
 }

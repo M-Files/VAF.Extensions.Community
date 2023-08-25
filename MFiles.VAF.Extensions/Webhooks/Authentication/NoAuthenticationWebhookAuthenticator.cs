@@ -1,5 +1,4 @@
-﻿using extensionstest2.Webhooks.Configuration;
-using MFiles.VAF;
+﻿using MFiles.VAF;
 using MFiles.VAF.Common;
 using MFilesAPI;
 

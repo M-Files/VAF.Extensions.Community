@@ -24,6 +24,11 @@ namespace MFiles.VAF.Extensions.Webhooks.Configuration
         {
             this.VaultApplication = vaultApplication ?? throw new ArgumentNullException(nameof(vaultApplication));
         }
+
+		/// <summary>
+		/// Ensures that this instance represents data in <paramref name="configuration"/>.
+		/// </summary>
+		/// <param name="configuration"></param>
         public virtual void PopulateFromConfiguration(TSecureConfiguration configuration)
         {
             this.Authenticators.Clear();
@@ -45,17 +50,23 @@ namespace MFiles.VAF.Extensions.Webhooks.Configuration
                 this.Authenticators.Add(pair.Item1.WebHookName, authenticator);
             }
         }
+
+		/// <summary>
+		/// Returns the instance of <see cref="IWebhookAuthenticator"/> associated with the
+		/// webhook with name <paramref name="webhook"/>.
+		/// </summary>
+		/// <param name="webhook">The webhook name.</param>
+		/// <returns>The authenticator, or <see cref="FallbackAuthenticator"/> if none is registered.</returns>
         public IWebhookAuthenticator GetAuthenticator(string webhook)
             => this.Authenticators.ContainsKey(webhook) ? this.Authenticators[webhook] : this.FallbackAuthenticator;
 
 
         /// <summary>
-        /// Retrieves any task processor scheduling/recurring configuration
-        /// that is exposed via VAF configuration.
+        /// Retrieves any task webhook configuration that is exposed via VAF configuration.
         /// </summary>
         /// <param name="input">The object containing the <paramref name="fieldInfo"/>.</param>
         /// <param name="fieldInfo">The field to retrieve the configuration from.</param>
-        /// <param name="config">All configuration found relating to scheduled execution.</param>
+        /// <param name="config">All configuration found.</param>
         /// <param name="recurse">Whether to recurse down the object structure exposed.</param>
         protected virtual void GetWebhookAuthenticationConfiguration
         (
@@ -92,15 +103,14 @@ namespace MFiles.VAF.Extensions.Webhooks.Configuration
 
         }
 
-        /// <summary>
-        /// Retrieves any task processor scheduling/recurring configuration
-        /// that is exposed via VAF configuration.
-        /// </summary>
-        /// <param name="input">The object containing the <paramref name="propertyInfo"/>.</param>
-        /// <param name="propertyInfo">The property to retrieve the configuration from.</param>
-        /// <param name="schedules">All configuration found relating to scheduled execution.</param>
-        /// <param name="recurse">Whether to recurse down the object structure exposed.</param>
-        protected virtual void GetWebhookAuthenticationConfiguration
+		/// <summary>
+		/// Retrieves any task webhook configuration that is exposed via VAF configuration.
+		/// </summary>
+		/// <param name="input">The object containing the <paramref name="propertyInfo"/>.</param>
+		/// <param name="propertyInfo">The property to retrieve the configuration from.</param>
+		/// <param name="schedules">All configuration found.</param>
+		/// <param name="recurse">Whether to recurse down the object structure exposed.</param>
+		protected virtual void GetWebhookAuthenticationConfiguration
         (
             object input,
             PropertyInfo propertyInfo,
@@ -135,14 +145,13 @@ namespace MFiles.VAF.Extensions.Webhooks.Configuration
 
         }
 
-        /// <summary>
-        /// Retrieves any task processor scheduling/recurring configuration
-        /// that is exposed via VAF configuration.
-        /// </summary>
-        /// <param name="input">The object containing the configuration.</param>
-        /// <param name="config">All configuration found relating to scheduled execution.</param>
-        /// <param name="recurse">Whether to recurse down the object structure exposed.</param>
-        protected virtual void GetWebhookAuthenticationConfiguration
+		/// <summary>
+		/// Retrieves any task webhook configuration that is exposed via VAF configuration.
+		/// </summary>
+		/// <param name="input">The object containing the configuration.</param>
+		/// <param name="config">All configuration found.</param>
+		/// <param name="recurse">Whether to recurse down the object structure exposed.</param>
+		protected virtual void GetWebhookAuthenticationConfiguration
         (
             object input,
             out List<Tuple<WebhookConfigurationAttribute, IWebhookAuthenticatorProvider>> config,

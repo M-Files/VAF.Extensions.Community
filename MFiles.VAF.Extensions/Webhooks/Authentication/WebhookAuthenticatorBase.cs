@@ -13,21 +13,36 @@ namespace MFiles.VAF.Extensions.Webhooks.Authentication
     public abstract class WebhookAuthenticatorBase
         : IWebhookAuthenticator, IWebhookAuthenticatorProvider
     {
+		/// <inheritdoc />
         [DataMember]
         public bool Enabled { get; set; } = false;
 
         private ILogger Logger { get; } = LogManager.GetLogger(typeof(WebhookAuthenticatorBase));
 
+		/// <summary>
+		/// The type of authentication this authenticator provides.
+		/// </summary>
         public WebhookAuthenticationType AuthenticationType { get; }
+
         public WebhookAuthenticatorBase(WebhookAuthenticationType authenticationType)
         {
             this.AuthenticationType = authenticationType;
         }
 
-        public virtual IWebhookAuthenticator GetWebhookAuthenticator()
+		/// <inheritdoc />
+		public virtual IWebhookAuthenticator GetWebhookAuthenticator()
             => this;
 
-        public virtual bool IsRequestAuthenticated(EventHandlerEnvironment env, out AnonymousExtensionMethodResult output)
+		/// <summary>
+		/// Returns true if the request is considered authenticated 
+		/// (i.e. the request passes both <see cref="ContainsCredentials(EventHandlerEnvironment)"/>
+		/// and <see cref="AreCredentialsValid(EventHandlerEnvironment)"/>).
+		/// </summary>
+		/// <param name="env">The environment representing the request.</param>
+		/// <param name="output">The output from the authentication, if provided.</param>
+		/// <returns><see langword="true"/> if the request is considered authenticated.</returns>
+		/// <exception cref="ArgumentNullException"></exception>
+		public virtual bool IsRequestAuthenticated(EventHandlerEnvironment env, out AnonymousExtensionMethodResult output)
         {
             output = null;
             if (null == env)
@@ -53,8 +68,20 @@ namespace MFiles.VAF.Extensions.Webhooks.Authentication
 
             return true;
         }
-        protected abstract bool AreCredentialsValid(EventHandlerEnvironment env);
-        protected abstract bool ContainsCredentials(EventHandlerEnvironment env);
+
+		/// <summary>
+		/// Checks whether the credentials in <paramref name="env"/> are valid.
+		/// </summary>
+		/// <param name="env">The environment representing the request.</param>
+		/// <returns></returns>
+		protected abstract bool AreCredentialsValid(EventHandlerEnvironment env);
+
+		/// <summary>
+		/// Checks whether the credentials in <paramref name="env"/> are valid.
+		/// </summary>
+		/// <param name="env">The environment representing the request.</param>
+		/// <returns></returns>
+		protected abstract bool ContainsCredentials(EventHandlerEnvironment env);
 
         protected virtual AnonymousExtensionMethodResult CreateResult
         (

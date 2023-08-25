@@ -213,6 +213,9 @@
   <ItemGroup>
     <None Include="nuget-readme.md" Pack="True" PackagePath="\" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Web" />
+  </ItemGroup>
   <Target Name="CleanNugetPackages" BeforeTargets="Build">
     <ItemGroup>
       <FilesToDelete Include="$(OutputPath)*.nupkg" />
