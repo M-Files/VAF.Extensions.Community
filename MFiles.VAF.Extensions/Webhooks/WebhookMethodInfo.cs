@@ -21,8 +21,8 @@ namespace MFiles.VAF.Extensions.Webhooks
     {
         private ILogger Logger = LogManager.GetLogger(typeof(WebhookMethodInfo<TConfiguration>));
 
-        protected WebhookAttribute Attribute { get; }
-        protected string WebhookName => this.Attribute?.Name;
+        protected IWebhook Details { get; }
+        public string WebhookName => this.Details?.Name;
         
         protected MethodInfo MethodInfo { get; }
         protected object Instance { get; }
@@ -30,7 +30,7 @@ namespace MFiles.VAF.Extensions.Webhooks
         protected WebhookAuthenticationConfigurationManager<TConfiguration> AuthenticationConfigurationManager { get; }
 
 		/// <inheritdoc />
-        public bool HasSeparateEventHandlerProxy => this.Attribute?.HasSeparateEventHandlerProxy ?? true;
+        public bool HasSeparateEventHandlerProxy => (this.Details as WebhookAttribute)?.HasSeparateEventHandlerProxy ?? true;
 
 		/// <inheritdoc />
 		public EventHandlerVaultUserIdentity VaultUserIdentity => EventHandlerVaultUserIdentity.Server;
@@ -47,14 +47,14 @@ namespace MFiles.VAF.Extensions.Webhooks
         public WebhookMethodInfo
         (
             WebhookAuthenticationConfigurationManager<TConfiguration> authenticationConfigurationManager,
-            WebhookAttribute attribute,
+            IWebhook details,
             MethodInfo methodInfo, 
             object instance
         )
         {
             this.AuthenticationConfigurationManager = authenticationConfigurationManager
                 ?? throw new ArgumentNullException(nameof(authenticationConfigurationManager));
-            this.Attribute = attribute ?? throw new ArgumentNullException(nameof(attribute));
+            this.Details = details ?? throw new ArgumentNullException(nameof(details));
 
             // Override the extension method.
             this.MethodInfo = methodInfo;
@@ -122,7 +122,7 @@ namespace MFiles.VAF.Extensions.Webhooks
             object output = null;
 
             // Validate the serializer.
-            var serializerType = this.Attribute.SerializerType ?? typeof(NewtonsoftJsonSerializer);
+            var serializerType = this.Details.SerializerType ?? typeof(NewtonsoftJsonSerializer);
             if (!typeof(ISerializer).IsAssignableFrom(serializerType))
             {
                 var e = new InvalidOperationException("Webhook serializer declaration invalid.");
@@ -227,7 +227,7 @@ namespace MFiles.VAF.Extensions.Webhooks
 
 			// Validate that this type is okay for the declaration.
 			if ((authenticator == null || authenticator is NoAuthenticationWebhookAuthenticator)
-                    && !this.Attribute.SupportsNoAuthentication)
+                    && !this.Details.SupportsNoAuthentication)
             {
                 this.Logger.Warn($"Web hook {this.WebhookName} requires authentication, but no authentication is configured.  Request is being denied.");
                 throw new UnauthorizedAccessException();
@@ -237,7 +237,7 @@ namespace MFiles.VAF.Extensions.Webhooks
 				// No authenticator, but the attribute supports no authentication, so...  Awesome.
 				return true;
 			}
-            if (!this.Attribute.SupportsAuthenticator(authenticator.GetType()))
+            if (!this.Details.SupportsAuthenticator(authenticator.GetType()))
             {
                 this.Logger.Warn($"Web hook {this.WebhookName} does not support authenticator of type {authenticator.GetType().FullName}.  Request is being denied.");
                 throw new UnauthorizedAccessException();
