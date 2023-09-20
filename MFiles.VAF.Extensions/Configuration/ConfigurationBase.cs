@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace MFiles.VAF.Extensions.Configuration
 {
+
 	/// <summary>
 	/// A base class for configuration that implements <see cref="IConfigurationWithLoggingConfiguration"/>.
 	/// </summary>
@@ -18,7 +19,9 @@ namespace MFiles.VAF.Extensions.Configuration
 	[UsesConfigurationResources]
 	[UsesLoggingResources]
 	public abstract class ConfigurationBase
-		: VersionedConfigurationBase, IConfigurationWithLoggingConfiguration
+		: VersionedConfigurationBase,
+			IConfigurationWithLoggingConfiguration,
+			IConfigurationWithWebhookConfiguration
 	{
 
 		[DataMember]

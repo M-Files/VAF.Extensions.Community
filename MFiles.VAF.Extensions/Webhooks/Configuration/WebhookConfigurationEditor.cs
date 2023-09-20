@@ -4,6 +4,8 @@ using MFiles.VAF.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Resources;
+using MFiles.VAF.Extensions.Webhooks.Authentication;
+using Newtonsoft.Json.Linq;
 
 namespace MFiles.VAF.Extensions.Webhooks.Configuration
 {
@@ -40,6 +42,30 @@ namespace MFiles.VAF.Extensions.Webhooks.Configuration
 					}
 				};
 			}
+		}
+		public bool TryGetWebhookAuthenticator
+		(
+			string webhookName, 
+			out IWebhookAuthenticator authenticator
+		)
+		{
+			authenticator = null;
+			if (string.IsNullOrWhiteSpace(webhookName))
+				return false;
+			if (false == this.ContainsKey(webhookName))
+				return false;
+
+			var value = this[webhookName] as JObject;
+			if (value == null)
+				return false;
+
+			var type = Instance[webhookName] as Type;
+			if (null == type)
+				return false;
+
+			authenticator = value.ToObject(type) as IWebhookAuthenticator;
+			return (authenticator != null);
+
 		}
 	}
 }
