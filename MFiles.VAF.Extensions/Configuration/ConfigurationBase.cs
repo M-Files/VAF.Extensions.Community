@@ -1,6 +1,7 @@
 ﻿using MFiles.VAF.Configuration;
 using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Configuration.Logging.NLog;
+using MFiles.VAF.Extensions.Webhooks.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,12 @@ namespace MFiles.VAF.Extensions.Configuration
 	public abstract class ConfigurationBase
 		: VersionedConfigurationBase, IConfigurationWithLoggingConfiguration
 	{
+
+		[DataMember]
+		[Security(ChangeBy = SecurityAttribute.UserLevel.VaultAdmin, ViewBy = SecurityAttribute.UserLevel.VaultAdmin)]
+		public WebhookConfigurationEditor WebhookConfiguration { get; set; }
+			= new WebhookConfigurationEditor();
+
 		[DataMember(EmitDefaultValue = false)]
 		[JsonConfEditor
 		(

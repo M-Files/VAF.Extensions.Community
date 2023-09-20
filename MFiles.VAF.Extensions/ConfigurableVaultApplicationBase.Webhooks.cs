@@ -15,7 +15,7 @@ namespace MFiles.VAF.Extensions
 	where TSecureConfiguration : class, new()
 	{
 
-		protected List<WebhookMethodInfo<TSecureConfiguration>> Webhooks { get; set; }
+		public List<WebhookMethodInfo<TSecureConfiguration>> Webhooks { get; set; }
 			= new List<WebhookMethodInfo<TSecureConfiguration>>();
 
 		/// <summary>
@@ -37,6 +37,25 @@ namespace MFiles.VAF.Extensions
 					instance
 				);
 				this.Webhooks.Add(webhookMethodInfo);
+
+				// Add the webhook to the configuration editor.
+				var authenticationAttribute = methodInfo.GetCustomAttribute<WebhookAuthenticationAttribute>();
+				if (authenticationAttribute != null)
+				{
+					if (authenticationAttribute is AnonymousWebhookAuthenticationAttribute)
+					{
+						// No config.
+					}
+					else
+					{
+						WebhookConfigurationEditor.Instance.Add(a.Name, authenticationAttribute.ConfigurationType);
+					}
+				}
+				else
+				{
+					WebhookConfigurationEditor.Instance.Add(a.Name, typeof(WebhookConfiguration));
+				}
+				
 				return webhookMethodInfo;
 			}
 

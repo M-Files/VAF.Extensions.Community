@@ -22,6 +22,9 @@ using System.Threading.Tasks;
 using MFiles.VAF.Extensions.Logging;
 using MFiles.VAF.Configuration;
 using MFiles.VAF.Extensions.Configuration;
+using MFiles.VAF.Configuration.JsonEditor;
+using MFiles.VAF.Extensions.Webhooks.Configuration;
+using System.Dynamic;
 
 namespace MFiles.VAF.Extensions
 {
@@ -138,6 +141,42 @@ namespace MFiles.VAF.Extensions
 		protected override IMetadataStructureValidator CreateMetadataStructureValidator()
 		{
 			return new MFiles.VAF.Extensions.Configuration.MetadataStructureValidator();
+		}
+
+		public override Schema GetConfigurationSchema(IConfigurationRequestContext context)
+		{
+			var s = base.GetConfigurationSchema(context);
+
+			// Create a schema for the different types of webhook auth.
+			// We can use the WebhookConfiguration class as an entry point.
+			var authSchema = new SchemaGenerator()
+			{
+				ConfigurationRequestContext = context,
+				ResourceManager = this.ConfManager.ResourceManager
+			}.GenerateSchema(typeof(WebhookConfiguration));
+			foreach (var kvp in authSchema.Editors)
+			{
+				if(!s.Editors.ContainsKey(kvp.Key))
+					s.Editors.Add(kvp.Key, kvp.Value);
+			}
+
+			// If we don't have any webhooks then remove the configuration option...
+			if(!WebhookConfigurationEditor.Instance.Any())
+			{
+				var configurationElement = s
+					.Editors
+					.FirstOrDefault(e => e.Key == typeof(TSecureConfiguration).FullName)
+					.Value as IDictionary<string, object>;
+
+				if(!(configurationElement == default))
+				{
+					var members = ((IDictionary<string, object>)configurationElement["members"]);
+					if (!(members == default) && members.ContainsKey(nameof(ConfigurationBase.WebhookConfiguration)))
+						members.Remove(nameof(ConfigurationBase.WebhookConfiguration));
+				}
+			}
+
+			return s;
 		}
 	}
 }

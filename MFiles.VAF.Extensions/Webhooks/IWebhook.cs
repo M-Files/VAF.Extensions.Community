@@ -13,10 +13,6 @@ namespace MFiles.VAF.Extensions.Webhooks
 		string HttpMethod { get; }
 		bool SupportsNoAuthentication { get; }
 		Type SerializerType { get; }
-		bool SupportsAuthenticator(Type type);
-		bool SupportsAuthenticator<TAuthenticatorType>()
-			where TAuthenticatorType : IWebhookAuthenticator;
-
 		bool TryGetHandlerMethodInfo(out MethodInfo methodInfo, out object instance);
 
 	}
@@ -33,13 +29,7 @@ namespace MFiles.VAF.Extensions.Webhooks
 
 		public Type SerializerType { get; set; } = typeof(NewtonsoftJsonSerializer);
 
-		public virtual bool SupportsAuthenticator(Type type)
-			=> true;
-
 		public abstract bool TryGetHandlerMethodInfo(out MethodInfo methodInfo, out object instance);
-
-		public bool SupportsAuthenticator<TAuthenticatorType>() where TAuthenticatorType : IWebhookAuthenticator
-			=> this.SupportsAuthenticator(typeof(TAuthenticatorType));
 
 		public Webhook(string name)
 		{

@@ -237,11 +237,11 @@ namespace MFiles.VAF.Extensions.Webhooks
 				// No authenticator, but the attribute supports no authentication, so...  Awesome.
 				return true;
 			}
-            if (!this.Details.SupportsAuthenticator(authenticator.GetType()))
-            {
-                this.Logger.Warn($"Web hook {this.WebhookName} does not support authenticator of type {authenticator.GetType().FullName}.  Request is being denied.");
-                throw new UnauthorizedAccessException();
-            }
+            //if (!this.Details.SupportsAuthenticator(authenticator.GetType()))
+            //{
+            //    this.Logger.Warn($"Web hook {this.WebhookName} does not support authenticator of type {authenticator.GetType().FullName}.  Request is being denied.");
+            //    throw new UnauthorizedAccessException();
+            //}
 
 			// Authenticate!
             if(!authenticator.IsRequestAuthenticated(env, out output))

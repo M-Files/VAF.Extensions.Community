@@ -77,5 +77,5 @@ namespace MFiles.VAF.Extensions.Webhooks
             if (responseBody != null)
                 this.ResponseBody = responseBody;
         }
-    }
+	}
 }

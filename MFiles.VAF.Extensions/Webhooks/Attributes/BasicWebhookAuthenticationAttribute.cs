@@ -1,4 +1,5 @@
 ﻿using MFiles.VAF.Extensions.Webhooks.Authentication;
+using MFiles.VAF.Extensions.Webhooks.Configuration;
 using System;
 
 namespace MFiles.VAF.Extensions
@@ -8,15 +9,15 @@ namespace MFiles.VAF.Extensions
 	/// (i.e. base64-encoded credentials in a HTTP header).
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
-    public class BasicAuthenticationWebhookAttribute
-        : WebhookAttribute
-    {
-        public BasicAuthenticationWebhookAttribute(string webhookName, string httpMethod = "GET")
-            : base(webhookName, false, httpMethod)
-        {
-        }
-
-        public override bool SupportsAuthenticator(Type type)
+    public class BasicWebhookAuthenticationAttribute
+        : WebhookAuthenticationAttribute
+	{
+		public BasicWebhookAuthenticationAttribute()
+			: base(typeof(BasicWebhookAuthenticator))
+		{
+		}
+		
+		public override bool SupportsAuthenticator(Type type)
             => typeof(BasicWebhookAuthenticator).IsAssignableFrom(type);
     }
 }
