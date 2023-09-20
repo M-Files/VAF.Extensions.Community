@@ -34,7 +34,6 @@ namespace MFiles.VAF.Extensions.Webhooks.Configuration
         {
             this.Authenticators.Clear();
 
-			System.Diagnostics.Debugger.Launch();
 			if(configuration is IConfigurationWithWebhookConfiguration c
 				&& null != c.WebhookConfiguration)
 			{
