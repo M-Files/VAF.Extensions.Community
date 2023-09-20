@@ -20,7 +20,7 @@ namespace MFiles.VAF.Extensions.Webhooks.Configuration
         protected Dictionary<string, IWebhookAuthenticator> Authenticators { get; } 
             = new Dictionary<string, IWebhookAuthenticator>();
         protected IWebhookAuthenticator FallbackAuthenticator { get; set; }
-            = new NoAuthenticationWebhookAuthenticator();
+            = new BlockAllRequestsWebhookAuthenticator();
         public WebhookAuthenticationConfigurationManager(ConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication)
         {
             this.VaultApplication = vaultApplication ?? throw new ArgumentNullException(nameof(vaultApplication));
@@ -34,12 +34,19 @@ namespace MFiles.VAF.Extensions.Webhooks.Configuration
         {
             this.Authenticators.Clear();
 
+			// Sanity.
+			if (null == this.VaultApplication?.Webhooks)
+				return;
+
+			// If we can parse the config then use it.
 			if(configuration is IConfigurationWithWebhookConfiguration c
 				&& null != c.WebhookConfiguration)
 			{
 				this.Logger?.Trace($"Parsing webhook configuration...");
 				foreach(var webhook in this.VaultApplication.Webhooks)
 				{
+					if (string.IsNullOrWhiteSpace(webhook?.WebhookName))
+						return;
 					if (!c.WebhookConfiguration.ContainsKey(webhook.WebhookName))
 					{
 						this.Logger?.Warn($"Webhook with name {webhook.WebhookName} found, but configuration is not available.");
@@ -49,6 +56,7 @@ namespace MFiles.VAF.Extensions.Webhooks.Configuration
 					if(c.WebhookConfiguration.TryGetWebhookAuthenticator(webhook.WebhookName, out IWebhookAuthenticator authenticator)
 						&& null != authenticator)
 					{
+						this.Logger?.Info($"Webhook with name {webhook.WebhookName} found, configured via {authenticator.GetType().FullName}.");
 						this.Authenticators.Add(webhook.WebhookName, authenticator);
 					}
 					else

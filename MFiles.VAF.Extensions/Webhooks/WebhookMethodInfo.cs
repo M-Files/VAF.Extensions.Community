@@ -226,7 +226,7 @@ namespace MFiles.VAF.Extensions.Webhooks
 			output = null;
 
 			// Validate that this type is okay for the declaration.
-			if ((authenticator == null || authenticator is NoAuthenticationWebhookAuthenticator)
+			if ((authenticator == null || authenticator is BlockAllRequestsWebhookAuthenticator)
                     && !this.Details.SupportsNoAuthentication)
             {
                 this.Logger.Warn($"Web hook {this.WebhookName} requires authentication, but no authentication is configured.  Request is being denied.");

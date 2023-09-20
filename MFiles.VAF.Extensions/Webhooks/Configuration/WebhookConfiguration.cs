@@ -56,7 +56,7 @@ namespace MFiles.VAF.Extensions.Webhooks.Configuration
             switch (this.AuthenticationType)
             {
                 case WebhookAuthenticationType.None:
-                    return new NoAuthenticationWebhookAuthenticator();
+                    return new BlockAllRequestsWebhookAuthenticator();
                 case WebhookAuthenticationType.Basic:
                     return this.BasicWebhookAuthenticationConfiguration?.GetWebhookAuthenticator();
                 case WebhookAuthenticationType.Secret:
