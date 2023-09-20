@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Resources;
 using MFiles.VAF.Extensions.Webhooks.Authentication;
 using Newtonsoft.Json.Linq;
+using MFiles.VAF.Configuration.Logging;
 
 namespace MFiles.VAF.Extensions.Webhooks.Configuration
 {
@@ -13,6 +14,7 @@ namespace MFiles.VAF.Extensions.Webhooks.Configuration
 	public class WebhookConfigurationEditor
 		: Dictionary<string, object>, IObjectEditorMembersProvider
 	{
+		private ILogger Logger { get; } = LogManager.GetLogger<WebhookConfigurationEditor>();
 		public static WebhookConfigurationEditor Instance { get; }
 			= new WebhookConfigurationEditor();
 		public IEnumerable<ObjectEditorMember> GetMembers
@@ -63,7 +65,14 @@ namespace MFiles.VAF.Extensions.Webhooks.Configuration
 			if (null == type)
 				return false;
 
-			authenticator = value.ToObject(type) as IWebhookAuthenticator;
+			try
+			{
+				authenticator = value.ToObject(type) as IWebhookAuthenticator;
+			}
+			catch(Exception e)
+			{
+				this.Logger?.Warn(e, $"Could not load webhook configuration for {webhookName}.");
+			}
 			return (authenticator != null);
 
 		}

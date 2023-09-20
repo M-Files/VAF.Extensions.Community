@@ -38,16 +38,30 @@ namespace MFiles.VAF.Extensions.Webhooks.Configuration
 			if(configuration is IConfigurationWithWebhookConfiguration c
 				&& null != c.WebhookConfiguration)
 			{
+				this.Logger?.Trace($"Parsing webhook configuration...");
 				foreach(var webhook in this.VaultApplication.Webhooks)
 				{
 					if (!c.WebhookConfiguration.ContainsKey(webhook.WebhookName))
+					{
+						this.Logger?.Warn($"Webhook with name {webhook.WebhookName} found, but configuration is not available.");
 						continue;
+					}
+
 					if(c.WebhookConfiguration.TryGetWebhookAuthenticator(webhook.WebhookName, out IWebhookAuthenticator authenticator)
 						&& null != authenticator)
 					{
 						this.Authenticators.Add(webhook.WebhookName, authenticator);
 					}
+					else
+					{
+						this.Logger?.Warn($"Webhook with name {webhook.WebhookName} found, but configuration could not be loaded.");
+
+					}
 				}
+			}
+			else
+			{
+				this.Logger?.Trace($"The configuration does not inherit from IConfigurationWithWebhookConfiguration so cannot parse webhook config.");
 			}
         }
 
