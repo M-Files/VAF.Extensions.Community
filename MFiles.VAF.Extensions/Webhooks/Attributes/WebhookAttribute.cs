@@ -1,10 +1,12 @@
 ﻿using MFiles.VAF.Common;
+using MFiles.VAF.Configuration.Domain.Client;
 using MFiles.VAF.Extensions.Webhooks;
 using System;
 using System.Reflection;
 
 namespace MFiles.VAF.Extensions
 {
+
 	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
     public class WebhookAttribute
         : VaultAnonymousExtensionMethodAttribute, IWebhook

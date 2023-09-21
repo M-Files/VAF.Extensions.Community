@@ -66,7 +66,9 @@ namespace MFiles.VAF.Extensions
 			// Ensure that our web hook configuration is updated.
 			try
 			{
+				this.Logger?.Debug($"Webhook configuration updating");
 				this.WebhookAuthenticationConfigurationManager?.PopulateFromConfiguration(this.Configuration);
+				this.Logger?.Debug($"Webhook configuration updated");
 			}
 			catch (Exception e)
 			{

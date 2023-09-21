@@ -1,7 +1,9 @@
 ﻿using MFiles.VAF.Common;
+using MFiles.VAF.Configuration;
 using MFiles.VAF.Configuration.Logging;
 using MFilesAPI;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
@@ -13,10 +15,6 @@ namespace MFiles.VAF.Extensions.Webhooks.Authentication
     public abstract class WebhookAuthenticatorBase
         : IWebhookAuthenticator, IWebhookAuthenticatorProvider
     {
-		/// <inheritdoc />
-        [DataMember]
-        public bool Enabled { get; set; } = false;
-
         private ILogger Logger { get; } = LogManager.GetLogger(typeof(WebhookAuthenticatorBase));
 
 		/// <summary>
@@ -68,6 +66,10 @@ namespace MFiles.VAF.Extensions.Webhooks.Authentication
 
             return true;
         }
+
+		/// <inheritdoc />
+		public virtual IEnumerable<ValidationFinding> CustomValidation(Vault vault, string webhookName)
+			=> Array.Empty<ValidationFinding>();
 
 		/// <summary>
 		/// Checks whether the credentials in <paramref name="env"/> are valid.

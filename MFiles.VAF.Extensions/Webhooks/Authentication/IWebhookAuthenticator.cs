@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF;
 using MFiles.VAF.Common;
+using MFiles.VAF.Configuration;
 using MFilesAPI;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,5 +13,7 @@ namespace MFiles.VAF.Extensions.Webhooks.Authentication
     public interface IWebhookAuthenticator
     {
         bool IsRequestAuthenticated(EventHandlerEnvironment env, out AnonymousExtensionMethodResult output);
-    }
+		IEnumerable<ValidationFinding> CustomValidation(Vault vault, string webhookName);
+
+	}
 }

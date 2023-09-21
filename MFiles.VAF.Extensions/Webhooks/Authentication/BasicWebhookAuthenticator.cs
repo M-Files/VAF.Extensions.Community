@@ -4,6 +4,8 @@ using MFiles.VAF.Configuration;
 using MFiles.VAF.Configuration.Logging;
 using MFilesAPI;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Text;
@@ -18,30 +20,70 @@ namespace MFiles.VAF.Extensions.Webhooks.Authentication
     public class BasicWebhookAuthenticator
         : WebhookAuthenticatorBase
     {
+		[DataContract]
+		[JsonConfEditor(NameMember = nameof(Username))]
+		public class Credentials
+			: VAF.Extensions.Configuration.ConfigurationCollectionItemBase
+		{
+			/// <inheritdoc />
+			[DataMember]
+			public bool Enabled { get; set; } = false;
+
+			[DataMember]
+			public string Username { get; set; }
+
+			[DataMember]
+			[Security(IsPassword = true)]
+			public string Password { get; set; }
+
+		}
 		private ILogger Logger { get; } 
 			= LogManager.GetLogger<BasicWebhookAuthenticator>();
 
-        [DataMember]
-        public string Username { get; set; }
-
-        [DataMember]
-        [Security(IsPassword = true)]
-        public string Password { get; set; }
-
-        [DataMember]
-        public string NewUsername { get; set; }
-
-        [DataMember]
-        [Security(IsPassword = true)]
-        public string NewPassword { get; set; }
+		[DataMember]
+		[JsonConfEditor(ChildName = "Credential")]
+		public List<Credentials> AccessCredentials { get; set; }
+			= new List<Credentials>();
 
         public BasicWebhookAuthenticator()
             : base(WebhookAuthenticationType.Basic)
         {
-        }
+		}
 
 		/// <inheritdoc />
-        protected override bool ContainsCredentials(EventHandlerEnvironment env)
+		public override IEnumerable<ValidationFinding> CustomValidation(Vault vault, string webhookName)
+		{
+			if(!(this.AccessCredentials?.Any() ?? false))
+			{
+				yield return new ValidationFinding
+				(
+					ValidationFindingType.Warning,
+					$"WebhookConfiguration.{webhookName}",
+					$"No credentials are stored for webhook {webhookName}.  This webhook may not be able to be called."
+				);
+			}
+
+			// Check each item.
+			foreach(var c in this.AccessCredentials)
+			{
+				if (c != null)
+					continue;
+
+				if(string.IsNullOrWhiteSpace(c.Username) || string.IsNullOrWhiteSpace(c.Password))
+				{
+
+					yield return new ValidationFinding
+					(
+						ValidationFindingType.Warning,
+						$"WebhookConfiguration.{webhookName}",
+						$"An empty username or password is stored.  This is a security concern."
+					);
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		protected override bool ContainsCredentials(EventHandlerEnvironment env)
             => !string.IsNullOrWhiteSpace(env?.InputHttpHeaders?.GetValueOrEmpty("Authorization"));
 
 		/// <inheritdoc />
@@ -97,9 +139,15 @@ namespace MFiles.VAF.Extensions.Webhooks.Authentication
                     }
                 }
 
-                // Check that they are the same.
-                return (this.Username == username && this.Password == password)
-                    || (this.NewUsername == username && this.NewPassword == password);
+				// Check that they are the same.
+				if (null == this.AccessCredentials)
+					return false;
+				foreach (var c in this.AccessCredentials.Where(c => c?.Enabled ?? false))
+				{
+					if (c.Username == username && c.Password == password)
+						return true;
+				}
+				return false;
             }
             catch (Exception e)
             {

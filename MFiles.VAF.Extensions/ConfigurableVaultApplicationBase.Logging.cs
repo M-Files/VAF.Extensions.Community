@@ -1,7 +1,9 @@
 ﻿using MFiles.VAF.Configuration;
 using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Configuration.Logging.NLog;
+using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Logging;
+using MFiles.VAF.Extensions.Webhooks.Configuration;
 using MFilesAPI;
 using System;
 using System.Collections.Generic;
@@ -59,6 +61,22 @@ namespace MFiles.VAF.Extensions
 			return null;
 		}
 
+
+
+		/// <summary>
+		/// Retriees the current logging configuration, if available.
+		/// </summary>
+		/// <returns>The current logging configuration, or null.</returns>
+		protected virtual WebhookConfigurationEditor GetWebhookConfiguration()
+		{
+			if (this.Configuration is IConfigurationWithWebhookConfiguration configurationWithWebhook)
+			{
+				return configurationWithWebhook?.WebhookConfiguration;
+			}
+
+			return null;
+		}
+		
 		/// <inheritdoc />
 		protected override void UninitializeApplication(Vault vault)
 		{
@@ -81,6 +99,43 @@ namespace MFiles.VAF.Extensions
 				foreach (var finding in loggingConfiguration.GetValidationFindings() ?? new ValidationFinding[0])
 					yield return finding;
 			}
+
+			// Validate the webhook stuff.
+			var webhookConfiguration = this.GetWebhookConfiguration();
+			if(null == webhookConfiguration && WebhookConfigurationEditor.Instance.Any())
+			{
+				// No config, but no webhooks.
+				yield return new ValidationFinding
+				(
+					ValidationFindingType.Warning, 
+					"WebhookConfiguration", 
+					"No webhook configuration was found, but webhooks are available.  Webhooks may not be able to be called."
+				);
+			}
+			if(null != webhookConfiguration)
+			{
+				foreach(var webhook in WebhookConfigurationEditor.Instance)
+				{
+					// If none whatsoever then return a warning.
+					if (!webhookConfiguration.TryGetWebhookAuthenticator(webhook.Key, out var authenticator))
+					{
+						yield return new ValidationFinding
+						(
+							ValidationFindingType.Warning,
+							"WebhookConfiguration",
+							$"No webhook configuration was found for webhook {webhook.Key}.  This webhook may not be able to be called."
+						);
+						continue;
+					}
+
+					// Allow each authenticator type to validate.
+					foreach (var finding in authenticator.CustomValidation(vault, webhook.Key))
+					{
+						yield return finding;
+					}
+				}
+			}
+			
 		}
 	}
 }
