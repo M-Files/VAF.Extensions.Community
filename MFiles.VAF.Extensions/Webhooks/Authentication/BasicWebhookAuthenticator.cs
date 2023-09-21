@@ -1,6 +1,7 @@
 ﻿using MFiles.VAF;
 using MFiles.VAF.Common;
 using MFiles.VAF.Configuration;
+using MFiles.VAF.Configuration.Logging;
 using MFilesAPI;
 using System;
 using System.Net;
@@ -17,6 +18,8 @@ namespace MFiles.VAF.Extensions.Webhooks.Authentication
     public class BasicWebhookAuthenticator
         : WebhookAuthenticatorBase
     {
+		private ILogger Logger { get; } 
+			= LogManager.GetLogger<BasicWebhookAuthenticator>();
 
         [DataMember]
         public string Username { get; set; }
@@ -100,8 +103,8 @@ namespace MFiles.VAF.Extensions.Webhooks.Authentication
             }
             catch (Exception e)
             {
-                // TODO: LOG!
-                return false;
+				this.Logger?.Error(e, $"Exception checking authentication.");
+				return false;
             }
         }
     }
