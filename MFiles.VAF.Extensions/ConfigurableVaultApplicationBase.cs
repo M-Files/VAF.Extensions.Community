@@ -207,9 +207,6 @@ namespace MFiles.VAF.Extensions
 				}
 			}
 
-			// If we don't have any webhooks then remove the configuration option...
-
-			var json = s.ToJson();
 			return s;
 		}
 	}
