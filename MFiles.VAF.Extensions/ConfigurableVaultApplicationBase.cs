@@ -186,7 +186,7 @@ namespace MFiles.VAF.Extensions
 							if(!string.IsNullOrWhiteSpace(typeName) && s.Editors.ContainsKey(typeName))
 							{
 								// What should the new type name be?
-								var newType = $"\"MFiles.VAF.Extensions.MemberProxy`3[[{this.GetType().FullName}],[MFiles.VAF.Extensions.Webhooks.Configuration.WebhookConfigurationEditor],[System.Object]]\"";
+								var newType = $"MFiles.VAF.Extensions.MemberProxy`3[[{this.GetType().FullName}],[MFiles.VAF.Extensions.Webhooks.Configuration.WebhookConfigurationEditor],[System.Object]]";
 
 								// Replace the type in the editors.
 								var existingType = s.Editors[typeName];
