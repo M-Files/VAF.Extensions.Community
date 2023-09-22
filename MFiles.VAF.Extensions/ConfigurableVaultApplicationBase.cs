@@ -160,22 +160,56 @@ namespace MFiles.VAF.Extensions
 					s.Editors.Add(kvp.Key, kvp.Value);
 			}
 
-			// If we don't have any webhooks then remove the configuration option...
-			if(!WebhookConfigurationEditor.Instance.Any())
+			// Fix the schema.
 			{
+				// Find the schema editor entry for the current config type.
 				var configurationElement = s
 					.Editors
 					.FirstOrDefault(e => e.Key == typeof(TSecureConfiguration).FullName)
 					.Value as IDictionary<string, object>;
-
-				if(!(configurationElement == default))
+				if (!(configurationElement == default))
 				{
+					// Get the members (configurable properties) for this type.
 					var members = ((IDictionary<string, object>)configurationElement["members"]);
-					if (!(members == default) && members.ContainsKey(nameof(ConfigurationBase.WebhookConfiguration)))
-						members.Remove(nameof(ConfigurationBase.WebhookConfiguration));
+					if(!(members == default) && members.ContainsKey(nameof(ConfigurationBase.WebhookConfiguration)))
+					{
+						// If there are no webhooks then remove the webhook config member.
+						if (!WebhookConfigurationEditor.Instance.Any())
+						{
+							members.Remove(nameof(ConfigurationBase.WebhookConfiguration));
+						}
+						else
+						{
+							// Get the name of the type.
+							var webhookConfigurationMember = members[nameof(ConfigurationBase.WebhookConfiguration)] as IDictionary<string, object>;
+							var typeName = (webhookConfigurationMember != null && webhookConfigurationMember.ContainsKey("type")) ? webhookConfigurationMember["type"].ToString() : (string)null;
+							if(!string.IsNullOrWhiteSpace(typeName) && s.Editors.ContainsKey(typeName))
+							{
+								// What should the new type name be?
+								var newType = $"\"MFiles.VAF.Extensions.MemberProxy`3[[{this.GetType().FullName}],[MFiles.VAF.Extensions.Webhooks.Configuration.WebhookConfigurationEditor],[System.Object]]\"";
+
+								// Replace the type in the editors.
+								var existingType = s.Editors[typeName];
+
+								if ((existingType as IDictionary<string, object>)?["type"]?.ToString() == typeName)
+								{
+									s.Editors.Remove(typeName);
+									(existingType as IDictionary<string, object>)["type"] = newType;
+									s.Editors.Add(newType, existingType);
+									webhookConfigurationMember["type"] = newType;
+								}
+
+								
+							}
+						}
+					}
+
 				}
 			}
 
+			// If we don't have any webhooks then remove the configuration option...
+
+			var json = s.ToJson();
 			return s;
 		}
 	}
