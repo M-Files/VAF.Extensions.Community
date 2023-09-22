@@ -173,34 +173,30 @@ namespace MFiles.VAF.Extensions
 					var members = ((IDictionary<string, object>)configurationElement["members"]);
 					if(!(members == default) && members.ContainsKey(nameof(ConfigurationBase.WebhookConfiguration)))
 					{
-						// If there are no webhooks then remove the webhook config member.
+						var webhookConfigurationMember = members[nameof(ConfigurationBase.WebhookConfiguration)] as IDictionary<string, object>;
+
+						// Update the editor type name so that it's unique...
+						var typeName = (webhookConfigurationMember != null && webhookConfigurationMember.ContainsKey("type")) ? webhookConfigurationMember["type"].ToString() : (string)null;
+						if (!string.IsNullOrWhiteSpace(typeName) && s.Editors.ContainsKey(typeName))
+						{
+							// What should the new type name be?
+							var newType = $"MFiles.VAF.Extensions.MemberProxy`3[[{this.GetType().FullName}],[MFiles.VAF.Extensions.Webhooks.Configuration.WebhookConfigurationEditor],[System.Object]]";
+
+							// Replace the type in the editors.
+							var existingType = s.Editors[typeName];
+							if ((existingType as IDictionary<string, object>)?["type"]?.ToString() == typeName)
+							{
+								s.Editors.Remove(typeName);
+								(existingType as IDictionary<string, object>)["type"] = newType;
+								s.Editors.Add(newType, existingType);
+								webhookConfigurationMember["type"] = newType;
+							}
+						}
+
+						// If there are no webhooks then remove the webhook config member entirely.
 						if (!WebhookConfigurationEditor.Instance.Any())
 						{
 							members.Remove(nameof(ConfigurationBase.WebhookConfiguration));
-						}
-						else
-						{
-							// Get the name of the type.
-							var webhookConfigurationMember = members[nameof(ConfigurationBase.WebhookConfiguration)] as IDictionary<string, object>;
-							var typeName = (webhookConfigurationMember != null && webhookConfigurationMember.ContainsKey("type")) ? webhookConfigurationMember["type"].ToString() : (string)null;
-							if(!string.IsNullOrWhiteSpace(typeName) && s.Editors.ContainsKey(typeName))
-							{
-								// What should the new type name be?
-								var newType = $"MFiles.VAF.Extensions.MemberProxy`3[[{this.GetType().FullName}],[MFiles.VAF.Extensions.Webhooks.Configuration.WebhookConfigurationEditor],[System.Object]]";
-
-								// Replace the type in the editors.
-								var existingType = s.Editors[typeName];
-
-								if ((existingType as IDictionary<string, object>)?["type"]?.ToString() == typeName)
-								{
-									s.Editors.Remove(typeName);
-									(existingType as IDictionary<string, object>)["type"] = newType;
-									s.Editors.Add(newType, existingType);
-									webhookConfigurationMember["type"] = newType;
-								}
-
-								
-							}
 						}
 					}
 
