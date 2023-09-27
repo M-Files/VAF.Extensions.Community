@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using MFiles.VAF.Common;
+using MFiles.VAF.Extensions.ExtensionMethods;
 using MFilesAPI;
 
 namespace MFiles.VAF.Extensions
@@ -75,9 +72,22 @@ namespace MFiles.VAF.Extensions
 					nameof(propertyDef)
 				);
 
-			//// If it's a date and the value has a time component then strip it.
+			// If it's a date and the value has a time component then strip it.
 			if (dataType == MFDataType.MFDatatypeDate)
 				value = value?.Date;
+
+			// If it's a timestamp then ensure we are searching by local time.
+			if(
+				dataType == MFDataType.MFDatatypeTimestamp
+				&& value.HasValue
+			)
+			{
+				value = searchBuilder?.
+					Vault?
+					.SessionInfo?
+					.TimeZoneInfo?
+					.EnsureLocalTime(value.Value);
+			}
 
 			// Add the search condition.
 			return searchBuilder.AddPropertyValueSearchCondition
