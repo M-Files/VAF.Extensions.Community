@@ -859,5 +859,40 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading.Rules
 				""ReminderDate"" : ""MF.PD.ReminderDate""
 			}", rule.GetReadWriteLocationValue(vault));
 		}
+
+
+		[DataContract]
+		public sealed class ConfigurationWithRequiredElements
+		{
+			[DataMember]
+			[JsonConfEditor(Label = "Test Frequency", IsRequired = true)]
+			public Frequency TestFrequency { get; set; }
+
+			[DataMember]
+			[JsonConfEditor(Label = "Test bool", IsRequired = true)]
+			public bool TestBool { get; set; }
+		}
+
+		[TestMethod]
+		public void ConfigurationWithRequiredElements_DefaultsAreLeft()
+		{
+			var vault = Mock.Of<Vault>();
+			var rule = new EnsureLatestSerializationSettingsUpgradeRuleProxy<ConfigurationWithRequiredElements>();
+			rule.SetReadWriteLocation(MFNamedValueType.MFConfigurationValue, "sampleNamespace", "config");
+			rule.SetReadWriteLocationValue(vault, @"{
+				""TestFrequency"" : {
+					""RecurrenceType"": 0				
+				},
+				""TestBool"" : false
+			}");
+
+			Assert.IsTrue(rule.Execute(vault));
+			Assert.That.AreEqualJson(@"{
+				""TestFrequency"" : {
+					""RecurrenceType"": 0				
+				},
+				""TestBool"" : false
+			}", rule.GetReadWriteLocationValue(vault));
+		}
 	}
 }
