@@ -46,9 +46,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MFiles.VAF" Version="23.6.687.4" />
+    <PackageReference Include="MFiles.VAF" Version="23.6.687.5" />
     <PackageReference Include="MFiles.VAF.Configuration.Logging.NLog" Version="22.11.2" />
-    <PackageReference Include="MFilesAPI.Extensions" Version="1.0.6" />
+    <PackageReference Include="MFilesAPI.Extensions" Version="23.3.2" />
   </ItemGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
