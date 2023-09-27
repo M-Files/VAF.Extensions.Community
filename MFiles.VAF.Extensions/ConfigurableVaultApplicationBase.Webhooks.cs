@@ -31,7 +31,7 @@ namespace MFiles.VAF.Extensions
 			{
 				var webhookMethodInfo = new WebhookMethodInfo<TSecureConfiguration>
 				(
-					this.WebhookAuthenticationConfigurationManager,
+					this,
 					a,
 					methodInfo,
 					instance

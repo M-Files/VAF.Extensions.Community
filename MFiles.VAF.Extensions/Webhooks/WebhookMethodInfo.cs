@@ -27,7 +27,7 @@ namespace MFiles.VAF.Extensions.Webhooks
         protected MethodInfo MethodInfo { get; }
         protected object Instance { get; }
 
-        protected WebhookAuthenticationConfigurationManager<TConfiguration> AuthenticationConfigurationManager { get; }
+		protected ConfigurableVaultApplicationBase<TConfiguration> VaultApplication { get; }
 
 		/// <inheritdoc />
         public bool HasSeparateEventHandlerProxy => (this.Details as WebhookAttribute)?.HasSeparateEventHandlerProxy ?? true;
@@ -46,14 +46,14 @@ namespace MFiles.VAF.Extensions.Webhooks
 
         public WebhookMethodInfo
         (
-            WebhookAuthenticationConfigurationManager<TConfiguration> authenticationConfigurationManager,
-            IWebhook details,
+			ConfigurableVaultApplicationBase<TConfiguration> vaultApplication,
+			IWebhook details,
             MethodInfo methodInfo, 
             object instance
         )
         {
-            this.AuthenticationConfigurationManager = authenticationConfigurationManager
-                ?? throw new ArgumentNullException(nameof(authenticationConfigurationManager));
+            this.VaultApplication = vaultApplication
+				?? throw new ArgumentNullException(nameof(vaultApplication));
             this.Details = details ?? throw new ArgumentNullException(nameof(details));
 
             // Override the extension method.
@@ -74,7 +74,7 @@ namespace MFiles.VAF.Extensions.Webhooks
 				this.Logger.Trace($"Executing webhook {this.WebhookName}");
 
 				// Get the authenticator.
-				var authenticator = this.AuthenticationConfigurationManager.GetAuthenticator(this.WebhookName);
+				var authenticator = this.VaultApplication.WebhookAuthenticationConfigurationManager.GetAuthenticator(this.WebhookName);
 
 				// If it is not a valid request then return now.
 				AnonymousExtensionMethodResult result;
@@ -102,7 +102,132 @@ namespace MFiles.VAF.Extensions.Webhooks
 				this.Logger?.Warn(e, $"Webhook failed. {this.LogString}");
 				throw;
 			}
-        }
+		}
+
+		protected virtual AnonymousExtensionMethodResult ExecuteMethodAsync(EventHandlerEnvironment env)
+		{
+			// Sanity.
+			if (!(this.Details is IAsynchronousWebhook a))
+				throw new InvalidOperationException($"Webhook {this.Details?.Name} is marked as asynchronous but does not implement IAsynchronousWebhook");
+			if(string.IsNullOrWhiteSpace(a.TaskQueueId) || string.IsNullOrWhiteSpace(a.TaskQueueTaskType))
+				throw new InvalidOperationException($"Webhook {this.Details?.Name} is marked as asynchronous, but does not have an allocated task queue and type.");
+
+			// Add the task to the queue.
+			this.VaultApplication.TaskManager.AddTask
+			(
+				env.Vault,
+				a.TaskQueueId,
+				a.TaskQueueTaskType,
+				new AsynchronousWebhookTaskDirective(env)
+			);
+
+			// Generate the output.
+			var output = new WebhookOutput();
+			var responseText = a.GetResponseText();
+			var contentType = a.GetContentType();
+			if (!string.IsNullOrWhiteSpace(responseText))
+				output.ResponseBody = Encoding.UTF8.GetBytes(responseText);
+			if (!string.IsNullOrWhiteSpace(contentType))
+			{
+				output.ResponseHeaders["Content-Type"] = contentType;
+			}
+			return output.AsAnonymousExtensionMethodResult();
+		}
+
+		protected virtual AnonymousExtensionMethodResult ExecuteMethodSync(EventHandlerEnvironment env)
+		{
+			// Work out what we need to provide to the method.
+			var returnType = MethodInfo.ReturnType;
+			var parameters = MethodInfo.GetParameters();
+			var genericParameters = MethodInfo.GetGenericArguments();
+
+			// What is the output?
+			object output = null;
+
+			// Validate the serializer.
+			var serializerType = this.Details.SerializerType ?? typeof(NewtonsoftJsonSerializer);
+			if (!typeof(ISerializer).IsAssignableFrom(serializerType))
+			{
+				var e = new InvalidOperationException("Webhook serializer declaration invalid.");
+				this.Logger.Fatal(e, $"Serializer type does not implement ISerializer.");
+				throw e;
+			}
+			var serializer = Activator.CreateInstance(serializerType) as ISerializer;
+
+			// Is it the simple syntax?
+			if (typeof(AnonymousExtensionMethodResult).IsAssignableFrom(returnType)
+				&& genericParameters.Length == 0
+				&& parameters.Length == 1
+				&& parameters[0].ParameterType == typeof(EventHandlerEnvironment))
+			{
+				// Simple syntax.
+				// public AnonymousExtensionMethodResult XXXX(EventHandlerEnvironment env);
+				output = this.MethodInfo.Invoke(this.Instance, new[] { env }) as AnonymousExtensionMethodResult;
+			}
+			else
+			{
+
+				// Is it the type that takes an input and output?
+				if ((parameters.Length == 1 || parameters.Length == 2))
+				{
+					if (parameters[0].ParameterType != typeof(EventHandlerEnvironment))
+					{
+						{
+							var e = new InvalidOperationException("Method signature not valid");
+							this.Logger.Fatal(e, $"Parameter 1 is not assignable to EventHandlerEnvironment.");
+							throw e;
+						}
+					}
+					switch (parameters.Length)
+					{
+						case 1:
+							// public void XXXX(EventHandlerEnvironment env)
+							// public WebhookOutput XXXX(EventHandlerEnvironment env);
+							output = this.MethodInfo.Invoke(this.Instance, new[] { env });
+							break;
+						case 2:
+							// public void XXXX(EventHandlerEnvironment env, MyType input);
+							// public WebhookOutput XXXX(EventHandlerEnvironment env, MyType input);
+							// public WebhookOutput<MyType> XXXX(EventHandlerEnvironment env, MyType input);
+							object input = serializer.Deserialize(env.InputBytes, parameters[1].ParameterType);
+							output = this.MethodInfo.Invoke(this.Instance, new object[] { env, input });
+							break;
+					}
+				}
+				else
+				{
+					{
+						// Method signature not valid.
+						var e = new InvalidOperationException("Method signature not valid");
+						this.Logger.Fatal(e, $"Method return type was incorrect, or incorrect number or type of parameters.");
+						throw e;
+					}
+				}
+			}
+
+			// If we have no return type needed, create a blank implementation.
+			if (returnType == typeof(void))
+				return new AnonymousExtensionMethodResult();
+
+			// Null means an empty result.
+			if (output == null)
+				return new AnonymousExtensionMethodResult();
+
+			// If we already have a result then return that.
+			if (output is AnonymousExtensionMethodResult r)
+				return r;
+
+			// If we can cast to the correct type then return that.
+			if (output is IConvertableToAnonymousExtensionMethodResult o)
+				return o.AsAnonymousExtensionMethodResult();
+
+			// Serialize it.
+			return new AnonymousExtensionMethodResult()
+			{
+				OutputBytesValue = serializer.Serialize(output)
+			};
+
+		}
 
 		/// <summary>
 		/// Ensures that the method signature is one of the expected ones,
@@ -110,101 +235,12 @@ namespace MFiles.VAF.Extensions.Webhooks
 		/// </summary>
 		/// <param name="env">The environment to pass to the method.</param>
 		/// <returns>The result of the call to the method, or an empty <see cref="AnonymousExtensionMethodResult"/>.</returns>
-        protected virtual AnonymousExtensionMethodResult ExecuteMethod(EventHandlerEnvironment env)
+		protected virtual AnonymousExtensionMethodResult ExecuteMethod(EventHandlerEnvironment env)
         {
-
-            // Work out what we need to provide to the method.
-            var returnType = MethodInfo.ReturnType;
-            var parameters = MethodInfo.GetParameters();
-            var genericParameters = MethodInfo.GetGenericArguments();
-
-            // What is the output?
-            object output = null;
-
-            // Validate the serializer.
-            var serializerType = this.Details.SerializerType ?? typeof(NewtonsoftJsonSerializer);
-            if (!typeof(ISerializer).IsAssignableFrom(serializerType))
-            {
-                var e = new InvalidOperationException("Webhook serializer declaration invalid.");
-                this.Logger.Fatal(e, $"Serializer type does not implement ISerializer.");
-                throw e;
-            }
-            var serializer = Activator.CreateInstance(serializerType) as ISerializer;
-
-            // Is it the simple syntax?
-            if (typeof(AnonymousExtensionMethodResult).IsAssignableFrom(returnType)
-                && genericParameters.Length == 0
-                && parameters.Length == 1
-                && parameters[0].ParameterType == typeof(EventHandlerEnvironment))
-            {
-				// Simple syntax.
-				// public AnonymousExtensionMethodResult XXXX(EventHandlerEnvironment env);
-				output = this.MethodInfo.Invoke(this.Instance, new[] { env }) as AnonymousExtensionMethodResult;
-            }
-            else
-            {
-
-                // Is it the type that takes an input and output?
-                if ((parameters.Length == 1 || parameters.Length == 2))
-                {
-                    if (parameters[0].ParameterType != typeof(EventHandlerEnvironment))
-                    {
-                        {
-                            var e = new InvalidOperationException("Method signature not valid");
-                            this.Logger.Fatal(e, $"Parameter 1 is not assignable to EventHandlerEnvironment.");
-                            throw e;
-                        }
-                    }
-                    switch (parameters.Length)
-                    {
-                        case 1:
-                            // public void XXXX(EventHandlerEnvironment env)
-                            // public WebhookOutput XXXX(EventHandlerEnvironment env);
-                            output = this.MethodInfo.Invoke(this.Instance, new[] { env });
-                            break;
-                        case 2:
-							// public void XXXX(EventHandlerEnvironment env, MyType input);
-							// public WebhookOutput XXXX(EventHandlerEnvironment env, MyType input);
-							// public WebhookOutput<MyType> XXXX(EventHandlerEnvironment env, MyType input);
-                            object input = serializer.Deserialize(env.InputBytes, parameters[1].ParameterType);
-                            output = this.MethodInfo.Invoke(this.Instance, new object[] { env, input });
-                            break;
-                    }
-                }
-                else
-                {
-                    {
-                        // Method signature not valid.
-                        var e = new InvalidOperationException("Method signature not valid");
-                        this.Logger.Fatal(e, $"Method return type was incorrect, or incorrect number or type of parameters.");
-                        throw e;
-                    }
-                }
-            }
-
-            // If we have no return type needed, create a blank implementation.
-            if (returnType == typeof(void))
-                return new AnonymousExtensionMethodResult();
-            
-            // Null means an empty result.
-            if (output == null)
-                return new AnonymousExtensionMethodResult();
-
-            // If we already have a result then return that.
-            if (output is AnonymousExtensionMethodResult r)
-                return r;
-
-            // If we can cast to the correct type then return that.
-            if (output is IConvertableToAnonymousExtensionMethodResult o)
-                return o.AsAnonymousExtensionMethodResult();
-
-            // Serialize it.
-            return new AnonymousExtensionMethodResult()
-            {
-                OutputBytesValue = serializer.Serialize(output)
-            };
-
-
+			if (this.Details is IAsynchronousWebhook)
+				return this.ExecuteMethodAsync(env);
+			else
+				return this.ExecuteMethodSync(env);
         }
 
 		/// <summary>
