@@ -1,31 +1,25 @@
-﻿using MFiles.VAF;
-using MFiles.VAF.Common;
-using MFilesAPI;
-using System.Text;
+﻿using MFiles.VAF.Common;
 
 namespace MFiles.VAF.Extensions.Webhooks.Authentication
 {
-	public class BlockAllRequestsWebhookAuthenticator
+	public class AnonymousWebhookAuthenticator
 		: WebhookAuthenticatorBase
 	{
-		public BlockAllRequestsWebhookAuthenticator() :
+		public AnonymousWebhookAuthenticator() :
 			base(WebhookAuthenticationType.None)
 		{
 		}
 
 		public override bool IsRequestAuthenticated(EventHandlerEnvironment env, out AnonymousExtensionMethodResult output)
 		{
-			output = new WebhookOutput()
-			{
-				ResponseBody = Encoding.UTF8.GetBytes("Access denied")
-			}.AsAnonymousExtensionMethodResult();
-			return false;
+			output = null;
+			return true;
 		}
 
 		protected override bool ContainsCredentials(EventHandlerEnvironment env)
-			=> false;
+			=> true;
 
 		protected override bool AreCredentialsValid(EventHandlerEnvironment env)
-			=> false;
+			=> true;
 	}
 }

@@ -37,18 +37,10 @@ namespace MFiles.VAF.Extensions
 			var loggingConfiguration = this.GetLoggingConfiguration();
 			LogManager.Initialize(vault, loggingConfiguration);
 			this.Logger?.Debug($"Logging started");
-
-			//// By default everything in this app should go in the "application" log category.
-			//{
-			//	var defaultLoggingNamespace = this.GetDefaultLoggingNamespace();
-			//	if (!string.IsNullOrWhiteSpace(defaultLoggingNamespace)
-			//		&& false == LogCategory.Application.Loggers.Contains(defaultLoggingNamespace))
-			//		LogCategory.Application.Loggers.Add(defaultLoggingNamespace);
-			//}
 		}
 
 		/// <summary>
-		/// Retriees the current logging configuration, if available.
+		/// Retrieves the current logging configuration, if available.
 		/// </summary>
 		/// <returns>The current logging configuration, or null.</returns>
 		protected virtual ILoggingConfiguration GetLoggingConfiguration()

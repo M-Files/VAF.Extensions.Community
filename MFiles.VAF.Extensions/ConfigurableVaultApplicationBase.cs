@@ -72,6 +72,8 @@ namespace MFiles.VAF.Extensions
 			LogManager.Current = logManager ?? new ExtensionsNLogLogManager();
 			this.Logger = LogManager.GetLogger(this.GetType());
 			this.WebhookAuthenticationConfigurationManager = this.GetWebhookAuthenticationConfigurationManager();
+			this.asynchronousWebhookTaskQueueConfiguration.QueueID = $"{this.GetType().FullName}.Webhooks.Queue";
+			this.asynchronousWebhookTaskQueueConfiguration.TaskType = "AsynchronousWebhook";
 		}
 		private TaskQueueBackgroundOperationManager<TSecureConfiguration> taskQueueBackgroundOperationManager;
 

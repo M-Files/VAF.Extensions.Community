@@ -26,7 +26,7 @@ namespace MFiles.VAF.Extensions
 		)
 			: this
 			(
-				webhookName, 
+				webhookName,
 				DefaultResponseText,
 				DefaultContentType, 
 				supportsNoAuthentication, 

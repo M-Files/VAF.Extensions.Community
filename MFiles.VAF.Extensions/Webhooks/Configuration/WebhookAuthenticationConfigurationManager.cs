@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
@@ -47,6 +48,15 @@ namespace MFiles.VAF.Extensions.Webhooks.Configuration
 				{
 					if (string.IsNullOrWhiteSpace(webhook?.WebhookName))
 						return;
+
+					// Is it anonymous, in which case we're golden.
+					if(webhook.GetCustomMethodAttributes<AnonymousWebhookAuthenticationAttribute>().Any())
+					{
+						this.Logger?.Info($"Webhook with name {webhook.WebhookName} found, configured via AnonymousWebhookAuthentication.");
+						this.Authenticators.Add(webhook.WebhookName, new AnonymousWebhookAuthenticator());
+						continue;
+					}
+
 					if (!c.WebhookConfiguration.ContainsKey(webhook.WebhookName))
 					{
 						this.Logger?.Warn($"Webhook with name {webhook.WebhookName} found, but configuration is not available.");
@@ -62,7 +72,6 @@ namespace MFiles.VAF.Extensions.Webhooks.Configuration
 					else
 					{
 						this.Logger?.Warn($"Webhook with name {webhook.WebhookName} found, but configuration could not be loaded.");
-
 					}
 				}
 			}

@@ -25,6 +25,10 @@ namespace MFiles.VAF.Extensions.Webhooks
         public string WebhookName => this.Details?.Name;
         
         protected MethodInfo MethodInfo { get; }
+		public IEnumerable<T> GetCustomMethodAttributes<T>() 
+			where T : Attribute
+			=> this.MethodInfo?.GetCustomAttributes<T>();
+
         protected object Instance { get; }
 
 		protected ConfigurableVaultApplicationBase<TConfiguration> VaultApplication { get; }
@@ -88,7 +92,10 @@ namespace MFiles.VAF.Extensions.Webhooks
 				}
 
 				// Run it.
-				result = this.ExecuteMethod(environment);
+				if (this.Details is IAsynchronousWebhook)
+					result = this.QueueAsynchronousWebhook(environment);
+				else
+					result = this.Execute(environment);
 
 				// Awesome.
 				this.Logger.Trace($"Webhook completed successfully {this.WebhookName}");
@@ -104,20 +111,22 @@ namespace MFiles.VAF.Extensions.Webhooks
 			}
 		}
 
-		protected virtual AnonymousExtensionMethodResult ExecuteMethodAsync(EventHandlerEnvironment env)
+		protected virtual AnonymousExtensionMethodResult QueueAsynchronousWebhook(EventHandlerEnvironment env)
 		{
 			// Sanity.
 			if (!(this.Details is IAsynchronousWebhook a))
 				throw new InvalidOperationException($"Webhook {this.Details?.Name} is marked as asynchronous but does not implement IAsynchronousWebhook");
-			if(string.IsNullOrWhiteSpace(a.TaskQueueId) || string.IsNullOrWhiteSpace(a.TaskQueueTaskType))
+			var queueId = a.TaskQueueId ?? this.VaultApplication.GetAsynchronousWebhookTaskQueueConfiguration()?.QueueID;
+			var taskType = a.TaskQueueTaskType ?? this.VaultApplication.GetAsynchronousWebhookTaskQueueConfiguration()?.TaskType;
+			if (string.IsNullOrWhiteSpace(queueId) || string.IsNullOrWhiteSpace(taskType))
 				throw new InvalidOperationException($"Webhook {this.Details?.Name} is marked as asynchronous, but does not have an allocated task queue and type.");
 
 			// Add the task to the queue.
 			this.VaultApplication.TaskManager.AddTask
 			(
 				env.Vault,
-				a.TaskQueueId,
-				a.TaskQueueTaskType,
+				queueId,
+				taskType,
 				new AsynchronousWebhookTaskDirective(env)
 			);
 
@@ -129,12 +138,19 @@ namespace MFiles.VAF.Extensions.Webhooks
 				output.ResponseBody = Encoding.UTF8.GetBytes(responseText);
 			if (!string.IsNullOrWhiteSpace(contentType))
 			{
+				output.ResponseHeaders = output.ResponseHeaders ?? new NamedValues();
 				output.ResponseHeaders["Content-Type"] = contentType;
 			}
 			return output.AsAnonymousExtensionMethodResult();
 		}
 
-		protected virtual AnonymousExtensionMethodResult ExecuteMethodSync(EventHandlerEnvironment env)
+		/// <summary>
+		/// Ensures that the method signature is one of the expected ones,
+		/// then calls <see cref="MethodInfo"/>.
+		/// </summary>
+		/// <param name="env">The environment to pass to the method.</param>
+		/// <returns>The result of the call to the method, or an empty <see cref="AnonymousExtensionMethodResult"/>.</returns>
+		public virtual AnonymousExtensionMethodResult Execute(EventHandlerEnvironment env)
 		{
 			// Work out what we need to provide to the method.
 			var returnType = MethodInfo.ReturnType;
@@ -170,19 +186,19 @@ namespace MFiles.VAF.Extensions.Webhooks
 				// Is it the type that takes an input and output?
 				if ((parameters.Length == 1 || parameters.Length == 2))
 				{
-					if (parameters[0].ParameterType != typeof(EventHandlerEnvironment))
-					{
-						{
-							var e = new InvalidOperationException("Method signature not valid");
-							this.Logger.Fatal(e, $"Parameter 1 is not assignable to EventHandlerEnvironment.");
-							throw e;
-						}
-					}
 					switch (parameters.Length)
 					{
 						case 1:
 							// public void XXXX(EventHandlerEnvironment env)
 							// public WebhookOutput XXXX(EventHandlerEnvironment env);
+							if (parameters[0].ParameterType != typeof(EventHandlerEnvironment))
+							{
+								{
+									var e = new InvalidOperationException("Method signature not valid");
+									this.Logger.Fatal(e, $"Parameter 1 is not assignable to EventHandlerEnvironment.");
+									throw e;
+								}
+							}
 							output = this.MethodInfo.Invoke(this.Instance, new[] { env });
 							break;
 						case 2:
@@ -226,22 +242,7 @@ namespace MFiles.VAF.Extensions.Webhooks
 			{
 				OutputBytesValue = serializer.Serialize(output)
 			};
-
 		}
-
-		/// <summary>
-		/// Ensures that the method signature is one of the expected ones,
-		/// then calls <see cref="MethodInfo"/>.
-		/// </summary>
-		/// <param name="env">The environment to pass to the method.</param>
-		/// <returns>The result of the call to the method, or an empty <see cref="AnonymousExtensionMethodResult"/>.</returns>
-		protected virtual AnonymousExtensionMethodResult ExecuteMethod(EventHandlerEnvironment env)
-        {
-			if (this.Details is IAsynchronousWebhook)
-				return this.ExecuteMethodAsync(env);
-			else
-				return this.ExecuteMethodSync(env);
-        }
 
 		/// <summary>
 		/// Returns true if the <paramref name="authenticator"/> is both valid for this type of

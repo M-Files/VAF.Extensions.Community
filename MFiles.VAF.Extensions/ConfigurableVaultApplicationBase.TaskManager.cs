@@ -70,6 +70,11 @@ namespace MFiles.VAF.Extensions
 
 				// Now populate the run commands.
 				this.TaskManager?.PopulateTaskQueueRunCommands(this.TaskQueueResolver);
+
+				this.Logger?.Trace($"Registering asynchronous webhook task queue");
+				this.RegisterAsynchronousWebhookTaskQueue();
+				this.Logger?.Debug($"Asynchronous webhook task queue registered.");
+
 			}
 			catch(System.Runtime.InteropServices.COMException e)
 			{

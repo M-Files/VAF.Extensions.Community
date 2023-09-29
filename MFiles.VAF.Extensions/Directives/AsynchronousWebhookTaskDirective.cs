@@ -11,6 +11,9 @@ namespace MFiles.VAF.Extensions
 		: TaskDirectiveWithDisplayName
 	{
 		[DataMember]
+		public string WebhookName { get; set; }
+
+		[DataMember]
 		/// <summary>
 		/// Input HTTP query string for anonymous extension method.
 		/// </summary>
@@ -41,6 +44,7 @@ namespace MFiles.VAF.Extensions
 		}
 		public AsynchronousWebhookTaskDirective(EventHandlerEnvironment env)
 		{
+			this.WebhookName = env.VaultExtensionMethodName;
 			this.InputQueryString = env?.InputQueryString;
 			this.InputBytes = env?.InputBytes;
 			this.InputHttpMethod = env?.InputHttpMethod;
@@ -65,6 +69,7 @@ namespace MFiles.VAF.Extensions
 			// Create the environment.
 			return new EventHandlerEnvironment()
 			{
+				VaultExtensionMethodName = this.WebhookName,
 				Vault = vault,
 				InputQueryString = this.InputQueryString,
 				InputBytes = this.InputBytes,
