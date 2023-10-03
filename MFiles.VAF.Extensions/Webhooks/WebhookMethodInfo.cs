@@ -144,6 +144,19 @@ namespace MFiles.VAF.Extensions.Webhooks
 			return output.AsAnonymousExtensionMethodResult();
 		}
 
+		protected virtual ISerializer CreateSerializerFromType(Type serializerType)
+		{
+			if (null == serializerType)
+				throw new ArgumentNullException(nameof(serializerType));
+			if (!typeof(ISerializer).IsAssignableFrom(serializerType))
+			{
+				var e = new InvalidOperationException("Webhook serializer declaration invalid.");
+				this.Logger.Fatal(e, $"Serializer type {serializerType.FullName} does not implement ISerializer.");
+				throw e;
+			}
+			return Activator.CreateInstance(serializerType) as ISerializer;
+		}
+
 		/// <summary>
 		/// Ensures that the method signature is one of the expected ones,
 		/// then calls <see cref="MethodInfo"/>.
@@ -155,69 +168,66 @@ namespace MFiles.VAF.Extensions.Webhooks
 			// Work out what we need to provide to the method.
 			var returnType = MethodInfo.ReturnType;
 			var parameters = MethodInfo.GetParameters();
-			var genericParameters = MethodInfo.GetGenericArguments();
 
 			// What is the output?
 			object output = null;
 
-			// Validate the serializer.
-			var serializerType = this.Details.SerializerType ?? typeof(NewtonsoftJsonSerializer);
-			if (!typeof(ISerializer).IsAssignableFrom(serializerType))
-			{
-				var e = new InvalidOperationException("Webhook serializer declaration invalid.");
-				this.Logger.Fatal(e, $"Serializer type does not implement ISerializer.");
-				throw e;
-			}
-			var serializer = Activator.CreateInstance(serializerType) as ISerializer;
+			// Validate the serializers.
+			ISerializer requestSerializer = this.CreateSerializerFromType
+			(
+				this.Details.IncomingSerializerType
+					?? this.Details.DefaultSerializerType
+					?? typeof(NewtonsoftJsonSerializer)
+			);
+			ISerializer responseSerializer = this.CreateSerializerFromType
+			(
+				this.Details.OutgoingSerializerType
+					?? this.Details.DefaultSerializerType
+					?? typeof(NewtonsoftJsonSerializer)
+			);
 
-			// Is it the simple syntax?
-			if (typeof(AnonymousExtensionMethodResult).IsAssignableFrom(returnType)
-				&& genericParameters.Length == 0
-				&& parameters.Length == 1
-				&& parameters[0].ParameterType == typeof(EventHandlerEnvironment))
+			// Is it the type that takes an input and output?
+			if ((parameters.Length == 1 || parameters.Length == 2))
 			{
-				// Simple syntax.
-				// public AnonymousExtensionMethodResult XXXX(EventHandlerEnvironment env);
-				output = this.MethodInfo.Invoke(this.Instance, new[] { env }) as AnonymousExtensionMethodResult;
+				switch (parameters.Length)
+				{
+					case 1:
+						// public void XXXX(EventHandlerEnvironment env)
+						// public WebhookOutput XXXX(EventHandlerEnvironment env);
+						if (parameters[0].ParameterType != typeof(EventHandlerEnvironment))
+						{
+							{
+								var e = new InvalidOperationException("Method signature not valid");
+								this.Logger.Fatal(e, $"Parameter 1 is not assignable to EventHandlerEnvironment.");
+								throw e;
+							}
+						}
+						output = this.MethodInfo.Invoke(this.Instance, new[] { env });
+						break;
+					case 2:
+						if (parameters[0].ParameterType != typeof(EventHandlerEnvironment))
+						{
+							{
+								var e = new InvalidOperationException("Method signature not valid");
+								this.Logger.Fatal(e, $"Parameter 1 is not assignable to EventHandlerEnvironment.");
+								throw e;
+							}
+						}
+						// public void XXXX(EventHandlerEnvironment env, MyType input);
+						// public WebhookOutput XXXX(EventHandlerEnvironment env, MyType input);
+						// public WebhookOutput<MyType> XXXX(EventHandlerEnvironment env, MyType input);
+						var input = requestSerializer.Deserialize(env.InputBytes, parameters[1].ParameterType);
+						output = this.MethodInfo.Invoke(this.Instance, new object[] { env, input });
+						break;
+				}
 			}
 			else
 			{
-
-				// Is it the type that takes an input and output?
-				if ((parameters.Length == 1 || parameters.Length == 2))
 				{
-					switch (parameters.Length)
-					{
-						case 1:
-							// public void XXXX(EventHandlerEnvironment env)
-							// public WebhookOutput XXXX(EventHandlerEnvironment env);
-							if (parameters[0].ParameterType != typeof(EventHandlerEnvironment))
-							{
-								{
-									var e = new InvalidOperationException("Method signature not valid");
-									this.Logger.Fatal(e, $"Parameter 1 is not assignable to EventHandlerEnvironment.");
-									throw e;
-								}
-							}
-							output = this.MethodInfo.Invoke(this.Instance, new[] { env });
-							break;
-						case 2:
-							// public void XXXX(EventHandlerEnvironment env, MyType input);
-							// public WebhookOutput XXXX(EventHandlerEnvironment env, MyType input);
-							// public WebhookOutput<MyType> XXXX(EventHandlerEnvironment env, MyType input);
-							object input = serializer.Deserialize(env.InputBytes, parameters[1].ParameterType);
-							output = this.MethodInfo.Invoke(this.Instance, new object[] { env, input });
-							break;
-					}
-				}
-				else
-				{
-					{
-						// Method signature not valid.
-						var e = new InvalidOperationException("Method signature not valid");
-						this.Logger.Fatal(e, $"Method return type was incorrect, or incorrect number or type of parameters.");
-						throw e;
-					}
+					// Method signature not valid.
+					var e = new InvalidOperationException("Method signature not valid");
+					this.Logger.Fatal(e, $"Method return type was incorrect, or incorrect number or type of parameters.");
+					throw e;
 				}
 			}
 
@@ -240,7 +250,7 @@ namespace MFiles.VAF.Extensions.Webhooks
 			// Serialize it.
 			return new AnonymousExtensionMethodResult()
 			{
-				OutputBytesValue = serializer.Serialize(output)
+				OutputBytesValue = responseSerializer.Serialize(output)
 			};
 		}
 
@@ -253,14 +263,21 @@ namespace MFiles.VAF.Extensions.Webhooks
 		/// <param name="output">The output of the authorisation process, if one is provided.</param>
 		/// <returns><see langword="true"/> if the request is authorised, <see langword="false"/> otherwise.</returns>
 		/// <exception cref="UnauthorizedAccessException"></exception>
-        public virtual bool IsValidRequest
-        (
-            EventHandlerEnvironment env, 
-            IWebhookAuthenticator authenticator,
-            out AnonymousExtensionMethodResult output
-        )
-        {
+		public virtual bool IsValidRequest
+		(
+			EventHandlerEnvironment env,
+			IWebhookAuthenticator authenticator,
+			out AnonymousExtensionMethodResult output
+		)
+		{
 			output = null;
+
+			// Is it enabled?
+			if (!this.Details.Enabled)
+			{
+				this.Logger.Warn($"Web hook {this.WebhookName} is not enabled.  Request is being denied.");
+				return false;
+			}
 
 			// Validate that this type is okay for the declaration.
 			if ((authenticator == null || authenticator is BlockAllRequestsWebhookAuthenticator)

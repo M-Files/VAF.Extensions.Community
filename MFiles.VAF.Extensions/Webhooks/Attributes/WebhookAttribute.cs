@@ -11,10 +11,12 @@ namespace MFiles.VAF.Extensions
     public class WebhookAttribute
         : VaultAnonymousExtensionMethodAttribute, IWebhook
 	{
+		private Type incomingSerializerType;
+
 		/// <summary>
 		/// The web hook name.  Must be unique.
 		/// </summary>
-        public string Name => base.Filter;
+		public string Name => base.Filter;
 
 		/// <summary>
 		/// The HTTP method that is needed to call this web hook.
@@ -30,9 +32,22 @@ namespace MFiles.VAF.Extensions
 		/// <summary>
 		/// The type of serializer to use.  The type must implement <see cref="Webhooks.ISerializer"/>.
 		/// </summary>
-        public Type SerializerType { get; set; }
+		/// <remarks>If null, consumer is expected to default to <see cref="NewtonsoftJsonSerializer"/>.</remarks>
+		public Type DefaultSerializerType { get; set; } = typeof(NewtonsoftJsonSerializer);
 
-		public bool Enabled => throw new NotImplementedException();
+		/// <summary>
+		/// The type of serializer to use for incoming requests.  The type must implement <see cref="Webhooks.ISerializer"/>.
+		/// </summary>
+		/// <remarks> If null, uses <see cref="DefaultSerializerType"/></remarks>
+		public Type IncomingSerializerType { get => incomingSerializerType; set => incomingSerializerType = value; }
+
+		/// <summary>
+		/// The type of serializer to use for outgoing responses.  The type must implement <see cref="Webhooks.ISerializer"/>.
+		/// </summary>
+		/// <remarks> If null, uses <see cref="DefaultSerializerType"/></remarks>
+		public Type OutgoingSerializerType { get; set; }
+
+		public bool Enabled { get; set; } = true;
 
 		/// <summary>
 		/// Creates a web hook.
