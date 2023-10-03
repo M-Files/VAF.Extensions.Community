@@ -216,6 +216,14 @@ namespace MFiles.VAF.Extensions.Webhooks
 						// public void XXXX(EventHandlerEnvironment env, MyType input);
 						// public WebhookOutput XXXX(EventHandlerEnvironment env, MyType input);
 						// public WebhookOutput<MyType> XXXX(EventHandlerEnvironment env, MyType input);
+						if (!requestSerializer.CanDeserialize(parameters[1].ParameterType))
+						{
+							{
+								var e = new InvalidOperationException($"Deserializer {requestSerializer.GetType().FullName} cannot deserialize to {parameters[1].ParameterType}.");
+								this.Logger.Fatal(e, $"Deserializer {requestSerializer.GetType().FullName} cannot deserialize to {parameters[1].ParameterType}.");
+								throw e;
+							}
+						}
 						var input = requestSerializer.Deserialize(env.InputBytes, parameters[1].ParameterType);
 						output = this.MethodInfo.Invoke(this.Instance, new object[] { env, input });
 						break;
@@ -248,6 +256,14 @@ namespace MFiles.VAF.Extensions.Webhooks
 				return o.AsAnonymousExtensionMethodResult();
 
 			// Serialize it.
+			if(!responseSerializer.CanSerialize(output.GetType()))
+			{
+				{
+					var e = new InvalidOperationException($"Serializer {responseSerializer.GetType().FullName} cannot serialize to {output.GetType()}.");
+					this.Logger.Fatal(e, $"Serializer {responseSerializer.GetType().FullName} cannot serialize to {output.GetType()}.");
+					throw e;
+				}
+			}
 			return new AnonymousExtensionMethodResult()
 			{
 				OutputBytesValue = responseSerializer.Serialize(output)

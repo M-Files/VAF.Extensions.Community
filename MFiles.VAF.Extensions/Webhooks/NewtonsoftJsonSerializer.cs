@@ -5,13 +5,20 @@ using System.Text;
 
 namespace MFiles.VAF.Extensions.Webhooks
 {
-    public class NewtonsoftJsonSerializer
+
+	public class NewtonsoftJsonSerializer
         : ISerializer
-    {
+	{
+		/// <inheritdoc />
+		public bool CanSerialize(Type type) => true;
+
+		/// <inheritdoc />
+		public bool CanDeserialize(Type type) => true;        
+		
 		/// <summary>
 		/// The type of encoding to use.  Defaults to <see cref="Encoding.UTF8"/>.
 		/// </summary>
-        public Encoding Encoding { get; set; }
+		public Encoding Encoding { get; set; }
             = Encoding.UTF8;
 
 		/// <summary>
