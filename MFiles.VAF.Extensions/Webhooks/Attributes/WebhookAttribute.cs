@@ -1,5 +1,6 @@
 ﻿using MFiles.VAF.Common;
 using MFiles.VAF.Configuration.Domain.Client;
+using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Webhooks;
 using System;
 using System.Reflection;
@@ -11,7 +12,7 @@ namespace MFiles.VAF.Extensions
     public class WebhookAttribute
         : VaultAnonymousExtensionMethodAttribute, IWebhook
 	{
-		private Type incomingSerializerType;
+		private ILogger Logger { get; } = LogManager.GetLogger<WebhookAttribute>();
 
 		/// <summary>
 		/// The web hook name.  Must be unique.
@@ -39,7 +40,7 @@ namespace MFiles.VAF.Extensions
 		/// The type of serializer to use for incoming requests.  The type must implement <see cref="Webhooks.ISerializer"/>.
 		/// </summary>
 		/// <remarks> If null, uses <see cref="DefaultSerializerType"/></remarks>
-		public Type IncomingSerializerType { get => incomingSerializerType; set => incomingSerializerType = value; }
+		public Type IncomingSerializerType { get; set; }
 
 		/// <summary>
 		/// The type of serializer to use for outgoing responses.  The type must implement <see cref="Webhooks.ISerializer"/>.
@@ -49,6 +50,37 @@ namespace MFiles.VAF.Extensions
 
 		public bool Enabled { get; set; } = true;
 
+		protected virtual ISerializer CreateSerializerFromType(Type serializerType)
+		{
+			if (null == serializerType)
+				throw new ArgumentNullException(nameof(serializerType));
+			if (!typeof(ISerializer).IsAssignableFrom(serializerType))
+			{
+				var e = new InvalidOperationException("Webhook serializer declaration invalid.");
+				this.Logger.Fatal(e, $"Serializer type {serializerType.FullName} does not implement ISerializer.");
+				throw e;
+			}
+			return Activator.CreateInstance(serializerType) as ISerializer;
+		}
+
+		/// <inheritdoc />
+		public ISerializer GetIncomingSerializer()
+			=> this.CreateSerializerFromType
+			(
+				this.IncomingSerializerType
+					?? this.DefaultSerializerType
+					?? typeof(NewtonsoftJsonSerializer)
+			);
+
+		/// <inheritdoc />
+		public ISerializer GetOutgoingSerializer()
+			=> this.CreateSerializerFromType
+			(
+				this.OutgoingSerializerType
+					?? this.DefaultSerializerType
+					?? typeof(NewtonsoftJsonSerializer)
+			);
+		
 		/// <summary>
 		/// Creates a web hook.
 		/// </summary>

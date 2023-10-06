@@ -144,19 +144,6 @@ namespace MFiles.VAF.Extensions.Webhooks
 			return output.AsAnonymousExtensionMethodResult();
 		}
 
-		protected virtual ISerializer CreateSerializerFromType(Type serializerType)
-		{
-			if (null == serializerType)
-				throw new ArgumentNullException(nameof(serializerType));
-			if (!typeof(ISerializer).IsAssignableFrom(serializerType))
-			{
-				var e = new InvalidOperationException("Webhook serializer declaration invalid.");
-				this.Logger.Fatal(e, $"Serializer type {serializerType.FullName} does not implement ISerializer.");
-				throw e;
-			}
-			return Activator.CreateInstance(serializerType) as ISerializer;
-		}
-
 		/// <summary>
 		/// Ensures that the method signature is one of the expected ones,
 		/// then calls <see cref="MethodInfo"/>.
@@ -173,18 +160,8 @@ namespace MFiles.VAF.Extensions.Webhooks
 			object output = null;
 
 			// Validate the serializers.
-			ISerializer requestSerializer = this.CreateSerializerFromType
-			(
-				this.Details.IncomingSerializerType
-					?? this.Details.DefaultSerializerType
-					?? typeof(NewtonsoftJsonSerializer)
-			);
-			ISerializer responseSerializer = this.CreateSerializerFromType
-			(
-				this.Details.OutgoingSerializerType
-					?? this.Details.DefaultSerializerType
-					?? typeof(NewtonsoftJsonSerializer)
-			);
+			ISerializer requestSerializer = this.Details.GetIncomingSerializer();
+			ISerializer responseSerializer = this.Details.GetOutgoingSerializer();
 
 			// Is it the type that takes an input and output?
 			if ((parameters.Length == 1 || parameters.Length == 2))
@@ -239,6 +216,18 @@ namespace MFiles.VAF.Extensions.Webhooks
 				}
 			}
 
+			// Return the correct data.
+			return this.ConvertToAnonymousExtensionMethodResult(returnType, responseSerializer, output);
+		}
+
+		protected virtual AnonymousExtensionMethodResult ConvertToAnonymousExtensionMethodResult
+		(
+			Type returnType, 
+			ISerializer serializer,
+			object output
+		)
+		{
+
 			// If we have no return type needed, create a blank implementation.
 			if (returnType == typeof(void))
 				return new AnonymousExtensionMethodResult();
@@ -256,17 +245,17 @@ namespace MFiles.VAF.Extensions.Webhooks
 				return o.AsAnonymousExtensionMethodResult();
 
 			// Serialize it.
-			if(!responseSerializer.CanSerialize(output.GetType()))
+			if (!serializer.CanSerialize(output.GetType()))
 			{
 				{
-					var e = new InvalidOperationException($"Serializer {responseSerializer.GetType().FullName} cannot serialize to {output.GetType()}.");
-					this.Logger.Fatal(e, $"Serializer {responseSerializer.GetType().FullName} cannot serialize to {output.GetType()}.");
+					var e = new InvalidOperationException($"Serializer {serializer.GetType().FullName} cannot serialize to {output.GetType()}.");
+					this.Logger.Fatal(e, $"Serializer {serializer.GetType().FullName} cannot serialize to {output.GetType()}.");
 					throw e;
 				}
 			}
 			return new AnonymousExtensionMethodResult()
 			{
-				OutputBytesValue = responseSerializer.Serialize(output)
+				OutputBytesValue = serializer.Serialize(output)
 			};
 		}
 

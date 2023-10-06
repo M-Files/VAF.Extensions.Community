@@ -22,22 +22,16 @@ namespace MFiles.VAF.Extensions.Webhooks
 		string HttpMethod { get; }
 		bool SupportsNoAuthentication { get; }
 
-        /// <summary>
-        /// The type of serializer to use.  The type must implement <see cref="Webhooks.ISerializer"/>.
-        /// </summary>
-        /// <remarks>If null, consumer is expected to default to <see cref="NewtonsoftJsonSerializer"/>.</remarks>
-        Type DefaultSerializerType { get; set; }
+		/// <summary>
+		/// Gets the serializer to use for incoming requests.
+		/// </summary>
+		/// <returns></returns>
+		ISerializer GetIncomingSerializer();
 
-        /// <summary>
-        /// The type of serializer to use for incoming requests.  The type must implement <see cref="Webhooks.ISerializer"/>.
-        /// </summary>
-        /// <remarks> If null, uses <see cref="DefaultSerializerType"/></remarks>
-        Type IncomingSerializerType { get; set; }
-
-        /// <summary>
-        /// The type of serializer to use for outgoing responses.  The type must implement <see cref="Webhooks.ISerializer"/>.
-        /// </summary>
-        /// <remarks> If null, uses <see cref="DefaultSerializerType"/></remarks>
-        Type OutgoingSerializerType { get; set; }
-    }
+		/// <summary>
+		/// Gets the serializer to use for outgoing responses.
+		/// </summary>
+		/// <returns></returns>
+		ISerializer GetOutgoingSerializer();
+	}
 }
