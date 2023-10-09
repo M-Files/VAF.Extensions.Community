@@ -1,4 +1,5 @@
 ﻿using MFiles.VAF;
+using MFiles.VAF.AppTasks;
 using MFiles.VAF.Common;
 using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Core;
@@ -95,7 +96,7 @@ namespace MFiles.VAF.Extensions.Webhooks
 				if (this.Details is IAsynchronousWebhook)
 					result = this.QueueAsynchronousWebhook(environment);
 				else
-					result = this.Execute(environment);
+					result = this.Execute(environment, (ITaskProcessingJob<AsynchronousWebhookTaskDirective>)null);
 
 				// Awesome.
 				this.Logger.Trace($"Webhook completed successfully {this.WebhookName}");
@@ -150,7 +151,7 @@ namespace MFiles.VAF.Extensions.Webhooks
 		/// </summary>
 		/// <param name="env">The environment to pass to the method.</param>
 		/// <returns>The result of the call to the method, or an empty <see cref="AnonymousExtensionMethodResult"/>.</returns>
-		public virtual AnonymousExtensionMethodResult Execute(EventHandlerEnvironment env)
+		public virtual AnonymousExtensionMethodResult Execute(EventHandlerEnvironment env, ITaskProcessingJob<Extensions.AsynchronousWebhookTaskDirective> job)
 		{
 			// Work out what we need to provide to the method.
 			var returnType = MethodInfo.ReturnType;

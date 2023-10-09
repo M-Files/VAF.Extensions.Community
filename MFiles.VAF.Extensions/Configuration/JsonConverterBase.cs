@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace MFiles.VAF.Extensions
 {
-	internal abstract class JsonConverterBase
+	public abstract class JsonConverterBase
 		: JsonConverter
 	{
 

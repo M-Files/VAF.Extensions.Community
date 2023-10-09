@@ -51,7 +51,7 @@ namespace MFiles.VAF.Extensions
 				return;
 
 			// Go!
-			webhook.Execute(job.Directive.AsEnvironment(job.Vault));
+			webhook.Execute(job.Directive.AsEnvironment(job.Vault), job);
 		}
 
 		/// <summary>
