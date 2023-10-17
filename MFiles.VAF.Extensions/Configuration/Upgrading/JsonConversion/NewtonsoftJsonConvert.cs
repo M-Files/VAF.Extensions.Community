@@ -21,7 +21,7 @@ namespace MFiles.VAF.Extensions
 	/// </summary>
 	public class NewtonsoftJsonConvert : IJsonConvert
 	{
-		internal class DefaultValueAwareValueProvider
+		public class DefaultValueAwareValueProvider
 			: IValueProvider
 		{
 			protected IJsonConvert JsonConvert { get; set; }
@@ -41,27 +41,20 @@ namespace MFiles.VAF.Extensions
 			public void SetValue(object target, object value)
 				=> this.valueProvider.SetValue(target, value);
 
-			/// <inheritdoc />
-			/// <remarks>
-			/// If the member has a [JsonConfEditor] attribute then the default value defined there is compared
-			/// against the current value and, if they are the same, the value is returned as <see langword="null"/>
-			/// (effectively causing the property to not be rendered to the saved configuration).
-			/// </remarks>
-			public object GetValue(object target)
+			public virtual bool ShouldRenderValue(ref object value)
 			{
-				// Get the value.
-				var value = this.valueProvider.GetValue(target);
+				// Sanity.
 				if (null == value)
-					return null;
+					return false;
 
 				// If it is the version string then always output it.
 				{
 					var dataMemberAttribute = this.memberInfo.GetCustomAttribute<DataMemberAttribute>();
-					if(null != dataMemberAttribute 
+					if (null != dataMemberAttribute
 						&& this.memberInfo.DeclaringType == typeof(VersionedConfigurationBase)
 						&& this.memberInfo.Name == nameof(VersionedConfigurationBase.VersionString))
 					{
-						return value;
+						return true;
 					}
 				}
 
@@ -69,7 +62,7 @@ namespace MFiles.VAF.Extensions
 				{
 					var allowDefaultAttribute = this.memberInfo.GetCustomAttribute<AllowDefaultValueSerializationAttribute>();
 					if (null != allowDefaultAttribute)
-						return value;
+						return true;
 				}
 
 				// Try to get the runtime default value.
@@ -80,7 +73,7 @@ namespace MFiles.VAF.Extensions
 					object defaultValue = null;
 					var instance = Activator.CreateInstance(this.memberInfo.ReflectedType);
 					bool hasValueOptionsAttribute = false;
-					switch(this.memberInfo.MemberType)
+					switch (this.memberInfo.MemberType)
 					{
 						case MemberTypes.Field:
 							{
@@ -88,7 +81,7 @@ namespace MFiles.VAF.Extensions
 								type = fieldInfo.FieldType;
 								defaultValue = fieldInfo.GetValue(instance);
 								hasValueOptionsAttribute = fieldInfo.GetCustomAttribute<ValueOptionsAttribute>() != null;
-							break;
+								break;
 							}
 						case MemberTypes.Property:
 							{
@@ -116,14 +109,14 @@ namespace MFiles.VAF.Extensions
 								var prefix = s.Substring(0, s.Length - 1);
 								if (type.FullName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
 									|| this.memberInfo.DeclaringType.FullName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-									return value;
+									return true;
 							}
 							else
 							{
 								// Exact match.
 								if (type.FullName.Equals(s, StringComparison.OrdinalIgnoreCase)
 									|| this.memberInfo.DeclaringType.FullName.Equals(s, StringComparison.OrdinalIgnoreCase))
-									return value;
+									return true;
 							}
 						}
 					}
@@ -144,7 +137,7 @@ namespace MFiles.VAF.Extensions
 					catch { } // Nope.
 
 					// If the type is an enum, but it has a ValueOptionsAttribute, then serialize as an integer.
-					if(type.IsEnum && hasValueOptionsAttribute)
+					if (type.IsEnum && hasValueOptionsAttribute)
 					{
 						try
 						{
@@ -154,7 +147,7 @@ namespace MFiles.VAF.Extensions
 						{
 							// Could not convert to integer.
 							this.Logger?.Warn(e, $"Could not convert {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name} value to an integer ({value}).");
-							return value;
+							return true;
 						}
 						try
 						{
@@ -164,7 +157,7 @@ namespace MFiles.VAF.Extensions
 						{
 							// Could not convert to integer.
 							this.Logger?.Warn(e, $"Could not convert {type.FullName} default value to an integer ({defaultValue}).");
-							return value;
+							return true;
 						}
 					}
 
@@ -177,24 +170,24 @@ namespace MFiles.VAF.Extensions
 							{
 								// We have a value, but we're not allowed empty values.
 								// Return the value.
-								return value;
+								return true;
 							}
 						}
 					}
 
 					// If the data is the same as the default value then do not serialize.
 					if (type == typeof(string) && string.Equals(defaultValue, value))
-						return null;
+						return false;
 					if (defaultValue == value)
-						return null;
+						return false;
 
 					var serializedValue = null == value ? "{}" : this.JsonConvert.Serialize(value);
 					var serializedDefaultValue = null == defaultValue ? "{}" : this.JsonConvert.Serialize(defaultValue);
 
 					if (serializedValue == "{}" || serializedDefaultValue == serializedValue)
-						return null;
+						return false;
 				}
-				catch(Exception e)
+				catch (Exception e)
 				{
 					this.Logger?.Warn(e, $"Could not identify default value for {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name}");
 				}
@@ -202,13 +195,13 @@ namespace MFiles.VAF.Extensions
 				// If this member has a JsonConfEditorAttribute then we need to check whether to filter it.
 				{
 					var jsonConfEditorAttribute = this.memberInfo.GetCustomAttribute<JsonConfEditorAttribute>();
-					if(null != jsonConfEditorAttribute)
+					if (null != jsonConfEditorAttribute)
 					{
 						if (null != jsonConfEditorAttribute.DefaultValue)
 						{
 							// If it is the default then die now.
 							if (value?.ToString() == jsonConfEditorAttribute.DefaultValue?.ToString())
-								return null;
+								return false;
 
 							// If it's the identifier then we need to check the alias/guid/id properties.
 							if (value is MFIdentifier identifier && (
@@ -217,7 +210,7 @@ namespace MFiles.VAF.Extensions
 								|| identifier.ID.ToString() == jsonConfEditorAttribute.DefaultValue?.ToString()
 								))
 							{
-								return null;
+								return false;
 							}
 						}
 
@@ -230,7 +223,28 @@ namespace MFiles.VAF.Extensions
 				}
 
 				// Return the value that the base implementation gave.
-				return value;
+				return true;
+
+			}
+			public static bool ShouldRenderValue(ref object value, IJsonConvert jsonConvert, MemberInfo memberInfo)
+			{
+				var valueProvider = new DefaultValueAwareValueProvider(jsonConvert, memberInfo, null);
+				return valueProvider.ShouldRenderValue(ref value);
+			}
+
+			/// <inheritdoc />
+			/// <remarks>
+			/// If the member has a [JsonConfEditor] attribute then the default value defined there is compared
+			/// against the current value and, if they are the same, the value is returned as <see langword="null"/>
+			/// (effectively causing the property to not be rendered to the saved configuration).
+			/// </remarks>
+			public object GetValue(object target)
+			{
+				// Get the value.
+				var value = this.valueProvider.GetValue(target);
+				return this.ShouldRenderValue(ref value)
+					? value
+					: null;
 			}
 		}
 
