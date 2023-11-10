@@ -7,7 +7,7 @@ on:
         description: 'Source branch'
         required: false
         default: 'master'
-     inputs:
+     targetBranch:
         description: 'Target branch'
         required: false
         default: 'release'
@@ -23,5 +23,5 @@ jobs:
         with:
           type: now
           from_branch: ${{ inputs.sourceBranch }}
-          target_branch: ${{ inputs.inputs }}
+          target_branch: ${{ inputs.targetBranch }}
           github_token: ${{ secrets.GITHUB_TOKEN }}    
