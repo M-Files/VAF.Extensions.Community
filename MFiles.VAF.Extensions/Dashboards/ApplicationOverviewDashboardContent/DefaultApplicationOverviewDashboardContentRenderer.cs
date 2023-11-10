@@ -77,6 +77,26 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 		public virtual IDashboardContent GetDashboardContent()
 		{
 			var content = new DashboardContentCollection();
+			IDashboardContent root = content;
+
+			if(this.VaultApplication.DashboardLogo != null)
+			{
+				// Create a table so we can put the logo on as well.
+				var table = new DashboardTable();
+				table.TableStyles.AddOrUpdate("border", "0px");
+				var row = table.AddRow();
+
+				// Create a new cell for the content.
+				var contentCell = row.AddCell();
+				contentCell.Styles.AddOrUpdate("vertical-align", "top");
+				contentCell.InnerContent = content;
+
+				// Add the logo.
+				row.AddCell(this.VaultApplication.DashboardLogo);
+
+				// The root will now be the table, not the collection.
+				root = table;
+			}
 
 			// Add the details panel, if one is returned.
 			{
@@ -97,7 +117,7 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 			}
 
 			// Return all the content.
-			return content;
+			return root;
 
 		}
 

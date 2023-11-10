@@ -19,6 +19,11 @@ namespace MFiles.VAF.Extensions
 {
 	public abstract partial class ConfigurableVaultApplicationBase<TSecureConfiguration>
 	{
+		/// <summary>
+		/// The logo to render to the dashboard.
+		/// If null, no logo is rendered.
+		/// </summary>
+		public ILogoSource DashboardLogo { get; set; }
 
 		#region Top-level dashboard generation
 
