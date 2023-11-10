@@ -92,7 +92,9 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 				contentCell.InnerContent = content;
 
 				// Add the logo.
-				row.AddCell(this.VaultApplication.DashboardLogo);
+				row.AddCell(this.VaultApplication.DashboardLogo)
+					.Styles
+					.AddOrUpdate("width", "1%"); // Make it small.
 
 				// The root will now be the table, not the collection.
 				root = table;
