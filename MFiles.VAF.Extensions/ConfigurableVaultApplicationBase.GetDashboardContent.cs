@@ -59,7 +59,7 @@ namespace MFiles.VAF.Extensions
 				var exception = new Exception("Could not create status dashboard", e);
 				FormattableString message = $"Could not create status dashboard.";
 				this.Logger?.Error(e, message);
-				return new ExceptionDashboardPanel(exception, $"Could not create status dashboard")?.ToString();
+				return new ExceptionDashboardPanel(exception, $"Could not create status dashboard")?.ToXmlString();
 			}
 
 			// Add all content in turn.
