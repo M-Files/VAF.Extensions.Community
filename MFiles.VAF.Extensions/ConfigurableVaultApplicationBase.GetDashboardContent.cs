@@ -90,7 +90,7 @@ namespace MFiles.VAF.Extensions
 				var exception = new Exception("Could not render dashboard to a string", e);
 				FormattableString message = $"Could not render dashboard to a string.";
 				this.Logger?.Error(e, message);
-				return new ExceptionDashboardPanel(exception, $"Could not render dashboard")?.ToString();
+				return new ExceptionDashboardPanel(exception, $"Could not render dashboard")?.ToXmlString();
 			}
 		}
 
