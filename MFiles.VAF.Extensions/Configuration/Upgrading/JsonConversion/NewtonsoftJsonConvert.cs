@@ -3,6 +3,7 @@ using MFiles.VAF.Configuration.JsonAdaptor;
 using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
+using MFilesAPI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -65,6 +66,46 @@ namespace MFiles.VAF.Extensions
 						return true;
 				}
 
+				var jsonConfEditorAttribute = this.memberInfo.GetCustomAttribute<JsonConfEditorAttribute>();
+				if(null != jsonConfEditorAttribute)
+				{ 
+					if (null != jsonConfEditorAttribute.DefaultValue)
+					{
+						// If it is the default then die now.
+						if (value?.ToString() == jsonConfEditorAttribute.DefaultValue?.ToString())
+						{
+							this.Logger?.Trace($"Value of {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name} was same as default value in JSONConfEditor ({jsonConfEditorAttribute.DefaultValue}) so not writing to JSON.");
+							return false;
+						}
+
+						// If it's the identifier then we need to check the alias/guid/id properties.
+						if (value is MFIdentifier identifier && (
+							identifier.Alias == jsonConfEditorAttribute.DefaultValue?.ToString()
+							|| identifier.Guid == jsonConfEditorAttribute.DefaultValue?.ToString()
+							|| identifier.ID.ToString() == jsonConfEditorAttribute.DefaultValue?.ToString()
+							))
+						{
+							this.Logger?.Trace($"Identifier at {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name} was same as default value in JSONConfEditor ({jsonConfEditorAttribute.DefaultValue}) so not writing to JSON.");
+							return false;
+						}
+					}
+
+					// If the configuration value has a JsonConfEditor attribute that defines an editor type
+					// then we may need to convert our deserialized value.
+					if (jsonConfEditorAttribute.TypeEditor == "date" && value is DateTime dateTime)
+					{
+						this.Logger?.Trace($"Value at {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name}is a date, so removing time portion.");
+						value = dateTime.ToString("yyyy-MM-dd");
+					}
+
+					// If it is required then give the current value.
+					if (jsonConfEditorAttribute.IsRequired)
+					{
+						this.Logger?.Trace($"Value at {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name} is marked as required, so writing to JSON.");
+						return true;
+					}
+				}
+
 				// Try to get the runtime default value.
 				Type type = null;
 				try
@@ -109,14 +150,20 @@ namespace MFiles.VAF.Extensions
 								var prefix = s.Substring(0, s.Length - 1);
 								if (type.FullName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
 									|| this.memberInfo.DeclaringType.FullName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+								{
+									this.Logger?.Trace($"Member at {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name} has a type prefix that is marked for skipping ({type.FullName} / {prefix}), so not writing to JSON.");
 									return true;
+								}
 							}
 							else
 							{
 								// Exact match.
 								if (type.FullName.Equals(s, StringComparison.OrdinalIgnoreCase)
 									|| this.memberInfo.DeclaringType.FullName.Equals(s, StringComparison.OrdinalIgnoreCase))
-									return true;
+								{
+									this.Logger?.Trace($"Member at {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name} has a type that is marked for skipping ({type.FullName}), so not writing to JSON.");
+									return false;
+								}
 							}
 						}
 					}
@@ -170,6 +217,7 @@ namespace MFiles.VAF.Extensions
 							{
 								// We have a value, but we're not allowed empty values.
 								// Return the value.
+								this.Logger?.Trace($"Value at {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name} does not allow empty values, so writing to JSON.");
 								return true;
 							}
 						}
@@ -177,49 +225,35 @@ namespace MFiles.VAF.Extensions
 
 					// If the data is the same as the default value then do not serialize.
 					if (type == typeof(string) && string.Equals(defaultValue, value))
+					{
+						this.Logger?.Trace($"Value at {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name} is an empty string, so not writing it to JSON.");
 						return false;
+					}
 					if (defaultValue == value)
+					{
+						this.Logger?.Trace($"Value at {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name} is null, so not writing it to JSON.");
 						return false;
+					}
 
-					var serializedValue = null == value ? "{}" : this.JsonConvert.Serialize(value);
-					var serializedDefaultValue = null == defaultValue ? "{}" : this.JsonConvert.Serialize(defaultValue);
+					try
+					{
+						var serializedValue = null == value ? "{}" : this.JsonConvert.Serialize(value);
+						var serializedDefaultValue = null == defaultValue ? "{}" : this.JsonConvert.Serialize(defaultValue);
 
-					if (serializedValue == "{}" || serializedDefaultValue == serializedValue)
-						return false;
+						if (serializedValue == "{}" || serializedDefaultValue == serializedValue)
+						{
+							this.Logger?.Trace($"Value at {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name} is empty, so not writing it to JSON.");
+							return false;
+						}
+					}
+					catch (Exception e)
+					{
+						this.Logger?.Warn(e, $"Could not create default serialised value for {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name}");
+					}
 				}
 				catch (Exception e)
 				{
 					this.Logger?.Warn(e, $"Could not identify default value for {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name}");
-				}
-
-				// If this member has a JsonConfEditorAttribute then we need to check whether to filter it.
-				{
-					var jsonConfEditorAttribute = this.memberInfo.GetCustomAttribute<JsonConfEditorAttribute>();
-					if (null != jsonConfEditorAttribute)
-					{
-						if (null != jsonConfEditorAttribute.DefaultValue)
-						{
-							// If it is the default then die now.
-							if (value?.ToString() == jsonConfEditorAttribute.DefaultValue?.ToString())
-								return false;
-
-							// If it's the identifier then we need to check the alias/guid/id properties.
-							if (value is MFIdentifier identifier && (
-								identifier.Alias == jsonConfEditorAttribute.DefaultValue?.ToString()
-								|| identifier.Guid == jsonConfEditorAttribute.DefaultValue?.ToString()
-								|| identifier.ID.ToString() == jsonConfEditorAttribute.DefaultValue?.ToString()
-								))
-							{
-								return false;
-							}
-						}
-
-						// If the configuration value has a JsonConfEditor attribute that defines an editor type
-						// then we may need to convert our deserialized value.
-						if (jsonConfEditorAttribute.TypeEditor == "date" && value is DateTime dateTime)
-							value = dateTime.ToString("yyyy-MM-dd");
-
-					}
 				}
 
 				// Return the value that the base implementation gave.
@@ -245,6 +279,8 @@ namespace MFiles.VAF.Extensions
 				return this.ShouldRenderValue(ref value)
 					? value
 					: null;
+				this.Logger?.Trace($"Value at {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name} is being written to JSON.");
+				return value;
 			}
 		}
 
@@ -398,6 +434,24 @@ namespace MFiles.VAF.Extensions
 				if(null == value || !RawJsonLookup.ContainsKey(value))
 				{
 					this.Logger?.Warn($"No data found in cache for {writer.Path}.");
+
+					// We have to deal with some types explicitly...
+					{
+						if (value is IMFJsonAdaptor<SearchConditions> a)
+						{
+							writer.WriteRawValue(a.ToJson());
+							return;
+						}
+					}
+					{
+						if (value is IMFJsonAdaptor<SearchCondition> a)
+						{
+							writer.WriteRawValue(a.ToJson());
+							return;
+						}
+					}
+
+					// Use the basic approach.
 					base.WriteJson(writer, value, serializer);
 					return;
 				}

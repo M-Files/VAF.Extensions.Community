@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
+using MFiles.VAF.Common;
 using MFilesAPI;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,13 +23,95 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods.ObjVerEx
         public GetPropertyAsDateTime()
             : base((objVerEx, propertyDefId) => objVerEx.GetPropertyAsDateTime(propertyDefId))
         {
-        }
-    }
+		}
 
-    /// <summary>
-    /// Tests <see cref="ObjVerExExtensionMethods.GetPropertyAsBoolean(Common.ObjVerEx, int)"/>.
-    /// </summary>
-    [TestClass]
+		[TestMethod]
+		public void DateTimeKind_SetToUTC()
+		{
+			var properties = new PropertyValues();
+			var objVer = new ObjVer();
+			objVer.SetIDs(0, 1, 1);
+			var objectVersionAndPropertiesMock = new Mock<ObjectVersionAndProperties>();
+			objectVersionAndPropertiesMock.Setup(m => m.Properties).Returns(properties);
+			objectVersionAndPropertiesMock.Setup(m => m.ObjVer).Returns(objVer);
+
+			var propertyDefOperationsMock = new Mock<VaultPropertyDefOperations>();
+			propertyDefOperationsMock
+				.Setup(m => m.GetPropertyDef(123))
+				.Returns
+				(
+					new PropertyDef()
+					{
+						DataType = MFDataType.MFDatatypeTimestamp,
+						ID = 123
+					}
+				);
+			propertyDefOperationsMock.SetupAllProperties();
+
+			var vaultMock = base.GetVaultMock();
+			vaultMock
+				.Setup(m => m.PropertyDefOperations)
+				.Returns(propertyDefOperationsMock.Object);
+
+			var timestamp = new Timestamp();
+			timestamp.SetValue(new DateTime(2020, 01, 01));
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
+			objVerEx.Properties.SetProperty
+			(
+				123,
+				MFDataType.MFDatatypeTimestamp,
+				timestamp
+			);
+			var output = this.CallGetPropertyMethod(objVerEx, 123);
+			Assert.IsTrue(output.HasValue);
+			Assert.AreEqual(DateTimeKind.Utc, output.Value.Kind);
+		}
+
+		[TestMethod]
+		public void Timestamp_IsNull_ReturnsNull()
+		{
+			var properties = new PropertyValues();
+			var objVer = new ObjVer();
+			objVer.SetIDs(0, 1, 1);
+			var objectVersionAndPropertiesMock = new Mock<ObjectVersionAndProperties>();
+			objectVersionAndPropertiesMock.Setup(m => m.Properties).Returns(properties);
+			objectVersionAndPropertiesMock.Setup(m => m.ObjVer).Returns(objVer);
+
+			var propertyDefOperationsMock = new Mock<VaultPropertyDefOperations>();
+			propertyDefOperationsMock
+				.Setup(m => m.GetPropertyDef(123))
+				.Returns
+				(
+					new PropertyDef()
+					{
+						DataType = MFDataType.MFDatatypeTimestamp,
+						ID = 123
+					}
+				);
+			propertyDefOperationsMock.SetupAllProperties();
+
+			var vaultMock = base.GetVaultMock();
+			vaultMock
+				.Setup(m => m.PropertyDefOperations)
+				.Returns(propertyDefOperationsMock.Object);
+
+			var nullTypedValue = new TypedValue();
+			nullTypedValue.SetValueToNULL(MFDataType.MFDatatypeTimestamp);
+			var objVerEx = new Common.ObjVerEx(vaultMock.Object, objectVersionAndPropertiesMock.Object);
+			objVerEx.Properties.SetProperty
+			(
+				123,
+				nullTypedValue
+			);
+			var output = this.CallGetPropertyMethod(objVerEx, 123);
+			Assert.IsFalse(output.HasValue);
+		}
+	}
+
+	/// <summary>
+	/// Tests <see cref="ObjVerExExtensionMethods.GetPropertyAsBoolean(Common.ObjVerEx, int)"/>.
+	/// </summary>
+	[TestClass]
     [ValidDataTypes(MFDataType.MFDatatypeBoolean)]
     public class GetPropertyAsBoolean
         : GetPropertyAsSimpleTypeBase<bool?>

@@ -19,6 +19,11 @@ namespace MFiles.VAF.Extensions
 {
 	public abstract partial class ConfigurableVaultApplicationBase<TSecureConfiguration>
 	{
+		/// <summary>
+		/// The logo to render to the dashboard.
+		/// If null, no logo is rendered.
+		/// </summary>
+		public ILogoSource DashboardLogo { get; set; }
 
 		#region Top-level dashboard generation
 
@@ -54,7 +59,7 @@ namespace MFiles.VAF.Extensions
 				var exception = new Exception("Could not create status dashboard", e);
 				FormattableString message = $"Could not create status dashboard.";
 				this.Logger?.Error(e, message);
-				return new ExceptionDashboardPanel(exception, $"Could not create status dashboard")?.ToString();
+				return new ExceptionDashboardPanel(exception, $"Could not create status dashboard")?.ToXmlString();
 			}
 
 			// Add all content in turn.
@@ -85,7 +90,7 @@ namespace MFiles.VAF.Extensions
 				var exception = new Exception("Could not render dashboard to a string", e);
 				FormattableString message = $"Could not render dashboard to a string.";
 				this.Logger?.Error(e, message);
-				return new ExceptionDashboardPanel(exception, $"Could not render dashboard")?.ToString();
+				return new ExceptionDashboardPanel(exception, $"Could not render dashboard")?.ToXmlString();
 			}
 		}
 
