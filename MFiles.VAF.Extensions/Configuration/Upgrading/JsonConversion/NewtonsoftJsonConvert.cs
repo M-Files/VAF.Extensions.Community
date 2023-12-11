@@ -3,6 +3,7 @@ using MFiles.VAF.Configuration.JsonAdaptor;
 using MFiles.VAF.Configuration.Logging;
 using MFiles.VAF.Extensions.Configuration;
 using MFiles.VAF.Extensions.Configuration.Upgrading;
+using MFilesAPI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -241,13 +242,20 @@ namespace MFiles.VAF.Extensions
 						return null;
 					}
 
-					var serializedValue = null == value ? "{}" : this.JsonConvert.Serialize(value);
-					var serializedDefaultValue = null == defaultValue ? "{}" : this.JsonConvert.Serialize(defaultValue);
-
-					if (serializedValue == "{}" || serializedDefaultValue == serializedValue)
+					try
 					{
-						this.Logger?.Trace($"Value at {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name} is empty, so not writing it to JSON.");
-						return null;
+						var serializedValue = null == value ? "{}" : this.JsonConvert.Serialize(value);
+						var serializedDefaultValue = null == defaultValue ? "{}" : this.JsonConvert.Serialize(defaultValue);
+
+						if (serializedValue == "{}" || serializedDefaultValue == serializedValue)
+						{
+							this.Logger?.Trace($"Value at {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name} is empty, so not writing it to JSON.");
+							return null;
+						}
+					}
+					catch (Exception e)
+					{
+						this.Logger?.Warn(e, $"Could not create default serialised value for {this.memberInfo.ReflectedType.FullName}.{this.memberInfo.Name}");
 					}
 				}
 				catch(Exception e)
@@ -411,6 +419,24 @@ namespace MFiles.VAF.Extensions
 				if(null == value || !RawJsonLookup.ContainsKey(value))
 				{
 					this.Logger?.Warn($"No data found in cache for {writer.Path}.");
+
+					// We have to deal with some types explicitly...
+					{
+						if (value is IMFJsonAdaptor<SearchConditions> a)
+						{
+							writer.WriteRawValue(a.ToJson());
+							return;
+						}
+					}
+					{
+						if (value is IMFJsonAdaptor<SearchCondition> a)
+						{
+							writer.WriteRawValue(a.ToJson());
+							return;
+						}
+					}
+
+					// Use the basic approach.
 					base.WriteJson(writer, value, serializer);
 					return;
 				}
