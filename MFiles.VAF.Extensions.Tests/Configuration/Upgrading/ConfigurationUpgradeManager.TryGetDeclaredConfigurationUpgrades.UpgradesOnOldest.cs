@@ -22,7 +22,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnOldest_AllUpgradePathsIdentified()
 		{
-			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new VAF.Extensions.Configuration.Upgrading.DefaultConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
 			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades<VersionThreeWithStaticUpgradePath>(out var configurationVersion, out var rules));
 			Assert.AreEqual("3.0", configurationVersion?.ToString());
 			Assert.AreEqual(3, rules.Count());
@@ -37,14 +37,14 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnOldest_CyclicUpgradeRule()
 		{
-			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new VAF.Extensions.Configuration.Upgrading.DefaultConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
 			Assert.AreEqual(false, c.TryGetDeclaredConfigurationUpgrades<CyclicUpgradeRule2>(out var configurationVersion, out var rules));
 		}
 
 		[TestMethod]
 		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnOldest_CyclicUpgradeRule_Same()
 		{
-			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new VAF.Extensions.Configuration.Upgrading.DefaultConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
 			Assert.AreEqual(false, c.TryGetDeclaredConfigurationUpgrades<CyclicUpgradeRule_Same>(out var configurationVersion, out var rules));
 		}
 
@@ -55,7 +55,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnOldest_IdentifiesStringParameterMethod()
 		{
-			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new VAF.Extensions.Configuration.Upgrading.DefaultConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
 			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades<VersionFourWithStaticUpgradePath>(out var configurationVersion, out var rules));
 			Assert.AreEqual("4.0", configurationVersion?.ToString());
 			Assert.AreEqual(4, rules.Count());
@@ -76,7 +76,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		[TestMethod]
 		public void TryGetDeclaredConfigurationUpgrades_UpgradeMethodOnOldest_IdentifiesJObjectParameterMethod()
 		{
-			var c = new VAF.Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
+			var c = new VAF.Extensions.Configuration.Upgrading.DefaultConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>());
 			Assert.AreEqual(true, c.TryGetDeclaredConfigurationUpgrades<VersionFiveWithStaticUpgradePath>(out var configurationVersion, out var rules));
 			Assert.AreEqual("5.0", configurationVersion?.ToString());
 			Assert.AreEqual(5, rules.Count());

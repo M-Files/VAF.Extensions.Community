@@ -4,6 +4,19 @@ When using the `ConfigurableVaultApplicationBase<T>` class, changes to the struc
 
 This library supports the ability for you to programmatically control the upgrade process so that the application can convert any old configuration across to the new structures and continue loading.
 
+## Enabling the functionality
+
+Within your VaultApplication class, override `GetConfigurationUpgradeManager` and return an instance of something that implements `IConfigurationUpgradeManager`. The default implementation is within `DefaultConfigurationUpgradeManager`:
+
+```csharp
+public override IConfigurationUpgradeManager GetConfigurationUpgradeManager()
+{
+	return new DefaultConfigurationUpgradeManager(this);
+}
+```
+
+The configuration upgrade process will now run whenever the vault comes online.
+
 ## Adding versioning to your configuration class
 
 Consider that we wish to make a change to the configuration structure but wish to be able to migrate the old configuration across.  Consider these configuration classes:

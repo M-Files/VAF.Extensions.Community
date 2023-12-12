@@ -13,10 +13,10 @@ using System.Reflection;
 
 namespace MFiles.VAF.Extensions.Configuration.Upgrading
 {
-	public class ConfigurationUpgradeManager
+	public class DefaultConfigurationUpgradeManager
 		: IConfigurationUpgradeManager
 	{
-		private ILogger Logger { get; } = LogManager.GetLogger(typeof(ConfigurationUpgradeManager));
+		private ILogger Logger { get; } = LogManager.GetLogger(typeof(DefaultConfigurationUpgradeManager));
 
 		/// <summary>
 		/// The NamedValueStorageManager used to interact with named value storage.
@@ -34,7 +34,7 @@ namespace MFiles.VAF.Extensions.Configuration.Upgrading
 		/// </summary>
 		protected VaultApplicationBase VaultApplication { get; set; } 
 
-		public ConfigurationUpgradeManager(VaultApplicationBase vaultApplication)
+		public DefaultConfigurationUpgradeManager(VaultApplicationBase vaultApplication)
 		{
 			this.VaultApplication = vaultApplication ?? throw new ArgumentNullException(nameof(vaultApplication));
 		}
