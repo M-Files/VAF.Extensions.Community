@@ -258,7 +258,7 @@ namespace MFiles.VAF.Extensions
 		/// </summary>
 		/// <param name="configurationType">The configuration type to check.</param>
 		/// <param name="vaultApplication">The vault application to fall back to.</param>
-		/// <param name="configurationVersion">The version of the configuration, or <see cref="ConfigurationUpgradeManager.VersionZero"/> if none is available.</param>
+		/// <param name="configurationVersion">The version of the configuration, or <see cref="DefaultConfigurationUpgradeManager.VersionZero"/> if none is available.</param>
 		/// <returns>The location in named value storage.</returns>
 		/// <exception cref="ArgumentNullException">If <paramref name="configurationType"/> or <paramref name="vaultApplication"/> are null.</exception>
 		public static ISingleNamedValueItem GetConfigurationLocation(this Type configurationType, VaultApplicationBase vaultApplication, out Version configurationVersion)
@@ -274,7 +274,7 @@ namespace MFiles.VAF.Extensions
 						.Where(a => a is Configuration.ConfigurationVersionAttribute)
 						.Cast<Configuration.ConfigurationVersionAttribute>()
 						.FirstOrDefault();
-			configurationVersion = parameterTypeConfigurationVersionAttribute?.Version ?? ConfigurationUpgradeManager.VersionZero;
+			configurationVersion = parameterTypeConfigurationVersionAttribute?.Version ?? DefaultConfigurationUpgradeManager.VersionZero;
 
 			// Where should we read from? (Use the configuration attribute if we can, otherwise default to vault application location.
 			return (parameterTypeConfigurationVersionAttribute?.UsesCustomNVSLocation ?? false)

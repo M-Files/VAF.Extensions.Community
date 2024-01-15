@@ -24,11 +24,13 @@ namespace MFiles.VAF.Extensions
 		/// Returns the instance of <see cref="IConfigurationUpgradeManager"/> that will be used
 		/// to upgrade any configuration found.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>
+		/// <see langword="null"/> by default.  
+		/// Return an instance of something that inherits <see cref="IConfigurationUpgradeManager"/>,
+		/// for example <see cref="DefaultConfigurationUpgradeManager"/>, to control configuration upgrading.
+		/// </returns>
 		public virtual IConfigurationUpgradeManager GetConfigurationUpgradeManager()
-		{
-			return new ConfigurationUpgradeManager(this);
-		}
+			=> null;
 
 		/// <inheritdoc />
 		/// <remarks>Will call <see cref="UpgradeConfiguration"/> then call the base implementation.</remarks>
