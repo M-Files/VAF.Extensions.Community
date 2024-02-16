@@ -83,7 +83,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 		{
 			var vault = this.GetVaultMock().Object;
 			var managerMock = this.GetNamedValueStorageManagerMock();
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
+			var c = new Extensions.Configuration.Upgrading.DefaultConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
 			{
 				NamedValueStorageManager = managerMock.Object
 			};
@@ -106,7 +106,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 				"Castle.Proxies.VaultApplicationBaseProxy",
 				this.CreateNamedValues("config", Newtonsoft.Json.JsonConvert.SerializeObject(source))
 			);
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
+			var c = new Extensions.Configuration.Upgrading.DefaultConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
 			{
 				NamedValueStorageManager = managerMock.Object
 			};
@@ -136,7 +136,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 				"Castle.Proxies.VaultApplicationBaseProxy",
 				this.CreateNamedValues("configuration", @"{ ""World"" : ""abc"", ""Version"" : ""3.0"", ""TimeSpan"" : { ""Interval"" : ""01:02:03"", ""RunOnVaultStartup"" : false } }")
 			);
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
+			var c = new Extensions.Configuration.Upgrading.DefaultConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
 			{
 				NamedValueStorageManager = managerMock.Object
 			};
@@ -166,7 +166,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration.Upgrading
 				"Castle.Proxies.VaultApplicationBaseProxy",
 				this.CreateNamedValues("configuration", @"{ ""Version"" : ""3.0"", ""TimeSpan"" : { ""Interval"" : ""01:02:03"", ""RunOnVaultStartup"" : false }, ""TimeSpan-Comment"": ""hello world"" }")
 			);
-			var c = new Extensions.Configuration.Upgrading.ConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
+			var c = new Extensions.Configuration.Upgrading.DefaultConfigurationUpgradeManager(Mock.Of<VaultApplicationBase>())
 			{
 				NamedValueStorageManager = managerMock.Object
 			};
