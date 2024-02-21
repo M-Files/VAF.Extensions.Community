@@ -22,7 +22,7 @@ namespace MFiles.VAF.Extensions
 		/// If <see cref="DateTime.Kind"/> is set to <see cref="DateTimeKind.Unspecified"/> then this method does nothing.
 		/// If <see cref="DateTime.Kind"/> is set to <see cref="DateTimeKind.Utc"/> then the datetime is altered to take into the <paramref name="timeZoneInfo"/>.
 		/// </returns>
-		internal static DateTime EnsureLocalTime(this TimeZoneInformation timeZoneInfo, DateTime input)
+		public static DateTime EnsureLocalTime(this TimeZoneInformation timeZoneInfo, DateTime input)
 		{
 			// Sanity.
 			if (string.IsNullOrWhiteSpace(timeZoneInfo?.StandardName))
@@ -49,8 +49,13 @@ namespace MFiles.VAF.Extensions
 				var output = input.Add(tzi.GetUtcOffset(input));
 				return DateTime.SpecifyKind(output, DateTimeKind.Local);
 			}
-			catch
+			catch (Exception ex)
 			{
+				Logger?.Error
+				(
+					ex,
+					$"Error converting to local time.  It will be used as-is."
+				);
 				return input;
 			}
 		}
@@ -68,7 +73,7 @@ namespace MFiles.VAF.Extensions
 		/// If <see cref="DateTime.Kind"/> is set to <see cref="DateTimeKind.Unspecified"/> then this method does nothing.
 		/// If <see cref="DateTime.Kind"/> is set to <see cref="DateTimeKind.Utc"/> then the datetime is altered to take into the <paramref name="timeZoneInfo"/>.
 		/// </returns>
-		internal static DateTime EnsureUTCTime(this TimeZoneInformation timeZoneInfo, DateTime input)
+		public static DateTime EnsureUTCTime(this TimeZoneInformation timeZoneInfo, DateTime input)
 		{
 			// Sanity.
 			if (string.IsNullOrWhiteSpace(timeZoneInfo?.StandardName))
@@ -95,8 +100,13 @@ namespace MFiles.VAF.Extensions
 				var output = input.Subtract(tzi.GetUtcOffset(input));
 				return DateTime.SpecifyKind(output, DateTimeKind.Local);
 			}
-			catch
+			catch (Exception ex)
 			{
+				Logger?.Error
+				(
+					ex,
+					$"Error converting to UTC time.  It will be used as-is."
+				);
 				return input;
 			}
 		}
