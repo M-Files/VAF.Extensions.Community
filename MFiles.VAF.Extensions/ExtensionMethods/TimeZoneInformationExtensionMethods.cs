@@ -98,7 +98,7 @@ namespace MFiles.VAF.Extensions
 			{
 				TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(timeZoneInfo.StandardName);
 				var output = input.Subtract(tzi.GetUtcOffset(input));
-				return DateTime.SpecifyKind(output, DateTimeKind.Local);
+				return DateTime.SpecifyKind(output, DateTimeKind.Utc);
 			}
 			catch (Exception ex)
 			{
