@@ -23,14 +23,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods
 
 			var output = tzMock.Object.EnsureLocalTime(input);
 			Assert.AreEqual(expected.ToString(), output.ToString());
-			Assert.AreEqual
-			(
-				expected.Kind, 
-				input.Kind == DateTimeKind.Unspecified
-					? DateTimeKind.Unspecified
-					: DateTimeKind.Local
-			);
-
+			Assert.AreEqual(expected.Kind, output.Kind);
 		}
 
 		public static IEnumerable<object[]> GetEnsureLocalTimeData()
@@ -69,14 +62,7 @@ namespace MFiles.VAF.Extensions.Tests.ExtensionMethods
 
 			var output = tzMock.Object.EnsureUTCTime(input);
 			Assert.AreEqual(expected.ToString(), output.ToString());
-			Assert.AreEqual
-			(
-				expected.Kind,
-				input.Kind == DateTimeKind.Unspecified
-					? DateTimeKind.Unspecified
-					: DateTimeKind.Utc
-			);
-
+			Assert.AreEqual(expected.Kind, output.Kind);
 		}
 
 		public static IEnumerable<object[]> GetEnsureUtcTimeData()
