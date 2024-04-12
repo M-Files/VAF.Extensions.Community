@@ -86,7 +86,7 @@ namespace MFiles.VAF.Extensions
 			switch (this.RecurrenceType)
 			{
 				case RecurrenceType.Interval:
-					if (null == this.Interval)
+					if (null == this.Interval || this.Interval == TimeSpan.Zero)
 						return null;
 					return (after ?? DateTime.UtcNow).Add(this.Interval);
 				case RecurrenceType.Schedule:
