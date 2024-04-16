@@ -28,7 +28,8 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 			var result = WeeklyTrigger.GetNextDayOfWeek(after, dayOfWeek)?.ToArray();
 			Assert.IsNotNull(result);
 			Assert.AreEqual(expected.Length, result.Length);
-			for(var i=0; i<result.Length; i++)
+
+			for (var i = 0; i < result.Length; i++)
 			{
 				Assert.AreEqual(expected[i], result[i]);
 			}

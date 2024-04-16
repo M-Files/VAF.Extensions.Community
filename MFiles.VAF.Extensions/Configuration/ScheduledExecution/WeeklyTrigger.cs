@@ -103,7 +103,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			}
 
 			// Get the next one of this day.
-			yield return after.Date.AddDays(daysToAdd);
+			yield return new DateTimeOffset(after.Date.AddDays(daysToAdd), after.Offset);
 		}
 
 		/// <inheritdoc />
