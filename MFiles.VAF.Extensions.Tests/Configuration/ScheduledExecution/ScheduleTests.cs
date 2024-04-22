@@ -1,17 +1,21 @@
-﻿using MFiles.VAF.Extensions;
-using MFiles.VAF.Extensions.ScheduledExecution;
+﻿using MFiles.VAF.Extensions.ScheduledExecution;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 {
 	[TestClass]
 	public class ScheduleTests
 	{
+		public ScheduleTests()
+		{
+			Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+			Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("en-US");
+		}
+
 		[TestMethod]
 		public void ScheduleIsEnabledByDefault()
 		{

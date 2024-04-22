@@ -1,15 +1,19 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace MFiles.VAF.Extensions.Tests.ExtensionMethods
 {
 	[TestClass]
 	public class FormattingExtensionMethods
 	{
+		public FormattingExtensionMethods()
+		{
+			Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+			Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("en-US");
+		}
+
 		[TestMethod]
 		public void ToDashboardDisplayString_HoursMinutesSeconds()
 		{

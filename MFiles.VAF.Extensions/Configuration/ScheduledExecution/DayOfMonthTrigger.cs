@@ -74,11 +74,14 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				)
 				return null;
 
+			// Use local timezone as default timezone
+			timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
+
 			// When should we start looking?
 			after = (after ?? DateTime.UtcNow).ToUniversalTime();
 
 			// Convert the time into the timezone we're after.
-			after = TimeZoneInfo.ConvertTime(after.Value, timeZoneInfo ?? TimeZoneInfo.Local);
+			after = TimeZoneInfo.ConvertTime(after.Value, timeZoneInfo);
 
 			// Get the times to run, filtered to those in the future.
 			return this.TriggerDays
