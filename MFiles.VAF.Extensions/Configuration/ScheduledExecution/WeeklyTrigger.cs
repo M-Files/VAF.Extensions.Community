@@ -49,11 +49,15 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				)
 				return null;
 
-			// When should we start looking?
+			// Use local timezone as default timezone
 			timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
 
-			// Make sure after is in the correct timezone.
-			after = after ?? DateTimeOffset.Now;
+			// When should we start looking?
+			after = (after ?? DateTime.UtcNow).ToUniversalTime();
+
+			// Convert the time into the timezone we're after.
+			after = TimeZoneInfo.ConvertTime(after.Value, timeZoneInfo);
+
 			this.Logger?.Trace($"Retrieving next execution after {after}");
 
 			this.Logger.Trace($"There are {this.TriggerTimes.Count} times configured: {string.Join(", ", this.TriggerTimes)}");
@@ -103,7 +107,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			}
 
 			// Get the next one of this day.
-			yield return after.Date.AddDays(daysToAdd);
+			yield return new DateTimeOffset(after.Date.AddDays(daysToAdd), after.Offset);
 		}
 
 		/// <inheritdoc />

@@ -55,12 +55,14 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				)
 				return null;
 
-			// When should we start looking?
+			// Use local timezone as default timezone
 			timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
 
-			// Ensure we have a value.
-			if (null == after)
-				after = DateTimeOffset.UtcNow;
+			// When should we start looking?
+			after = (after ?? DateTime.UtcNow).ToUniversalTime();
+
+			// Convert the time into the timezone we're after.
+			after = TimeZoneInfo.ConvertTime(after.Value, timeZoneInfo);
 
 			// Get the next execution time.
 			return this.TriggerTimes

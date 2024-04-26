@@ -9,6 +9,19 @@ namespace MFiles.VAF.Extensions.Tests
 	[TestClass]
 	public class Initialization
 	{
+		private class MSTestContextTarget 
+			: global::NLog.Targets.TargetWithLayout
+		{
+			protected TestContext TestContext { get; }
+			public MSTestContextTarget(TestContext testContext)
+			{
+				this.TestContext = testContext;
+			}
+			protected override void Write(NLog.LogEventInfo logEvent)
+			{
+				this.TestContext.WriteLine(this.RenderLogEvent(Layout, logEvent));
+			}
+		}
 		[AssemblyInitialize]
 		public static void MyTestInitialize(TestContext testContext)
 		{
@@ -23,16 +36,10 @@ namespace MFiles.VAF.Extensions.Tests
 			(
 				global::NLog.LogLevel.Trace,
 				global::NLog.LogLevel.Fatal,
-				new SensitivityAwareAsyncTargetWrapper
-				(
-					new global::NLog.Targets.ColoredConsoleTarget()
-					{
-						AutoFlush = true,
-						Layout = layout
-					},
-					LogSensitivity.Minimum,
-					new SensitivityFlag[0]
-				)
+				new MSTestContextTarget(testContext)
+				{
+					Layout = layout
+				}
 			);
 			global::NLog.LogManager.ReconfigExistingLoggers();
 
