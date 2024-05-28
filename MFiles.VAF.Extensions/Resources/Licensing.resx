@@ -144,10 +144,10 @@
     <comment>{0} will be replaced with the number of licensed users, {1} will be replaced with the number of licenses in use.</comment>
   </data>
   <data name="LicensingStatusPanel_GroupMembership_Exceeded" xml:space="preserve">
-    <value>User group {0} has {1} members, which is more than the licensed value of {1}.</value>
+    <value>User group {0} has {1} members, which is more than the licensed value of {2}.</value>
   </data>
   <data name="LicensingStatusPanel_GroupMembership_Valid" xml:space="preserve">
-    <value>User group {0} has {1} members, which is less than the licensed value of {1}.</value>
+    <value>User group {0} has {1} members, which is less than the licensed value of {2}.</value>
   </data>
   <data name="LicensingStatusPanel_LicensedTo" xml:space="preserve">
     <value>This application is licensed to {0}.</value>

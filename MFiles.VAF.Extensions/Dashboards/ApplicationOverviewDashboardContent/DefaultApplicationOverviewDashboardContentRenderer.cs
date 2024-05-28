@@ -290,8 +290,8 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 							content.Add(this.GetTernaryStatementDashboardContent
 							(
 								userGroup.Members.Count > group.Len,
-								string.Format(Resources.Licensing.LicensingStatusPanel_GroupMembership_Valid, group.Group, group.Len, userGroup.Members.Count),
-								string.Format(Resources.Licensing.LicensingStatusPanel_GroupMembership_Exceeded, group.Group, group.Len, userGroup.Members.Count)
+								string.Format(Resources.Licensing.LicensingStatusPanel_GroupMembership_Exceeded, group.Group, group.Len, userGroup.Members.Count),
+								string.Format(Resources.Licensing.LicensingStatusPanel_GroupMembership_Valid, group.Group, group.Len, userGroup.Members.Count)
 							));
 						}
 					}
