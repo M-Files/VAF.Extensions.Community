@@ -46,9 +46,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MFiles.VAF" Version="24.1.706.3" />
+    <PackageReference Include="MFiles.VAF" Version="24.5.714.1" />
     <PackageReference Include="MFiles.VAF.Configuration.Logging.NLog" Version="23.12.3" />
-    <PackageReference Include="MFilesAPI.Extensions" Version="23.3.2" />
+    <PackageReference Include="MFilesAPI.Extensions" Version="24.4.3" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
   </ItemGroup>
   <ItemGroup>

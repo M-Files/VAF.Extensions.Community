@@ -35,7 +35,7 @@ namespace MFiles.VAF.Extensions.Webhooks
 		protected ConfigurableVaultApplicationBase<TConfiguration> VaultApplication { get; }
 
 		/// <inheritdoc />
-        public bool HasSeparateEventHandlerProxy => (this.Details as WebhookAttribute)?.HasSeparateEventHandlerProxy ?? true;
+        public virtual bool HasSeparateEventHandlerProxy => true;
 
 		/// <inheritdoc />
 		public EventHandlerVaultUserIdentity VaultUserIdentity => EventHandlerVaultUserIdentity.Server;
