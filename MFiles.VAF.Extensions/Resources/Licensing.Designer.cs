@@ -133,7 +133,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to User group {0} has {1} members, which is more than the licensed value of {1}..
+        ///   Looks up a localized string similar to User group {0} has {1} members, which is more than the licensed value of {2}..
         /// </summary>
         internal static string LicensingStatusPanel_GroupMembership_Exceeded {
             get {
@@ -142,7 +142,7 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to User group {0} has {1} members, which is less than the licensed value of {1}..
+        ///   Looks up a localized string similar to User group {0} has {1} members, which is less than the licensed value of {2}..
         /// </summary>
         internal static string LicensingStatusPanel_GroupMembership_Valid {
             get {

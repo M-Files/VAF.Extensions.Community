@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using MFiles.VAF.Extensions.ScheduledExecution;
+using MFiles.VAF.Extensions.Tests.ScheduledExecution;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -43,17 +44,13 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		{
 			yield return new object[]
 			{
-				new DateTime(2022, 10, 06, 20, 01, 00, DateTimeKind.Utc),
-				new DateTime(2022, 10, 06, 20, 30, 00, DateTimeKind.Utc)
+				new DateTimeOffset(2022, 10, 06, 20, 01, 00, TimeSpan.Zero),
+				new DateTimeOffset(2022, 10, 06, 20, 30, 00, TimeSpan.Zero)
 			};
 			yield return new object[]
 			{
-				TimeZoneInfo.ConvertTimeBySystemTimeZoneId
-				(
-					new DateTime(2022, 10, 26, 20, 31, 00, DateTimeKind.Local),
-					"GMT Standard Time"
-				),
-				new DateTime(2022, 10, 26, 20, 00, 00, DateTimeKind.Utc)
+				new DateTimeOffset(2022, 10, 06, 20, 01, 00, TimeSpan.FromHours(1)),
+				new DateTimeOffset(2022, 10, 06, 20, 30, 00, TimeSpan.FromHours(1))
 			};
 		}
 		public static IEnumerable<object[]> DaylightSaving_ClocksGoBackwards_Data()
@@ -111,7 +108,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 
 		[DynamicData(nameof(SplitTriggerType_Data), DynamicDataSourceType.Method)]
 		[TestMethod]
-		public void SplitTriggerType(DateTime now, DateTime expected)
+		public void SplitTriggerType(DateTimeOffset now, DateTimeOffset expected)
 		{
 			var frequency = Newtonsoft.Json.JsonConvert.DeserializeObject<Frequency>(@"{
     ""Triggers"": [
@@ -210,11 +207,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
     ""TriggerTimeType"": ""UTC""
 }
 ");
-			{
-				var nextRun = frequency.GetNextExecution(now);
-				Assert.IsNotNull(nextRun.Value);
-				Assert.AreEqual(expected, nextRun.Value.ToUniversalTime());
-			}
+			var nextRun = frequency.GetNextExecution(now);
+			Assert.IsNotNull(nextRun.Value);
+			Assert.AreEqual(expected, nextRun.Value.ToUniversalTime());
 		}
 
 		/// <summary>

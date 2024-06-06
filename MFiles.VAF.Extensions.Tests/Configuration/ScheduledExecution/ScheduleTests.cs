@@ -1,17 +1,21 @@
-﻿using MFiles.VAF.Extensions;
-using MFiles.VAF.Extensions.ScheduledExecution;
+﻿using MFiles.VAF.Extensions.ScheduledExecution;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 {
 	[TestClass]
 	public class ScheduleTests
 	{
+		public ScheduleTests()
+		{
+			Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+			Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("en-US");
+		}
+
 		[TestMethod]
 		public void ScheduleIsEnabledByDefault()
 		{
@@ -25,12 +29,52 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 		}
 
 		[TestMethod]
+		// https://community.m-files.com/groups-1602070992/developers/f/developer-forum/9824/trouble-with-daily-scheduling-repeating
+		public void ForumPost9824()
+		{
+			using (var x = new LocalTimeZoneInfoMocker("FLE Standard Time"))
+			{
+				var schedule = new Schedule()
+				{
+					Enabled = true,
+					Triggers = new List<Trigger>()
+					{
+						new DailyTrigger()
+						{
+							TriggerTimes = new List<TimeSpan>()
+							{
+								TimeSpan.FromHours(1)
+							}
+						}
+					},
+					RunOnVaultStartup = false
+				};
+
+				Assert.AreEqual
+				(
+					// Lets say we run just after the time above.
+					new DateTime(2024, 01, 02, 01, 00, 00, DateTimeKind.Local),
+					// We expect to run the next day at 1am local time.
+					schedule.GetNextExecution(new DateTime(2024, 01, 01, 01, 00, 01, DateTimeKind.Local))
+				);
+
+				Assert.AreEqual
+				(
+					// Lets say we run just after the time above but without an explicit datetimekind.
+					new DateTime(2024, 01, 02, 01, 00, 00),
+					// We expect to run the next day at 1am local time.
+					schedule.GetNextExecution(new DateTime(2024, 01, 01, 01, 00, 01))
+				);
+			}
+		}
+
+		[TestMethod]
 		[DynamicData(nameof(GetNextExecutionData_UTC), DynamicDataSourceType.Method)]
-		public void GetNextExecution
+		public void GetNextExecution_UTC
 		(
 			IEnumerable<TriggerBase> triggers,
-			DateTime? after,
-			DateTime? expected
+			DateTimeOffset? after,
+			DateTimeOffset? expected
 		)
 		{
 			Assert.AreEqual
@@ -42,7 +86,8 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 					Triggers = triggers
 						.Select(t => new Trigger(t))
 						.Where(t => t != null)
-						.ToList()
+						.ToList(),
+					TriggerTimeType = TriggerTimeType.Utc,
 				}.GetNextExecution(after)
 			);
 		}
@@ -141,8 +186,8 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 		public void GetNextExecution_NotEnabled
 		(
 			IEnumerable<TriggerBase> triggers,
-			DateTime? after,
-			DateTime? expected
+			DateTimeOffset? after,
+			DateTimeOffset? expected
 		)
 		{
 			// We use the same data as the GetNextExecution, but
@@ -177,8 +222,8 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 						}.ToList()
 					}
 				},
-				new DateTime(2021, 03, 17, 01, 00, 00, DateTimeKind.Utc), // Wednesday @ 1am
-				new DateTime(2021, 03, 17, 17, 00, 00, DateTimeKind.Utc), // Wednesday @ 5pm
+				new DateTimeOffset(2021, 03, 17, 01, 00, 00, TimeSpan.Zero), // Wednesday @ 1am
+				new DateTimeOffset(2021, 03, 17, 17, 00, 00, TimeSpan.Zero), // Wednesday @ 5pm
 			};
 
 			// Multiple triggers returns earliest.
@@ -199,16 +244,16 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 						}.ToList()
 					}
 				},
-				new DateTime(2021, 03, 17, 01, 00, 00, DateTimeKind.Utc), // Wednesday @ 1am
-				new DateTime(2021, 03, 17, 12, 00, 00, DateTimeKind.Utc), // Wednesday @ 5pm
+				new DateTimeOffset(2021, 03, 17, 01, 00, 00, TimeSpan.Zero), // Wednesday @ 1am
+				new DateTimeOffset(2021, 03, 17, 12, 00, 00, TimeSpan.Zero), // Wednesday @ 5pm
 			};
 
 			// No triggers = null.
 			yield return new object[]
 			{
 				new TriggerBase[0],
-				new DateTime(2021, 03, 17, 01, 00, 00, DateTimeKind.Utc), // Wednesday @ 1am
-				(DateTime?)null
+				new DateTimeOffset(2021, 03, 17, 01, 00, 00, TimeSpan.Zero), // Wednesday @ 1am
+				(DateTimeOffset?)null
 			};
 
 			// Trigger at exact current time returns now.
@@ -223,8 +268,8 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 						}.ToList()
 					}
 				},
-				new DateTime(2021, 03, 17, 17, 00, 00, DateTimeKind.Utc), // Wednesday @ 1am
-				new DateTime(2021, 03, 17, 17, 00, 00, DateTimeKind.Utc)
+				new DateTimeOffset(2021, 03, 17, 17, 00, 00, TimeSpan.Zero), // Wednesday @ 1am
+				new DateTimeOffset(2021, 03, 17, 17, 00, 00, TimeSpan.Zero)
 			};
 		}
 
@@ -278,8 +323,8 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 						}.ToList()
 					}
 				},
-				new DateTimeOffset(2022, 10, 30, 02, 00, 00, 0, TimeSpan.Zero), // This is 0100 BST
-				new DateTimeOffset(2022, 10, 30, 02, 30, 00, 0, TimeSpan.Zero), // So it should run at 0030UTC / 0130 BST
+				new DateTimeOffset(2022, 10, 30, 00, 00, 00, 0, TimeSpan.FromHours(1)), // This is 0100 BST
+				new DateTimeOffset(2022, 10, 30, 02, 30, 00, 0, TimeSpan.Zero), // So it should run at 0230 GMT
 			};
 
 			// Just before clocks go backwards.
