@@ -66,7 +66,7 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 
 		public DefaultApplicationOverviewDashboardContentRenderer(ConfigurableVaultApplicationBase<TSecureConfiguration> vaultApplication)
 		{
-			this.VaultApplication = vaultApplication 
+			this.VaultApplication = vaultApplication
 				?? throw new ArgumentNullException(nameof(vaultApplication));
 		}
 
@@ -79,7 +79,7 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 			var content = new DashboardContentCollection();
 			IDashboardContent root = content;
 
-			if(this.VaultApplication.DashboardLogo != null)
+			if (this.VaultApplication.DashboardLogo != null)
 			{
 				// Create a table so we can put the logo on as well.
 				var table = new DashboardTable();
@@ -111,7 +111,7 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 			{
 				var licensingPanel = this.GetLicensingDetailsDashboardContent
 				(
-					this.VaultApplication?.License?.Content<TLicenseContent>(),
+					this.VaultApplication?.License ?? null,
 					this.VaultApplication?.License?.ServerLicense
 				);
 				if (null != licensingPanel)
@@ -127,10 +127,10 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 		/// Generates the "Licensing Status" dashboard content.
 		/// </summary>
 		/// <returns>The dashboard panel, or null if nothing should be shown.</returns>
-		public virtual DashboardPanelEx GetLicensingDetailsDashboardContent(TLicenseContent licenseContent, LicenseStatus serverLicenseStatus)
+		public virtual DashboardPanelEx GetLicensingDetailsDashboardContent(IApplicationLicense applicationLicense, LicenseStatus serverLicenseStatus)
 		{
 			// Sanity.
-			if (null == licenseContent || false == this.ShowLicenseStatus)
+			if (null == applicationLicense || false == this.ShowLicenseStatus)
 				return null;
 
 			// Let's generate the various statements!
@@ -138,209 +138,213 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 
 			// General status.
 			{
-				var licenseStatus = this.GetLicenseStatusDashboardContent(licenseContent.LicenseStatus);
-				if(null != licenseStatus)
+				var licenseStatus = this.GetLicenseStatusDashboardContent(applicationLicense.LicenseStatus);
+				if (null != licenseStatus)
 					content.Add(licenseStatus);
 			}
 
-			// Who is it licensed to?
+			var licenseContent = applicationLicense?.Content<TLicenseContent>();
+			if (null != licenseContent)
 			{
-				if (false == string.IsNullOrWhiteSpace(licenseContent?.LicensedTo))
-					content.Add(this.GetStatementDashboardContent
-					(
-						string.Format(Resources.Licensing.LicensingStatusPanel_LicensedTo, licenseContent?.LicensedTo),
-						StatementType.Okay
-					));
-			}
-
-			// Is it okay for this serial number?
-			{
-				var serialNumber = serverLicenseStatus?.SerialNumber;
-				if(false == string.IsNullOrWhiteSpace(licenseContent.MFilesSerialNumber))
-					content.Add(this.GetTernaryStatementDashboardContent
-					(
-						serialNumber == licenseContent.MFilesSerialNumber,
-						Resources.Licensing.LicensingStatusPanel_ValidForThisServer,
-						Resources.Licensing.LicensingStatusPanel_NotValidForThisServer
-					));
-			}
-
-			// Server version?
-			{
-				if (licenseContent.ServerVersions?.Any() ?? false)
+				// Who is it licensed to?
 				{
-					MFilesVersion serverVersion = this.VaultApplication.PermanentVault.GetServerVersionOfVault();
-					content.Add(this.GetTernaryStatementDashboardContent
-					(
-						licenseContent.ServerVersions.Any((string f) => VersionMatch(serverVersion, f)),
-						Resources.Licensing.LicensingStatusPanel_ValidInThisServerVersion,
-						string.Format(Resources.Licensing.LicensingStatusPanel_NotValidInThisServerVersion, serverVersion?.ToString())
-					));
+					if (false == string.IsNullOrWhiteSpace(licenseContent?.LicensedTo))
+						content.Add(this.GetStatementDashboardContent
+						(
+							string.Format(Resources.Licensing.LicensingStatusPanel_LicensedTo, licenseContent?.LicensedTo),
+							StatementType.Okay
+						));
 				}
-			}
 
-			// Is it okay in this vault?
-			{
-				if (licenseContent.Vaults?.Any() ?? false)
+				// Is it okay for this serial number?
 				{
-					var vaultGuid = this.VaultApplication.PermanentVault.GetGUID();
-					content.Add(this.GetTernaryStatementDashboardContent
-					(
-						licenseContent.Vaults == null || licenseContent.Vaults.Any(v => v.Equals(vaultGuid, StringComparison.OrdinalIgnoreCase)),
-						Resources.Licensing.LicensingStatusPanel_ValidInThisVault,
-						string.Format(Resources.Licensing.LicensingStatusPanel_NotValidInThisVault, vaultGuid)
-					));
-				}
-			}
-
-			// When does it expire?
-			{
-				if (DateTime.TryParseExact(licenseContent.LicenseExpireDate, "d.M.yyyy", null, System.Globalization.DateTimeStyles.AllowWhiteSpaces, out DateTime expiry))
-				{
-					var days = expiry.Subtract(DateTime.Now).Days;
-					content.Add(this.GetTernaryStatementDashboardContent
-					(
-						expiry > DateTime.Now,
-						string.Format(Resources.Licensing.LicensingStatusPanel_LicenseExpiresInXXXXDays, days),
-						string.Format(Resources.Licensing.LicensingStatusPanel_LicenseExpiredXXXXDaysAgo, DateTime.Now.Subtract(expiry).Days),
-						successfulStatementType: days > 30
-							? StatementType.Okay
-							: StatementType.Warning
-					));
-				}
-			}
-
-			// Maintenance.
-			{
-				if (DateTime.TryParseExact(licenseContent.MaintenanceExpireDate, "d.M.yyyy", null, System.Globalization.DateTimeStyles.AllowWhiteSpaces, out DateTime expiry))
-				{
-					var days = expiry.Subtract(DateTime.Now).Days;
-					content.Add(this.GetTernaryStatementDashboardContent
-					(
-						expiry > DateTime.Now,
-						string.Format(Resources.Licensing.LicensingStatusPanel_MaintenanceExpiresInXXXXDays, days),
-						string.Format(Resources.Licensing.LicensingStatusPanel_MaintenanceExpiredXXXXDaysAgo, DateTime.Now.Subtract(expiry).Days),
-						successfulStatementType: days > 30
-							? StatementType.Okay
-							: StatementType.Warning
-					));
-				}
-			}
-
-			// Users.
-			{
-				// Named users.
-				if(licenseContent.NamedUsers >= 0)
-				{
-					{
-						var licensed = licenseContent.NamedUsers;
-						var used = serverLicenseStatus.NumOfNamedUserLicenses;
+					var serialNumber = serverLicenseStatus?.SerialNumber;
+					if (false == string.IsNullOrWhiteSpace(licenseContent.MFilesSerialNumber))
 						content.Add(this.GetTernaryStatementDashboardContent
 						(
-							used == -1 || licensed >= used,
-							string.Format(Resources.Licensing.LicensingStatusPanel_NamedUsers_Valid, licensed, used == -1 ? "unlimited" : used.ToString()),
-							string.Format(Resources.Licensing.LicensingStatusPanel_NamedUsers_Exceeded, licensed, used == -1 ? "unlimited" : used.ToString())
+							serialNumber == licenseContent.MFilesSerialNumber,
+							Resources.Licensing.LicensingStatusPanel_ValidForThisServer,
+							Resources.Licensing.LicensingStatusPanel_NotValidForThisServer
+						));
+				}
+
+				// Server version?
+				{
+					if (licenseContent.ServerVersions?.Any() ?? false)
+					{
+						MFilesVersion serverVersion = this.VaultApplication.PermanentVault.GetServerVersionOfVault();
+						content.Add(this.GetTernaryStatementDashboardContent
+						(
+							licenseContent.ServerVersions.Any((string f) => VersionMatch(serverVersion, f)),
+							Resources.Licensing.LicensingStatusPanel_ValidInThisServerVersion,
+							string.Format(Resources.Licensing.LicensingStatusPanel_NotValidInThisServerVersion, serverVersion?.ToString())
 						));
 					}
 				}
 
-				// Concurrent users.
-				if (licenseContent.ConcurrentUsers >= 0)
+				// Is it okay in this vault?
 				{
+					if (licenseContent.Vaults?.Any() ?? false)
 					{
-						var licensed = licenseContent.ConcurrentUsers;
-						var used = serverLicenseStatus.NumOfConcurrentUserLicenses;
+						var vaultGuid = this.VaultApplication.PermanentVault.GetGUID();
 						content.Add(this.GetTernaryStatementDashboardContent
 						(
-							used == -1 || licensed >= used,
-							string.Format(Resources.Licensing.LicensingStatusPanel_ConcurrentUsers_Valid, licensed, used == -1 ? "unlimited" : used.ToString()),
-							string.Format(Resources.Licensing.LicensingStatusPanel_ConcurrentUsers_Exceeded, licensed, used == -1 ? "unlimited" : used.ToString())
+							licenseContent.Vaults == null || licenseContent.Vaults.Any(v => v.Equals(vaultGuid, StringComparison.OrdinalIgnoreCase)),
+							Resources.Licensing.LicensingStatusPanel_ValidInThisVault,
+							string.Format(Resources.Licensing.LicensingStatusPanel_NotValidInThisVault, vaultGuid)
 						));
 					}
 				}
 
-				// Read-only users.
-				if (licenseContent.ReadOnlyUsers >= 0)
+				// When does it expire?
 				{
+					if (DateTime.TryParseExact(licenseContent.LicenseExpireDate, "d.M.yyyy", null, System.Globalization.DateTimeStyles.AllowWhiteSpaces, out DateTime expiry))
 					{
-						var licensed = licenseContent.ReadOnlyUsers;
-						var used = serverLicenseStatus.NumOfReadonlyLicenses;
+						var days = expiry.Subtract(DateTime.Now).Days;
 						content.Add(this.GetTernaryStatementDashboardContent
 						(
-							used == -1 || licensed >= used,
-							string.Format(Resources.Licensing.LicensingStatusPanel_ReadOnlyUsers_Valid, licensed, used == -1 ? "unlimited" : used.ToString()),
-							string.Format(Resources.Licensing.LicensingStatusPanel_ReadOnly_Exceeded, licensed, used == -1 ? "unlimited" : used.ToString())
+							expiry > DateTime.Now,
+							string.Format(Resources.Licensing.LicensingStatusPanel_LicenseExpiresInXXXXDays, days),
+							string.Format(Resources.Licensing.LicensingStatusPanel_LicenseExpiredXXXXDaysAgo, DateTime.Now.Subtract(expiry).Days),
+							successfulStatementType: days > 30
+								? StatementType.Okay
+								: StatementType.Warning
 						));
 					}
 				}
-			}
 
-			// Groups.
-			{
-				if(licenseContent.Groups?.Any() ?? false)
+				// Maintenance.
 				{
-					foreach (var group in licenseContent.Groups)
+					if (DateTime.TryParseExact(licenseContent.MaintenanceExpireDate, "d.M.yyyy", null, System.Globalization.DateTimeStyles.AllowWhiteSpaces, out DateTime expiry))
 					{
-						if (null == group || string.IsNullOrWhiteSpace(group.Group))
-							continue;
-						int userGroupIDByAlias = this.VaultApplication.PermanentVault.UserGroupOperations.GetUserGroupIDByAlias(group.Group);
-						if (userGroupIDByAlias != -1)
+						var days = expiry.Subtract(DateTime.Now).Days;
+						content.Add(this.GetTernaryStatementDashboardContent
+						(
+							expiry > DateTime.Now,
+							string.Format(Resources.Licensing.LicensingStatusPanel_MaintenanceExpiresInXXXXDays, days),
+							string.Format(Resources.Licensing.LicensingStatusPanel_MaintenanceExpiredXXXXDaysAgo, DateTime.Now.Subtract(expiry).Days),
+							successfulStatementType: days > 30
+								? StatementType.Okay
+								: StatementType.Warning
+						));
+					}
+				}
+
+				// Users.
+				{
+					// Named users.
+					if (licenseContent.NamedUsers >= 0)
+					{
 						{
-							UserGroup userGroup = this.VaultApplication.PermanentVault.UserGroupOperations.GetUserGroupAdmin(userGroupIDByAlias).UserGroup;
+							var licensed = licenseContent.NamedUsers;
+							var used = serverLicenseStatus.NumOfNamedUserLicenses;
 							content.Add(this.GetTernaryStatementDashboardContent
 							(
-								userGroup.Members.Count > group.Len,
-								string.Format(Resources.Licensing.LicensingStatusPanel_GroupMembership_Exceeded, group.Group, group.Len, userGroup.Members.Count),
-								string.Format(Resources.Licensing.LicensingStatusPanel_GroupMembership_Valid, group.Group, group.Len, userGroup.Members.Count)
+								used == -1 || licensed >= used,
+								string.Format(Resources.Licensing.LicensingStatusPanel_NamedUsers_Valid, licensed, used == -1 ? "unlimited" : used.ToString()),
+								string.Format(Resources.Licensing.LicensingStatusPanel_NamedUsers_Exceeded, licensed, used == -1 ? "unlimited" : used.ToString())
+							));
+						}
+					}
+
+					// Concurrent users.
+					if (licenseContent.ConcurrentUsers >= 0)
+					{
+						{
+							var licensed = licenseContent.ConcurrentUsers;
+							var used = serverLicenseStatus.NumOfConcurrentUserLicenses;
+							content.Add(this.GetTernaryStatementDashboardContent
+							(
+								used == -1 || licensed >= used,
+								string.Format(Resources.Licensing.LicensingStatusPanel_ConcurrentUsers_Valid, licensed, used == -1 ? "unlimited" : used.ToString()),
+								string.Format(Resources.Licensing.LicensingStatusPanel_ConcurrentUsers_Exceeded, licensed, used == -1 ? "unlimited" : used.ToString())
+							));
+						}
+					}
+
+					// Read-only users.
+					if (licenseContent.ReadOnlyUsers >= 0)
+					{
+						{
+							var licensed = licenseContent.ReadOnlyUsers;
+							var used = serverLicenseStatus.NumOfReadonlyLicenses;
+							content.Add(this.GetTernaryStatementDashboardContent
+							(
+								used == -1 || licensed >= used,
+								string.Format(Resources.Licensing.LicensingStatusPanel_ReadOnlyUsers_Valid, licensed, used == -1 ? "unlimited" : used.ToString()),
+								string.Format(Resources.Licensing.LicensingStatusPanel_ReadOnly_Exceeded, licensed, used == -1 ? "unlimited" : used.ToString())
 							));
 						}
 					}
 				}
-			}
 
-			// Modules.
-			{
-				if (licenseContent.Modules?.Any() ?? false)
+				// Groups.
 				{
-					var modules = new DashboardContentCollection
+					if (licenseContent.Groups?.Any() ?? false)
+					{
+						foreach (var group in licenseContent.Groups)
+						{
+							if (null == group || string.IsNullOrWhiteSpace(group.Group))
+								continue;
+							int userGroupIDByAlias = this.VaultApplication.PermanentVault.UserGroupOperations.GetUserGroupIDByAlias(group.Group);
+							if (userGroupIDByAlias != -1)
+							{
+								UserGroup userGroup = this.VaultApplication.PermanentVault.UserGroupOperations.GetUserGroupAdmin(userGroupIDByAlias).UserGroup;
+								content.Add(this.GetTernaryStatementDashboardContent
+								(
+									userGroup.Members.Count > group.Len,
+									string.Format(Resources.Licensing.LicensingStatusPanel_GroupMembership_Exceeded, group.Group, group.Len, userGroup.Members.Count),
+									string.Format(Resources.Licensing.LicensingStatusPanel_GroupMembership_Valid, group.Group, group.Len, userGroup.Members.Count)
+								));
+							}
+						}
+					}
+				}
+
+				// Modules.
+				{
+					if (licenseContent.Modules?.Any() ?? false)
+					{
+						var modules = new DashboardContentCollection
 					{
 						new DashboardCustomContentEx($"<p>The following modules are licensed:</p>")
 					};
 
-					// If we know about all the modules then we can show the ones that are unlicensed too.
-					if (this.AllModules?.Any() ?? false)
-					{
-						// We have more details about the modules
-						foreach (var kvp in this.AllModules)
+						// If we know about all the modules then we can show the ones that are unlicensed too.
+						if (this.AllModules?.Any() ?? false)
 						{
-							modules.Add
-							(
-								this.GetTernaryStatementDashboardContent
+							// We have more details about the modules
+							foreach (var kvp in this.AllModules)
+							{
+								modules.Add
 								(
-									licenseContent.Modules.Contains(kvp.Key),
-									kvp.Value, // Use the same value for success and failure.
-									kvp.Value, // Use the same value for success and failure.
-									failureStatementType: StatementType.Unknown // Unlicensed modules is not an error or warning.
-								)
-							);
+									this.GetTernaryStatementDashboardContent
+									(
+										licenseContent.Modules.Contains(kvp.Key),
+										kvp.Value, // Use the same value for success and failure.
+										kvp.Value, // Use the same value for success and failure.
+										failureStatementType: StatementType.Unknown // Unlicensed modules is not an error or warning.
+									)
+								);
+							}
 						}
-					}
-					else
-					{
-						// We can just list out the data that was in the license.
-						foreach (var module in licenseContent.Modules)
+						else
 						{
-							modules.Add(this.GetStatementDashboardContent(module, StatementType.Okay));
+							// We can just list out the data that was in the license.
+							foreach (var module in licenseContent.Modules)
+							{
+								modules.Add(this.GetStatementDashboardContent(module, StatementType.Okay));
+							}
 						}
-					}
 
-					// Add the panel for the modules.
-					var modulesPanel = new DashboardPanelEx()
-					{
-						InnerContent = modules
-					};
-					modulesPanel.Styles.AddOrUpdate("margin", "8px 0px");
-					content.Add(modulesPanel);
+						// Add the panel for the modules.
+						var modulesPanel = new DashboardPanelEx()
+						{
+							InnerContent = modules
+						};
+						modulesPanel.Styles.AddOrUpdate("margin", "8px 0px");
+						content.Add(modulesPanel);
+					}
 				}
 			}
 
@@ -361,7 +365,7 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 		/// </summary>
 		/// <returns>The dashboard panel, or null if nothing should be shown.</returns>
 		public virtual DashboardPanelEx GetApplicationDetailsDashboardContent()
-		{ 
+		{
 			var innerContent = new DashboardContentCollection();
 
 			var table = new DashboardTable();
@@ -401,7 +405,7 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 			// Add a marker to say whether this is MSM-compatible.
 			if (this.ShowMultiServerModeStatus)
 			{
-				var element = 
+				var element =
 					ApplicationDefinition.MultiServerCompatible
 					? this.GetStatementDashboardContent(Resources.Licensing.ApplicationDetailsPanel_ApplicationIsMultiServerModeCompatible, StatementType.Okay)
 					: this.GetStatementDashboardContent(Resources.Licensing.ApplicationDetailsPanel_ApplicationIsNotMultiServerModeCompatible, StatementType.Error);
