@@ -111,7 +111,7 @@ namespace MFiles.VAF.Extensions.Dashboards.ApplicationOverviewDashboardContent
 			{
 				var licensingPanel = this.GetLicensingDetailsDashboardContent
 				(
-					this.VaultApplication?.License ?? null,
+					this.VaultApplication?.License,
 					this.VaultApplication?.License?.ServerLicense
 				);
 				if (null != licensingPanel)
