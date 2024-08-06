@@ -61,6 +61,15 @@ namespace MFiles.VAF.Extensions.Resources.Exceptions {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} file(s) could not be added to the log download.  This can happen when files are inaccessible due to container recycle or similar.  The log data may be incomplete..
+        /// </summary>
+        internal static string LogFileDownloadIncomplete {
+            get {
+                return ResourceManager.GetString("LogFileDownloadIncomplete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to XML fragment for {0} was null so cannot be rendered..
         /// </summary>
         internal static string XmlFragmentNull {
