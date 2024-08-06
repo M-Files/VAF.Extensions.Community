@@ -211,6 +211,9 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 		[DataContract]
 		class ConfigurationWithField
 		{
+
+// Suppress warnings about default values as that's what we're actually testing.
+#pragma warning disable 0649
 			[DataMember]
 			[MFObjType(AllowEmpty = true)]
 			public MFIdentifier ObjectType;
@@ -224,6 +227,7 @@ namespace MFiles.VAF.Extensions.Tests.Configuration
 			[DataMember]
 			public ConfigurationWithField SubConfiguration;
 
+#pragma warning restore 0649
 		}
 
 		[TestMethod]
