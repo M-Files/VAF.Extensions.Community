@@ -117,7 +117,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 							// where the container is recycled and the file is locked.
 							inaccessibleFileCount++;
 
-							this.Logger?.Error(e, $"Cannot add {relPath} to the log download.");
+							this.Logger?.Warn(e, $"Cannot add {relPath} to the log download.");
 
 							// Ensure we don't have a value in the zip for this file.
 							try { fileEntry?.Delete(); } catch { }
@@ -142,6 +142,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			// If some files weren't accessible then inform the user.
 			if(inaccessibleFileCount > 0)
 			{
+				this.Logger?.Error($"There were {inaccessibleFileCount} files that could not be added to the log download.");
 				clientOps.ShowMessage
 				(
 					string.Format(Resources.Exceptions.Dashboard.LogFileDownloadIncomplete, inaccessibleFileCount)
