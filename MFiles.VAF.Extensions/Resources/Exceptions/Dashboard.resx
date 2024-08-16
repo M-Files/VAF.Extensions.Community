@@ -117,6 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="LogFileDownloadIncomplete" xml:space="preserve">
+    <value>{0} file(s) could not be added to the log download.  This can happen when files are inaccessible due to container recycle or similar.  The log data may be incomplete.</value>
+    <comment>{0} is replaced with the number of files affected.</comment>
+  </data>
   <data name="XmlFragmentNull" xml:space="preserve">
     <value>XML fragment for {0} was null so cannot be rendered.</value>
     <comment>Thrown if a dashboard component returns a null XML (XHTML) fragment. {0} will be replaced with the name of the component.</comment>

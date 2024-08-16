@@ -69,6 +69,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 			var fileSizes = new List<string>();
 			long totalSize = 0;
 			long archiveSize = 0;
+			int inaccessibleFileCount = 0;
 			using (var memStream = new MemoryStream())
 			{
 				// Build the archive.
@@ -77,31 +78,49 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 					// Add each log file to the archive.
 					foreach (string relPath in files)
 					{
-						// Sanity and safety check.
-						// All paths must be inside the log folder.
-						var fullPath = Path.GetFullPath(Path.Combine(rootPath, relPath));
-						if (!fullPath.StartsWith(rootPath) ||
-							Path.GetExtension(fullPath).ToLower() != ".log" ||
-							!File.Exists(fullPath))
-							throw new FileNotFoundException();
-
-						// Add the file to the archive.
-						// NOTE:
-						//   We can't use archive.CreateEntryFromFile, because the log file may be
-						//   open by the logger, and the method doesn't have options for how we open
-						//   the file. To avoid issues, we must open the file with FileShare.ReadWrite.
-						var fileEntry = archive.CreateEntry(relPath, CompressionLevel.Optimal);
-						using (FileStream fileStream = File.Open(
-								fullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-						using (Stream entryStream = fileEntry.Open())
+						ZipArchiveEntry fileEntry = null;
+						string fullPath = null;
+						try
 						{
-							// Copy the file to the archive.
-							fileStream.CopyTo(entryStream);
+							// Sanity and safety check.
+							// All paths must be inside the log folder.
+							fullPath = Path.GetFullPath(Path.Combine(rootPath, relPath));
+							if (!fullPath.StartsWith(rootPath) ||
+								Path.GetExtension(fullPath).ToLower() != ".log" ||
+								!File.Exists(fullPath))
+								throw new FileNotFoundException();
 
-							// Bookkeeping.
-							var fileSize = fileStream.Length;
-							fileSizes.Add($"{relPath}: {fileSize} bytes");
-							totalSize += fileSize;
+							// Add the file to the archive.
+							// NOTE:
+							//   We can't use archive.CreateEntryFromFile, because the log file may be
+							//   open by the logger, and the method doesn't have options for how we open
+							//   the file. To avoid issues, we must open the file with FileShare.ReadWrite.
+							using (FileStream fileStream = File.Open(
+									fullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+							{
+								fileEntry = archive.CreateEntry(relPath, CompressionLevel.Optimal);
+								using (Stream entryStream = fileEntry.Open())
+								{
+									// Copy the file to the archive.
+									fileStream.CopyTo(entryStream);
+
+									// Bookkeeping.
+									var fileSize = fileStream.Length;
+									fileSizes.Add($"{relPath}: {fileSize} bytes");
+									totalSize += fileSize;
+								}
+							}
+						}
+						catch (Exception e)
+						{
+							// The file was likely inaccessible.  This can happen in some situations
+							// where the container is recycled and the file is locked.
+							inaccessibleFileCount++;
+
+							this.Logger?.Warn(e, $"Cannot add {relPath} to the log download.");
+
+							// Ensure we don't have a value in the zip for this file.
+							try { fileEntry?.Delete(); } catch { }
 						}
 					}
 				}
@@ -119,6 +138,16 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 					$"Files:\n" +
 					String.Join( "\n - ", fileSizes ) );
 			*/
+
+			// If some files weren't accessible then inform the user.
+			if(inaccessibleFileCount > 0)
+			{
+				this.Logger?.Error($"There were {inaccessibleFileCount} files that could not be added to the log download.");
+				clientOps.ShowMessage
+				(
+					string.Format(Resources.Exceptions.Dashboard.LogFileDownloadIncomplete, inaccessibleFileCount)
+				);
+			}
 
 			// Prompt the user to download the archive.
 			clientOps.Directives.Add(new PromptDownloadFile
