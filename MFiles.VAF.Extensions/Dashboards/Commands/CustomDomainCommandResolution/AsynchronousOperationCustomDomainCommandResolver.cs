@@ -53,7 +53,7 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands.CustomDomainCommandResolutio
 			// Get the background operations that have a run command.
 			// Note: this should be all of them.
 			foreach (var c in
-				GetType()
+				VaultApplication.GetType()
 				.GetPropertiesAndFieldsOfType<TaskQueueBackgroundOperationManager<TSecureConfiguration>>(VaultApplication)
 				.SelectMany(tqbom => tqbom.BackgroundOperations)
 				.AsEnumerable()
