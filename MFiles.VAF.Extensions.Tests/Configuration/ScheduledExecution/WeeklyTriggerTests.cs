@@ -193,5 +193,23 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 				new DateTime ?[] { new DateTime(2021, 03, 20, 0, 0, 0, 0) }
 			};
 		}
+
+		[TestMethod]
+		public void WeeklyValueNotReturnedWhenDaylightsavingChanges()
+		{
+			var now = new DateTimeOffset(new DateTime(2024, 10, 23, 10, 27, 0), new TimeSpan(0, 0, 0));
+			var expected = new DateTimeOffset(new DateTime(2024, 10, 30, 9, 0, 0), new TimeSpan(2, 0, 0));
+
+			var trigger = new WeeklyTrigger()
+			{
+				TriggerTimes = new List<TimeSpan>()
+				{
+					new TimeSpan(9, 0, 0)
+				},
+				TriggerDays = new List<DayOfWeek>() { DayOfWeek.Wednesday }
+			};
+			var execution = trigger.GetNextExecution(now, TimeZoneInfo.FindSystemTimeZoneById("FLE Standard Time"));
+			Assert.AreEqual(expected.ToUniversalTime(), execution?.ToUniversalTime());
+		}
 	}
 }
