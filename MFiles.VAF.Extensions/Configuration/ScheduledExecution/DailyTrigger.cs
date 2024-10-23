@@ -59,6 +59,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
 
 			// When should we start looking?
+			var before = after.Value;
 			after = (after ?? DateTime.UtcNow).ToUniversalTime();
 
 			// Convert the time into the timezone we're after.
@@ -73,7 +74,12 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 						// What is the potential time that this will run?
 						DateTimeOffset potential;
 						{
-							var dateTime = after.Value.Date.Add(t);
+							// If the timezone conversion changed the date then go back to the start of the date.
+							var date = after.Value.Date;
+							if (after.Value.Date != before.Date)
+								date = new DateTime(before.Date.Ticks);
+
+							var dateTime = date.Add(t);
 							potential = new DateTimeOffset(dateTime, timeZoneInfo.GetUtcOffset(dateTime));
 						}
 

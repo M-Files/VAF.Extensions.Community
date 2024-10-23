@@ -74,13 +74,12 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				.Select(d => d.Value)
 				.Where(d => d > after.Value)
 				.OrderBy(d => d)
+				.Select(d => d.ToUniversalTime())
 				.ToList();
 
 			this.Logger?.Trace($"These are the potential matches: {string.Join(", ", potentialMatches)}");
 
-			return potentialMatches
-				.Select(d => d.ToUniversalTime())
-				.FirstOrDefault();
+			return potentialMatches.Any() ? (DateTimeOffset?)potentialMatches.First() : null;
 		}
 
 		/// <summary>
