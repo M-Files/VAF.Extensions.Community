@@ -59,8 +59,8 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
 
 			// When should we start looking?
-			var before = after.Value;
-			after = (after ?? DateTime.UtcNow).ToUniversalTime();
+			var before = (after ?? DateTime.UtcNow);
+			after = before.ToUniversalTime();
 
 			// Convert the time into the timezone we're after.
 			after = TimeZoneInfo.ConvertTime(after.Value, timeZoneInfo);
