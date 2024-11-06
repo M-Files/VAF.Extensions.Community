@@ -30,6 +30,19 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 			}.GetNextExecution(after, timezoneInfo);
 			Assert.AreEqual(expected?.ToUniversalTime(), execution?.ToUniversalTime());
 		}
+		[TestMethod]
+		public void NullAfterDoesNotThrow
+		(
+		)
+		{
+			var execution = new DailyTrigger()
+			{
+				TriggerTimes = new List<TimeSpan>
+				{
+					new TimeSpan(10, 0, 0)
+				}
+			}.GetNextExecution(null);
+		}
 
 		public static IEnumerable<object[]> GetNextExecutionData()
 		{
