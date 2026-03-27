@@ -65,6 +65,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 			// Get the next execution time (this will not find run times today).
 			var potentialMatches = this.TriggerDays
 				.SelectMany(d => GetNextDayOfWeek(after.Value, d))
+				.Select(d => new DateTimeOffset(d.DateTime, timeZoneInfo.GetUtcOffset(d.DateTime)))
 				.Select
 				(
 					d => new DailyTrigger() { Type = ScheduleTriggerType.Daily, TriggerTimes = this.TriggerTimes }

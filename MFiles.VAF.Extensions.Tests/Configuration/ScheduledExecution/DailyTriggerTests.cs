@@ -154,6 +154,27 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 				new DateTimeOffset(2024, 04, 17, 10, 00, 00, TimeSpan.Zero), // Wednesday @ 10am
 				TimeZoneInfo.Utc,
 			};
+
+			// Regression: Positive UTC offset (UTC+8) where trigger time just passed.
+			// When the server is at UTC+8, 02:01 local = 18:01 UTC (previous day).
+			// The next execution should be the NEXT day, not immediate re-trigger.
+			var sgTimezone = TimeZoneInfo.FindSystemTimeZoneById("Singapore Standard Time");
+			yield return new object[]
+			{
+				new []{ new TimeSpan(2, 0, 0) }, // Trigger at 02:00 local
+				new DateTimeOffset(2024, 04, 17, 2, 01, 00, TimeSpan.FromHours(8)), // 02:01 SGT (= 16 Apr 18:01 UTC)
+				new DateTimeOffset(2024, 04, 18, 2, 00, 00, TimeSpan.FromHours(8)), // Next day 02:00 SGT
+				sgTimezone,
+			};
+
+			// Regression: Positive UTC offset (UTC+8) where trigger time is still ahead today.
+			yield return new object[]
+			{
+				new []{ new TimeSpan(10, 0, 0) }, // Trigger at 10:00 local
+				new DateTimeOffset(2024, 04, 17, 2, 00, 00, TimeSpan.FromHours(8)), // 02:00 SGT (= 16 Apr 18:00 UTC)
+				new DateTimeOffset(2024, 04, 17, 10, 00, 00, TimeSpan.FromHours(8)), // Same day 10:00 SGT
+				sgTimezone,
+			};
 		}
 	}
 }
