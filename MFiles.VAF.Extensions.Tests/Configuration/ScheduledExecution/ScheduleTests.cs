@@ -383,6 +383,69 @@ namespace MFiles.VAF.Extensions.Tests.ScheduledExecution
 			};
 		}
 
+		[TestMethod]
+		[DynamicData(nameof(GetNextExecutionData_Singapore), DynamicDataSourceType.Method)]
+		public void GetNextExecution_Singapore
+		(
+			IEnumerable<TriggerBase> triggers,
+			DateTime? after,
+			DateTime? expected
+		)
+		{
+			var execution = new Schedule()
+			{
+				Enabled = true,
+				Triggers = triggers
+						.Select(t => new Trigger(t))
+						.Where(t => t != null)
+						.ToList(),
+				TriggerTimeType = TriggerTimeType.Custom,
+				TriggerTimeCustomTimeZone = "Singapore Standard Time"
+			}.GetNextExecution(after);
+			Assert.AreEqual(expected?.ToUniversalTime(), execution?.ToUniversalTime());
+		}
+
+		/// <summary>
+		/// Returns data for a high positive UTC offset (UTC+8) where the UTC day differs from local day.
+		/// Regression test: ensures trigger time just passed does not cause immediate re-trigger.
+		/// </summary>
+		public static IEnumerable<object[]> GetNextExecutionData_Singapore()
+		{
+			// Trigger at 02:00 SGT, current time is 02:01 SGT (= 18:01 UTC previous day).
+			// Next execution should be tomorrow at 02:00 SGT, NOT immediate.
+			yield return new object[]
+			{
+				new TriggerBase[]
+				{
+					new DailyTrigger(){
+						TriggerTimes = new List<TimeSpan>()
+						{
+							new TimeSpan(2, 0, 0)
+						}.ToList()
+					}
+				},
+				new DateTime(2024, 04, 16, 18, 01, 00, DateTimeKind.Utc), // 02:01 SGT on 17th = 18:01 UTC on 16th
+				new DateTime(2024, 04, 17, 18, 00, 00, DateTimeKind.Utc), // 02:00 SGT on 18th = 18:00 UTC on 17th
+			};
+
+			// Trigger at 10:00 SGT, current time is 02:00 SGT (= 18:00 UTC previous day).
+			// Next execution should be today at 10:00 SGT.
+			yield return new object[]
+			{
+				new TriggerBase[]
+				{
+					new DailyTrigger(){
+						TriggerTimes = new List<TimeSpan>()
+						{
+							new TimeSpan(10, 0, 0)
+						}.ToList()
+					}
+				},
+				new DateTime(2024, 04, 16, 18, 00, 00, DateTimeKind.Utc), // 02:00 SGT on 17th = 18:00 UTC on 16th
+				new DateTime(2024, 04, 17, 02, 00, 00, DateTimeKind.Utc), // 10:00 SGT on 17th = 02:00 UTC on 17th
+			};
+		}
+
 		/// <summary>
 		/// Returns data for a high UTC offset where the trigger times are the next day in UTC.
 		/// </summary>

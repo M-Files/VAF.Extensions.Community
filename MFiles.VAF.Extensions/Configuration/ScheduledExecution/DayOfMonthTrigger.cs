@@ -89,6 +89,7 @@ namespace MFiles.VAF.Extensions.ScheduledExecution
 				(
 					d => GetNextDayOfMonth(after.Value, d, this.UnrepresentableDateHandling)
 				)
+				.Select(d => new DateTimeOffset(d.DateTime, timeZoneInfo.GetUtcOffset(d.DateTime)))
 				.Select
 				(
 					d => new DailyTrigger() { Type = ScheduleTriggerType.Daily, TriggerTimes = this.TriggerTimes }
