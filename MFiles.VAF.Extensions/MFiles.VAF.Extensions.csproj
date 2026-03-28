@@ -46,9 +46,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MFiles.VAF" Version="24.10.720.2" />
-    <PackageReference Include="MFiles.VAF.Configuration.Logging.NLog" Version="23.12.3" />
-    <PackageReference Include="MFilesAPI.Extensions" Version="24.4.3" />
+    <PackageReference Include="MFiles.VAF" Version="25.3.727.1" />
+    <PackageReference Include="MFiles.VAF.Configuration.Logging.NLog" Version="25.3.4" />
+    <PackageReference Include="MFilesAPI.Extensions" Version="25.2.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
