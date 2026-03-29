@@ -68,27 +68,5 @@ namespace MFiles.VAF.Extensions
 		{
 			get => base.ConfManager;
 		}
-
-		/// <inheritdoc />
-		public override void StartOperations(Vault vaultPersistent)
-		{
-			// Do we have a valid configuration?
-			this.isCurrentConfigurationValid = this.IsValid(vaultPersistent);
-
-			// Initialize the application.
-			base.StartOperations(vaultPersistent);
-
-			// Ensure that our recurring configuration is updated.
-			try
-			{
-				this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(isVaultStartup: true);
-			}
-			catch(Exception e)
-			{
-				this.Logger?.Fatal(e, $"Exception mapping configuration to recurring operations.");
-			}
-
-
-		}
 	}
 }

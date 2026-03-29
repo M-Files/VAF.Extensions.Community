@@ -111,11 +111,22 @@ namespace MFiles.VAF.Extensions
 		protected override void StartApplication()
 		{
 			this.startApplicationCalled = true;
+			this.isCurrentConfigurationValid = this.IsValid( this.PermanentVault );
 			this.RecurringOperationConfigurationManager = new RecurringOperationConfigurationManager<TSecureConfiguration>(this);
 			this.ApplicationOverviewDashboardContentRenderer = this.GetApplicationOverviewDashboardContentRenderer();
 			this.AsynchronousDashboardContentRenderer = this.GetAsynchronousDashboardContentRenderer();
 			this.AsynchronousDashboardContentProviders.AddRange(this.GetAsynchronousDashboardContentProviders());
 			this.LoggingDashboardContentRenderer = this.GetLoggingDashboardContentRenderer();
+
+			// Ensure that our recurring configuration is updated.
+			try
+			{
+				this.RecurringOperationConfigurationManager?.PopulateFromConfiguration(isVaultStartup: true);
+			}
+			catch(Exception e)
+			{
+				this.Logger?.Fatal(e, $"Exception mapping configuration to recurring operations.");
+			}
 
 #if DEBUG
 			// In debug builds we want to show the referenced assemblies and the like.
