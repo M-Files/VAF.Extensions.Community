@@ -171,6 +171,12 @@
   <data name="Schedule_DailyTrigger_TriggerTimes_Label" xml:space="preserve">
     <value>Trigger Times</value>
   </data>
+  <data name="Schedule_DayOfMonthTrigger_NthDay_HelpText" xml:space="preserve">
+    <value>Ordinal number for the occurrence of a certain weekday within a month to schedule. For instance, set to "1" for the first Saturday of the month.</value>
+  </data>
+  <data name="Schedule_DayOfMonthTrigger_NthDay_Label" xml:space="preserve">
+    <value>Nth Weekday</value>
+  </data>
   <data name="Schedule_DayOfMonthTrigger_TriggerDays_ChildName" xml:space="preserve">
     <value>Day</value>
   </data>
@@ -185,6 +191,21 @@
   </data>
   <data name="Schedule_DayOfMonthTrigger_UnrepresentableDateHandling_Label" xml:space="preserve">
     <value>Unrepresentable Date Handling</value>
+  </data>
+  <data name="Schedule_DayOfMonthTrigger_Weekday_Label" xml:space="preserve">
+    <value>Weekday</value>
+  </data>
+  <data name="Schedule_MonthlyTrigger_DayType_HelpText" xml:space="preserve">
+    <value>Use "Specific Date" if you require a specific date every month (e.g. 5th of every month). Use "Variable Date" if you require the nth weekday of every month (e.g. the second Tuesday of every month).</value>
+  </data>
+  <data name="Schedule_MonthlyTrigger_DayType_Label" xml:space="preserve">
+    <value>Date Type</value>
+  </data>
+  <data name="Schedule_MonthlyTrigger_DayType_SpecificDate" xml:space="preserve">
+    <value>Specific Date</value>
+  </data>
+  <data name="Schedule_MonthlyTrigger_DayType_VariableDate" xml:space="preserve">
+    <value>Variable Date</value>
   </data>
   <data name="Schedule_Triggers_HelpText" xml:space="preserve">
     <value />

@@ -187,6 +187,24 @@ namespace MFiles.VAF.Extensions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ordinal number for the occurrence of a certain weekday within a month to schedule. For instance, set to &quot;1&quot; for the first Saturday of the month..
+        /// </summary>
+        internal static string Schedule_DayOfMonthTrigger_NthDay_HelpText {
+            get {
+                return ResourceManager.GetString("Schedule_DayOfMonthTrigger_NthDay_HelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nth Weekday.
+        /// </summary>
+        internal static string Schedule_DayOfMonthTrigger_NthDay_Label {
+            get {
+                return ResourceManager.GetString("Schedule_DayOfMonthTrigger_NthDay_Label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Day.
         /// </summary>
         internal static string Schedule_DayOfMonthTrigger_TriggerDays_ChildName {
@@ -228,6 +246,51 @@ namespace MFiles.VAF.Extensions.Resources {
         internal static string Schedule_DayOfMonthTrigger_UnrepresentableDateHandling_Label {
             get {
                 return ResourceManager.GetString("Schedule_DayOfMonthTrigger_UnrepresentableDateHandling_Label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Weekday.
+        /// </summary>
+        internal static string Schedule_DayOfMonthTrigger_Weekday_Label {
+            get {
+                return ResourceManager.GetString("Schedule_DayOfMonthTrigger_Weekday_Label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use &quot;Specific Date&quot; if you require a specific date every month (e.g. 5th of every month). Use &quot;Variable Date&quot; if you require the nth weekday of every month (e.g. the second Tuesday of every month)..
+        /// </summary>
+        internal static string Schedule_MonthlyTrigger_DayType_HelpText {
+            get {
+                return ResourceManager.GetString("Schedule_MonthlyTrigger_DayType_HelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Date Type.
+        /// </summary>
+        internal static string Schedule_MonthlyTrigger_DayType_Label {
+            get {
+                return ResourceManager.GetString("Schedule_MonthlyTrigger_DayType_Label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specific Date.
+        /// </summary>
+        internal static string Schedule_MonthlyTrigger_DayType_SpecificDate {
+            get {
+                return ResourceManager.GetString("Schedule_MonthlyTrigger_DayType_SpecificDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Variable Date.
+        /// </summary>
+        internal static string Schedule_MonthlyTrigger_DayType_VariableDate {
+            get {
+                return ResourceManager.GetString("Schedule_MonthlyTrigger_DayType_VariableDate", resourceCulture);
             }
         }
         

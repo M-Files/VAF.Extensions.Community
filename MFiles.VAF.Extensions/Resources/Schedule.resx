@@ -133,9 +133,13 @@
     <value>Daily at the following times: {0}.</value>
     <comment>Shown to describe a daily trigger for a schedule.  {0} will be replaced with the trigger times.</comment>
   </data>
-  <data name="Triggers_DayOfMonthTrigger" xml:space="preserve">
+  <data name="Triggers_DayOfMonthTrigger_SpecificDate" xml:space="preserve">
     <value>On the {0} of the month at the following times: {1}.</value>
-    <comment>Shown to describe a day-of-month trigger. {0} will be replaced with the days of the month this will trigger, and {1} will be replaced with the trigger times.</comment>
+    <comment>Shown to describe a day-of-month trigger with Specific Date type. {0} will be replaced with the days of the month this will trigger, and {1} will be replaced with the trigger times.</comment>
+  </data>
+  <data name="Triggers_DayOfMonthTrigger_VariableDate" xml:space="preserve">
+    <value>Every {0} {1} of the month at the following times: {2}.</value>
+    <comment>Shown to describe a day-of-month trigger with Variable Date type. {0} will be replaced by an ordinal number, {1} will be replaced by the weekday, and {2} will be replaced with the trigger times.</comment>
   </data>
   <data name="Triggers_WeeklyTrigger" xml:space="preserve">
     <value>Every {0} at the following times: {1}.</value>

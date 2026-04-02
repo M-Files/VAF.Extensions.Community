@@ -108,9 +108,18 @@ namespace MFiles.VAF.Extensions.Resources {
         /// <summary>
         ///   Looks up a localized string similar to On the {0} of the month at the following times: {1}..
         /// </summary>
-        internal static string Triggers_DayOfMonthTrigger {
+        internal static string Triggers_DayOfMonthTrigger_SpecificDate {
             get {
-                return ResourceManager.GetString("Triggers_DayOfMonthTrigger", resourceCulture);
+                return ResourceManager.GetString("Triggers_DayOfMonthTrigger_SpecificDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Every {0} {1} of the month at the following times: {2}..
+        /// </summary>
+        internal static string Triggers_DayOfMonthTrigger_VariableDate {
+            get {
+                return ResourceManager.GetString("Triggers_DayOfMonthTrigger_VariableDate", resourceCulture);
             }
         }
         

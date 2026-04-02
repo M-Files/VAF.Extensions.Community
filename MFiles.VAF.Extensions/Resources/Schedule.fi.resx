@@ -133,7 +133,7 @@
     <value>Päivittäin seuraavina kellonaikoina: {0}.</value>
     <comment>Shown to describe a daily trigger for a schedule.  {0} will be replaced with the trigger times.</comment>
   </data>
-  <data name="Triggers_DayOfMonthTrigger" xml:space="preserve">
+  <data name="Triggers_DayOfMonthTrigger_SpecificDate" xml:space="preserve">
     <value>Kuukauden {0} päivä seuraavina kellonaikoina: {1}.</value>
     <comment>Shown to describe a day-of-month trigger. {0} will be replaced with the days of the month this will trigger, and {1} will be replaced with the trigger times.</comment>
   </data>
