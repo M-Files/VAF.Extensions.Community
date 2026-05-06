@@ -493,6 +493,13 @@
             </form>
         </div>
         <div id="scrollPanel">
+            <div>
+            Note that in multi-server instances the log data may be spread amongst multiple files.
+            This viewer attempts to pull data from all server nodes into one location but there
+            are situations where data may not be in the correct order, especially in high-volume
+            deployments or high-verbosity configurations.
+            If in doubt, always download the log files and manually inspect what each node is doing.
+            </div>
             <div id="unstructured">
                 The logger is not using the default log layout, so structured formatting cannot be applied.
             </div>

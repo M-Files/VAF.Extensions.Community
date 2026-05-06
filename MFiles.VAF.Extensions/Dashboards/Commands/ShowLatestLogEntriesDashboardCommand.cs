@@ -272,6 +272,19 @@ namespace MFiles.VAF.Extensions.Dashboards.Commands
 				}
 			}
 
+			// Ensure that the log entries are in descending order.
+			if (null != logEntries?.Entries)
+				logEntries.Entries.Sort
+				(
+					(a, b) =>
+					{
+						if (a.DateTime == null && b.DateTime == null) return 0;
+						if (a.DateTime == null) return 1;  // null goes after non-null
+						if (b.DateTime == null) return -1; // null goes after non-null
+						return b.DateTime.Value.CompareTo(a.DateTime.Value); // reverse order
+					}
+				);
+
 			// Create the directive.
 			clientOps.Directives.Add(new VAF.Configuration.Domain.ClientDirective.UpdateDashboardContent()
 			{
